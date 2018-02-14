@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using TodoApi.Db;
+using TodoApi.Models;
 using TodoApi.Web;
 
 namespace TodoApi
@@ -22,7 +23,7 @@ namespace TodoApi
                 {
                     options.RespectBrowserAcceptHeader = true;
                     options.ReturnHttpNotAcceptable = true;
-                    
+
                     // map execeptions to http status codes
                     options.Filters.Add(typeof(ExceptionFilter));
 
@@ -38,13 +39,9 @@ namespace TodoApi
                 .AddJsonFormatters(s => s.ContractResolver = new DefaultContractResolver())
                 .AddXmlDataContractSerializerFormatters();
 
-            services.AddScoped<ITodoRepository, TodoRepository>();
-            services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);
+            services.RegisterIoc();
 
-            services.Configure<RouteOptions>(options =>
-            {
-                options.LowercaseUrls = true;
-            });
+            services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -63,6 +60,26 @@ namespace TodoApi
             }
 
             app.UseMvc();
+        }
+
+
+    }
+
+    public static class IocRegistrations
+    {
+        public static IServiceCollection RegisterIoc(this IServiceCollection services)
+        {
+            services.AddScoped<ITodoRepository, TodoRepository>();
+            services.AddScoped<ITenantRepository, TenantRepository>();
+            
+            services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);
+            
+            /**
+             * Currently, this is the logged in user
+             */
+            services.AddSingleton(new User {Id = 1});
+
+            return services;
         }
     }
 }

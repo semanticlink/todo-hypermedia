@@ -17,10 +17,9 @@ namespace TodoApi.RepresentationExtensions
                 Links = new[]
                 {
                     // root of the api
-                    url.MakeApiUri().MakeWebLink(IanaLinkRelation.Self),
+                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Self),
                     
-                    // todos collection
-                    url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
+                    url.MakeHomeTenantsUri().MakeWebLink(CustomLinkRelation.Tenants),
                 },
                 Version = api.Version
             };

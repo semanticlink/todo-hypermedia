@@ -10,6 +10,16 @@ namespace TodoApi.Utils
     public static class EnumerableExtensions
     {
 
+        /// <summary>
+        ///     Convert a single item to either an enumerable with a single item, or no items if the object is null.
+        /// </summary>
+        public static IEnumerable<T> ToEnumerable<T>(this T singleItem) where T : class
+        {
+            if (singleItem != null)
+            {
+                yield return singleItem;
+            }
+        }
  
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> items) where T : class
         {

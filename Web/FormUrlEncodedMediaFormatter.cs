@@ -30,7 +30,6 @@ namespace TodoApi.Web
     ///         this has been disabled.
     ///     </para>
     /// </remarks>
-    /// <seealso cref = "IFormDataReader" />
     public class FormUrlEncodedMediaFormatter : IInputFormatter
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -61,6 +60,7 @@ namespace TodoApi.Web
 
                     foreach (var entry in formDictionary)
                     {
+                        // Hardcoded assumption of en-US that uses title case as per programming convention
                         var property = new CultureInfo("en-US", false).TextInfo.ToTitleCase(entry.Key);
                         try
                         {

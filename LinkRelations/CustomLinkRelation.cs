@@ -12,7 +12,7 @@
          * 
          **************************************
          */
-        public const string Authenticator = "authenticator";
         public const string Todos = "todos";
+        public const string Tenants = "tenants";
     }
 }

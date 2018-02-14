@@ -23,7 +23,7 @@ namespace TodoApi.RepresentationExtensions
                     url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to root
-                    url.MakeApiUri().MakeWebLink(IanaLinkRelation.Up),
+                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
                     // create-form
                     url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
