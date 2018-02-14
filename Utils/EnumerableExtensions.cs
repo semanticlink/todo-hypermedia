@@ -1,0 +1,81 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace TodoApi.Utils
+{
+    public delegate string ToString<in T>(T anObject);
+    
+    public static class EnumerableExtensions
+    {
+
+ 
+        public static bool IsNullOrEmpty<T>(this IEnumerable<T> items) where T : class
+        {
+            return items == null || !items.Any();
+        }
+
+        public static void ForEach<T>(
+            this IEnumerable<T> items,
+            Action<T> action)
+        {
+            foreach (var item in items)
+            {
+                action(item);
+            }
+        }
+
+        /// <summary>
+        ///     If a collection (emable is null) then return an empty collection.
+        /// </summary>
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> collection)
+        {
+            return collection ?? new T[] { };
+        }
+        
+        
+        /// <summary>
+        ///     A function very similar to string.Join(), but the items are
+        ///     a delegate and a prefix and suffix are supported.
+        /// </summary>
+        public static string ToString<T>(
+            this IEnumerable<T> items,
+            string prefix,
+            string suffix,
+            string seperator,
+            ToString<T> formatter)
+        {
+            var str = new StringBuilder();
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                str.Append(prefix);
+            }
+
+            if (items != null)
+            {
+                var isTheFirstItem = true;
+                foreach (var item in items)
+                {
+                    if (isTheFirstItem)
+                    {
+                        isTheFirstItem = false;
+                    }
+                    else
+                    {
+                        str.Append(seperator);
+                    }
+
+                    str.Append(formatter(item));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(suffix))
+            {
+                str.Append(suffix);
+            }
+
+            return str.ToString();
+        }
+    }
+}
