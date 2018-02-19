@@ -1,37 +1,12 @@
 ﻿using System;
 using Microsoft.AspNetCore.Hosting;
-using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TodoApi.Db;
 using TodoApi.Models;
-using TodoApi.Utils;
 
 namespace TodoApi
 {
-    public class Program
-    {
-        public static IHostingEnvironment HostingEnvironment { get; set; }
-
-        public static void Main(string[] args)
-        {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .ConfigureAppConfiguration((hostingContext, config) =>
-                {
-                    // Assigning the environment for use in ConfigureServices
-                    HostingEnvironment = hostingContext.HostingEnvironment;
-                })
-                .UseIISIntegration()
-                .UseStartup<Startup>()
-                .Build()
-                .Initialise(HostingEnvironment);
-
-            host.Run();
-        }
-    }
-
     /// <summary>
     ///     All code around <see cref="DbInitializer" needs to be in <see cref="Program.Main"/> to avoid
     ///     problems with migrations
