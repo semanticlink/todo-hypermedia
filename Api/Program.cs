@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using System.IO;
-using TodoApi.Utils;
+﻿using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
-namespace TodoApi
+namespace Api
 {
     public class Program
     {

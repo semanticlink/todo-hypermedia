@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace TodoApi.Web
+namespace Api.Web
 {
     public static class StatusCodeFactory
     {

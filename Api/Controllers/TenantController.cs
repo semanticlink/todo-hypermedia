@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TodoApi.Db;
-using TodoApi.Representation;
-using TodoApi.RepresentationExtensions;
-using TodoApi.UriFactory;
+﻿using App.RepresentationExtensions;
+using App.UriFactory;
+using Domain.Persistence;
+using Domain.Representation;
+using Microsoft.AspNetCore.Mvc;
 
-namespace TodoApi.Controllers
+namespace Api.Controllers
 {
     [Route("tenant/")]
     public class TenantController : Controller

@@ -4,9 +4,9 @@ using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using NLog;
-using TodoApi.Utils;
+using Toolkit;
 
-namespace TodoApi.Web
+namespace Api.Web
 {
     /// <summary>
     ///     Support for mapping exception to http status codes for the application.

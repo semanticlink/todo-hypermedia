@@ -2,14 +2,15 @@
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.LinkRelations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using TodoApi.LinkRelations;
-using TodoApi.Representation.Forms;
-using TodoApi.Representation.LinkedRepresentation;
-using TodoApi.Utils;
+using Toolkit;
+using Toolkit.LinkRelations;
+using Toolkit.Representation.Forms;
+using Toolkit.Representation.LinkedRepresentation;
 
-namespace TodoApi.Web
+namespace Api.Web
 {
     public class HtmlFormMediaFormatter : TextOutputFormatter
     {

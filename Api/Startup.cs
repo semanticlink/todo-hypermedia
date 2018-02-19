@@ -1,5 +1,8 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
+using Api.Web;
+using Domain.Models;
+using Domain.Persistence;
+using Infrastructure.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -8,11 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
-using TodoApi.Db;
-using TodoApi.Models;
-using TodoApi.Web;
 
-namespace TodoApi
+namespace Api
 {
     public class Startup
     {

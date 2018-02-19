@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
+    <PackageReference Include="NLog" Version="4.5.0-rc05" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Representation" />
+  </ItemGroup>
+</Project>

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TodoApi.Web
+namespace Api.Web
 {
     /// <summary>
     ///     Extension helpers for a application to return simple result codes

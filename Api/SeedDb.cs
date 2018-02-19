@@ -1,11 +1,11 @@
 ﻿using System;
+using Domain.Models;
+using Infrastructure.Db;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TodoApi.Db;
-using TodoApi.Models;
 
-namespace TodoApi
+namespace Api
 {
     /// <summary>
     ///     All code around <see cref="DbInitializer" needs to be in <see cref="Program.Main"/> to avoid

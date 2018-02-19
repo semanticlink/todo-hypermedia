@@ -1,16 +1,16 @@
 ﻿using System;
+using Api.Web;
+using App.RepresentationExtensions;
+using App.UriFactory;
+using Domain.Models;
+using Domain.Persistence;
+using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
-using TodoApi.Db;
-using TodoApi.Models;
-using TodoApi.Representation;
-using TodoApi.Representation.Forms;
-using TodoApi.Representation.LinkedRepresentation;
-using TodoApi.RepresentationExtensions;
-using TodoApi.UriFactory;
-using TodoApi.Utils;
-using TodoApi.Web;
+using Toolkit;
+using Toolkit.Representation.Forms;
+using Toolkit.Representation.LinkedRepresentation;
 
-namespace TodoApi.Controllers
+namespace Api.Controllers
 {
     [Route("")]
     public class HomeController : Controller

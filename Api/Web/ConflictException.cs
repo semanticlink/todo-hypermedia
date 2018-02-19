@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TodoApi.Web
+namespace Api.Web
 {
     /// <summary>
     ///     <para>HTTP 409 Conflict</para>

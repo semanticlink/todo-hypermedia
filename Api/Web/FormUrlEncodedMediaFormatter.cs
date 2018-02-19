@@ -6,7 +6,7 @@ using FastMember;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using NLog;
 
-namespace TodoApi.Web
+namespace Api.Web
 {
     /// <summary>
     ///     <para>
@@ -66,7 +66,7 @@ namespace TodoApi.Web
                         {
                             accessor[obj, property] = entry.Value;
                         }
-                        catch (Exception e)
+                        catch
                         {
                             Console.WriteLine("Cannot write property '{0}' on {1}", entry.Key, modelType.Name);
                             Log.Info("Cannot write property '{0}' on {1}", entry.Key, modelType.Name);

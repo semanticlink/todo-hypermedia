@@ -1,4 +1,4 @@
-﻿namespace TodoApi.Web
+﻿namespace Api.Web
 {
     /// <summary>
     ///     The names of cache files registered with ASP.NET Core MVC for use on controllers.
