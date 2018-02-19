@@ -1,0 +1,138 @@
+/* global module __dirname require process */
+
+const path = require('path');
+const webpack = require('webpack');
+const merge = require('webpack-merge');
+
+/**
+ *  Configuration of the javascript and css for:
+ *      - single-page app client
+ */
+const clientConfig = {
+    entry: {
+        // single-page app
+        app: './src/main',
+    },
+    output: {
+        path: path.join(__dirname, 'dist'),
+        /**
+         * In webapp and admin, we make these available under the same path
+         */
+        publicPath: '/dist/',
+        /**
+         * Note: currently web and admin all have cache busting on the query params and we
+         * don't want to rewrite the .cshtml/.aspx files. The chunks, however, are not cache
+         * busted in the application and thus need hashes.
+         */
+        filename: '[name].js',
+        chunkFilename: '[id].[chunkhash:6].js',
+        /**
+         * This is required so that 'require'js modules are umd loaded
+         */
+        libraryTarget: 'umd'
+    },
+    externals: {
+        /**
+         * Bottleneck has these transitive dependencies for
+         */
+        'hiredis': 'hiredis',
+        'redis': 'redis'
+    },
+    resolve: {
+        alias: {
+            // vendor checked in libraries (perhaps we can dependency manage these?
+            // we use this library alot so we will treat it like an independent library in the imports
+            semanticLink: path.resolve(__dirname, 'src/lib/semanticLink'),
+            /*
+             * Allow for runtime compiling of vue templates
+             */
+            'vue$': 'vue/dist/vue.esm.js'
+        },
+        extensions: [
+            /**
+             * Plain old javascript (well, es6+)
+             */
+            '.js',
+            /**
+             * vue (combine with resolve>alias above)
+             */
+            '.vue'
+        ]
+    },
+    module: {
+        rules: [
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader',
+                options: {
+                    css: 'vue-style-loader!css-loader',
+                    loaders: {}
+                }
+            },
+            {
+                // Only run `.js` files through Babel
+                test: /\.js$/,
+                loader: 'babel-loader',
+                exclude: /node_modules/,
+                query: {
+                    presets: ['es2015', 'stage-0'],
+                }
+            }
+        ]
+    },
+    plugins: [
+        /**
+         * @see https://survivejs.com/webpack/optimizing/adding-hashes-to-filenames/#enabling-namedmodulesplugin
+         */
+        new webpack.NamedModulesPlugin()
+    ],
+    node: {
+        // used so that bottleneck can be loaded (peer dependency of redis/hiredis and transitives)
+        net: 'empty',
+        tls: 'empty'
+    },
+
+};
+
+const commonConfig = {
+    devServer: {
+        historyApiFallback: true,
+        noInfo: true
+    },
+    performance: {
+        hints: false
+    },
+    devtool: '#eval-source-map'
+};
+
+if (process.env.NODE_ENV === 'production') {
+    commonConfig.devtool = '#source-map';
+    commonConfig.plugins = (commonConfig.plugins || []).concat([
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: '"production"'
+            }
+        }),
+        new webpack.optimize.UglifyJsPlugin({
+            sourceMap: true,
+            compress: {
+                warnings: false
+            }
+        }),
+        new webpack.LoaderOptionsPlugin({
+            minimize: true
+        })
+    ]);
+}
+
+if (process.env.NODE_ENV === 'development') {
+    commonConfig.plugins = (commonConfig.plugins || []).concat([]);
+}
+
+// test specific setups
+if (process.env.NODE_ENV === 'test') {
+    module.exports.externals = [require('webpack-node-externals')()];
+    module.exports.devtool = 'inline-cheap-module-source-map';
+}
+
+module.exports = merge(commonConfig, clientConfig);

@@ -206,4 +206,6 @@ FakesAssemblies/
 # Allow configuration files for the 'release' packages (this is not in the bin or obj Release directory)
 !**/Config/Release/
 
-
+# Javascript build
+client/dist/
+node_modules/
