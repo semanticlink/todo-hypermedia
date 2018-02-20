@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>Todos        </h1>
+        <h1>Todos </h1>
 
         <div v-for="(value, key) in this.todos.items">
             {{ value.name }}
@@ -15,12 +15,9 @@
 
     export default {
         props: {
-            /**
-             * @type {TenantRepresentation}
-             */
-            apiUri: {type: String}
+            apiUri: { type: String }
         },
-        data () {
+        data() {
             return {
                 todos: {},
             };
@@ -51,11 +48,13 @@
         },
         computed: {
             displayFields: function () {
-                return (this.todos.items || {}).map(i => { name: i.name})
+                return (this.todos.items || {}).map(i => {
+                    name: i.name
+                })
             }
         },
         methods: {
-            createOnUser (userRepresentation, context) {
+            createOnUser(userRepresentation, context) {
                 log.debug(`Create on user: '${userRepresentation.name}' --> ${SemanticLink.getUri(context, /self/)}`);
             }
         }

@@ -25,6 +25,7 @@
     import { log, nodMaker, SemanticLink, _ } from 'semanticLink';
     import { toSitePath } from '../lib/util/UriMapping';
     import { nodSynchroniser } from 'semanticLink/NODSynchroniser';
+    import { redirectToTenant } from "../router";
 
     export default {
         data () {
@@ -78,7 +79,7 @@
                 this.$router.push(toSitePath("", '/tenants/a/'));
             },
             gotoTenant (organisation) {
-                this.$router.push(toSitePath(SemanticLink.getUri(organisation, /self/), '/tenant/a/'));
+                redirectToTenant(organisation);
             },
             createOrUpdateTenantOnRoot (tenantDocument, rootRepresentation) {
                 nodSynchroniser.getResourceInNamedCollection(rootRepresentation, 'tenants', /tenants/, tenantDocument, [])
