@@ -13,7 +13,6 @@ import AbstractTenant from './components/AbstractTenant.vue';
 import DroppableModel from './components/DroppableModel';
 import DraggableModel from './components/DraggableModel';
 import DragAndDroppableModel from './components/DragAndDroppableModel';
-import ZoneMenu from './components/ZoneMenu';
 
 /*
  * Add runtime dependencies
@@ -52,7 +51,6 @@ Vue.use(VueLocalStorage, { name: 'localStorage' });
 Vue.component('draggable-model', DraggableModel);
 Vue.component('droppable-model', DroppableModel);
 Vue.component('drag-and-droppable-model', DragAndDroppableModel);
-Vue.component('zone-menu', ZoneMenu);
 
 /**
  * This view sets up the application including the ondemand authentication (login) and
