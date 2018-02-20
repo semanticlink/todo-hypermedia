@@ -27,7 +27,6 @@
     import { nodSynchroniser } from 'semanticLink/NODSynchroniser';
 
     export default {
-        name: 'Hello',
         data () {
             return {
                 msg: 'Looking ...',

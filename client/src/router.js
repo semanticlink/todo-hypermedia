@@ -3,7 +3,7 @@ import VueRouter from 'vue-router';
 import { makeAbsolute, toSitePath } from './lib/util/UriMapping';
 import Home from './components/Home.vue';
 import SelectTenants from './components/SelectTenants.vue';
-import User from './components/User.vue';
+import Todo from './components/Todo.vue';
 import { SemanticLink } from "semanticLink";
 
 Vue.use(VueRouter);
@@ -54,6 +54,39 @@ function resolve(route) {
     }
 }
 
+/**
+ * Basic construction of the prefix for client-side of the uri that pivots on the '#' and the api uri
+ *
+ * @example https://example.com/#/todo/a/tenant/1
+ *
+ * We need to construct the `/todo/a/` part being the client prefix. The input is simply the unique
+ * client-side routing, in this case 'todo'. In other cases of nested resources it will be more complex (eg `tenant/todo`)
+ *
+ *
+ * @param clientPath
+ * @returns {string}
+ */
+const makePrefix = clientPath => `/${clientPath}/a/`;
+
+/**
+ * Basic construction of routing path that concatenates the client-side view state with a wildcard that allows
+ * us to get access to the api uri.
+ *
+ * @example https://example.com/#/todo/a/tenant/1
+ *
+ * We need to construct a `/todo/a/:apiUri(.*)` so that routing matches the client-side component and then passes in the
+ * api uri (in this case `tenant/1` which is in turn mapped back the absolute api uri {@link resolve})
+ *
+ * @param clientPath
+ * @returns {string}
+ */
+const makePath = clientPath => `${makePrefix(clientPath)}:apiUri(.*)`;
+
+const clientPath = {
+    SelectTenants: 'tenants',
+    Todo: 'todo',
+};
+
 let router = new VueRouter({
     routes: [
         {
@@ -62,15 +95,15 @@ let router = new VueRouter({
             component: Home,
         },
         {
-            path: '/tenants/a/:apiUri(.*)',
+            path: makePath(clientPath.SelectTenants),
             name: 'SelectTenants',
             component: SelectTenants,
             props: resolve
         },
         {
-            path: '/user/a/:apiUri(.*)',
-            name: 'User',
-            component: User,
+            path: makePath(clientPath.Todo),
+            name: 'Todo',
+            component: Todo,
             props: resolve
         }
     ]
@@ -78,8 +111,7 @@ let router = new VueRouter({
 
 const redirect = (representation, path) => router.push(toSitePath(SemanticLink.getUri(representation, /self/), path));
 
-const redirectToTenant = tenantRepresentation => redirect(tenantRepresentation, '/tenant/a/');
-const redirectToUser = userRepresentation => redirect(userRepresentation, '/user/a/');
+const redirectToTenant = tenantRepresentation => redirect(tenantRepresentation, makePrefix(clientPath.Todo));
 
-export { redirectToTenant, redirectToUser };
+export { redirectToTenant };
 export default router;

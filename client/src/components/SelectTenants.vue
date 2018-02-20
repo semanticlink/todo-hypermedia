@@ -33,7 +33,6 @@
     import { redirectToTenant, redirectToUser } from "../router";
 
     export default {
-        name: 'Tenants',
         props: {
             apiUri: { type: String }
         },
@@ -48,7 +47,6 @@
         created: function () {
 
             log.debug(`Loading selected organisation`);
-
 
             /**
              * The 'global' cache of representation synchronised from the server.
