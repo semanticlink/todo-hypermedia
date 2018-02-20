@@ -3,6 +3,7 @@
 import Vue from 'vue';
 import router from './router';
 import { nodMaker } from 'semanticLink';
+import VueLocalStorage from 'vue-localstorage';
 
 import App from './App.vue';
 import Offline from './components/Offline.vue';
@@ -32,7 +33,7 @@ Vue.config.productionTip = false;
 let store;
 const apiPlugin = {
     store,
-    install (Vue) {
+    install(Vue) {
         // attach to the root view
         // access via this.$root.$api
         Vue.prototype.$api = store;
@@ -40,6 +41,11 @@ const apiPlugin = {
 };
 
 Vue.use(apiPlugin);
+
+/**
+ * Allows us to access local storage via `this.$localStorage`
+ */
+Vue.use(VueLocalStorage, { name: 'localStorage' });
 
 //  TODO: understand inline-templates so that this does haven't to be registered globally
 // @see https://stackoverflow.com/questions/46173821/for-recursive-components-make-sure-to-provide-the-name-option
@@ -56,7 +62,7 @@ new Vue({
     el: '#app',
     router,
     template: '<div><App/><offline/><login/></div>',
-    components: {App, Offline, Login, AbstractTenant},
+    components: { App, Offline, Login, AbstractTenant },
     created: function () {
 
         // TODO: work out why `import { apiUri, authenticatorUri } from './lib/uri-mappings';` doesn't work

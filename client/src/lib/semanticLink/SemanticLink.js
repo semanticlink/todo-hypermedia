@@ -70,7 +70,7 @@ class SemanticLink {
 
     /**
      *
-     * @param http
+     * @param {Axios} http
      * @param {Logger} log
      */
     constructor (http, log) {

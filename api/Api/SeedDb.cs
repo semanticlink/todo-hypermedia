@@ -13,7 +13,6 @@ namespace Api
     /// </summary>
     public static class SeedDb
     {
-
         public static IWebHost Initialise(this IWebHost host, IHostingEnvironment HostingEnvironment)
         {
             using (var scope = host.Services.CreateScope())
@@ -21,7 +20,7 @@ namespace Api
                 var services = scope.ServiceProvider;
                 try
                 {
-                    var context = services.GetRequiredService<TodoContext>();
+//                    var context = services.GetRequiredService<TodoContext>();
 //                    DbInitializer.Initialize(context);
 
                     if (HostingEnvironment.IsDevelopment())
@@ -42,6 +41,9 @@ namespace Api
         public static IServiceProvider SeedTestData(this IServiceProvider services)
         {
             var context = services.GetRequiredService<TodoContext>();
+
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Seeding dev data.");
 
             var tenants = new[]
             {

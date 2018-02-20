@@ -26,7 +26,7 @@ export default class NODMaker {
      * @return {Promise}
      */
 
-    static defaultCreateFormStrategy (resource, createForm, options) {
+    static defaultCreateFormStrategy(resource, createForm, options) {
         return resourceMerger.createMerge(resource, createForm, options);
     }
 
@@ -38,7 +38,7 @@ export default class NODMaker {
      * @param key
      * @param value
      */
-    static ToJsonReplacer (key, value) {
+    static ToJsonReplacer(key, value) {
         return key !== '$$hashKey' && key !== 'createForm' && key !== 'editForm' ? value : undefined;
     }
 
@@ -50,7 +50,7 @@ export default class NODMaker {
      * @property {*} resolver
      */
 
-    static toWireRepresentation (resource) {
+    static toWireRepresentation(resource) {
         return StateFactory.delete(resource);
     }
 
@@ -59,7 +59,7 @@ export default class NODMaker {
      * @param {LinkedRepresentation} resource
      * @return {State}
      */
-    getResourceState (resource) {
+    getResourceState(resource) {
         return StateFactory.get(resource);
     }
 
@@ -69,11 +69,11 @@ export default class NODMaker {
      * @param {*} defaultValue
      * @return {State}
      */
-    tryGetResourceState (resource, defaultValue) {
+    tryGetResourceState(resource, defaultValue) {
         return StateFactory.tryGet(resource, defaultValue);
     }
 
-    createResourceOnCollection (collection, collectionAttribute, rel, document, options = {}) {
+    createResourceOnCollection(collection, collectionAttribute, rel, document, options = {}) {
         return this.getNamedCollectionResource(collection, collectionAttribute, rel, options)
             .then(childCollection => this.createCollectionResourceItem(childCollection, document, options));
     }
@@ -84,7 +84,7 @@ export default class NODMaker {
      * @param state
      * @return {function():State}
      */
-    defaultStateFactory (state) {
+    defaultStateFactory(state) {
         return () => StateFactory.make(state);
     }
 
@@ -93,7 +93,7 @@ export default class NODMaker {
      * @param {stateFlagEnum} state
      * @return {SparseResourceOptions}
      */
-    makeSparseResourceOptions (state) {
+    makeSparseResourceOptions(state) {
         return {
             stateFactory: this.defaultStateFactory(state)
         };
@@ -105,7 +105,7 @@ export default class NODMaker {
      * @param {stateFlagEnum=} state
      * @return {LinkedRepresentation}
      */
-    makeLinkedRepresentation (defaultValues, state) {
+    makeLinkedRepresentation(defaultValues, state) {
         return SparseResource.makeLinkedRepresentation(this.makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
     }
 
@@ -114,7 +114,7 @@ export default class NODMaker {
      * @param {*=} defaultValues
      * @return {LinkedRepresentation}
      */
-    makeVirtualRepresentation (defaultValues) {
+    makeVirtualRepresentation(defaultValues) {
         return SparseResource.makeLinkedRepresentation(this.makeSparseResourceOptions(stateFlagEnum.virtual), defaultValues);
     }
 
@@ -138,7 +138,7 @@ export default class NODMaker {
      * @param {stateFlagEnum=} state=stateFlagEnum.unknown
      * @return {CollectionRepresentation}
      */
-    makeCollection (defaultValues, state) {
+    makeCollection(defaultValues, state) {
         return SparseResource.makeCollection(this.makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
     }
 
@@ -151,7 +151,7 @@ export default class NODMaker {
      * @param {stateFlagEnum=} state
      * @return {LinkedRepresentation}
      */
-    makeSparseResourceFromUri (uri, defaultValues, state) {
+    makeSparseResourceFromUri(uri, defaultValues, state) {
         if (!uri) {
             state = stateFlagEnum.virtual;
         }
@@ -167,7 +167,7 @@ export default class NODMaker {
      * @param {stateFlagEnum=} state
      * @return {CollectionRepresentation}
      */
-    makeSparseCollectionResourceFromUri (uri, defaultValues, state) {
+    makeSparseCollectionResourceFromUri(uri, defaultValues, state) {
         if (!uri) {
             state = stateFlagEnum.virtual;
         }
@@ -183,7 +183,7 @@ export default class NODMaker {
      * @param {LinkedRepresentation=} defaultValues optional default values for the resource
      * @return {LinkedRepresentation} resource existing as a child
      */
-    makeUnknownResourceAddedToResource (resource, resourceName, defaultValues) {
+    makeUnknownResourceAddedToResource(resource, resourceName, defaultValues) {
         return this.getResourceState(resource)
             .addResourceByName(resource, resourceName, () => this.makeLinkedRepresentation(defaultValues));
     }
@@ -196,7 +196,7 @@ export default class NODMaker {
      * @param {LinkedRepresentation=} defaultValues optional default values for the resource
      * @return {CollectionRepresentation}
      */
-    makeUnknownCollectionAddedToResource (resource, collectionResourceName, defaultValues) {
+    makeUnknownCollectionAddedToResource(resource, collectionResourceName, defaultValues) {
         return this.getResourceState(resource)
             .addCollectionResourceByName(resource, collectionResourceName, () => this.makeCollection(defaultValues));
     }
@@ -208,7 +208,7 @@ export default class NODMaker {
      * @param {LinkedRepresentation=} defaultValues optional default values for the resource
      * @return {LinkedRepresentation}
      */
-    makeUnknownResourceAddedToCollection (collection, defaultValues) {
+    makeUnknownResourceAddedToCollection(collection, defaultValues) {
         return State.addItemToCollectionResource(collection, () => this.makeCollection(defaultValues));
     }
 
@@ -219,7 +219,7 @@ export default class NODMaker {
      * @param {*} defaultValues
      * @return {*|LinkedRepresentation}
      */
-    makeResourceFromUriAddedToCollection (collection, resourceUri, defaultValues) {
+    makeResourceFromUriAddedToCollection(collection, resourceUri, defaultValues) {
         return State.addItemToCollectionResource(collection, () => this.makeSparseResourceFromUri(resourceUri, defaultValues));
     }
 
@@ -229,10 +229,22 @@ export default class NODMaker {
      * @param {string[]} uriList
      * @return {CollectionRepresentation}
      */
-    makeCollectionItemsFromUriListAddedToCollection (collection, uriList) {
+    makeCollectionItemsFromUriListAddedToCollection(collection, uriList) {
         const resourceState = this.getResourceState(collection);
         uriList.forEach(resourceUri =>
             resourceState.addItemToCollectionResource(collection, () => this.makeSparseResourceFromUri(resourceUri)));
+        return collection;
+    }
+
+    /**
+     * Takes a feed representation and converts to a sparse collection representation
+     *
+     * @param {CollectionRepresentation} collection
+     * @param {FeedRepresentation} feedRepresentation
+     * @return {CollectionRepresentation}
+     */
+    makeCollectionItemsFromFeedAddedToCollection(collection, feedRepresentation) {
+        feedRepresentation.items.forEach(item => nodMaker.addCollectionResourceItemByUri(collection, item.id, { name: item.title }));
         return collection;
     }
 
@@ -246,7 +258,7 @@ export default class NODMaker {
      * @param {stateFlagEnum} state
      * @return {LinkedRepresentation}
      */
-    makeNamedCollectionFromUriAndResourceFromUriList (resource, collectionResourceName, collectionUri, itemsUriList, state) {
+    makeNamedCollectionFromUriAndResourceFromUriList(resource, collectionResourceName, collectionUri, itemsUriList, state) {
         let collection = this.getResourceState(resource)
             .addCollectionResourceByName(
                 resource,
@@ -271,7 +283,7 @@ export default class NODMaker {
      * @param {stateFlagEnum=} state
      * @return {Promise} contains an array of sparsely populated resources
      */
-    makeSingletonSparseListFromAttributeUriList (resource, singletonName, itemsUriListName, state) {
+    makeSingletonSparseListFromAttributeUriList(resource, singletonName, itemsUriListName, state) {
 
         return this.getResource(resource)
             .then(resource => {
@@ -298,7 +310,7 @@ export default class NODMaker {
      * @param {string} uri
      * @return {Promise} contains an array of populated resources
      */
-    makeSingletonSparseFromUri (resource, singletonName, uri) {
+    makeSingletonSparseFromUri(resource, singletonName, uri) {
         return this.getResource(resource)
             .then(resource => {
 
@@ -318,7 +330,7 @@ export default class NODMaker {
      * @param {stateFlagEnum=} state
      * @return {Promise} contains an array of populated resources
      */
-    makeSingletonListFromAttributeUriList (resource, singletonName, itemsUriListName, state) {
+    makeSingletonListFromAttributeUriList(resource, singletonName, itemsUriListName, state) {
         return this.makeSingletonSparseListFromAttributeUriList(resource, singletonName, itemsUriListName, state)
             .then(collection => {
                 return _(collection).mapWaitAll(item => {
@@ -340,7 +352,7 @@ export default class NODMaker {
      * @param {UtilOptions} options
      * @return {*|Promise} containing the item in the collection
      */
-    getResourceFromUriAddedToNamedCollection (parentResource, collectionResourceName, collectionRel, itemUri, options = {}) {
+    getResourceFromUriAddedToNamedCollection(parentResource, collectionResourceName, collectionRel, itemUri, options = {}) {
 
         let collection = parentResource[collectionResourceName];
 
@@ -365,7 +377,7 @@ export default class NODMaker {
      * @return {LinkedRepresentation}
      * @obsolete
      */
-    addCollectionResourceItemByUri (collection, resourceUri, defaultValues) {
+    addCollectionResourceItemByUri(collection, resourceUri, defaultValues) {
         return State.addItemToCollectionResource(collection, () => this.makeSparseResourceFromUri(resourceUri, defaultValues));
     }
 
@@ -388,7 +400,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}
      */
-    getResource (resource, options = {}) {
+    getResource(resource, options = {}) {
         return this.getResourceState(resource)
             .getResource(resource, options);
     }
@@ -402,7 +414,7 @@ export default class NODMaker {
      * @return {Promise} promise contains a {@link LinkedRepresentation}
      * @return {*}
      */
-    tryGetResource (resource, defaultValue = undefined, options = {}) {
+    tryGetResource(resource, defaultValue = undefined, options = {}) {
         const tryResource = StateFactory.tryGet(resource, defaultValue);
 
         if (tryResource === defaultValue) {
@@ -420,7 +432,7 @@ export default class NODMaker {
      * @param {UtilOptions} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}
      */
-    getCollectionResource (resource, options) {
+    getCollectionResource(resource, options) {
         return this.getResourceState(resource)
             .getCollectionResource(resource, options);
     }
@@ -437,7 +449,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}
      */
-    getCollectionResourceItemByUri (collection, itemUri, options) {
+    getCollectionResourceItemByUri(collection, itemUri, options) {
         return this.getResourceState(collection)
             .makeItemOnCollectionResource(collection, itemUri, options)
             .then(resource => this.getResource(resource, options));
@@ -454,7 +466,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}
      */
-    getCollectionResourceItem (collection, resource, options) {
+    getCollectionResourceItem(collection, resource, options) {
         return this.getCollectionResourceItemByUri(collection, SemanticLink.getUri(resource, /canonical|self/), options);
     }
 
@@ -470,7 +482,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
-    getSingletonResource (resource, singletonName, rel, options) {
+    getSingletonResource(resource, singletonName, rel, options) {
 
         return this.getResource(resource, options)
             .then(resource => {
@@ -498,7 +510,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
-    tryGetSingletonResource (resource, singletonName, rel, defaultValue, options = {}) {
+    tryGetSingletonResource(resource, singletonName, rel, defaultValue, options = {}) {
         options = _({}).extend(options, {
             getUri: SemanticLink.tryGetUri
         });
@@ -536,7 +548,7 @@ export default class NODMaker {
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      *
      */
-    getNamedCollectionResource (resource, collectionAttribute, rel, options) {
+    getNamedCollectionResource(resource, collectionAttribute, rel, options) {
         if (resource[collectionAttribute]) {
             return this.getCollectionResource(resource[collectionAttribute], options);
         } else {
@@ -565,7 +577,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      */
-    tryGetNamedCollectionResource (resource, collectionAttribute, rel, options = {}) {
+    tryGetNamedCollectionResource(resource, collectionAttribute, rel, options = {}) {
         options = _({}).extend(options, {
             getUri: SemanticLink.tryGetUri
         });
@@ -581,7 +593,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains original {@link LinkedRepresentation[]}
      */
-    getNamedCollectionResourceOnSingletons (singletons, collectionName, rel, options) {
+    getNamedCollectionResourceOnSingletons(singletons, collectionName, rel, options) {
         return _(singletons)
             .mapWaitAll(singleton =>
                 this.getResource(singleton)
@@ -601,7 +613,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains original {@link LinkedRepresentation[]}
      */
-    tryGetNamedCollectionResourceOnSingletons (singletons, collectionName, rel, options = {}) {
+    tryGetNamedCollectionResourceOnSingletons(singletons, collectionName, rel, options = {}) {
         options = _({}).extend(options, {
             getUri: SemanticLink.tryGetUri
         });
@@ -625,7 +637,7 @@ export default class NODMaker {
      * @param {UtilOptions} options (with a cancellable)
      * @return {Promise} with the collection resource
      */
-    tryGetCollectionResourceItems (collection, options = {}) {
+    tryGetCollectionResourceItems(collection, options = {}) {
 
         return _(collection)
             .mapWaitAll((item) => {
@@ -646,7 +658,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
      */
-    getCollectionResourceAndItems (resource, options) {
+    getCollectionResourceAndItems(resource, options) {
 
         return this.getCollectionResource(resource, options)
             .then(collection => this.tryGetCollectionResourceItems(collection, options));
@@ -663,7 +675,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
      */
-    getNamedCollectionResourceAndItems (resource, collectionName, rel, options) {
+    getNamedCollectionResourceAndItems(resource, collectionName, rel, options) {
 
         return this.getNamedCollectionResource(resource, collectionName, rel, options)
             .then(collection => this.tryGetCollectionResourceItems(collection, options));
@@ -681,7 +693,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} with the item by uri from the collection resource of type {@link FeedRepresentation}
      */
-    getCollectionResourceAndItemByUri (resource, collectionName, rel, uri, options) {
+    getCollectionResourceAndItemByUri(resource, collectionName, rel, uri, options) {
 
         return this.getNamedCollectionResource(resource, collectionName, rel, options)
             .then((collection) => {
@@ -719,7 +731,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
      */
-    tryGetCollectionResourceAndItems (resource, collectionName, rel, options = {}) {
+    tryGetCollectionResourceAndItems(resource, collectionName, rel, options = {}) {
         options = _({}).extend(options, {
             getUri: SemanticLink.tryGetUri
         });
@@ -743,7 +755,7 @@ export default class NODMaker {
      * @param rel
      * @param options
      */
-    tryGetNamedCollectionResourceAndItemsOnCollectionItems (collection, collectionName, rel, options = {}) {
+    tryGetNamedCollectionResourceAndItemsOnCollectionItems(collection, collectionName, rel, options = {}) {
         options = _({}).extend(options, {
             getUri: SemanticLink.tryGetUri
         });
@@ -763,7 +775,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
      */
-    tryGetNamedCollectionResourceOnCollectionItems (collectionResource, childCollectionName, rel, options) {
+    tryGetNamedCollectionResourceOnCollectionItems(collectionResource, childCollectionName, rel, options) {
 
         return _(collectionResource)
             .mapWaitAll(item => this.tryGetNamedCollectionResource(item, childCollectionName, rel, options));
@@ -777,7 +789,7 @@ export default class NODMaker {
      * @param {UtilOptions=} options
      * @return {Promise} with the array of singleton resources that succeed
      */
-    tryGetNamedSingletonResourceOnCollectionItems (collectionResource, singletonName, rel, options) {
+    tryGetNamedSingletonResourceOnCollectionItems(collectionResource, singletonName, rel, options) {
         return _(collectionResource)
             .mapWaitAll(item => this.tryGetSingletonResource(item, singletonName, rel, undefined, options))
             // now discard any in the tryGet that returned the default value 'undefined'
@@ -792,7 +804,7 @@ export default class NODMaker {
      * @param {UpdateCollectionResourceItemOptions} options
      * @return {Promise}
      */
-    defaultEditFormStrategy (resource, documentResource, editForm, options = {}) {
+    defaultEditFormStrategy(resource, documentResource, editForm, options = {}) {
 
         const isTracked = (resource, trackedName) => {
             const resourceState = StateFactory.tryGet(resource);
@@ -804,7 +816,7 @@ export default class NODMaker {
             }
         };
 
-        options = _({}).extend(options, {isTracked});
+        options = _({}).extend(options, { isTracked });
         return resourceMerger.editMerge(resource, documentResource, editForm, options);
     }
 
@@ -816,7 +828,7 @@ export default class NODMaker {
      * @param {UpdateCollectionResourceItemOptions} options
      * @return {Promise} with the updated resource
      */
-    updateResource (resource, documentResource, options = {}) {
+    updateResource(resource, documentResource, options = {}) {
 
         /* @type {EditMergeOptions} */
         options = _({}).extend(options, {
@@ -835,7 +847,7 @@ export default class NODMaker {
                 if (!editForm) {
                     log.info(`Resource has no edit form ${SemanticLink.getUri(resource, /self|canonical/)}`);
                     // return Promise.resolve(resource);
-                    editForm = {items: []};
+                    editForm = { items: [] };
                 }
 
                 return mergeStrategy(resource, documentResource, editForm, options)
@@ -851,7 +863,7 @@ export default class NODMaker {
             });
     }
 
-    tryUpdateResource (resource, documentResource, editFormCallback, options = {}) {
+    tryUpdateResource(resource, documentResource, editFormCallback, options = {}) {
         return this.updateResource(resource, documentResource, editFormCallback, options);
     }
 
@@ -862,7 +874,7 @@ export default class NODMaker {
      * @param {CreateCollectionResourceItemOptions} options
      * @return {LinkedRepresentation} a sparsely populated resource representation
      */
-    createCollectionResourceItem (collection, document, options = {}) {
+    createCollectionResourceItem(collection, document, options = {}) {
         const mergeStrategy = options.createForm || NODMaker.defaultCreateFormStrategy;
 
         return this.getCollectionResource(collection, options)
@@ -898,7 +910,7 @@ export default class NODMaker {
      * @param {UtilOptions} options
      * @return {Promise} contains the original resource {@link LinkedRepresentation}
      */
-    deleteResource (resource, options = {}) {
+    deleteResource(resource, options = {}) {
 
         return this.getResourceState(resource)
             .deleteResource(resource, options)
@@ -912,7 +924,7 @@ export default class NODMaker {
      * @param {UtilOptions} options
      * @return {Promise}
      */
-    deleteCollectionItem (collection, item, options = {}) {
+    deleteCollectionItem(collection, item, options = {}) {
 
         return this.getCollectionResource(collection, options)
             .then((collectionResource) => {
@@ -939,7 +951,7 @@ export default class NODMaker {
      * @param {[Number|String]=} space number of spaces in the pretty print JSON
      * @return {LinkedRepresentation} obj
      */
-    toJson (obj, space) {
+    toJson(obj, space) {
         return JSON.stringify(obj, this.ToJsonReplacer, space);
     }
 

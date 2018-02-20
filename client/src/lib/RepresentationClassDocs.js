@@ -7,3 +7,16 @@
  * @extends LinkedRepresentation
  * @property {string} version
  */
+
+/**
+ * @class TenantCollectionRepresentation
+ * @extends CollectionRepresentation
+ * @property {LinkedRepresentation[]} tenants
+ * @property {TenantSearchRepresentation} searchForm
+ */
+
+/**
+ * @class TenantSearchRepresentation
+ * @extends LinkedRepresentation
+ * @property {LinkedRepresentation[]} search
+ */

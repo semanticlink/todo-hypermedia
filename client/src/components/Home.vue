@@ -1,22 +1,20 @@
 <template>
     <div class="hello">
-        <p>Hello {{ me.user_name }}</p>
-
         <h1>Organisations
             <droppable-model
                     :context="$root.$api"
-                    :dropped="createOrUpdateOrganisationOnRoot">
+                    :dropped="createOrUpdateTenantOnRoot">
             </droppable-model>
         </h1>
 
         <ul>
-            <li v-for="organisation in organisations.items">
-                <a v-on:click="gotoOrganisation(organisation)">{{ organisation.name }}</a>
+            <li v-for="tenant in tenants.items">
+                <a v-on:click="gotoTenant(tenant)">{{ tenant.name }}</a>
                 <drag-and-droppable-model
-                        :msg="organisation.name"
-                        :model="organisation"
+                        :msg="tenant.name"
+                        :model="tenant"
                         :context="$root.$api"
-                        :dropped="createOrUpdateOrganisationOnRoot">
+                        :dropped="createOrUpdateTenantOnRoot">
                 </drag-and-droppable-model>
             </li>
         </ul>
@@ -24,7 +22,7 @@
 </template>
 
 <script>
-    import { log, nodMaker, SemanticLink } from 'semanticLink';
+    import { log, nodMaker, SemanticLink, _ } from 'semanticLink';
     import { toSitePath } from '../lib/util/UriMapping';
     import { nodSynchroniser } from 'semanticLink/NODSynchroniser';
 
@@ -37,7 +35,7 @@
                 invalid: '',
                 busy: true,
                 me: {},
-                organisations: {},
+                tenants: {},
             };
         },
         created: function () {
@@ -47,10 +45,9 @@
             /**
              * Strategy One: use the first tenant from a provided list (when authenticated)
              * @param {ApiRepresentation} apiResource
-             * @param nextStrategy
              * @returns {Promise|*}
              */
-            const strategyOneProvidedTenant = (apiResource, nextStrategy = () => {}) => {
+            const strategyOneProvidedTenant = (apiResource) => {
                 log.info('Looking for provided tenant');
 
                 /*
@@ -62,18 +59,15 @@
                  */
                 return nodMaker
                     .getResource(apiResource)
-                    .then(apiResource => nodMaker.getSingletonResource(apiResource, 'me', /me/))
-                    .then(me => {
-                        this.me = me;
-                        return nodMaker.tryGetCollectionResourceAndItems(apiResource, 'organisations', /organisations/);
-                    })
-                    .then(organisations => {
-                        this.organisations = organisations;
-                        return nextStrategy();
+                    .then(apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tenants', /tenants/))
+                    .then(tenants => {
+                        if (tenants && _(tenants.items).isEmpty()){
+                            this.gotoTenants();
+                        }
+                        this.tenants = tenants;
                     })
                     .catch(err => {
                         log.error(err);
-                        return nextStrategy();
                     });
             };
 
@@ -81,11 +75,14 @@
 
         },
         methods: {
-            gotoOrganisation (organisation) {
-                this.$router.push(toSitePath(SemanticLink.getUri(organisation, /self/), '/organisation/a/'));
+            gotoTenants () {
+                this.$router.push(toSitePath("", '/tenants/a/'));
             },
-            createOrUpdateOrganisationOnRoot (organisationDocument, rootRepresentation) {
-                nodSynchroniser.getResourceInNamedCollection(rootRepresentation, 'organisations', /organisations/, organisationDocument, [])
+            gotoTenant (organisation) {
+                this.$router.push(toSitePath(SemanticLink.getUri(organisation, /self/), '/tenant/a/'));
+            },
+            createOrUpdateTenantOnRoot (tenantDocument, rootRepresentation) {
+                nodSynchroniser.getResourceInNamedCollection(rootRepresentation, 'tenants', /tenants/, tenantDocument, [])
                     .then(resource => {
                         log.debug(resource);
                     })

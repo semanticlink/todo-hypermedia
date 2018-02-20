@@ -126,7 +126,7 @@
                     .getResource(apiResource)
                     .then(apiResource => nodMaker.getSingletonResource(apiResource, 'me', /me/)
                         .then(() => apiResource))
-                    .then(apiResource => nodMaker.getCollectionResource(apiResource, 'organisations', /organisations/))
+                    .then(apiResource => nodMaker.getCollectionResource(apiResource, 'tenants', /organisations/))
                     .then(organisations => nodMaker.getCollectionResourceItemByUri(organisations, this.apiUri))
                     .then(organisation => {
                         this.organisation = organisation;

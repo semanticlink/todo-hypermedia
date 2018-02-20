@@ -6,8 +6,6 @@
 </template>
 
 <script>
-    import { log } from 'semanticLink';
-
     export default {
         name: 'app',
     };

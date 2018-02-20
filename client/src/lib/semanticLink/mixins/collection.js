@@ -1,6 +1,8 @@
 import _ from 'underscore';
 import { SemanticLink } from '../SemanticLink';
 
+const normaliseCollection = collection => collection.items || collection || [];
+
 /**
  * Find a resource item in a collection identified through a found link relation or resource attribute
  * that matches an item in the collection items.
@@ -223,6 +225,24 @@ const mapUriList = array => {
 };
 
 /**
+ *
+ * @param {CollectionRepresentation|LinkedRepresentation[]} collection
+ * @returns {boolean}
+ */
+const isCollectionEmpty = collection => {
+    return _(get(collection)).IsEmpty();
+};
+
+/**
+ *
+ * @param {CollectionRepresentation|LinkedRepresentation[]} collection
+ * @returns {LinkedRepresentation}
+ */
+const firstItem = collection => {
+    return _(normaliseCollection(collection)).first();
+};
+
+/**
  * @mixin
  */
 export const CollectionMixins = {
@@ -236,6 +256,8 @@ export const CollectionMixins = {
     pushAll,
     pushResource,
     mapUriList,
+    isCollectionEmpty,
+    firstItem
 };
 
 _.mixin(CollectionMixins);

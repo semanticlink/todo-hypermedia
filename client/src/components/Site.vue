@@ -86,7 +86,7 @@
                     .getResource(apiResource)
                     .then(apiResource => nodMaker.getSingletonResource(apiResource, 'me', /me/)
                         .then(() => apiResource))
-                    .then(apiResource => nodMaker.getCollectionResource(apiResource, 'organisations', /organisations/))
+                    .then(apiResource => nodMaker.getCollectionResource(apiResource, 'tenants', /organisations/))
                     .then(organisations => nodMaker.getCollectionResource(organisations, 'companies', /companies/))
                     .then(companies => nodMaker.getCollectionResource(companies, 'sites', /sites/))
                     .then(sites => nodMaker.getCollectionResourceItemByUri(sites, this.apiUri))

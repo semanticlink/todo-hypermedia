@@ -1,11 +1,10 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { makeAbsolute } from './lib/util/UriMapping';
+import { makeAbsolute, toSitePath } from './lib/util/UriMapping';
 import Home from './components/Home.vue';
-import Organisation from './components/Organisation.vue';
-import Company from './components/Company.vue';
-import Site from './components/Site.vue';
+import SelectTenants from './components/SelectTenants.vue';
 import User from './components/User.vue';
+import { SemanticLink } from "semanticLink";
 
 Vue.use(VueRouter);
 
@@ -47,11 +46,11 @@ Vue.use(VueRouter);
  *        eg Home --> /home/a/
  *
  * @param {Route} route vue router
- * @return {{currentUri: string}} absolute uri of the current api
+ * @return {{apiUri: string}} absolute uri of the current api
  */
-function resolve (route) {
+function resolve(route) {
     if (route.params.apiUri) {
-        return {apiUri: makeAbsolute(route.params.apiUri)};
+        return { apiUri: makeAbsolute(route.params.apiUri) };
     }
 }
 
@@ -63,21 +62,9 @@ let router = new VueRouter({
             component: Home,
         },
         {
-            path: '/organisation/a/:apiUri(.*)',
-            name: 'Organisation',
-            component: Organisation,
-            props: resolve
-        },
-        {
-            path: '/organisation/company/a/:apiUri(.*)',
-            name: 'Company',
-            component: Company,
-            props: resolve
-        },
-        {
-            path: '/site/a/:apiUri(.*)',
-            name: 'Site',
-            component: Site,
+            path: '/tenants/a/:apiUri(.*)',
+            name: 'SelectTenants',
+            component: SelectTenants,
             props: resolve
         },
         {
@@ -89,4 +76,10 @@ let router = new VueRouter({
     ]
 });
 
+const redirect = (representation, path) => router.push(toSitePath(SemanticLink.getUri(representation, /self/), path));
+
+const redirectToTenant = tenantRepresentation => redirect(tenantRepresentation, '/tenant/a/');
+const redirectToUser = userRepresentation => redirect(userRepresentation, '/user/a/');
+
+export { redirectToTenant, redirectToUser };
 export default router;
