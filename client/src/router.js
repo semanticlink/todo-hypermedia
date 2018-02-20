@@ -109,9 +109,11 @@ let router = new VueRouter({
     ]
 });
 
-const redirect = (representation, path) => router.push(toSitePath(SemanticLink.getUri(representation, /self/), path));
+const redirect = (representation, path, query = {}) => router.push(Object.assign({}, { path: toSitePath(SemanticLink.getUri(representation, /self/), path) }, query));
 
-const redirectToTenant = tenantRepresentation => redirect(tenantRepresentation, makePrefix(clientPath.Todo));
+const redirectToTenant = (tenantRepresentation, filter) => {
+    return redirect(tenantRepresentation, makePrefix(clientPath.Todo), filter);
+};
 
 export { redirectToTenant };
 export default router;
