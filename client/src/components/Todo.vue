@@ -12,7 +12,7 @@
                        @keyup.enter="addTodo(newTodo, todoCollection)">
             </header>
 
-            <section class="main" v-show="todos.length" v-cloak>
+            <section class="main" v-show="todoCollection.items.length" v-cloak>
                 <input class="toggle-all" type="checkbox" v-model="allDone">
                 <ul class="todo-list">
                     <li v-for="todo in filteredTodos"
@@ -43,7 +43,7 @@
                 </ul>
             </section>
 
-            <footer class="footer" v-show="todos.length" v-cloak>
+            <footer class="footer" v-show="todoCollection.items.length" v-cloak>
 
                 <span class="todo-count">
                   <strong>{{ remaining }}</strong> {{ remaining | pluralize }} left
@@ -56,7 +56,8 @@
                     </li>
                 </ul>
 
-                <button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">
+                <button class="clear-completed" @click="removeCompleted"
+                        v-show="todoCollection.items.length > remaining">
                     Clear completed
                 </button>
             </footer>
@@ -133,8 +134,7 @@
         },
         data() {
             return {
-                todoCollection: {},
-                todos: [],
+                todoCollection: { items: [] },
                 newTodo: Object.assign({}, DEFAULT_TODO),
                 visibility: filterEnum.ALL,
                 filter: filterEnum
@@ -168,17 +168,17 @@
         },
         computed: {
             filteredTodos: function () {
-                return filters[this.visibility](this.todos)
+                return filters[this.visibility](this.todoCollection.items)
             },
             remaining: function () {
-                return filters.active(this.todos).length
+                return filters.active(this.todoCollection.items).length
             },
             allDone: {
                 get: function () {
                     return this.remaining === 0
                 },
                 set: function (value) {
-                    this.todos.forEach(todo => this.completeTodo(todo, value))
+                    this.todoCollection.items.forEach(todo => this.completeTodo(todo, value))
                 }
             }
         },
@@ -251,7 +251,7 @@
             },
 
             removeCompleted: function () {
-                filters.completed(this.todos).forEach(todo => this.removeTodo(todo));
+                filters.completed(this.todoCollection.items).forEach(todo => this.removeTodo(todo));
             },
 
             showAll: function () {
@@ -319,9 +319,9 @@
             'todo-focus':
 
                 function (el, binding) {
-                    // if (binding.value) {
-                    el.focus()
-                    // }
+                    if (binding.value) {
+                        el.focus()
+                    }
                 }
         }
     }
