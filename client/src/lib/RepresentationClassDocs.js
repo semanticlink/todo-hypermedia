@@ -16,7 +16,26 @@
  */
 
 /**
+ * @class TenantRepresentation
+ * @extends LinkedRepresentation
+ * @property {LinkedRepresentation[]} name
+ */
+
+/**
  * @class TenantSearchRepresentation
  * @extends LinkedRepresentation
  * @property {LinkedRepresentation[]} search
+ */
+
+
+/**
+ * @class TodoCollectionRepresentation
+ * @extends CollectionRepresentation
+ */
+
+/**
+ * @class TodoRepresentation
+ * @extends LinkedRepresentation
+ * @property {string} name
+ * @property {boolean} completed
  */

@@ -59,7 +59,7 @@ namespace Api
             var todos = new[]
             {
                 new Todo {Name = "One"},
-                new Todo {Name = "Two"},
+                new Todo {Name = "Two", Completed = true},
                 new Todo {Name = "Three"},
             };
             context.TodoItems.AddRange(todos);
