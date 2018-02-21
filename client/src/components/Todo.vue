@@ -135,7 +135,7 @@
             return {
                 todoCollection: {},
                 todos: [],
-                newTodo: DEFAULT_TODO,
+                newTodo: Object.assign({}, DEFAULT_TODO),
                 visibility: filterEnum.ALL,
                 filter: filterEnum
             };
@@ -185,29 +185,37 @@
 
         methods: {
             setEditing(todo, edit) {
-                this.$set(todo, '_inprogress', Object.assign({}, edit || todo))
+                this.$set(todo, '_inprogress', Object.assign({}, edit || todo));
+                return this;
             },
             unsetEditing(todo) {
                 this.$set(todo, '_inprogress', null);
                 delete todo._inprogress;
+                return this;
+            },
+            resetTodo() {
+                this.newTodo = Object.assign({}, this.newTodo, DEFAULT_TODO);
+                return this;
             },
 
-            addTodo: function (todoDocument, todoCollection) {
-                nodMaker.createCollectionResourceItem(todoCollection, Object.assign({}, todoDocument))
-                    .then(item => {
-                        todoDocument = this.DEFAULT_TODO;
-                        return this.unsetEditing(item);
-                    })
+            addTodo: function (todo, todoCollection) {
+                return nodMaker.createCollectionResourceItem(todoCollection, Object.assign({}, todo))
+                    .then(todoResource => nodMaker.getResource(todoResource)
+                        .then(todoResource => {
+                            this
+                                .resetTodo()
+                                .unsetEditing(todoResource);
+                        }))
                     .catch(err => log.error(err));
             },
 
             removeTodo: function (todo) {
-                nodMaker.deleteCollectionItem(this.todoCollection, todo);
+                return nodMaker.deleteCollectionItem(this.todoCollection, todo);
             },
 
             completeTodo: function (todo) {
                 // this gets the updated version and does a force PUT (I think)
-                nodMaker.updateResource(todo, Object.assign({}, todo));
+                return nodMaker.updateResource(todo, Object.assign({}, todo));
             },
 
             editTodo: function (todo) {
@@ -231,7 +239,7 @@
 
                 const vm = this;
                 vm.unsetEditing(todo);
-                nodMaker.updateResource(todo, editedTodo)
+                return nodMaker.updateResource(todo, editedTodo)
                     .catch(err => {
                         vm.setEditing(todo, editedTodo);
                         log.error(err);
@@ -296,7 +304,7 @@
                         break;
                 }
 
-                getTenant(this.$root.$api, this.apiUri)
+                return getTenant(this.$root.$api, this.apiUri)
                     .then(tenant => redirectToTenant(tenant, query));
 
 
