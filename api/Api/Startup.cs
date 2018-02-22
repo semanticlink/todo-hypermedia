@@ -1,4 +1,10 @@
-﻿using Api.Web;
+﻿//using System.Configuration;
+
+using System.IO;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
+using Amazon.Runtime;
+using Api.Web;
 using App;
 using Infrastructure.Db;
 using Microsoft.AspNetCore.Builder;
@@ -6,6 +12,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
@@ -14,9 +21,32 @@ namespace Api
 {
     public class Startup
     {
+        public IHostingEnvironment HostingEnvironment { get; }
+        public IConfiguration Configuration { get; }
+
+        public Startup(IHostingEnvironment env, IConfiguration config)
+        {
+            HostingEnvironment = env;
+            Configuration = config;
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
+
+//            var awsOptions = new ConfigurationBuilder()
+//                .SetBasePath(Directory.GetCurrentDirectory())
+//                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+//                .AddEnvironmentVariables()
+//                .Build()
+//                .GetAWSOptions();
+//
+//            awsOptions.Credentials = new EnvironmentVariablesAWSCredentials();
+//
+//            services.AddDefaultAWSOptions(awsOptions);
+//            services.AddAWSService<IAmazonDynamoDB>();
+
+
             services.AddMvcCore(options =>
                 {
                     options.RespectBrowserAcceptHeader = true;
@@ -38,7 +68,7 @@ namespace Api
                 .AddXmlDataContractSerializerFormatters();
 
             services
-                .RegisterIoc()
+                .RegisterIoc(HostingEnvironment)
                 .AddTodoCors();
 
             services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
@@ -62,6 +92,11 @@ namespace Api
             app
                 .UseTodoCors()
                 .UseMvc();
+
+
+            var todoStore = app.ApplicationServices.GetService<TodoStore>();
+
+            todoStore.BuildOrDescribeTable().Wait();
         }
     }
 }

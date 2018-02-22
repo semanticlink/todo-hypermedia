@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit", "Toolkit\Toolkit.csproj", "{2DF1EAB4-3F06-4C85-8769-D61CE50296B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +44,9 @@ Global
 		{2DF1EAB4-3F06-4C85-8769-D61CE50296B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2DF1EAB4-3F06-4C85-8769-D61CE50296B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2DF1EAB4-3F06-4C85-8769-D61CE50296B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

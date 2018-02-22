@@ -21,7 +21,7 @@ namespace Infrastructure.Db
             return _context.TodoItems;
         }
 
-        public long Create(TodoCreateData todo)
+        public string Create(TodoCreateData todo)
         {
             var create = new Todo
             {
@@ -37,12 +37,12 @@ namespace Infrastructure.Db
             return create.Id;
         }
 
-        public Todo Get(long id)
+        public Todo Get(string id)
         {
             return _context.TodoItems.SingleOrDefault(x => x.Id == id);
         }
 
-        public void Update(long todoId, Action<Todo> updater)
+        public void Update(string todoId, Action<Todo> updater)
         {
             var todo = _context
                 .TodoItems
@@ -56,7 +56,7 @@ namespace Infrastructure.Db
             _context.SaveChanges();
         }
 
-        public void Delete(long todoId)
+        public void Delete(string todoId)
         {
             var todo = _context
                 .TodoItems

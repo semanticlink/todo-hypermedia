@@ -14,7 +14,7 @@ namespace App.UriFactory
             return url.Link(SelfRouteName, new { });
         }
 
-        public static string MakeTodoUri(this long todoId, IUrlHelper url)
+        public static string MakeTodoUri(this string todoId, IUrlHelper url)
         {
             return url.Link(TodoRouteName, new {id = todoId});
         }

@@ -7,9 +7,9 @@ namespace Domain.Persistence
     public interface ITodoRepository
     {
         IEnumerable<Todo> GetAll();
-        long Create(TodoCreateData todo);
-        Todo Get(long id);
-        void Update(long todoId, Action<Todo> updater);
-        void Delete(long todoId);
+        string Create(TodoCreateData todo);
+        Todo Get(string id);
+        void Update(string todoId, Action<Todo> updater);
+        void Delete(string todoId);
     }
 }

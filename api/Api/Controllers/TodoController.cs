@@ -46,7 +46,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
-        public TodoRepresentation GetById(long id)
+        public TodoRepresentation GetById(string id)
         {
             return _db
                 .Get(id)
@@ -55,7 +55,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
-        public IActionResult Update(long id, [FromBody] TodoRepresentation item)
+        public IActionResult Update(string id, [FromBody] TodoRepresentation item)
         {
             _db.Update(id,
                 todo =>
@@ -80,7 +80,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}", Name = TodoUriFactory.TodoRouteName)]
-        public IActionResult Delete(long id)
+        public IActionResult Delete(string id)
         {
             _db.Delete(id);
             return new NoContentResult();
