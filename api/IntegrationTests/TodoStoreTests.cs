@@ -20,7 +20,7 @@ namespace IntegrationTests
                 Assert.Equal(name.TableName, TodoStore.TableName);
 
                 var id = await todoStore.Create(new TodoCreateData {Name = "baba"});
-
+               
                 var todo = await todoStore.GetById(id);
 
                 Assert.Equal("baba", todo.Name);

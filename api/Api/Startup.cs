@@ -1,11 +1,13 @@
 ﻿//using System.Configuration;
 
+using System;
 using System.IO;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.Runtime;
 using Api.Web;
 using App;
+using Domain.Persistence;
 using Infrastructure.Db;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -80,7 +82,9 @@ namespace Api
              * Note: this block MUST be before app.UseMvc();
              */
             loggerFactory.AddConsole();
-            if (env.IsDevelopment())
+            
+
+            if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -94,9 +98,10 @@ namespace Api
                 .UseMvc();
 
 
-            var todoStore = app.ApplicationServices.GetService<TodoStore>();
+            app.ApplicationServices.GetService<ITodoStore>().BuildOrDescribeTable().Wait();
+            app.ApplicationServices.GetService<ITenantStore>().BuildOrDescribeTable().Wait();
 
-            todoStore.BuildOrDescribeTable().Wait();
+          
         }
     }
 }

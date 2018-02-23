@@ -6,7 +6,7 @@ namespace App.UriFactory
     {
         public const string SelfRouteName = "Tenant";
 
-        public static string MakeTenantUri(this long tenantId, IUrlHelper url)
+        public static string MakeTenantUri(this string tenantId, IUrlHelper url)
         {
             return url.Link(SelfRouteName, new {id = tenantId});
         }

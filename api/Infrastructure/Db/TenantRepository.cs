@@ -22,13 +22,13 @@ namespace Infrastructure.Db
                 .SingleOrDefault(x => x.Code.Equals(code, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public Tenant Get(long id)
+        public Tenant Get(string id)
         {
             return _context.Tenants
                 .SingleOrDefault(x => x.Id == id);
         }
 
-        public IEnumerable<Tenant> GetTenantsForUser(long userId)
+        public IEnumerable<Tenant> GetTenantsForUser(string userId)
         {
             // TODO: filter tenants by user
             // TODO: make relationships between tables

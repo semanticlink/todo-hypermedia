@@ -11,15 +11,15 @@ using Domain.Persistence;
 
 namespace Infrastructure.Db
 {
-    public class TodoStore : ITodoStore
+    public class TenantStore : ITenantStore
     {
         private readonly IAmazonDynamoDB _client;
         private readonly IDynamoDBContext _context;
 
-        public const string TableName = "Todo";
+        public const string TableName = "Tenant";
         private const string HashKey = "Id";
 
-        public TodoStore(IAmazonDynamoDB client, IDynamoDBContext context)
+        public TenantStore(IAmazonDynamoDB client, IDynamoDBContext context)
         {
             _client = client;
             _context = context;
@@ -68,30 +68,43 @@ namespace Infrastructure.Db
             }
         }
 
-        public async Task<string> Create(TodoCreateData todo)
+        public async Task<string> Create(TenantCreateData todo)
         {
             var id = Guid.NewGuid().ToString();
 
-            var create = new Todo
+            var create = new Tenant
             {
                 Id = id,
                 Name = todo.Name,
-                Completed = todo.Completed,
-                Due = todo.Due,
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _context.SaveAsync<Todo>(create);
+            await _context.SaveAsync<Tenant>(create);
 
             return id;
         }
 
-        public async Task<Todo> GetById(string id)
+        public async Task<Tenant> GetById(string id)
         {
             List<ScanCondition> conditions =
                 new List<ScanCondition> {new ScanCondition(HashKey, ScanOperator.Equal, id)};
-            var allDocs = await _context.ScanAsync<Todo>(conditions).GetRemainingAsync();
+            var allDocs = await _context.ScanAsync<Tenant>(conditions).GetRemainingAsync();
             return allDocs.FirstOrDefault();
+        }
+
+        public async Task<Tenant> GetByCode(string code)
+        {
+            List<ScanCondition> conditions =
+                new List<ScanCondition> {new ScanCondition("Code", ScanOperator.Equal, code)};
+            var doc = await _context.ScanAsync<Tenant>(conditions).GetRemainingAsync();
+            return doc.SingleOrDefault();
+        }
+
+        public async Task<IEnumerable<Tenant>> GetTenantsForUser(string id)
+        {
+            List<ScanCondition> conditions =
+                new List<ScanCondition> {new ScanCondition(HashKey, ScanOperator.Equal, id)};
+            return await _context.ScanAsync<Tenant>(conditions).GetRemainingAsync();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Domain.Models;
+using Domain.Persistence;
 using Infrastructure.Db;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +44,7 @@ namespace Api
             var context = services.GetRequiredService<TodoContext>();
 
             var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation("Seeding dev data.");
+            logger.LogInformation("Seeding Entity data.");
 
             var tenants = new[]
             {
@@ -65,6 +66,26 @@ namespace Api
             context.TodoItems.AddRange(todos);
 
             context.SaveChanges();
+
+            logger.LogInformation("Seedeing DynamoDb data");
+
+            var tenantStore = services.GetRequiredService<ITenantStore>();
+
+            tenantStore.Create(new TenantCreateData
+            {
+                Code = "rewire.example.nz",
+                Name = "Rewire NZ",
+                Description = "A sample tenant (company/organisation)"
+            });
+            
+            var todoStore = services.GetRequiredService<ITodoStore>();
+
+            todoStore.Create(new TodoCreateData {Name = "One Todo"});
+            todoStore.Create(new TodoCreateData {Name = "Two Todo", Completed = true});
+            todoStore.Create(new TodoCreateData {Name = "Three Todo"});
+            
+            
+            
 
             return services;
         }

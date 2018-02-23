@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Domain.Models;
@@ -13,7 +14,6 @@ namespace App
     {
         public static IServiceCollection RegisterIoc(this IServiceCollection services, IHostingEnvironment env)
         {
-
             /**
              * DymanoDb Registration
              */
@@ -24,7 +24,7 @@ namespace App
                 })
                 : new AmazonDynamoDBClient());
             services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
-            
+
             /**
              * Entity Framework Repositories
              */
@@ -34,17 +34,16 @@ namespace App
             /**
              * DynamoDb Stores
              */
-            services.AddScoped<TodoStore>();
+            services.AddScoped<ITodoStore, TodoStore>();
+            services.AddScoped<ITenantStore, TenantStore>();
 
             services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);
-
-
 
 
             /**
              * Currently, this is the logged in user
              */
-            services.AddSingleton(new User {Id = 1});
+            services.AddSingleton(new User {Id = Guid.NewGuid().ToString()});
 
             return services;
         }

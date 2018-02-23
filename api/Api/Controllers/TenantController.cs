@@ -9,18 +9,19 @@ namespace Api.Controllers
     [Route("tenant/")]
     public class TenantController : Controller
     {
-        private readonly ITenantRepository _tenantRepository;
+        private readonly ITenantStore _tenantRepository;
 
-        public TenantController(ITenantRepository tenantRepository)
+        public TenantController(ITenantStore tenantRepository)
         {
             _tenantRepository = tenantRepository;
         }
 
-        [HttpGet("{id:long}", Name = TenantUriFactory.SelfRouteName)]
-        public TenantRepresentation Get(long id)
+        [HttpGet("{id}", Name = TenantUriFactory.SelfRouteName)]
+        public TenantRepresentation Get(string id)
         {
             return _tenantRepository
-                .Get(id)
+                .GetById(id)
+                .Result
                 .ToRepresentation(Url);
         }
     }

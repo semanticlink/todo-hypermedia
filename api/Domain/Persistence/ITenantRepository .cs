@@ -5,8 +5,8 @@ namespace Domain.Persistence
 {
     public interface ITenantRepository
     {
-        Tenant Get(long id);
+        Tenant Get(string id);
         Tenant GetByCode(string code);
-        IEnumerable<Tenant> GetTenantsForUser(long userId);
+        IEnumerable<Tenant> GetTenantsForUser(string userId);
     }
 }

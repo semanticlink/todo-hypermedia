@@ -2,6 +2,6 @@
 {
     public class User
     {
-        public long Id { set; get; }
+        public string Id { set; get; }
     }
 }
