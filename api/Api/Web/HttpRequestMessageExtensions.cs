@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Web
@@ -34,12 +35,14 @@ namespace Api.Web
                 });
         }
 
-        public static RedirectResult MakeRedirect(
-            this HttpRequest request,
-            string uri,
-            string status = "")
+        public static async Task<NoContentResult> MakeNoContent(this Task task)
         {
-            return new RedirectResult(uri, false /* not permanent */);
+            return new NoContentResult();
+        }
+
+        public static RedirectResult MakeRedirect(this string uri)
+        {
+            return new RedirectResult(uri, permanent: false /* not permanent */);
         }
     }
 }

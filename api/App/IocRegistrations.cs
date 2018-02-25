@@ -5,6 +5,7 @@ using Amazon.DynamoDBv2.DataModel;
 using Domain.Models;
 using Domain.Persistence;
 using Infrastructure.Db;
+using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 

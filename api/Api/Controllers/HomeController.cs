@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
@@ -19,25 +20,21 @@ namespace Api.Controllers
         private readonly Version _version;
         private readonly User _user;
         private readonly ITenantStore _tenantStore;
-        private readonly ITodoStore _todoStore;
 
-        public HomeController(Version version, User user, ITenantStore tenantStore, ITodoStore todoStore)
+        public HomeController(Version version, User user, ITenantStore tenantStore)
         {
             _version = version;
             _user = user;
             _tenantStore = tenantStore;
-            _todoStore = todoStore;
         }
 
         [HttpGet("", Name = HomeUriFactory.SelfRouteName)]
         public ApiRepresentation GetApi()
         {
-            var apiVersion = new ApiVersion
-            {
-                Version = _version.ToString()
-            };
-
-            return apiVersion
+            return new ApiVersion
+                {
+                    Version = _version.ToString()
+                }
                 .ToRepresentation(Url);
         }
 
@@ -50,13 +47,14 @@ namespace Api.Controllers
         ///     Provides a redirect URL for locating a tenant without disclosing the name of any other tenants.
         /// </summary>
         [HttpGet(@"a/{tenantCode:regex(^[[\w\d\-\.]]+$)}")]
-        public IActionResult GetTenant(string tenantCode)
+        public async Task<IActionResult> GetTenant(string tenantCode)
         {
-            var tenant = _tenantStore
-                .GetByCode(tenantCode)
-                .Result
-                .ThrowObjectNotFoundExceptionIfNull("Invalid tenant");
-            return new RedirectResult(tenant.Id.MakeTenantUri(Url), permanent: false);
+            return (await _tenantStore
+                    .GetByCode(tenantCode))
+                .ThrowObjectNotFoundExceptionIfNull("Invalid tenant")
+                .Id
+                .MakeTenantUri(Url)
+                .MakeRedirect();
         }
 
         ///////////////////////////////////////////////////////////////
@@ -75,21 +73,22 @@ namespace Api.Controllers
         ///     be empty.
         /// </remarks>
         [HttpGet("tenant/", Name = HomeUriFactory.TenantsRouteName)]
-        public FeedRepresentation GetTenants([FromQuery(Name = "q")] string search = null)
+        public async Task<FeedRepresentation> GetTenants([FromQuery(Name = "q")] string search = null)
         {
-            return (!string.IsNullOrWhiteSpace(search)
-                    //
-                    //  Regardless of whether the caller is authenticated or not, a query with a name
-                    //  will return a collection with zero or one items matched by tenant code.
-                    //
-                    ? _tenantStore.GetByCode(search).Result.ToEnumerable()
-                    //
-                    : _user != null
-                        // If the user is authenticated, then return all tenants that the user has access to.
-                        ? _tenantStore.GetTenantsForUser(_user.Id).Result
+            var enumerable = (!string.IsNullOrWhiteSpace(search)
+                //
+                //  Regardless of whether the caller is authenticated or not, a query with a name
+                //  will return a collection with zero or one items matched by tenant code.
+                //
+                ? (await _tenantStore.GetByCode(search)).ToEnumerable()
+                //
+                : _user != null
+                    // If the user is authenticated, then return all tenants that the user has access to.
+                    ? (await _tenantStore.GetTenantsForUser(_user.Id))
 
-                        // The user is not authenticated and there is no query, so the caller gets no tenants.
-                        : new Tenant[] { })
+                    // The user is not authenticated and there is no query, so the caller gets no tenants.
+                    : new Tenant[] { });
+            return enumerable
                 .ToRepresentation(Url);
         }
 

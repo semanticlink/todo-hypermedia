@@ -1,13 +1,16 @@
-﻿using System.Threading.Tasks;
-using Amazon.DynamoDBv2.Model;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Domain.Models;
 
 namespace Domain.Persistence
 {
     public interface ITodoStore
     {
-        Task<TableDescription> BuildOrDescribeTable();
         Task<string> Create(TodoCreateData todo);
-        Task<Todo> GetById(string id);
+        Task<Todo> Get(string id);
+        Task<IEnumerable<Todo>> GetAll();
+        Task Update(string todoId, Action<Todo> updater);
+        Task Delete(string todoId);
     }
 }

@@ -1,4 +1,5 @@
-﻿using App.RepresentationExtensions;
+﻿using System.Threading.Tasks;
+using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Persistence;
 using Domain.Representation;
@@ -17,11 +18,10 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}", Name = TenantUriFactory.SelfRouteName)]
-        public TenantRepresentation Get(string id)
+        public async Task<TenantRepresentation> Get(string id)
         {
-            return _tenantRepository
-                .GetById(id)
-                .Result
+            return (await _tenantRepository
+                    .Get(id))
                 .ToRepresentation(Url);
         }
     }

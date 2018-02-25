@@ -9,6 +9,7 @@ using Api.Web;
 using App;
 using Domain.Persistence;
 using Infrastructure.Db;
+using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -82,7 +83,7 @@ namespace Api
              * Note: this block MUST be before app.UseMvc();
              */
             loggerFactory.AddConsole();
-            
+
 
             if (HostingEnvironment.IsDevelopment())
             {
@@ -95,13 +96,28 @@ namespace Api
 
             app
                 .UseTodoCors()
-                .UseMvc();
+                .UseMvc()
+                .MigrateDynamoDb();
+        }
+    }
 
+    public static class MigrateDynamoDbExtensions
+    {
+        public static IApplicationBuilder MigrateDynamoDb(this IApplicationBuilder app)
+        {
+            var client = app.ApplicationServices.GetService<IAmazonDynamoDB>();
 
-            app.ApplicationServices.GetService<ITodoStore>().BuildOrDescribeTable().Wait();
-            app.ApplicationServices.GetService<ITenantStore>().BuildOrDescribeTable().Wait();
+            TableNameConstants
+                .Todo
+                .CreateTable(client)
+                .ConfigureAwait(false);
 
-          
+            TableNameConstants
+                .Tenant
+                .CreateTable(client)
+                .ConfigureAwait(false);
+
+            return app;
         }
     }
 }

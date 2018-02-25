@@ -67,7 +67,7 @@ namespace Api
 
             context.SaveChanges();
 
-            logger.LogInformation("Seedeing DynamoDb data");
+            logger.LogInformation("Seeding DynamoDb data");
 
             var tenantStore = services.GetRequiredService<ITenantStore>();
 
@@ -76,18 +76,18 @@ namespace Api
                 Code = "rewire.example.nz",
                 Name = "Rewire NZ",
                 Description = "A sample tenant (company/organisation)"
-            });
+            }).ConfigureAwait(false);
             
             var todoStore = services.GetRequiredService<ITodoStore>();
 
-            todoStore.Create(new TodoCreateData {Name = "One Todo"});
-            todoStore.Create(new TodoCreateData {Name = "Two Todo", Completed = true});
-            todoStore.Create(new TodoCreateData {Name = "Three Todo"});
+            todoStore.Create(new TodoCreateData {Name = "One Todo"}).ConfigureAwait(false);
+            todoStore.Create(new TodoCreateData {Name = "Two Todo", Completed = true}).ConfigureAwait(false);
+            todoStore.Create(new TodoCreateData {Name = "Three Todo"}).ConfigureAwait(false);
             
-            
-            
+         
 
             return services;
         }
+        
     }
 }

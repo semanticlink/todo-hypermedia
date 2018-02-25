@@ -1,4 +1,5 @@
-﻿using Api.Web;
+﻿using System.Threading.Tasks;
+using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Persistence;
@@ -13,18 +14,18 @@ namespace Api.Controllers
     [Route("todo")]
     public class TodoController : Controller
     {
-        private readonly ITodoRepository _db;
+        private readonly ITodoStore _todoStore;
 
-        public TodoController(ITodoRepository db)
+        public TodoController(ITodoStore todoStore)
         {
-            _db = db;
+            _todoStore = todoStore;
         }
 
         [HttpGet("", Name = TodoUriFactory.SelfRouteName)]
-        public FeedRepresentation GetAll()
+        public async Task<FeedRepresentation> GetAll()
         {
-            return _db
-                .GetAll()
+            return (await _todoStore
+                    .GetAll())
                 .ToFeedRepresentation(Url);
         }
 
@@ -36,38 +37,38 @@ namespace Api.Controllers
 
 
         [HttpPost]
-        public CreatedResult Create([FromBody] TodoCreateDataRepresentation todo)
+        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation todo)
         {
-            return _db.Create(todo
+            return (await _todoStore.Create(todo
                     .ThrowInvalidDataExceptionIfNull("Invalid create data")
-                    .FromRepresentation(Url))
+                    .FromRepresentation(Url)))
                 .MakeTodoUri(Url)
                 .MakeCreated();
         }
 
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
-        public TodoRepresentation GetById(string id)
+        public async Task<TodoRepresentation> GetById(string id)
         {
-            return _db
-                .Get(id)
+            return (await _todoStore
+                    .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
                 .ToRepresentation(Url);
         }
 
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
-        public IActionResult Update(string id, [FromBody] TodoRepresentation item)
+        public async Task<IActionResult> Update(string id, [FromBody] TodoRepresentation item)
         {
-            _db.Update(id,
-                todo =>
-                {
-                    todo.Name = item.Name
-                        .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo must have a name");
+            return await _todoStore.Update(id,
+                    todo =>
+                    {
+                        todo.Name = item.Name
+                            .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo must have a name");
 
-                    todo.Completed = item.Completed;
+                        todo.Completed = item.Completed;
 
-                    todo.Due = item.Due;
-                });
-            return new NoContentResult();
+                        todo.Due = item.Due;
+                    })
+                .MakeNoContent();
         }
 
         /// <summary>
@@ -80,11 +81,10 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}", Name = TodoUriFactory.TodoRouteName)]
-        public IActionResult Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
-            _db.Delete(id);
-            return new NoContentResult();
+            return await _todoStore.Delete(id)
+                .MakeNoContent();
         }
-
     }
 }

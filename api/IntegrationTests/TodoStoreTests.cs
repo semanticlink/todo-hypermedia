@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Domain.Models;
-using Infrastructure.Db;
+using Infrastructure.NoSQL;
 using Xunit;
 
 namespace IntegrationTests
@@ -12,23 +12,18 @@ namespace IntegrationTests
         {
             using (var dbProvider = DynamoDbServerTestUtils.CreateDatabase())
             {
-                var todoStore = new TodoStore(dbProvider.Client, dbProvider.Context);
+                TableNameConstants
+                    .Todo
+                    .CreateTable(dbProvider.Client)
+                    .ConfigureAwait(false);
 
-
-                var name = await todoStore.BuildOrDescribeTable();
-
-                Assert.Equal(name.TableName, TodoStore.TableName);
+                var todoStore = new TodoStore(dbProvider.Context);
 
                 var id = await todoStore.Create(new TodoCreateData {Name = "baba"});
-               
-                var todo = await todoStore.GetById(id);
+
+                var todo = await todoStore.Get(id);
 
                 Assert.Equal("baba", todo.Name);
-//                var retrievedUser = await dbProvider.Context.LoadAsync(user);
-
-//                Assert.NotNull(retrievedUser);
-//                Assert.Equal(user.UserName, retrievedUser.UserName);
-//                Assert.Equal(user.NormalizedUserName, retrievedUser.NormalizedUserName);
             }
         }
     }
