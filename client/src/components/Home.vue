@@ -25,10 +25,10 @@
     import { log, nodMaker, SemanticLink, _ } from 'semanticLink';
     import { toSitePath } from '../lib/util/UriMapping';
     import { nodSynchroniser } from 'semanticLink/NODSynchroniser';
-    import { redirectToTenant } from "../router";
+    import { redirectToTenant, redirectToSelectTenant } from "../router";
 
     export default {
-        data () {
+        data() {
             return {
                 msg: 'Looking ...',
                 error: false,
@@ -50,45 +50,30 @@
             const strategyOneProvidedTenant = (apiResource) => {
                 log.info('Looking for provided tenant');
 
-                /*
-                 * This may error, at this point it is likely that it is not authentiated. If the
-                 * 401 interception is broken then it will fall through to the catch and the err
-                 * will contain rather than an error the actual resource.
-                 *
-                 * TODO: improve
-                 */
-                return nodMaker
+                 return nodMaker
                     .getResource(apiResource)
                     .then(apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tenants', /tenants/))
                     .then(tenants => {
-                        if (tenants && _(tenants.items).isEmpty()){
-                            this.gotoTenants();
+                        if (tenants && _(tenants.items).isEmpty()) {
+                            log.info('No tenants found: redirect to search for tenant')
+                            redirectToSelectTenant();
                         }
                         this.tenants = tenants;
                     })
-                    .catch(err => {
-                        log.error(err);
-                    });
+                    .catch(err => log.error(err));
             };
 
             return strategyOneProvidedTenant(this.$root.$api);
 
         },
         methods: {
-            gotoTenants () {
-                this.$router.push(toSitePath("", '/tenants/a/'));
-            },
-            gotoTenant (organisation) {
+            gotoTenant(organisation) {
                 redirectToTenant(organisation);
             },
-            createOrUpdateTenantOnRoot (tenantDocument, rootRepresentation) {
+            createOrUpdateTenantOnRoot(tenantDocument, rootRepresentation) {
                 nodSynchroniser.getResourceInNamedCollection(rootRepresentation, 'tenants', /tenants/, tenantDocument, [])
-                    .then(resource => {
-                        log.debug(resource);
-                    })
-                    .catch(err => {
-                        log.error(err);
-                    });
+                    .then(resource => log.debug(resource))
+                    .catch(err => log.error(err));
             }
 
         },

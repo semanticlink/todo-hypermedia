@@ -92,7 +92,7 @@
 
                             return link.post(tenantSearchRepresentation, /submit/, 'application/json', searchForm);
                         } else {
-                            throw new Error(`Search form item does not exist on ${link.getUri(tenantCollection, /search/)}.Do you have the correct headers set?`);
+                            throw new Error(`Search form item does not exist on ${link.getUri(tenantCollection, /search/)}. Do you have the correct headers set?`);
                         }
                     })
                     .then(createdResult => link.http.get(createdResult.headers.location))
@@ -106,7 +106,7 @@
              * @returns {Promise|*}
              */
             strategyOneProvidedTenant(apiResource, nextStrategy) {
-                log.debug("Looking for provided tenant");
+                log.debug("1. Looking for provided tenant");
                 return nodMaker
                     .getResource(apiResource)
                     .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
@@ -123,18 +123,36 @@
             },
 
             /**
-             * Strategy Two: use tenant name from local storage to search
+             * Strategy Two: use 'known' tenant name from local storage to search.
+             *
+             * If not known - move to next
+             * If no tenants listed - move to next
+             *
+             * Currently - just loads the first tenant [KLUDGE]
+             *
              * @param {ApiRepresentation} apiResource
              * @param nextStrategy
              * @returns {Promise|*}
              */
             strategyTwoKnownTenant(apiResource, nextStrategy) {
-                log.debug('Looking for tenants at root');
+                log.debug('2. Looking for tenants at root api');
+
+                const knownTenant = this.$localStorage.get('tenant');
+
+                if (!knownTenant){
+                    nextStrategy();
+                }
 
                 return nodMaker
                     .getResource(apiResource)
                     .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
-                    .then(tenantCollection => this.searchForTenant(tenantCollection, this.$localStorage.get('tenant')))
+                    .then(tenantCollection => {
+                        if (!_(tenantCollection).isCollectionEmpty()){
+                            return this.searchForTenant(tenantCollection, knownTenant);
+                        } else {
+                            nextStrategy();
+                        }
+                    })
                     .then(tenantCollection => {
                         const item = _(tenantCollection).firstItem();
                         if (item) {
@@ -145,9 +163,7 @@
                         }
 
                     })
-                    .catch(err => {
-                        log.error(err);
-                    });
+                    .catch(err => log.error(err));
             },
 
             /** Strategy Three: let the user enter in a tenant name and search
@@ -159,7 +175,7 @@
                 this.busy = false;
 
                 // need to wait for the user to enter a tenant and click the button
-                log.debug("Waiting for user to enter tenant name");
+                log.debug("3. Waiting for user to enter tenant name");
 
             },
 

@@ -1,7 +1,12 @@
 import _ from 'underscore';
 import { SemanticLink } from '../SemanticLink';
 
-const normaliseCollection = collection => collection.items || collection || [];
+const normaliseCollection = collection => {
+    if (!collection) {
+        return [];
+    }
+    return collection.items || collection || [];
+};
 
 /**
  * Find a resource item in a collection identified through a found link relation or resource attribute
@@ -230,7 +235,7 @@ const mapUriList = array => {
  * @returns {boolean}
  */
 const isCollectionEmpty = collection => {
-    return _(get(collection)).IsEmpty();
+    return _(normaliseCollection(collection)).isEmpty();
 };
 
 /**

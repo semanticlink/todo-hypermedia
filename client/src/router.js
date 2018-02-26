@@ -115,5 +115,7 @@ const redirectToTenant = (tenantRepresentation, filter) => {
     return redirect(tenantRepresentation, makePrefix(clientPath.Todo), filter);
 };
 
-export { redirectToTenant };
+const redirectToSelectTenant = () => router.push(toSitePath("", makePrefix(clientPath.SelectTenants)));
+
+export { redirectToTenant, redirectToSelectTenant };
 export default router;
