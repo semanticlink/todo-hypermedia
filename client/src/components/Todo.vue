@@ -15,31 +15,12 @@
             <section class="main" v-show="todoCollection.items.length" v-cloak>
                 <input class="toggle-all" type="checkbox" v-model="allDone">
                 <ul class="todo-list">
-                    <li v-for="todo in filteredTodos"
-                        class="todo"
-                        :key="todo.id"
-                        :class="{ completed: todo.completed, editing: todo._inprogress }">
+                    <todo-item v-for="todo in filteredTodos"
+                               class="todo"
+                               :item="todo"
+                               :collection="todoCollection">
 
-                        <div class="view">
-                            <input class="toggle" type="checkbox" v-model="todo.completed" @change="completeTodo(todo)">
-                            <label @dblclick="editTodo(todo)">{{ todo.name }}</label>
-                            <button class="destroy" @click="removeTodo(todo)"></button>
-                        </div>
-
-                        <!-- document version to be edited -->
-                        <input class="toggle"
-                               type="checkbox"
-                               v-if="todo._inprogress"
-                               v-model="todo._inprogress.completed">
-                        <input class="edit"
-                               type="text"
-                               v-if="todo._inprogress"
-                               v-model.trim="todo._inprogress.name"
-                               v-todo-focus="todo._inprogress !== null"
-                               @blur="doneEdit(todo)"
-                               @keyup.enter="doneEdit(todo)"
-                               @keyup.esc="cancelEdit(todo)">
-                    </li>
+                    </todo-item>
                 </ul>
             </section>
 
@@ -76,7 +57,8 @@
 <script>
 
     import { _, log, nodMaker, SemanticLink } from 'semanticLink';
-    import { redirectToTenant } from "../router";
+    import { redirectToTenant } from '../router';
+    import TodoItem from './TodoItem.vue';
 
     // visibility filters
     const filters = {
@@ -129,6 +111,9 @@
     const DEFAULT_TODO = { name: '', completed: false };
 
     export default {
+        components: {
+            todoItem: TodoItem
+        },
         props: {
             apiUri: { type: String },
         },
@@ -184,74 +169,20 @@
         },
 
         methods: {
-            setEditing(todo, edit) {
-                this.$set(todo, '_inprogress', Object.assign({}, edit || todo));
-                return this;
-            },
-            unsetEditing(todo) {
-                this.$set(todo, '_inprogress', null);
-                delete todo._inprogress;
-                return this;
-            },
+
             resetTodo() {
                 this.newTodo = Object.assign({}, this.newTodo, DEFAULT_TODO);
-                return this;
             },
 
             addTodo: function (todo, todoCollection) {
                 return nodMaker.createCollectionResourceItem(todoCollection, Object.assign({}, todo))
                     .then(todoResource => nodMaker.getResource(todoResource)
-                        .then(todoResource => {
-                            this
-                                .resetTodo()
-                                .unsetEditing(todoResource);
-                        }))
+                        .then(() => this.resetTodo()))
                     .catch(err => log.error(err));
             },
 
-            removeTodo: function (todo) {
-                return nodMaker.deleteCollectionItem(this.todoCollection, todo);
-            },
-
-            completeTodo: function (todo) {
-                // this gets the updated version and does a force PUT (I think)
-                return nodMaker.updateResource(todo, Object.assign({}, todo));
-            },
-
-            editTodo: function (todo) {
-                this.setEditing(todo);
-            },
-
-            doneEdit: function (todo) {
-
-                const editedTodo = todo._inprogress;
-
-                if (!editedTodo) {
-                    return;
-                }
-
-                /**
-                 * Fancy delete. If you remove the name, it means you want it removed. Note: it is already trimed.
-                 */
-                if (!editedTodo.name) {
-                    this.removeTodo(todo);
-                }
-
-                const vm = this;
-                vm.unsetEditing(todo);
-                return nodMaker.updateResource(todo, editedTodo)
-                    .catch(err => {
-                        vm.setEditing(todo, editedTodo);
-                        log.error(err);
-                    });
-            },
-
-            cancelEdit: function (todo) {
-                this.unsetEditing(todo);
-            },
-
             removeCompleted: function () {
-                filters.completed(this.todoCollection.items).forEach(todo => this.removeTodo(todo));
+                filters.completed(this.todoCollection.items).forEach(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo));
             },
 
             showAll: function () {
@@ -309,23 +240,8 @@
 
 
             }
-        },
-
-
-        // a custom directive to wait for the DOM to be updated
-        // before focusing on the input field.
-        // http://vuejs.org/guide/custom-directive.html
-        directives: {
-            'todo-focus':
-
-                function (el, binding) {
-                    if (binding.value) {
-                        el.focus()
-                    }
-                }
         }
-    }
-    ;
+    };
 </script>
 
 <style>
