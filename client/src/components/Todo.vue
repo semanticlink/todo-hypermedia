@@ -163,7 +163,11 @@
                     return this.remaining === 0
                 },
                 set: function (value) {
-                    this.todoCollection.items.forEach(todo => this.completeTodo(todo, value))
+                    this.todoCollection.items.forEach(todo => {
+                        const updateTodo = Object.assign({}, todo, { completed: value });
+                        nodMaker.updateResource(todo, updateTodo)
+                            .catch(err => log.error(err));
+                    })
                 }
             }
         },
