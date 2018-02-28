@@ -9,7 +9,7 @@
                        autofocus autocomplete="off"
                        placeholder="What needs to be done?"
                        v-model="newTodo.name"
-                       @keyup.enter="addTodo(newTodo, todoCollection)">
+                       @keyup.enter="addTodo">
             </header>
 
             <section class="main" v-show="todoCollection.items.length" v-cloak>
@@ -60,7 +60,7 @@
     import { log } from 'logger';
     import { redirectToTenant } from 'router';
     import TodoItem from './TodoItem.vue';
-    import { getTenant, getTodos, DEFAULT_TODO } from "domain/user";
+    import { getTenant, getTodos, DEFAULT_TODO } from "domain/todo";
 
     /**
      * This component displays and allows updates to the todo list
@@ -83,6 +83,10 @@
      * Filters usage:
      *
      * The filters have a client-side state that is contained in the URL query params.
+     *
+     * @example http://todo.example.com/#/todo/a/tenant/1?completed
+     *
+     *   This shows (filters) the completed (and loaded) todos client side
      *
      */
 
@@ -167,20 +171,34 @@
 
         methods: {
 
+            /**
+             * Clears out the new todo reaady to be entered and created
+             */
             resetTodo() {
                 this.newTodo = Object.assign({}, this.newTodo, DEFAULT_TODO);
             },
 
-            addTodo: function (todo, todoCollection) {
-                return nodMaker.createCollectionResourceItem(todoCollection, Object.assign({}, todo))
+            /**
+             * Adds the new todo document into the existing todo collection
+             */
+            addTodo: function () {
+                return nodMaker.createCollectionResourceItem(this.todoCollection, Object.assign({}, this.newTodo))
                     .then(todoResource => nodMaker.getResource(todoResource)
                         .then(() => this.resetTodo()))
                     .catch(err => log.error(err));
             },
 
+            /**
+             * Iterates through all the completed todos and deletes them from the collection. This is a (server-side) API delete
+             * rather than just a client-side filter.
+             */
             removeCompleted: function () {
                 filters.completed(this.todoCollection.items).forEach(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo));
             },
+
+            // FILTERS
+
+
 
             showAll: function () {
                 this.redirectOnVisibilityChange(filterEnum.ALL);
