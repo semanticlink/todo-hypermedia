@@ -12,7 +12,7 @@
                        @keyup.enter="addTodo">
             </header>
 
-            <section class="main" v-show="todoCollection.items.length" v-cloak>
+            <section class="main" v-show="todos.length" v-cloak>
                 <input class="toggle-all" type="checkbox" v-model="allDone">
                 <ul class="todo-list">
                     <todo-item v-for="todo in filteredTodos"
@@ -24,21 +24,21 @@
                 </ul>
             </section>
 
-            <footer class="footer" v-show="todoCollection.items.length" v-cloak>
+            <footer class="footer" v-show="todos.length" v-cloak>
 
                 <span class="todo-count">
                   <strong>{{ remaining }}</strong> {{ remaining | pluralize }} left
                 </span>
 
                 <ul class="filters">
-                    <li><a v-on:click="showAll" :class="{ selected: visibility == 'all' }">All</a></li>
-                    <li><a v-on:click="showActive" :class="{ selected: visibility == 'active' }">Active</a></li>
-                    <li><a v-on:click="showCompleted" :class="{ selected: visibility == 'completed' }">Completed</a>
+                    <li><a v-on:click="showAll" :class="{ selected: isAll }">All</a></li>
+                    <li><a v-on:click="showActive" :class="{ selected: isActive }">Active</a></li>
+                    <li><a v-on:click="showCompleted" :class="{ selected: isCompleted }">Completed</a>
                     </li>
                 </ul>
 
                 <button class="clear-completed" @click="removeAllCompleted"
-                        v-show="todoCollection.items.length > remaining">
+                        v-show="todos.length > remaining">
                     Clear completed
                 </button>
             </footer>
@@ -116,10 +116,26 @@
         },
         data() {
             return {
-                todoCollection: { items: [] },
+                /**
+                 * Holds a reference to the collection for processing
+                 * @type TodoCollectionRepresentation
+                 */
+                todoCollection: {},
+
+                /**
+                 * Collection items that are bound to the screen
+                 */
+                todos: [],
+
+                /**
+                 * New item holder
+                 */
                 newTodo: Object.assign({}, DEFAULT_TODO),
-                visibility: filterEnum.ALL,
-                filter: filterEnum
+
+                /**
+                 * Client-side filtering display that gets set from the incoming URL query: defaults {@link filterEnum.All}
+                 */
+                visibility: filterEnum.ALL
             };
         },
 
@@ -148,17 +164,18 @@
         },
         computed: {
             filteredTodos() {
-                return filters[this.visibility](this.todoCollection.items)
+                return filters[this.visibility](this.todos)
             },
             remaining() {
-                return filters[filterEnum.ACTIVE](this.todoCollection.items).length
+                return filters[filterEnum.ACTIVE](this.todos).length
             },
             allDone: {
                 get() {
                     return this.remaining === 0
                 },
                 set(value) {
-                    this.todoCollection.items.forEach(todo => {
+                    this.todos.forEach(todo => {
+                        // sets the 'known' attribute completed
                         const updateTodo = Object.assign({}, todo, { completed: value });
                         nodMaker.updateResource(todo, updateTodo)
                             .catch(err => log.error(err));
@@ -191,7 +208,7 @@
              * This is a (server-side) API delete rather than just a client-side filter.
              */
             removeAllCompleted() {
-                filters[filterEnum.COMPLETED](this.todoCollection.items)
+                filters[filterEnum.COMPLETED](this.todos)
                     .forEach(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo));
             },
 
@@ -200,7 +217,7 @@
             // **********************************
 
             /**
-             * Filter todos based on state
+             * Filter todos based on state (usually incoming from URL query param)
              * @param {filterEnum} filter
              */
             setVisibilityFilter(filter) {
@@ -218,6 +235,18 @@
                 }
             },
 
+            isAll() {
+                return this.visibility === filterEnum.ALL;
+            },
+            isActive() {
+                return this.visibility === filterEnum.ACTIVE;
+            },
+            isCompleted() {
+                return this.visibility === filterEnum.COMPLETED;
+            },
+
+            // Change filters
+
             showAll() {
                 this.redirectOnVisibilityChange(filterEnum.ALL);
             },
@@ -227,6 +256,7 @@
             showCompleted() {
                 this.redirectOnVisibilityChange(filterEnum.COMPLETED);
             },
+
 
             /**
              * Ensure that the filter state on client-side and uri match
