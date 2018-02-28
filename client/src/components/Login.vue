@@ -31,7 +31,8 @@
 
 <script>
     import EventBus, { loginConfirmed, loginRequired } from '../lib/util/EventBus';
-    import { link, log, nodMaker } from 'semanticLink';
+    import { link, nodMaker } from 'semanticLink';
+    import { log } from 'logger';
     import { setBearerToken } from '../lib/http-interceptors';
     import { authenticatorUri } from '../lib/uri-mappings';
 

@@ -38,7 +38,7 @@
      *
      * The wireframe layout is:
      *
-     *   [x] Text [update]
+     *   [x <&circle-x>] Text [update <&plus>]
      *
      * There are actually a number of states that need to be managed:
      *
@@ -49,9 +49,11 @@
      * 2a. Commit occurs via either enter or save (+)
      * 2b. TODO: Commit occurs on blur off either of the name/commited fields
      *
+     *
      */
 
-    import { log, nodMaker } from 'semanticLink';
+    import { nodMaker } from 'semanticLink';
+    import { log } from 'logger';
 
     export default {
         props: {
@@ -140,6 +142,7 @@
     .todo-list li .save:after {
         content: '+';
     }
+
     .todo-list li.editing .save {
         display: block;
         cursor: hand;

@@ -43,6 +43,10 @@ const clientConfig = {
             // vendor checked in libraries (perhaps we can dependency manage these?
             // we use this library alot so we will treat it like an independent library in the imports
             semanticLink: path.resolve(__dirname, 'src/lib/semanticLink'),
+
+            domain: path.resolve(__dirname, 'src/domain'),
+            router: path.resolve(__dirname, 'src/router'),
+            logger: path.resolve(__dirname, 'src/lib/logger'),
             /*
              * Allow for runtime compiling of vue templates
              */

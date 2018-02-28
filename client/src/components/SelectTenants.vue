@@ -29,8 +29,9 @@
 
 <script>
 
-    import { log, nodMaker, SemanticLink, link, _ } from 'semanticLink';
-    import { redirectToTenant, redirectToUser } from "../router";
+    import { nodMaker, SemanticLink, link, _ } from 'semanticLink';
+    import { log } from 'logger';
+    import { redirectToTenant, redirectToUser } from "router";
 
     export default {
         props: {

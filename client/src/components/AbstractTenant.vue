@@ -1,5 +1,6 @@
 <script>
-    import { log, link, SemanticLink } from 'semanticLink';
+    import { link, SemanticLink } from 'semanticLink';
+    import { log } from 'logger';
 
     /**
      * Watches and waits for the tenant to be loaded into the network of data
@@ -15,7 +16,7 @@
     export default {
         name: 'AbstractTenant',
         abstract: true,
-        data () {
+        data() {
             return {
                 /**
                  * company logo to be displayed
@@ -25,7 +26,7 @@
                 user: undefined,
             };
         },
-        render () {
+        render() {
 
             const vm = this;
             const waitForMyAccountToBeLoaded = () => setTimeout(

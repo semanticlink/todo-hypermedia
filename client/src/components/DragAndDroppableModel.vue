@@ -14,7 +14,8 @@
 <script>
 
     import { dragend, dragenter, dragleave, dragover, dragstart, drop } from '../lib/util/dragAndDropModel';
-    import { log, SemanticLink } from 'semanticLink';
+    import { SemanticLink } from 'semanticLink';
+    import { log } from 'logger';
 
     export default {
         name: 'drag-and-droppable-model',
@@ -31,14 +32,17 @@
              */
             context: {
                 type: Object,
-                default: () => { return {};}
+                default: () => {
+                    return {};
+                }
             },
             /**
              * Callback after the dropped model is loaded and then can be acted on (eg updated)
              */
             dropped: {
                 type: Function,
-                default: () => () => {}
+                default: () => () => {
+                }
             }
         },
         methods: {

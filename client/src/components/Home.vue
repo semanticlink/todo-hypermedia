@@ -22,10 +22,11 @@
 </template>
 
 <script>
-    import { log, nodMaker, SemanticLink, _ } from 'semanticLink';
+    import { nodMaker, SemanticLink, _ } from 'semanticLink';
+    import { log } from 'logger';
     import { toSitePath } from '../lib/util/UriMapping';
     import { nodSynchroniser } from 'semanticLink/NODSynchroniser';
-    import { redirectToTenant, redirectToSelectTenant } from "../router";
+    import { redirectToTenant, redirectToSelectTenant } from "router";
 
     export default {
         data() {

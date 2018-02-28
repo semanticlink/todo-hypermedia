@@ -10,7 +10,7 @@
 
 <script>
 
-    import { log } from 'semanticLink';
+    import { log } from 'logger';
     import { dragend, dragenter, dragleave, dragover, drop } from '../lib/util/dragAndDropModel';
 
     export default {
