@@ -37,7 +37,7 @@
                     </li>
                 </ul>
 
-                <button class="clear-completed" @click="removeCompleted"
+                <button class="clear-completed" @click="removeAllCompleted"
                         v-show="todoCollection.items.length > remaining">
                     Clear completed
                 </button>
@@ -124,12 +124,10 @@
         },
 
         filters: {
-            pluralize: function (n) {
-                return n === 1 ? 'item' : 'items'
-            }
+            pluralize: (n) => n === 1 ? 'item' : 'items'
         },
 
-        created: function () {
+        created() {
 
             /**
              * Visibility filter can be handed in via the Uri (eg http://localhost:8080/#/todo/a/tenant/1?completed)
@@ -149,17 +147,17 @@
 
         },
         computed: {
-            filteredTodos: function () {
+            filteredTodos() {
                 return filters[this.visibility](this.todoCollection.items)
             },
-            remaining: function () {
-                return filters.active(this.todoCollection.items).length
+            remaining() {
+                return filters[filterEnum.ACTIVE](this.todoCollection.items).length
             },
             allDone: {
-                get: function () {
+                get() {
                     return this.remaining === 0
                 },
-                set: function (value) {
+                set(value) {
                     this.todoCollection.items.forEach(todo => {
                         const updateTodo = Object.assign({}, todo, { completed: value });
                         nodMaker.updateResource(todo, updateTodo)
@@ -181,7 +179,7 @@
             /**
              * Adds the new todo document into the existing todo collection
              */
-            addTodo: function () {
+            addTodo() {
                 return nodMaker.createCollectionResourceItem(this.todoCollection, Object.assign({}, this.newTodo))
                     .then(todoResource => nodMaker.getResource(todoResource)
                         .then(() => this.resetTodo()))
@@ -189,32 +187,23 @@
             },
 
             /**
-             * Iterates through all the completed todos and deletes them from the collection. This is a (server-side) API delete
-             * rather than just a client-side filter.
+             * Clear Completed: iterates through all the completed todos and deletes them from the collection.
+             * This is a (server-side) API delete rather than just a client-side filter.
              */
-            removeCompleted: function () {
-                filters.completed(this.todoCollection.items).forEach(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo));
+            removeAllCompleted() {
+                filters[filterEnum.COMPLETED](this.todoCollection.items)
+                    .forEach(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo));
             },
 
+            // **********************************
             // FILTERS
-
-
-
-            showAll: function () {
-                this.redirectOnVisibilityChange(filterEnum.ALL);
-            },
-            showActive: function () {
-                this.redirectOnVisibilityChange(filterEnum.ACTIVE);
-            },
-            showCompleted: function () {
-                this.redirectOnVisibilityChange(filterEnum.COMPLETED);
-            },
+            // **********************************
 
             /**
              * Filter todos based on state
              * @param {filterEnum} filter
              */
-            setVisibilityFilter: function (filter) {
+            setVisibilityFilter(filter) {
                 switch (filter) {
                     case filterEnum.COMPLETED:
                         this.visibility = filterEnum.COMPLETED;
@@ -229,11 +218,21 @@
                 }
             },
 
+            showAll() {
+                this.redirectOnVisibilityChange(filterEnum.ALL);
+            },
+            showActive() {
+                this.redirectOnVisibilityChange(filterEnum.ACTIVE);
+            },
+            showCompleted() {
+                this.redirectOnVisibilityChange(filterEnum.COMPLETED);
+            },
+
             /**
              * Ensure that the filter state on client-side and uri match
              * @param {filterEnum} filter
              */
-            redirectOnVisibilityChange: function (filter) {
+            redirectOnVisibilityChange(filter) {
 
                 this.setVisibilityFilter(filter);
 
