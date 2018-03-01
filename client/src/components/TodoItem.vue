@@ -45,9 +45,9 @@
      * 1. Update completed (without updating name)
      * 1a. Commit occurs on button press
      *
-     * 2. Update name and/or completed together (ie you can move back-and-forth between the fields before commiting)
+     * 2. Update name and/or completed together (ie you can move back-and-forth between the fields before committing)
      * 2a. Commit occurs via either enter or save (+)
-     * 2b. TODO: Commit occurs on blur off either of the name/commited fields
+     * 2b. TODO: Commit occurs on blur off either of the name/committed fields
      *
      *
      */

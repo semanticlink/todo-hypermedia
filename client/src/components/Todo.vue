@@ -94,8 +94,8 @@
         // visibility filters
     const filters = {
             all: todos => todos,
-            active: (todos = []) => todos.filter(todo => !todo.completed),
-            completed: (todos = []) => todos && todos.filter(todo => todo.completed)
+            active: todos => todos.filter(todo => !todo.completed),
+            completed: todos => todos.filter(todo => todo.completed)
         };
 
     /**
@@ -119,10 +119,11 @@
             return {
                 /**
                  * Holds a reference to the collection for processing and is bound to the screen. Note: we need
-                 * an early binding to 'items' to calculate length.
+                 * an early binding to 'items' for it to be reactive.
+                 *
                  * @type TodoCollectionRepresentation
                  */
-                todoCollection: {},
+                todoCollection: { items: [] },
 
                 /**
                  * New item holder
@@ -161,10 +162,10 @@
                 return filters[this.visibility](this.todoCollection.items)
             },
             remaining() {
-                return _(filters[filterEnum.ACTIVE](this.todoCollection.items)).size()
+                return filters[filterEnum.ACTIVE](this.todoCollection.items).length;
             },
             totalItems() {
-                return _(this.todoCollection.items).size();
+                return this.todoCollection.items.length;
             },
             allDone: {
                 get() {
