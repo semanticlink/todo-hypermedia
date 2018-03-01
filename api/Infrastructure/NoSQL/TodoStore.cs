@@ -10,7 +10,6 @@ using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
-
     public class TodoStore : ITodoStore
     {
         private readonly IDynamoDBContext _context;
@@ -70,9 +69,12 @@ namespace Infrastructure.NoSQL
             await _context.SaveAsync(todo);
         }
 
-        public async Task Delete(string todoId)
+        public async Task Delete(string id)
         {
-            await _context.DeleteAsync(todoId);
+            var todo = await Get(id)
+                .ThrowObjectNotFoundExceptionIfNull();
+
+            await _context.DeleteAsync(todo);
         }
     }
 }

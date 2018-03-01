@@ -12,10 +12,9 @@ namespace IntegrationTests
         {
             using (var dbProvider = DynamoDbServerTestUtils.CreateDatabase())
             {
-                TableNameConstants
+                await TableNameConstants
                     .Todo
-                    .CreateTable(dbProvider.Client)
-                    .ConfigureAwait(false);
+                    .CreateTable(dbProvider.Client);
 
                 var todoStore = new TodoStore(dbProvider.Context);
 
@@ -24,6 +23,8 @@ namespace IntegrationTests
                 var todo = await todoStore.Get(id);
 
                 Assert.Equal("baba", todo.Name);
+
+                await todoStore.Delete(id);
             }
         }
     }

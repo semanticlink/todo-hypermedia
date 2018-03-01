@@ -58,17 +58,17 @@ namespace Api.Controllers
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
         public async Task<IActionResult> Update(string id, [FromBody] TodoRepresentation item)
         {
-            return await _todoStore.Update(id,
-                    todo =>
-                    {
-                        todo.Name = item.Name
-                            .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo must have a name");
+            await _todoStore.Update(id,
+                todo =>
+                {
+                    todo.Name = item.Name
+                        .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo must have a name");
 
-                        todo.Completed = item.Completed;
+                    todo.Completed = item.Completed;
 
-                        todo.Due = item.Due;
-                    })
-                .MakeNoContent();
+                    todo.Due = item.Due;
+                });
+            return NoContent();
         }
 
         /// <summary>
@@ -83,8 +83,8 @@ namespace Api.Controllers
         [HttpDelete("{id}", Name = TodoUriFactory.TodoRouteName)]
         public async Task<IActionResult> Delete(string id)
         {
-            return await _todoStore.Delete(id)
-                .MakeNoContent();
+            await _todoStore.Delete(id);
+            return NoContent();
         }
     }
 }

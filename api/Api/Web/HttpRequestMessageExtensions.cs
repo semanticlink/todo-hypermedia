@@ -34,12 +34,7 @@ namespace Api.Web
                     id = uri
                 });
         }
-
-        public static async Task<NoContentResult> MakeNoContent(this Task task)
-        {
-            return new NoContentResult();
-        }
-
+     
         public static RedirectResult MakeRedirect(this string uri)
         {
             return new RedirectResult(uri, permanent: false /* not permanent */);
