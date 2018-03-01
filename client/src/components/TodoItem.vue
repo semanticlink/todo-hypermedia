@@ -127,17 +127,6 @@
                 this.doneEdit();
             }
 
-        },
-
-        // a custom directive to wait for the DOM to be updated
-        // before focusing on the input field.
-        // http://vuejs.org/guide/custom-directive.html
-        directives: {
-            'item-focus': (el, binding) => {
-                if (binding.value) {
-                    el.focus()
-                }
-            }
         }
     };
 </script>
