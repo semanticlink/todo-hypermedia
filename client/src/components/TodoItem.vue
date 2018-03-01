@@ -8,7 +8,6 @@
         <input class="edit"
                type="text"
                v-model.trim="editItem.name"
-               v-item-focus="editing"
                @keyup.enter="doneEdit"
                @keyup.esc="reset">
         <button class="save" @click="doneEdit"></button>
