@@ -1,6 +1,6 @@
 <template>
 
-    <li :class="{ completed: item.completed, editing: editing }">
+    <li :class="{ completed: item.completed, editing: editing }" :id="self">
 
         <input class="toggle"
                type="checkbox"
@@ -52,19 +52,24 @@
      *
      */
 
-    import { nodMaker } from 'semanticLink';
+    import { nodMaker, SemanticLink } from 'semanticLink';
     import { log } from 'logger';
 
     export default {
         props: {
-            collection: { type: Object },
-            item: { type: Object }
+            collection: { type: Object, required: true },
+            item: { type: Object, required: true }
         },
         data() {
             return {
                 editTodo: {},
                 editing: false
             };
+        },
+        computed: {
+            self() {
+                return SemanticLink.tryGetUri(this.item, /self/);
+            }
         },
         methods: {
 
