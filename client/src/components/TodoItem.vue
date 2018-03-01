@@ -4,13 +4,13 @@
 
         <input class="toggle"
                type="checkbox"
-               v-model="editTodo.completed">
+               v-model="editItem.completed">
         <input class="edit"
                type="text"
-               v-model.trim="editTodo.name"
+               v-model.trim="editItem.name"
                v-item-focus="editing"
                @keyup.enter="doneEdit"
-               @keyup.esc="resetTodo">
+               @keyup.esc="reset">
         <button class="save" @click="doneEdit"></button>
 
 
@@ -20,7 +20,7 @@
                    v-model="item.completed"
                    @click.prevent="updateCompleted">
             <label @dblclick="startEdit">{{ item.name }}</label>
-            <button class="destroy" @click="removeTodo"></button>
+            <button class="destroy" @click="remove"></button>
         </div>
 
 
@@ -62,52 +62,68 @@
         },
         data() {
             return {
-                editTodo: {},
+                editItem: {},
                 editing: false
             };
         },
         computed: {
             self() {
+                // Evaluating the item actually helps with binding. Without this you'll find that items won't bind properly
                 return SemanticLink.tryGetUri(this.item, /self/);
             }
         },
         methods: {
 
-            resetTodo() {
+            /**
+             * Clear the editing mode back to view
+             */
+            reset() {
                 this.editing = false;
-                this.editTodo = {};
+                this.editItem = {};
             },
 
+            /**
+             * Make the field editable with the latest values
+             */
             startEdit() {
                 this.editing = true;
-                this.editTodo = Object.assign({}, this.item);
+                this.editItem = Object.assign({}, this.item);
             },
 
-            removeTodo() {
-                return nodMaker.deleteCollectionItem(this.collection, this.item);
-            },
-
+            /**
+             * Take the edited values and update if there is a change and delete in the case that because
+             * the name has been emptied there is a logical delete. Flush these changes back through the collection
+             * server-side
+             */
             doneEdit() {
 
-                if (!this.editTodo) {
+                if (!this.editItem) {
                     return;
                 }
 
-                /**
-                 * Fancy delete. If you remove the name, it means you want it removed. Note: it is already trimed.
-                 */
-                if (!this.editTodo.name) {
-                    this.removeTodo();
+                // Fancy delete. If you remove the name, it means you want it removed. Note: it is already trimmed.
+                if (!this.editItem.name) {
+                    this.remove();
                 }
 
-                return nodMaker.updateResource(this.item, this.editTodo)
-                    .then(() => this.resetTodo())
+                return nodMaker.updateResource(this.item, this.editItem)
+                    .then(() => this.reset())
                     .catch(err => log.error(err));
             },
 
+            /**
+             * Flush the delete back through the collection server-side
+             */
+            remove() {
+                return nodMaker.deleteCollectionItem(this.collection, this.item);
+            },
+
+            /**
+             * Update the specific field 'completed' in one go and rebind
+             */
             updateCompleted() {
                 this.startEdit();
-                this.editTodo.completed = !this.editTodo.completed;
+                this.editItem.completed = !this.editItem.completed;
                 this.doneEdit();
             }
 

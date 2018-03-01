@@ -12,7 +12,7 @@
                        @keyup.enter="addTodo">
             </header>
 
-            <section class="main" v-show="todoCollection.items.length" v-cloak>
+            <section class="main" v-show="totalItems" v-cloak>
                 <input class="toggle-all btn" type="checkbox" v-model="allDone">
                 <ul class="todo-list">
                     <todo-item v-for="todo in filteredTodos"
@@ -24,7 +24,7 @@
                 </ul>
             </section>
 
-            <footer class="footer" v-show="todoCollection.items.length" v-cloak>
+            <footer class="footer" v-show="totalItems" v-cloak>
 
                 <span class="todo-count">
                   <strong>{{ remaining }}</strong> {{ remaining | pluralize }} left
@@ -37,8 +37,9 @@
                     </li>
                 </ul>
 
-                <button class="clear-completed" @click="removeAllCompleted"
-                        v-show="todoCollection.items.length > remaining">
+                <button class="clear-completed"
+                        @click="removeAllCompleted"
+                        v-show="totalItems > remaining">
                     Clear completed
                 </button>
             </footer>
@@ -93,8 +94,8 @@
         // visibility filters
     const filters = {
             all: todos => todos,
-            active: todos => todos.filter(todo => !todo.completed),
-            completed: todos => todos.filter(todo => todo.completed)
+            active: (todos = []) => todos.filter(todo => !todo.completed),
+            completed: (todos = []) => todos && todos.filter(todo => todo.completed)
         };
 
     /**
@@ -121,7 +122,7 @@
                  * an early binding to 'items' to calculate length.
                  * @type TodoCollectionRepresentation
                  */
-                todoCollection: { items: [] },
+                todoCollection: {},
 
                 /**
                  * New item holder
@@ -136,7 +137,7 @@
         },
 
         filters: {
-            pluralize: (n) => n === 1 ? 'item' : 'items'
+            pluralize: n => n === 1 ? 'item' : 'items'
         },
 
         created() {
@@ -160,7 +161,10 @@
                 return filters[this.visibility](this.todoCollection.items)
             },
             remaining() {
-                return filters[filterEnum.ACTIVE](this.todoCollection.items).length
+                return _(filters[filterEnum.ACTIVE](this.todoCollection.items)).size()
+            },
+            totalItems() {
+                return _(this.todoCollection.items).size();
             },
             allDone: {
                 get() {
@@ -182,7 +186,7 @@
             /**
              * Clears out the new todo reaady to be entered and created
              */
-            resetTodo() {
+            reset() {
                 this.newTodo = Object.assign({}, this.newTodo, DEFAULT_TODO);
             },
 
@@ -192,7 +196,7 @@
             addTodo() {
                 return nodMaker.createCollectionResourceItem(this.todoCollection, Object.assign({}, this.newTodo))
                     .then(todoResource => nodMaker.getResource(todoResource)
-                        .then(() => this.resetTodo()))
+                        .then(() => this.reset()))
                     .catch(err => log.error(err));
             },
 
@@ -201,8 +205,10 @@
              * This is a (server-side) API delete rather than just a client-side filter.
              */
             removeAllCompleted() {
-                filters[filterEnum.COMPLETED](this.todoCollection.items)
-                    .forEach(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo));
+                return Promise
+                    .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
+                        .map(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo)))
+                    .catch(err => log.error(err));
             },
 
             // **********************************
