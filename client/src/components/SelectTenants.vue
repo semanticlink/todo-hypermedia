@@ -19,7 +19,7 @@
                             v-model="organisation"
                     >
                 </div>
-                <button class="btn btn-lg btn-primary btn-block" @click="post(organisation)">Search</button>
+                <button class="btn btn-lg btn-primary btn-block" @click="searchForTenant(organisation)">Search</button>
 
             </div>
 
@@ -29,9 +29,10 @@
 
 <script>
 
-    import { nodMaker, SemanticLink, link, _ } from 'semanticLink';
+    import { _ } from 'semanticLink';
     import { log } from 'logger';
     import { redirectToTenant, redirectToUser } from "router";
+    import { searchForTenant, getTenants } from "domain/tenant";
 
     export default {
         props: {
@@ -66,38 +67,39 @@
         methods: {
 
             /**
-             * Search for a tenant using the search form on the collection
-             *
-             * @param {TenantCollectionRepresentation} tenantCollection
-             * @param tenantName
-             * @returns {Promise} containing the search result collection
+             * Helper function used in strategies that redirects to tenant if the tenant name is located in a search
+             * @param {ApiRepresentation} apiResource
+             * @param {string} tenantName
+             * @param nextStrategy
+             * @returns {Promise|*}
              */
-            searchForTenant: function (tenantCollection, tenantName) {
-
-                log.debug('Looking for search form on tenant collection');
-                return nodMaker.getSingletonResource(tenantCollection, 'searchForm', /search/)
-                    .then(tenantSearchRepresentation => {
-
-                        let form = _(tenantSearchRepresentation.items).first();
-
-                        if (form) {
-
-                            /**
-                             * Construct search based on the tenantSearchRepresentation. This is a simple form
-                             * so we just grab the first item and haven't checks on type.
-                             *
-                             * In the future, we might ask for a field which is http://types/text
-                             */
-                            const searchForm = {};
-                            searchForm[form.name] = tenantName;
-
-                            return link.post(tenantSearchRepresentation, /submit/, 'application/json', searchForm);
+            retrieve(apiResource, tenantName, nextStrategy) {
+                return getTenants(apiResource)
+                    .then(tenantCollection => {
+                        if (tenantCollection) {
+                            return searchForTenant(tenantCollection, tenantName);
                         } else {
-                            throw new Error(`Search form item does not exist on ${link.getUri(tenantCollection, /search/)}. Do you have the correct headers set?`);
+                            return nextStrategy();
                         }
                     })
-                    .then(createdResult => link.http.get(createdResult.headers.location))
-                    .then(searchResult => searchResult.data);
+                    .then(searchCollection => this.storeTenantNameAndRedirect(searchCollection, nextStrategy));
+            },
+
+            /**
+             * Helper function that redirects to the first tenant found in the collection or moves to next strategy
+             * @param {CollectionRepresentation} tenantSearchCollection
+             * @param nextStrategy
+             * @returns {Promise|*}
+             */
+            storeTenantNameAndRedirect(tenantSearchCollection, nextStrategy) {
+                const tenant = _(tenantSearchCollection).firstItem();
+                if (tenant) {
+                    log.debug(`Tenant stored: ${tenant.name}`);
+                    this.$localStorage.set("tenant", tenant.name);
+                    redirectToTenant(tenant);
+                } else {
+                    return nextStrategy();
+                }
             },
 
             /**
@@ -107,19 +109,10 @@
              * @returns {Promise|*}
              */
             strategyOneProvidedTenant(apiResource, nextStrategy) {
-                log.debug("1. Looking for provided tenant");
-                return nodMaker
-                    .getResource(apiResource)
-                    .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
-                    .then(tenantCollection => {
-                        const item = _(tenantCollection).firstItem();
-                        if (item) {
-                            this.$localStorage.set("tenant", item.name);
-                            redirectToTenant(item);
-                        } else {
-                            nextStrategy();
-                        }
-                    })
+                log.debug("1. Retrieving tenant from tenant list");
+
+                return getTenants(apiResource)
+                    .then(tenantCollection => this.storeTenantNameAndRedirect(tenantCollection, nextStrategy))
                     .catch(() => nextStrategy());
             },
 
@@ -136,35 +129,19 @@
              * @returns {Promise|*}
              */
             strategyTwoKnownTenant(apiResource, nextStrategy) {
-                log.debug('2. Looking for tenants at root api');
+
+                log.debug('2. Searching for known tenant');
 
                 const knownTenant = this.$localStorage.get('tenant');
 
-                if (!knownTenant){
-                    nextStrategy();
+                if (!knownTenant) {
+                    return nextStrategy();
                 }
 
-                return nodMaker
-                    .getResource(apiResource)
-                    .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
-                    .then(tenantCollection => {
-                        if (!_(tenantCollection).isCollectionEmpty()){
-                            return this.searchForTenant(tenantCollection, knownTenant);
-                        } else {
-                            nextStrategy();
-                        }
-                    })
-                    .then(tenantCollection => {
-                        const item = _(tenantCollection).firstItem();
-                        if (item) {
-                            this.$localStorage.set("tenant", item.name);
-                            redirectToTenant(item);
-                        } else {
-                            nextStrategy();
-                        }
+                log.debug(`Searching for known tenant ${knownTenant}`);
 
-                    })
-                    .catch(err => log.error(err));
+                return this.retrieve(apiResource, knownTenant, nextStrategy)
+                    .catch(() => nextStrategy());
             },
 
             /** Strategy Three: let the user enter in a tenant name and search
@@ -176,33 +153,24 @@
                 this.busy = false;
 
                 // need to wait for the user to enter a tenant and click the button
+                // ui will then call {@link searchForTenant}
                 log.debug("3. Waiting for user to enter tenant name");
 
             },
 
-            post(tenantName) {
+            searchForTenant(tenantName) {
                 this.error = false;
                 this.invalid = "";
 
-                return nodMaker
-                    .getResource(this.$root.$api)
-                    .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', 'tenants'))
-                    .then(tenantCollection => {
-                        this.searchForTenant(tenantCollection, tenantName)
-                            .then(tenantSearchFeed => {
-                                if (_(tenantSearchFeed).isCollectionEmpty()) {
-                                    this.error = true;
-                                    this.invalid = `Unable to find ${tenantName}`;
-                                } else {
-                                    nodMaker.makeCollectionItemsFromFeedAddedToCollection(tenantCollection, tenantSearchFeed);
-                                    this.$localStorage.set("tenant", tenantName);
-                                    redirectToTenant(_(tenantCollection.items).first());
-                                }
-                            })
-                            .catch(() => {
-                                this.error = true;
-                                this.invalid = tenantName;
-                            });
+                const strategy = () => {
+                    this.error = true;
+                    this.invalid = `Unable to find ${tenantName}`;
+                };
+
+                return this.retrieve(this.$root.$api, tenantName, strategy)
+                    .catch(() => {
+                        this.error = true;
+                        this.invalid = tenantName;
                     });
 
             }
