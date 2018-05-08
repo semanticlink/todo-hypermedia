@@ -5,17 +5,16 @@ using Xunit;
 
 namespace IntegrationTests
 {
-    public class TenanttoreTests
+    public class TenantStoreTests
     {
         [Fact]
-        public async Task LoadTodo()
+        public async Task LoadTenant()
         {
             using (var dbProvider = DynamoDbServerTestUtils.CreateDatabase())
             {
-                TableNameConstants
+                await TableNameConstants
                     .Tenant
-                    .CreateTable(dbProvider.Client)
-                    .ConfigureAwait(false);
+                    .CreateTable(dbProvider.Client);
 
                 var todoStore = new TenantStore(dbProvider.Context);
 

@@ -9,6 +9,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.6" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.8" />
   </ItemGroup>
 </Project>

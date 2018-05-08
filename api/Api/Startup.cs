@@ -1,20 +1,11 @@
-﻿//using System.Configuration;
-
-using System;
-using System.IO;
-using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
-using Amazon.Runtime;
+﻿using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
-using Domain.Persistence;
-using Infrastructure.Db;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,8 +15,8 @@ namespace Api
 {
     public class Startup
     {
-        public IHostingEnvironment HostingEnvironment { get; }
-        public IConfiguration Configuration { get; }
+        private IHostingEnvironment HostingEnvironment { get; }
+        private IConfiguration Configuration { get; }
 
         public Startup(IHostingEnvironment env, IConfiguration config)
         {
@@ -35,7 +26,6 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 
 //            var awsOptions = new ConfigurationBuilder()
 //                .SetBasePath(Directory.GetCurrentDirectory())

@@ -1,6 +1,26 @@
 
 # Development
 
+## Prerequisites
+
+* local version of [DynamoDb (jar)](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
+* Java jdk
+
+## Setup DynamoDb
+
+* From the folder of the extracted files for dynamoDb:
+
+```shell
+dynamodb_local_latest$ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb -inMemory
+
+Initializing DynamoDB Local with the following configuration:
+Port:   8000
+InMemory:       false
+DbPath: null
+SharedDb:       true
+shouldDelayTransientStatuses:   false
+CorsParams:     *
+```
 
 
 # AWS deployment
@@ -34,4 +54,4 @@ dotnet lambda deploy-serverless --s3-bucket todo-rest-aws --stack-name DotNetCor
 
 # Links
 
-* 
+* https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html

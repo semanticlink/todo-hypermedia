@@ -1,7 +1,6 @@
 ﻿using System;
 using Domain.Models;
 using Domain.Persistence;
-using Infrastructure.Db;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,31 +40,7 @@ namespace Api
 
         public static IServiceProvider SeedTestData(this IServiceProvider services)
         {
-            var context = services.GetRequiredService<TodoContext>();
-
             var logger = services.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation("Seeding Entity data.");
-
-            var tenants = new[]
-            {
-                new Tenant
-                {
-                    Code = "rewire.example.nz",
-                    Name = "Rewire NZ",
-                    Description = "A sample tenant (company/organisation)"
-                }
-            };
-            context.Tenants.AddRange(tenants);
-
-            var todos = new[]
-            {
-                new Todo {Name = "One"},
-                new Todo {Name = "Two", Completed = true},
-                new Todo {Name = "Three"},
-            };
-            context.TodoItems.AddRange(todos);
-
-            context.SaveChanges();
 
             logger.LogInformation("Seeding DynamoDb data");
 
