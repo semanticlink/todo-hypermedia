@@ -28,12 +28,15 @@ namespace Infrastructure.NoSQL
 
             var id = Guid.NewGuid().ToString();
 
+            var now = DateTime.UtcNow;
             var create = new Tenant
             {
                 Id = id,
                 Name = tenant.Name,
                 Code = tenant.Code,
-                CreatedAt = DateTime.UtcNow
+                Description = tenant.Description,
+                CreatedAt = now,
+                UpdatedAt = now
             };
 
             await _context.SaveAsync(create);

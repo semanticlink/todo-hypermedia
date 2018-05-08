@@ -22,7 +22,8 @@ namespace IntegrationTests
                 var tenantCreateData = new TenantCreateData
                 {
                     Code = code,
-                    Name = "baba"
+                    Name = "baba",
+                    Description = "new one"
                 };
                 var id = await todoStore.Create(tenantCreateData);
 
@@ -30,6 +31,7 @@ namespace IntegrationTests
 
                 Assert.Equal(code, tenant.Code);
                 Assert.Equal("baba", tenant.Name);
+                Assert.Equal("new one", tenant.Description);
             }
         }
     }

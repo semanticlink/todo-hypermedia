@@ -20,9 +20,6 @@ namespace Api
                 var services = scope.ServiceProvider;
                 try
                 {
-//                    var context = services.GetRequiredService<TodoContext>();
-//                    DbInitializer.Initialize(context);
-
                     if (HostingEnvironment.IsDevelopment())
                     {
                         services.SeedTestData();
@@ -47,22 +44,21 @@ namespace Api
             var tenantStore = services.GetRequiredService<ITenantStore>();
 
             tenantStore.Create(new TenantCreateData
-            {
-                Code = "rewire.example.nz",
-                Name = "Rewire NZ",
-                Description = "A sample tenant (company/organisation)"
-            }).ConfigureAwait(false);
-            
+                {
+                    Code = "rewire.example.nz",
+                    Name = "Rewire NZ",
+                    Description = "A sample tenant (company/organisation)"
+                })
+                .ConfigureAwait(false);
+
             var todoStore = services.GetRequiredService<ITodoStore>();
 
             todoStore.Create(new TodoCreateData {Name = "One Todo"}).ConfigureAwait(false);
             todoStore.Create(new TodoCreateData {Name = "Two Todo", Completed = true}).ConfigureAwait(false);
             todoStore.Create(new TodoCreateData {Name = "Three Todo"}).ConfigureAwait(false);
-            
-         
+
 
             return services;
         }
-        
     }
 }

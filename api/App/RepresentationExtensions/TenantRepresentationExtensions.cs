@@ -32,7 +32,7 @@ namespace App.RepresentationExtensions
                 Name = tenant.Name,
                 Description = tenant.Description,
                 CreatedAt = tenant.CreatedAt,
-                UpdatedAt = tenant.UpdateAt
+                UpdatedAt = tenant.UpdatedAt
             };
         }
 
