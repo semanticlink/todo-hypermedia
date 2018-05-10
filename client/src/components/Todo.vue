@@ -15,7 +15,9 @@
             <section class="main" v-show="totalItems" v-cloak>
                 <input class="toggle-all btn" type="checkbox" v-model="allDone">
                 <ul class="todo-list">
-                    <todo-item v-for="todo in filteredTodos"
+                    <!-- Using index as key to avoid warning -->
+                    <todo-item v-for="(todo, index) in filteredTodos"
+                               :key="index"
                                class="todo"
                                :item="todo"
                                :collection="todoCollection">

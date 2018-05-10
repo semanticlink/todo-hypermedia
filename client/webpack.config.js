@@ -3,6 +3,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 /**
  *  Configuration of the javascript and css for:
@@ -68,33 +69,37 @@ const clientConfig = {
             {
                 test: /\.vue$/,
                 loader: 'vue-loader',
-                options: {
-                    css: 'vue-style-loader!css-loader',
-                    loaders: {}
-                }
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'vue-style-loader',
+                    'css-loader'
+                ]
             },
             {
                 // Only run `.js` files through Babel
                 test: /\.js$/,
-                loader: 'babel-loader',
                 exclude: /node_modules/,
-                query: {
-                    presets: ['es2015', 'stage-0'],
-                }
-            }
+                loader: 'babel-loader'
+            },
         ]
+    },
+    optimization: {
+        namedModules: true,
     },
     plugins: [
         /**
-         * @see https://survivejs.com/webpack/optimizing/adding-hashes-to-filenames/#enabling-namedmodulesplugin
+         * @see https://vue-loader.vuejs.org/guide/
          */
-        new webpack.NamedModulesPlugin()
+        new VueLoaderPlugin()
     ],
-    node: {
-        // used so that bottleneck can be loaded (peer dependency of redis/hiredis and transitives)
-        net: 'empty',
-        tls: 'empty'
-    },
+    // node: {
+    //     // used so that bottleneck can be loaded (peer dependency of redis/hiredis and transitives)
+    //     net: 'empty',
+    //     tls: 'empty',
+    //     redis: 'empty'
+    // },
 
 };
 
@@ -131,12 +136,6 @@ if (process.env.NODE_ENV === 'production') {
 
 if (process.env.NODE_ENV === 'development') {
     commonConfig.plugins = (commonConfig.plugins || []).concat([]);
-}
-
-// test specific setups
-if (process.env.NODE_ENV === 'test') {
-    module.exports.externals = [require('webpack-node-externals')()];
-    module.exports.devtool = 'inline-cheap-module-source-map';
 }
 
 module.exports = merge(commonConfig, clientConfig);

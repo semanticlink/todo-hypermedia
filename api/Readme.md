@@ -45,7 +45,7 @@ Build and run the project with the following environment variables. This ensures
 local port is 5000.
 
 * *ASPNETCORE_ENVIRONMENT*: Development
-*  *ASPNETCORE_URLS*: http://localhost:5000
+* *ASPNETCORE_URLS*: http://localhost:5000
 
 # AWS deployment
 
