@@ -42,12 +42,12 @@ export default class Loader {
         });
 
         this._limiter.on('debug', (message) => {
-            log.debug(`[Limiter] ${message}`);
+            // log.debug(`[Limiter] ${message}`);
         });
     }
 
     static limiterFactory (options) {
-        log.debug('[Limiter] Create');
+        log.debug('[Limiter] Created');
         return new Bottleneck(Object.assign({}, options, Loader.defaultOptions));
     }
 

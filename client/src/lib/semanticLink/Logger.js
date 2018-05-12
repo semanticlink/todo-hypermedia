@@ -37,6 +37,11 @@ class ConsoleLogger {
         log.log(LEVEL.ERROR, arguments);
     }
 
+    /**
+     * @private
+     * @param level
+     * @param args
+     */
     static log (level, ...args) {
         if (typeof console !== 'undefined') {
             console[level].apply(console, ...args);
