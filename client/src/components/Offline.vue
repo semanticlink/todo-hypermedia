@@ -107,7 +107,7 @@
         return setTimeout(
           () => axios(config)
           .then(error => {
-            if (error.message !== 'Network Error') {
+            if (error && error.message !== 'Network Error') {
               vm.offline = false;
               EventBus.$emit(restored);
               httpQueue.retryAll();
@@ -119,7 +119,7 @@
   };
 </script>
 
-<style>
+<style scoped>
     .offline-indicator {
         background: #E8EDE9;
         border-radius: 3px;

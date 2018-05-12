@@ -4,7 +4,7 @@ import { makeAbsolute, toSitePath } from './lib/util/UriMapping';
 import Home from './components/Home.vue';
 import SelectTenants from './components/SelectTenants.vue';
 import Todo from './components/Todo.vue';
-import { SemanticLink } from "semanticLink";
+import { SemanticLink } from 'semanticLink';
 
 Vue.use(VueRouter);
 
@@ -115,7 +115,7 @@ const redirectToTenant = (tenantRepresentation, filter) => {
     return redirect(tenantRepresentation, makePrefix(clientPath.Todo), filter);
 };
 
-const redirectToSelectTenant = () => router.push(toSitePath("", makePrefix(clientPath.SelectTenants)));
+const redirectToSelectTenant = () => router.push(toSitePath('', makePrefix(clientPath.SelectTenants)));
 
 export { redirectToTenant, redirectToSelectTenant };
 export default router;

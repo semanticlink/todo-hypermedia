@@ -59,7 +59,7 @@ Vue.component('drag-and-droppable-model', DragAndDroppableModel);
 new Vue({
     el: '#app',
     router,
-    template: '<div><App/><offline/><login/></div>',
+    template: '<div><App/><Offline/><Login/></div>',
     components: { App, Offline, Login, AbstractTenant },
     created: function () {
 

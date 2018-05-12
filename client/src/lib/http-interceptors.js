@@ -32,15 +32,15 @@ axios.interceptors.request.use(
  *
  * Note: `error` contains the original `config` to replay the original request.
  *
- * The order of this method MUST be before below because error in this scenario
- * does NOT return a reponse.
+ * The order of this method MUST be before other error handling (eg 500, 401) because error in this scenario
+ * does NOT return a response.
  */
 axios.interceptors.response.use(
     response => response,
     error => {
         // axios returns a network error that we need to match against readyState < DONE (4)
         // to correctly trap network down errors. All other errors should be passed through.
-        if (error.message === 'Network Error' && error.request.readyState < 4) {
+        if (error.message === 'Network Error' && error.request.readyState <= 4) {
             const promise = Promise.resolve(error);
             httpQueue.pushToBuffer(error.config, promise);
             EventBus.$emit(offline, error);

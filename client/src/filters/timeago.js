@@ -1,4 +1,4 @@
-import _ from 'semanticLink';
+import {_} from 'semanticLink';
 
 /**
  * modified from http://jsfiddle.net/i_woody/cnL5T/
@@ -13,10 +13,10 @@ export default function timeago (input, p_allowFuture) {
         return '';
     }
     let substitute = function (stringOrFunction, number, strings) {
-            var string = _(stringOrFunction).isFunction()
+            const string = _(stringOrFunction).isFunction()
                 ? stringOrFunction(number, dateDifference)
                 : stringOrFunction;
-            var value = (strings.numbers && strings.numbers[number]) || number;
+            const value = (strings.numbers && strings.numbers[number]) || number;
             return string.replace(/%d/i, value);
         },
         nowTime = (new Date()).getTime(),
@@ -76,4 +76,4 @@ export default function timeago (input, p_allowFuture) {
 
     return [prefix, words, suffix].join(separator);
 
-};
+}

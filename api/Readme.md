@@ -10,7 +10,7 @@
 
 ## Setup DynamoDb
 
-* From the folder of the extracted files for dynamoDb:
+* From the folder of the extracted files for dynamoDb (run in shell or setup a run configuration)
 
 ```shell
 dynamodb_local_latest$ java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb -inMemory
