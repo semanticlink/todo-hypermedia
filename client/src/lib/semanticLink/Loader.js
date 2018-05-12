@@ -42,7 +42,7 @@ export default class Loader {
         });
 
         this._limiter.on('debug', (message) => {
-            // log.debug(`[Limiter] ${message}`);
+            log.debug(`[Limiter] ${message}`);
         });
     }
 

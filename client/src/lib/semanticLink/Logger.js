@@ -8,12 +8,42 @@
  * @method error
  */
 
+/**
+ *
+ * @type {{DEBUG: {console: string, level: number}, INFO: {console: string, level: number}, WARN: {console: string, level: number}, ERROR: {console: string, level: number}}} LogLevel
+ */
 const LEVEL = {
-    DEBUG: 'log',
-    INFO: 'info',
-    WARN: 'warn',
-    ERROR: 'error'
+    DEBUG: {
+        console: 'log',
+        level: 1
+    },
+    INFO: {
+        console: 'info',
+        level: 2
+    },
+    WARN: {
+        console: 'warn',
+        level: 3
+    },
+    ERROR: {
+        console: 'error',
+        level: 4
+    }
 };
+
+/**
+ * Default level is info and above
+ * @type {number}
+ */
+let showLevel = LEVEL.INFO;
+
+/**
+ *
+ * @param {LogLevel} level
+ */
+function setLogLevel(level) {
+    showLevel = level;
+}
 
 /**
  * @extends Logger
@@ -21,19 +51,19 @@ const LEVEL = {
  */
 class ConsoleLogger {
 
-    static debug () {
+    static debug() {
         log.log(LEVEL.DEBUG, arguments);
     }
 
-    static info () {
+    static info() {
         log.log(LEVEL.INFO, arguments);
     }
 
-    static warn () {
+    static warn() {
         log.log(LEVEL.WARN, arguments);
     }
 
-    static error () {
+    static error() {
         log.log(LEVEL.ERROR, arguments);
     }
 
@@ -42,9 +72,9 @@ class ConsoleLogger {
      * @param level
      * @param args
      */
-    static log (level, ...args) {
-        if (typeof console !== 'undefined') {
-            console[level].apply(console, ...args);
+    static log(level, ...args) {
+        if (typeof console !== 'undefined' && level.level >= showLevel.level) {
+            console[level.console].apply(console, ...args);
         }
     }
 }
@@ -54,6 +84,7 @@ class ConsoleLogger {
  */
 const log = ConsoleLogger;
 
+export { setLogLevel, LEVEL };
 /**
  * @type Logger
  */

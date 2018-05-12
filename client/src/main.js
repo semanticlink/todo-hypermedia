@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.conf with an alias.
 import Vue from 'vue';
 import router from './router';
-import { nodMaker } from 'semanticLink';
+import { LEVEL, nodMaker, setLogLevel } from 'semanticLink';
 import VueLocalStorage from 'vue-localstorage';
 
 import App from './App.vue';
@@ -19,8 +19,11 @@ import DragAndDroppableModel from './components/DragAndDroppableModel';
  */
 require('./lib/uri-mappings');
 require('./lib/http-interceptors');
+``
+setLogLevel(LEVEL.INFO);
 
 Vue.config.productionTip = false;
+
 
 /*
  * Network of data store
