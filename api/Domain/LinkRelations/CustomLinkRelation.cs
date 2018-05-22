@@ -4,6 +4,7 @@
     {
         public const string Search = "search";
         public const string Submit = "submit";
+        public const string Authenticate = "authenticate";
 
         /*
          **************************************

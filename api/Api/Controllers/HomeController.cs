@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Api.Web;
 using App.RepresentationExtensions;
@@ -6,7 +7,9 @@ using App.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Toolkit;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
@@ -19,12 +22,25 @@ namespace Api.Controllers
         private readonly Version _version;
         private readonly User _user;
         private readonly ITenantStore _tenantStore;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly IConfiguration _configuration;
 
-        public HomeController(Version version, User user, ITenantStore tenantStore)
+        public HomeController(
+            Version version, 
+            User user, 
+            ITenantStore tenantStore,
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager,
+            IConfiguration configuration
+            )
         {
             _version = version;
             _user = user;
             _tenantStore = tenantStore;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _configuration = configuration;
         }
 
         [HttpGet("", Name = HomeUriFactory.SelfRouteName)]
@@ -115,6 +131,29 @@ namespace Api.Controllers
         {
             return new TenantRepresentation()
                 .ToTenantSearchFormRepresentation(Url);
+        }
+        
+        [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateRouteName) ]
+        public async Task<object> Login([FromBody] UserRepresentation model)
+        {
+            var result = _signInManager.PasswordSignInAsync(
+                model.Email,
+                model.Password,
+                isPersistent: false,
+                lockoutOnFailure: false);
+
+            (await result)
+                .Succeeded
+                .ThrowInvalidDataExceptionIf(x => x.Equals(false), result.ToString());
+
+            var user = _userManager.Users.SingleOrDefault(r => r.Email == model.Email);
+
+            /*
+             * TODO: this should actually create a new resource and return its uri rather than just the token
+             */
+            return user.Id
+                .MakeUserUri(Url)
+                .MakeCreatedToken(_configuration.GenerateJwtToken(model.Email, user));
         }
     }
 }

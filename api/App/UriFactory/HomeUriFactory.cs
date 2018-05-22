@@ -5,6 +5,7 @@ namespace App.UriFactory
     public static class HomeUriFactory
     {
         public const string SelfRouteName = "Home";
+        public const string AuthenticateRouteName = "Authenticate";
 
         /// <summary>
         ///     A logical resource that is the collection of all tenants
@@ -17,6 +18,11 @@ namespace App.UriFactory
         public static string MakeHomeUri(this IUrlHelper url)
         {
             return url.Link(SelfRouteName, new { });
+        }
+
+         public static string MakeAuthenticateUri(this IUrlHelper url)
+        {
+            return url.Link(AuthenticateRouteName, new { });
         }
 
         /// <summary>

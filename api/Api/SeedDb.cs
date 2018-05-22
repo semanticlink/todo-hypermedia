@@ -13,7 +13,7 @@ namespace Api
     /// </summary>
     public static class SeedDb
     {
-        public static IWebHost Initialise(this IWebHost host, IHostingEnvironment HostingEnvironment)
+        public static IWebHost InitialiseDynamoDb(this IWebHost host, IHostingEnvironment HostingEnvironment)
         {
             using (var scope = host.Services.CreateScope())
             {

@@ -10,5 +10,6 @@ namespace Domain.Persistence
         Task<Tenant> Get(string id);
         Task<Tenant> GetByCode(string code);
         Task<IEnumerable<Tenant>> GetTenantsForUser(string id);
+        Task<IEnumerable<User>> GetUsersByTenant(string id);
     }
 }

@@ -34,6 +34,16 @@ namespace Api.Web
                     id = uri
                 });
         }
+        public static CreatedResult MakeCreatedToken(this string uri, string token)
+        {
+            return new CreatedResult(
+                uri,
+                new
+                {
+                    message = "The resource has been created with bearer token",
+                    token = token
+                });
+        }
      
         public static RedirectResult MakeRedirect(this string uri)
         {

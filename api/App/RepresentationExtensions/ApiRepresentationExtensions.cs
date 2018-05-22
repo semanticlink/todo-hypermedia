@@ -18,6 +18,8 @@ namespace App.RepresentationExtensions
                     // root of the api
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Self),
                     
+                    url.MakeAuthenticateUri().MakeWebLink(CustomLinkRelation.Authenticate),
+                    
                     url.MakeHomeTenantsUri().MakeWebLink(CustomLinkRelation.Tenants),
                 },
                 Version = api.Version

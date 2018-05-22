@@ -77,5 +77,10 @@ namespace Infrastructure.NoSQL
                 })
                 .GetRemainingAsync();
         }
+
+        public Task<IEnumerable<User>> GetUsersByTenant(string id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

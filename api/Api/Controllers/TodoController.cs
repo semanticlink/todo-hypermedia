@@ -4,6 +4,7 @@ using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Persistence;
 using Domain.Representation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.Representation.Forms;
@@ -12,6 +13,7 @@ using Toolkit.Representation.LinkedRepresentation;
 namespace Api.Controllers
 {
     [Route("todo")]
+    [Authorize]
     public class TodoController : Controller
     {
         private readonly ITodoStore _todoStore;

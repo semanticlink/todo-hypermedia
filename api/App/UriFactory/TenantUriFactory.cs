@@ -5,10 +5,21 @@ namespace App.UriFactory
     public static class TenantUriFactory
     {
         public const string SelfRouteName = "Tenant";
+        public const string TenantUsersRouteName = "TenantUsers";
 
         public static string MakeTenantUri(this string tenantId, IUrlHelper url)
         {
             return url.Link(SelfRouteName, new {id = tenantId});
         }
+
+        public static string MakeTenantUsersUri(this string tenantId, IUrlHelper url)
+        {
+            return url.Link(TenantUsersRouteName, new {id = tenantId});
+        }
+        
+
+
     }
+
+    
 }

@@ -30,6 +30,7 @@ namespace App
              */
             services.AddScoped<ITodoStore, TodoStore>();
             services.AddScoped<ITenantStore, TenantStore>();
+            services.AddScoped<IUserStore, UserStore>();
 
             services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);
 

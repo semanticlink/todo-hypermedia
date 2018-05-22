@@ -1,9 +1,14 @@
-﻿using Amazon.DynamoDBv2;
+﻿using System.Net;
+using System.Threading.Tasks;
+using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
+using Infrastructure.mySql;
 using Infrastructure.NoSQL;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
@@ -26,21 +31,17 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-
-//            var awsOptions = new ConfigurationBuilder()
-//                .SetBasePath(Directory.GetCurrentDirectory())
-//                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-//                .AddEnvironmentVariables()
-//                .Build()
-//                .GetAWSOptions();
-//
-//            awsOptions.Credentials = new EnvironmentVariablesAWSCredentials();
-//
-//            services.AddDefaultAWSOptions(awsOptions);
-//            services.AddAWSService<IAmazonDynamoDB>();
-
-
-            services.AddMvcCore(options =>
+            services
+                .AddDbContext<ApplicationIdentityDbContext>()
+                .AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
+                .AddDefaultTokenProviders();
+            
+            services.AddMvc();
+            
+            services
+                .AddJwtTokenAuthentication(Configuration)
+                .AddMvcCore(options =>
                 {
                     options.RespectBrowserAcceptHeader = true;
                     options.ReturnHttpNotAcceptable = true;
@@ -60,6 +61,8 @@ namespace Api
                 .AddJsonFormatters(s => s.ContractResolver = new DefaultContractResolver())
                 .AddXmlDataContractSerializerFormatters();
 
+
+
             services
                 .RegisterIoc(HostingEnvironment)
                 .AddTodoCors();
@@ -67,7 +70,10 @@ namespace Api
             services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(
+            IApplicationBuilder app,
+            ILoggerFactory loggerFactory,
+            ApplicationIdentityDbContext db)
         {
             /**
              * Note: this block MUST be before app.UseMvc();
@@ -86,8 +92,12 @@ namespace Api
 
             app
                 .UseTodoCors()
+                .UseAuthentication()
                 .UseMvc()
-                .MigrateDynamoDb();
+                // requires a dynamoDb instance - see readme for setup in docker
+                .MigrateDynamoDb()
+                // requires a mysql instance - see readme for setup in docker
+                .MigrateIdentityDb(db);
         }
     }
 
