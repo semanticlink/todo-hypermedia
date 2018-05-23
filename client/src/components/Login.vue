@@ -10,8 +10,8 @@
                     <input
                             type="text"
                             class="form-control"
-                            placeholder="Enter your username"
-                            v-model="credentials.username"
+                            placeholder="Enter your email"
+                            v-model="credentials.email"
                     >
                 </div>
                 <div class="form-group">
@@ -67,7 +67,7 @@
                 // We need to initialize the component with any
                 // properties that will be used in it
                 credentials: {
-                    username: '',
+                    email: '',
                     password: ''
                 },
                 error: ''
@@ -89,7 +89,7 @@
                 const vm = this;
 
                 const credentials = {
-                    userName: this.credentials.username,
+                    email: this.credentials.email,
                     password: this.credentials.password,
                     grant_type: 'password'
                 };
@@ -123,7 +123,7 @@
                         } else {
                             log.warn('Authentication: failed', arguments);
                         }
-                        vm.error = 'Invalid username/password';
+                        vm.error = 'Invalid email/password';
                     });
             }
 
