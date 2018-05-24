@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Domain.Models;
 using Domain.Persistence;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Toolkit;
 
 namespace Api
 {
@@ -35,6 +38,9 @@ namespace Api
             return host;
         }
 
+        /// <summary>
+        ///     Creates a tenant, user on the tenant and some todos
+        /// </summary>
         public static IServiceProvider SeedTestData(this IServiceProvider services)
         {
             var logger = services.GetRequiredService<ILogger<Program>>();
@@ -43,12 +49,26 @@ namespace Api
 
             var tenantStore = services.GetRequiredService<ITenantStore>();
 
-            tenantStore.Create(new TenantCreateData
+            var tenantId = tenantStore.Create(new TenantCreateData
                 {
                     Code = "rewire.example.nz",
                     Name = "Rewire NZ",
                     Description = "A sample tenant (company/organisation)"
                 })
+                .ConfigureAwait(false)
+                .GetAwaiter()
+                .GetResult();
+
+            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+            var userStore = services.GetRequiredService<IUserStore>();
+
+            var user = new IdentityUser {UserName = "test@rewire.nz", Email = "test@rewire.nz"};
+            userManager.CreateAsync(user, "Test123!").ConfigureAwait(false);
+
+            // now, we have the identity user, link this into the new user
+            userStore.Create(
+                    tenantId.ThrowAccessDeniedExceptionIfNull("No tenant provided to create a user"),
+                    user.Id.ThrowAccessDeniedExceptionIfNull("No identity provided to create user"))
                 .ConfigureAwait(false);
 
             var todoStore = services.GetRequiredService<ITodoStore>();
@@ -56,7 +76,6 @@ namespace Api
             todoStore.Create(new TodoCreateData {Name = "One Todo"}).ConfigureAwait(false);
             todoStore.Create(new TodoCreateData {Name = "Two Todo", Completed = true}).ConfigureAwait(false);
             todoStore.Create(new TodoCreateData {Name = "Three Todo"}).ConfigureAwait(false);
-
 
             return services;
         }

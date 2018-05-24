@@ -3,10 +3,14 @@
 
 ## Prerequisites
 
-* local version of [DynamoDb (jar)](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html)
-* Java JDK
-* Modify Header Value (HTTP Headers)
+* Modify Header Value (HTTP Headers) [in Firefox]
 * GraphViz
+* PlantUML
+
+## Optional
+
+* Docker
+* gfm
 
 ## Setup DynamoDb
 
