@@ -134,7 +134,7 @@ namespace Api.Controllers
         }
         
         [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateRouteName) ]
-        public async Task<object> Login([FromBody] UserRepresentation model)
+        public async Task<object> Login([FromBody] UserCreateDataRepresentation model)
         {
             var result = _signInManager.PasswordSignInAsync(
                 model.Email,

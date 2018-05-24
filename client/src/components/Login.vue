@@ -31,10 +31,9 @@
 
 <script>
     import EventBus, { loginConfirmed, loginRequired } from '../lib/util/EventBus';
-    import { link, nodMaker } from 'semanticLink';
+    import { link, SemanticLink, nodMaker } from 'semanticLink';
     import { log } from 'logger';
-    import { setBearerToken } from '../lib/http-interceptors';
-    import { authenticatorUri } from '../lib/uri-mappings';
+    import { getBearerLinkRelation, setBearerToken } from '../lib/http-interceptors';
 
     /**
      * This is a simple bool 'lock'. When the event is triggered we don't
@@ -57,11 +56,18 @@
     let authenticatorResource;
 
     /**
+     * Holds the value of the authentication link relation in the api that points
+     * to the authentication resource
+     * @type {string}
+     */
+    let authenticationRel;
+
+    /**
      * Login:
      *    - waits for the unauthorised event (triggered by no network)
      */
     export default {
-        data () {
+        data() {
             return {
                 authenticated: true,
                 // We need to initialize the component with any
@@ -73,11 +79,14 @@
                 error: ''
             };
         },
-        mounted () {
+        mounted() {
             EventBus.$on(loginRequired, this.loginRequired);
         },
         methods: {
-            loginRequired (error) {
+            loginRequired(error) {
+
+                authenticationRel = getBearerLinkRelation(error);
+
                 this.authenticated = false;
 
                 if (isPerformingAuthentication) {
@@ -85,7 +94,7 @@
                 }
                 isPerformingAuthentication = true;
             },
-            submit () {
+            submit() {
                 const vm = this;
 
                 const credentials = {
@@ -104,6 +113,8 @@
                     return str.join('&');
                 };
 
+                const authenticatorUri = SemanticLink.getUri(this.$root.$api, authenticationRel);
+
                 // authenticatorUri should really be in the $api or part of the www-authenticate header
                 link.post(
                     nodMaker.makeSparseResourceFromUri(authenticatorUri),
@@ -111,7 +122,12 @@
                     'application/x-www-form-urlencoded',
                     makeFormEncoded(credentials))
                     .then(response => {
-                        setBearerToken(response.data.access_token);
+
+                        if (!response.data.token) {
+                            log.error('Bearer token not returned on the key: \'token\'');
+                        }
+                        setBearerToken(response.data.token);
+
                         EventBus.$emit(loginConfirmed);
                         isPerformingAuthentication = false;
                         vm.authenticated = true;

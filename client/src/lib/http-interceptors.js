@@ -2,6 +2,7 @@ import axios from 'axios';
 import { log } from 'semanticLink';
 import EventBus, { loginConfirmed, loginRequired, offline, serverError } from './util/EventBus';
 import { httpQueue } from './util/HTTPQueue';
+import { AxiosError } from "axios/index";
 
 log.debug('[Axios] Setting up http interceptors');
 
@@ -120,5 +121,49 @@ export const setBearerToken = (token) => {
         err => Promise.reject(err));
     return Promise.resolve();
 
+};
+
+/**
+ * Name of the WWW-Authenticate header
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate
+ * @type {string}
+ */
+export const WWW_AUTHENTICATE_HEADER = 'www-authenticate';
+
+/**
+ * (simple) Regular expression that matches to the link relation for the 'api' realm.
+ *
+ * In practice, this means that the client goes the root the 'api' and then looks for the
+ * link relation provided in the `www-authenticate` header
+ *
+ * @type {RegExp}
+ */
+export const MATCH_BEARER_TOKEN = /Bearer realm="api", rel="([^,]*)"/;
+
+/**
+ * Looks inside the 401 response www-authenticate header and gets the link relation
+ * @param {AxiosError} error
+ * @returns {string|undefined} token
+ */
+export const getBearerLinkRelation = error => {
+
+    if (!error && !error.response) {
+        log.error('This does not look like an Axios error');
+        return;
+    }
+
+    const wwwAuthenticate = error.response.headers[WWW_AUTHENTICATE_HEADER];
+    if (!wwwAuthenticate) {
+        log.error(`No www-authenticate header for bearer token on ${error.config.url}`);
+        return;
+    }
+
+    const token = wwwAuthenticate.match(MATCH_BEARER_TOKEN)[1];
+
+    if (!token) {
+        log.warn(`No Bearer token on realm 'api' with link rel found: '${wwwAuthenticate}'`);
+    }
+
+    return token;
 };
 

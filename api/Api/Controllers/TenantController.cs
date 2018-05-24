@@ -58,6 +58,7 @@ namespace Api.Controllers
         ///    A user cannot be created and logged in in the same transaction.
         /// </remarks>
         [HttpPost("{id}/user")]
+        [AllowAnonymous] // this should be restricture to role/claim
         public async Task<object> CreateUser([FromBody] UserCreateDataRepresentation model, string id)
         {
             var user = new IdentityUser
