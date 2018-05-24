@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.conf with an alias.
 import Vue from 'vue';
 import router from './router';
-import { LEVEL, nodMaker, setLogLevel } from 'semanticLink';
+import {LEVEL, nodMaker, setLogLevel} from 'semanticLink';
 import VueLocalStorage from 'vue-localstorage';
 
 import App from './App.vue';
@@ -13,6 +13,7 @@ import AbstractTenant from './components/AbstractTenant.vue';
 import DroppableModel from './components/DroppableModel';
 import DraggableModel from './components/DraggableModel';
 import DragAndDroppableModel from './components/DragAndDroppableModel';
+import {setBearerToken} from "./lib/http-interceptors";
 
 /*
  * Add runtime dependencies
@@ -47,7 +48,14 @@ Vue.use(apiPlugin);
 /**
  * Allows us to access local storage via `this.$localStorage`
  */
-Vue.use(VueLocalStorage, { name: 'localStorage' });
+Vue.use(VueLocalStorage, {name: 'localStorage'});
+
+/*
+ * If there is an already set authorisation bearer token then use it by default
+ */
+if (Vue.localStorage.get('auth')) {
+    setBearerToken(Vue.localStorage.get('auth'));
+}
 
 //  TODO: understand inline-templates so that this does haven't to be registered globally
 // @see https://stackoverflow.com/questions/46173821/for-recursive-components-make-sure-to-provide-the-name-option
@@ -63,7 +71,7 @@ new Vue({
     el: '#app',
     router,
     template: '<div><App/><Offline/><Login/></div>',
-    components: { App, Offline, Login, AbstractTenant },
+    components: {App, Offline, Login, AbstractTenant},
     created: function () {
 
         // TODO: work out why `import { apiUri, authenticatorUri } from './lib/uri-mappings';` doesn't work

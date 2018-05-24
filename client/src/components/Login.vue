@@ -115,6 +115,8 @@
 
                 const authenticatorUri = SemanticLink.getUri(this.$root.$api, authenticationRel);
 
+
+
                 // authenticatorUri should really be in the $api or part of the www-authenticate header
                 link.post(
                     nodMaker.makeSparseResourceFromUri(authenticatorUri),
@@ -127,6 +129,9 @@
                             log.error('Bearer token not returned on the key: \'token\'');
                         }
                         setBearerToken(response.data.token);
+                        // save bearer token so that when users do a full refresh
+                        // we can save the token across a refresh
+                        vm.$localStorage.set('auth', response.data.token);
 
                         EventBus.$emit(loginConfirmed);
                         isPerformingAuthentication = false;

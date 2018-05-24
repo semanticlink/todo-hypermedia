@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { log } from 'semanticLink';
-import EventBus, { loginConfirmed, loginRequired, offline, serverError } from './util/EventBus';
-import { httpQueue } from './util/HTTPQueue';
-import { AxiosError } from "axios/index";
+import {log} from 'semanticLink';
+import EventBus, {loginConfirmed, loginRequired, offline, serverError} from './util/EventBus';
+import {httpQueue} from './util/HTTPQueue';
 
 log.debug('[Axios] Setting up http interceptors');
 
