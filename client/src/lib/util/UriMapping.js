@@ -95,7 +95,7 @@ let instance;
  * @param {string} apiUri uri of the api being consumed by the  client (ie known link rel)
  */
 class UriMapping {
-    constructor (clientUri, apiUri) {
+    constructor(clientUri, apiUri) {
 
         if (!instance) {
             this.initialise(clientUri, apiUri);
@@ -112,7 +112,7 @@ class UriMapping {
      * @param {string} clientUri uri of serving out the client application (html)
      * @param {string} apiUri uri of the api being consumed by the  client (ie known link rel)
      */
-    initialise (clientUri, apiUri) {
+    initialise(clientUri, apiUri) {
         this.clientUri = clientUri;
         this.apiUri = apiUri;
     }
@@ -124,7 +124,7 @@ class UriMapping {
      * @param {string} sitePrefix the client side routing part of the URL
      * @return {string} path from a uri
      */
-    toSitePath (anApiUri, sitePrefix) {
+    toSitePath(anApiUri, sitePrefix) {
         const apiPathSuffix = anApiUri.replace(this.apiUri, '');
         if (apiPathSuffix) {
             const sitePrefixWithoutTrailingSlash = sitePrefix.replace(/\/$/, '');
@@ -145,7 +145,7 @@ class UriMapping {
      * @param {string} anApiUri absolute uri
      * @return {string} relative path or empty if nothing
      */
-    makeRelative (anApiUri) {
+    makeRelative(anApiUri) {
         const apiPathSuffix = anApiUri.replace(this.apiUri, '');
         if (apiPathSuffix) {
             if (/^\//.test(apiPathSuffix)) {
@@ -165,7 +165,7 @@ class UriMapping {
      * @param {string} path absolute or relative path (with or without the api in the scheme/authority)
      * @return {string} an absolute Uri with a trailing slash
      */
-    makeAbsolute (path) {
+    makeAbsolute(path) {
         const pathWithLeadingSlash = path.replace(/^\//, '');
         if (/\/$/.test(this.apiUri)) {
             return this.apiUri + pathWithLeadingSlash;
@@ -181,7 +181,7 @@ class UriMapping {
      * @param {string} sitePrefix the client side routing part of the URL
      * @return {string} an API URI
      */
-    fromSitePath (path, sitePrefix) {
+    fromSitePath(path, sitePrefix) {
         if (/\/$/.test(this.apiUri)) {
             if (/\/$/.test(sitePrefix)) {
                 return this.apiUri + path.replace(sitePrefix, '');
@@ -206,32 +206,32 @@ class UriMapping {
  * @example import {toSitePath, makeRelative } from '/UriMapping'
  */
 
-export function toSitePath (anApiUri, sitePrefix) {
+export function toSitePath(anApiUri, sitePrefix) {
     if (instance) {
         return instance.toSitePath(anApiUri, sitePrefix);
     }
-    log.error(`Mapper is not initialised. Instantiate first before calling this method`);
+    log.error('Mapper is not initialised. Instantiate first before calling this method');
 }
 
-export function makeRelative (anApiUri) {
+export function makeRelative(anApiUri) {
     if (instance) {
         return instance.makeRelative(anApiUri);
     }
-    log.error(`Mapper is not initialised. Instantiate first before calling this method`);
+    log.error('Mapper is not initialised. Instantiate first before calling this method');
 }
 
-export function makeAbsolute (path) {
+export function makeAbsolute(path) {
     if (instance) {
         return instance.makeAbsolute(path);
     }
-    log.error(`Mapper is not initialised. Instantiate first before calling this method`);
+    log.error('Mapper is not initialised. Instantiate first before calling this method');
 }
 
-export function fromSitePath (path, sitePrefix) {
+export function fromSitePath(path, sitePrefix) {
     if (instance) {
         return instance.fromSitePath(path, sitePrefix);
     }
-    log.error(`Mapper is not initialised. Instantiate first before calling this method`);
+    log.error('Mapper is not initialised. Instantiate first before calling this method');
 }
 
 /**
@@ -240,7 +240,7 @@ export function fromSitePath (path, sitePrefix) {
  * @param {string} apiUri uri of the api being consumed by the  client (ie known link rel)
  * @return {UriMapping} singleton instance of UriMapping
  */
-export function uriMapping (clientUri, apiUri) {
+export function uriMapping(clientUri, apiUri) {
     new UriMapping(clientUri, apiUri);
     return instance;
 }

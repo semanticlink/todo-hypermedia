@@ -13,14 +13,14 @@ import AbstractTenant from './components/AbstractTenant.vue';
 import DroppableModel from './components/DroppableModel';
 import DraggableModel from './components/DraggableModel';
 import DragAndDroppableModel from './components/DragAndDroppableModel';
-import {setBearerToken} from "./lib/http-interceptors";
+import {setBearerToken} from './lib/http-interceptors';
 
 /*
  * Add runtime dependencies
  */
 require('./lib/uri-mappings');
 require('./lib/http-interceptors');
-``
+
 setLogLevel(LEVEL.INFO);
 
 Vue.config.productionTip = false;
@@ -62,6 +62,7 @@ if (Vue.localStorage.get('auth')) {
 Vue.component('draggable-model', DraggableModel);
 Vue.component('droppable-model', DroppableModel);
 Vue.component('drag-and-droppable-model', DragAndDroppableModel);
+
 
 /**
  * This view sets up the application including the ondemand authentication (login) and

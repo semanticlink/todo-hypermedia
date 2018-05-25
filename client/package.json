@@ -19,6 +19,7 @@
     "bootstrap-sass": "^3.3.7",
     "bottleneck": "^2.3.1",
     "jquery": "^3.3.1",
+    "linkifyjs": "^2.1.6",
     "moment": "^2.22.1",
     "underscore": "^1.9.0",
     "vue": "^2.5.16",
