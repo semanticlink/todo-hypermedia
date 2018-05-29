@@ -15,6 +15,14 @@ import DraggableModel from './components/DraggableModel';
 import DragAndDroppableModel from './components/DragAndDroppableModel';
 import {setBearerToken} from './lib/http-interceptors';
 
+import BootstrapVue from "bootstrap-vue"
+
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
+import './styles/todo.css';
+
+Vue.use(BootstrapVue);
+
 /*
  * Add runtime dependencies
  */

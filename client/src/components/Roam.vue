@@ -1,14 +1,28 @@
 <template>
     <div>
+
         <div>
-            {{ self }}
+            <b-list-group>
+                <b-list-group-item>{{ self }}</b-list-group-item>
+            </b-list-group>
+
         </div>
 
-        {{ requestheaders }}
+        <div>
+            <div v-for="(value, key) in requestheaders">
+                <b-badge variant="primary" pill>{{key}}</b-badge>
+                {{value}}
+            </div>
+        </div>
 
         <pre v-html="representation"/>
 
-        {{ headers}}
+        <div>
+            <div v-for="(value, key) in headers">
+                <b-badge variant="primary" pill>{{key}}</b-badge>
+                {{value}}
+            </div>
+        </div>
 
     </div>
 </template>
@@ -16,7 +30,7 @@
 <script>
 
     import axios from 'axios';
-    import linkify from '../filters/linkify'
+    import linkify from '../filters/linkify';
 
     export default {
         props: {

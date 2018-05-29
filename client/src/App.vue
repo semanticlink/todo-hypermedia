@@ -1,7 +1,7 @@
 <template>
     <div id="app">
-        <router-link :to="{ name: 'Home' }">Home</router-link>
-        <router-link :to="{ name: 'Roam' }">Roamer</router-link>
+        <b-link :to="{ name: 'Home' }">Home</b-link>
+        <b-link :to="{ name: 'Roam' }">Roamer</b-link>
         <router-view></router-view>
     </div>
 </template>
