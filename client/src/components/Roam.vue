@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <b-container fluid v-if="canEdit">
+        <b-container fluid v-if="canEdit && editForm">
             <b-row class="my-1" v-for="item in editForm.items" :key="item.name">
                 <b-col sm="3"><label :for="`type-${item.type}`">Type {{ item.name }}:</label></b-col>
                 <b-col sm="9">
@@ -37,7 +37,7 @@
             </b-row>
             <b-btn @click="update">Update</b-btn>
         </b-container>
-`
+        `
     </div>
 </template>
 
@@ -84,6 +84,7 @@
     export default {
         props: {
             apiUri: {type: String},
+        },
         data() {
             return {
                 response: {},
@@ -122,16 +123,16 @@
                 link.get(this.representation, 'edit-form')
                     .then(response => {
                         vm.editForm = response.data;
-                    })
+                    });
             },
             type(t) {
                 return type(t);
             },
-            update(){
-
+            update() {
+                return;
             }
         }
-    };
+    }
 </script>
 
 <style>
