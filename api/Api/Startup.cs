@@ -36,7 +36,11 @@ namespace Api
                 .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
+                options.RespectBrowserAcceptHeader = true; // false by default
+            });
 
             services
                 .AddJwtTokenAuthentication(Configuration)
@@ -81,12 +85,14 @@ namespace Api
             if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+/*
                 app.UseStaticFiles(new StaticFileOptions
                 {
                     FileProvider = new PhysicalFileProvider(
                         Path.Combine(Directory.GetCurrentDirectory(), "../../client/dist")),
                     RequestPath = "/dist"
                 });
+*/
             }
             else
             {
