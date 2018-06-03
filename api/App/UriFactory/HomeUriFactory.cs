@@ -5,7 +5,11 @@ namespace App.UriFactory
     public static class HomeUriFactory
     {
         public const string SelfRouteName = "Home";
+        
+        
         public const string AuthenticateRouteName = "Authenticate";
+        public const string AuthenticateCollectionRouteName = "AuthenticateCollection";
+        public const string AuthenticateLoginFormRouteName = "AuthenticateLoginForm";
 
         /// <summary>
         ///     A logical resource that is the collection of all tenants

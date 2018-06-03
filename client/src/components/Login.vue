@@ -1,32 +1,6 @@
 <template>
     <transition name="slideup">
-        <div class="login-indicator" v-if="!authenticated">
-            <div class="col-sm-4 col-sm-offset-4">
-                <h2>Log In</h2>
-                <div class="alert alert-danger" v-if="error">
-                    <p>{{ error }}</p>
-                </div>
-                <div class="form-group">
-                    <input
-                            type="text"
-                            class="form-control"
-                            placeholder="Enter your email"
-                            v-model="credentials.email"
-                    >
-                </div>
-                <div class="form-group">
-                    <input
-                            type="password"
-                            class="form-control"
-                            placeholder="Enter your password"
-                            v-model="credentials.password"
-                    >
-                </div>
-                <button class="btn btn-primary" @click="submit()">Login</button>
-            </div>
-        </div>
-
-        <b-form @submit="submit" v-if="!authenticated">
+        <b-form @submit="submit" class="login-indicator" v-if="!authenticated">
             <b-form-group id="exampleInputGroup1"
                           label="Email address:"
                           label-for="exampleInput1"
@@ -42,7 +16,7 @@
                           label="Your Password:"
                           label-for="exampleInput2">
                 <b-form-input id="exampleInput2"
-                              type="text"
+                              type="password"
                               v-model="credentials.password"
                               required
                               placeholder="Enter your password">
@@ -197,8 +171,8 @@
         border-radius: 3px;
         border-bottom: 2px solid #d3d9d4;
         padding: 15px 5px;
-        text-align: center;
-        width: 100%;
+        /*text-align: center;*/
+        width: 60%;
         margin: 5px 0;
         font-family: sans-serif;
         color: #202126;

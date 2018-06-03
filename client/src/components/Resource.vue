@@ -33,7 +33,7 @@
             </b-row>
             <b-btn @click="update">Update</b-btn>
         </b-container>
-        `
+
     </div>
 </template>
 

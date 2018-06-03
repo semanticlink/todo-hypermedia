@@ -132,6 +132,25 @@ namespace Api.Controllers
             return new TenantRepresentation()
                 .ToTenantSearchFormRepresentation(Url);
         }
+/*
+
+        [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateCollectionRouteName)]
+        public AuthenticateRepresentation GetAuthenticateCollection()
+        {
+            return new AuthenticateRepresentation()
+                .ToRepresentation(Url);
+        }
+
+        /// <summary>
+        ///     A simple login form resource.
+        /// </summary>
+        [HttpGet("authenticate/form/login", Name = HomeUriFactory.HomeTenantSearchFormRouteName)]
+        public SearchFormRepresentation GetAuthenticateForm()
+        {
+            return new TenantRepresentation()
+                .ToAuthenticateLoginFormRepresentation(Url);
+        }
+*/
         
         [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateRouteName) ]
         public async Task<object> Login([FromBody] UserCreateDataRepresentation model)
