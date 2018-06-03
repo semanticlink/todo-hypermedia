@@ -26,6 +26,31 @@
             </div>
         </div>
 
+        <b-form @submit="submit" v-if="!authenticated">
+            <b-form-group id="exampleInputGroup1"
+                          label="Email address:"
+                          label-for="exampleInput1"
+                          description="We'll never share your email with anyone else.">
+                <b-form-input id="exampleInput1"
+                              type="email"
+                              v-model="credentials.email"
+                              required
+                              placeholder="Enter your email">
+                </b-form-input>
+            </b-form-group>
+            <b-form-group id="exampleInputGroup2"
+                          label="Your Password:"
+                          label-for="exampleInput2">
+                <b-form-input id="exampleInput2"
+                              type="text"
+                              v-model="credentials.password"
+                              required
+                              placeholder="Enter your password">
+                </b-form-input>
+            </b-form-group>
+            <b-button type="submit" variant="primary">Login</b-button>
+        </b-form>
+
     </transition>
 </template>
 
@@ -33,7 +58,7 @@
     import EventBus, { loginConfirmed, loginRequired } from '../lib/util/EventBus';
     import { link, SemanticLink, nodMaker } from 'semanticLink';
     import { log } from 'logger';
-    import { getBearerLinkRelation, setBearerToken } from '../lib/http-interceptors';
+    import { getAuthenticationUri, getBearerLinkRelation, setBearerToken } from '../lib/http-interceptors';
 
     /**
      * This is a simple bool 'lock'. When the event is triggered we don't
@@ -46,21 +71,12 @@
      */
     let isPerformingAuthentication;
 
-    /**
-     * Holds reference to the authentication resource return from the api
-     *
-     * TODO: attach into this.$root.$api
-     *
-     *  @type {LinkedRepresentation}
-     */
-    let authenticatorResource;
 
     /**
-     * Holds the value of the authentication link relation in the api that points
-     * to the authentication resource
-     * @type {string}
+     * Holds the error from the 401 handler
+     * @type {AxiosError}
      */
-    let authenticationRel;
+    let error;
 
     /**
      * Login:
@@ -83,9 +99,12 @@
             EventBus.$on(loginRequired, this.loginRequired);
         },
         methods: {
-            loginRequired(error) {
+            /**
+             * @param {AxiosError} err
+             */
+            loginRequired(err) {
 
-                authenticationRel = getBearerLinkRelation(error);
+                error = err;
 
                 this.authenticated = false;
 
@@ -99,8 +118,7 @@
 
                 const credentials = {
                     email: this.credentials.email,
-                    password: this.credentials.password,
-                    grant_type: 'password'
+                    password: this.credentials.password
                 };
 
                 const makeFormEncoded = (obj) => {
@@ -113,39 +131,60 @@
                     return str.join('&');
                 };
 
-                const authenticatorUri = SemanticLink.getUri(this.$root.$api, authenticationRel);
+                /**
+                 * Very simple (and awful) implementation.
+                 *
+                 * The www-authenticate header has the required information:
+                 *
+                 *   - uri of api
+                 *   - link relation to post to
+                 *
+                 *      1. GET the resource at the authenticate uri
+                 *      2. Construct a login object
+                 *      3. POST the login form back on the uri of link relation
+                 *
+                 *
+                 * A better server implementation would:
+                 *
+                 *  - return an authenticate resource
+                 *  - create form for the login (telling where to submit)
+                 *  - we then need to match our client form with the server login form (or display the login form)
+                 *
+                 */
+
+                return nodMaker
+                    .getResource(nodMaker.makeSparseResourceFromUri(getAuthenticationUri(error)))
+                    .then(authenticator =>
+                        link.post(
+                            authenticator,
+                            getBearerLinkRelation(error),
+                            'application/x-www-form-urlencoded',
+                            makeFormEncoded(credentials))
+                            .then(response => {
+
+                                if (!response.data.token) {
+                                    log.error('Bearer token not returned on the key: \'token\'');
+                                }
+                                setBearerToken(response.data.token);
+                                // save bearer token so that when users do a full refresh
+                                // we can save the token across a refresh
+                                vm.$localStorage.set('auth', response.data.token);
+
+                                EventBus.$emit(loginConfirmed);
+                                isPerformingAuthentication = false;
+                                vm.authenticated = true;
+                            })
+                            .catch(failureResponse => {
+                                vm.error = '';
+                                if (failureResponse && failureResponse.status) {
+                                    log.warn('Authentication failed (' + failureResponse.status + '): ' + failureResponse.statusText);
+                                } else {
+                                    log.warn('Authentication: failed', arguments);
+                                }
+                                vm.error = 'Invalid email/password';
+                            }));
 
 
-
-                // authenticatorUri should really be in the $api or part of the www-authenticate header
-                link.post(
-                    nodMaker.makeSparseResourceFromUri(authenticatorUri),
-                    'self',
-                    'application/x-www-form-urlencoded',
-                    makeFormEncoded(credentials))
-                    .then(response => {
-
-                        if (!response.data.token) {
-                            log.error('Bearer token not returned on the key: \'token\'');
-                        }
-                        setBearerToken(response.data.token);
-                        // save bearer token so that when users do a full refresh
-                        // we can save the token across a refresh
-                        vm.$localStorage.set('auth', response.data.token);
-
-                        EventBus.$emit(loginConfirmed);
-                        isPerformingAuthentication = false;
-                        vm.authenticated = true;
-                    })
-                    .catch(failureResponse => {
-                        vm.error = '';
-                        if (failureResponse && failureResponse.status) {
-                            log.warn('Authentication failed (' + failureResponse.status + '): ' + failureResponse.statusText);
-                        } else {
-                            log.warn('Authentication: failed', arguments);
-                        }
-                        vm.error = 'Invalid email/password';
-                    });
             }
 
         }

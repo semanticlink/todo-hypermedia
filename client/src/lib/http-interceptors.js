@@ -1,7 +1,7 @@
 import axios from 'axios';
-import {log} from 'semanticLink';
-import EventBus, {loginConfirmed, loginRequired, offline, serverError} from './util/EventBus';
-import {httpQueue} from './util/HTTPQueue';
+import { log } from 'semanticLink';
+import EventBus, { loginConfirmed, loginRequired, offline, serverError } from './util/EventBus';
+import { httpQueue } from './util/HTTPQueue';
 
 log.debug('[Axios] Setting up http interceptors');
 
@@ -132,12 +132,24 @@ export const WWW_AUTHENTICATE_HEADER = 'www-authenticate';
 /**
  * (simple) Regular expression that matches to the link relation for the 'api' realm.
  *
- * In practice, this means that the client goes the root the 'api' and then looks for the
- * link relation provided in the `www-authenticate` header
+ * Note: hard-coded to realm="api"
+ *
+ * In practice, we could have options of the client looking for the linke relation 'api' and/or providing in
+ * the `www-authenticate` header as 'api'
+ *
+ * This regex matches two and returns in an array:
+ *
+ * @example
+ *
+ *  www-authtenticate: Bearer realm="api", rel="authtenticate", api="http://example.com/"
+ *
+ *    match[1]: authenticate
+ *    match[2]: http://example.com/
+ *
  *
  * @type {RegExp}
  */
-export const MATCH_BEARER_TOKEN = /Bearer realm="api", rel="([^,]*)"/;
+export const MATCH_WWW_AUTHENTICATE_HEADER = /Bearer realm="api", rel="([^,]*)" api="([^,]*)"/;
 
 /**
  * Looks inside the 401 response www-authenticate header and gets the link relation
@@ -157,7 +169,7 @@ export const getBearerLinkRelation = error => {
         return;
     }
 
-    const token = wwwAuthenticate.match(MATCH_BEARER_TOKEN)[1];
+    const token = wwwAuthenticate.match(MATCH_WWW_AUTHENTICATE_HEADER)[1];
 
     if (!token) {
         log.warn(`No Bearer token on realm 'api' with link rel found: '${wwwAuthenticate}'`);
@@ -165,4 +177,34 @@ export const getBearerLinkRelation = error => {
 
     return token;
 };
+
+
+/**
+ * Looks inside the 401 response www-authenticate header and gets the representation uri
+ * @param {AxiosError} error
+ * @returns {string|undefined} uri
+ */
+export const getAuthenticationUri = error => {
+
+    if (!error && !error.response) {
+        log.error('This does not look like an Axios error');
+        return;
+    }
+
+    const wwwAuthenticate = error.response.headers[WWW_AUTHENTICATE_HEADER];
+    if (!wwwAuthenticate) {
+        log.error(`No www-authenticate header for authentication on ${error.config.url}`);
+        return;
+    }
+
+    const uri = wwwAuthenticate.match(MATCH_WWW_AUTHENTICATE_HEADER)[2];
+
+    if (!uri) {
+        log.warn(`No representation uri on realm 'api' found: '${wwwAuthenticate}'`);
+    }
+
+    return uri;
+};
+
+
 
