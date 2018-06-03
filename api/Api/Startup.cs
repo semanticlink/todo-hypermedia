@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Amazon.DynamoDBv2;
+﻿using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
 using Infrastructure.mySql;
@@ -11,12 +10,12 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 
 namespace Api
 {
+
     public class Startup
     {
         private IHostingEnvironment HostingEnvironment { get; }
@@ -85,20 +84,18 @@ namespace Api
             if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-/*
-                app.UseStaticFiles(new StaticFileOptions
-                {
-                    FileProvider = new PhysicalFileProvider(
-                        Path.Combine(Directory.GetCurrentDirectory(), "../../client/dist")),
-                    RequestPath = "/dist"
-                });
-*/
             }
             else
             {
                 app.UseExceptionHandler("/error");
-                // TODO: app.UseStaticFiles();
             }
+            
+
+            /**
+             * Handler for error pages to return content negotiated pages. For example, 401 can now
+             * return an text/html page for authenticating.
+             */
+            app.UseStatusCodePagesWithReExecute("/error/{0}");
 
             app
                 .UseTodoCors()

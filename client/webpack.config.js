@@ -107,7 +107,9 @@ const clientConfig = {
 const commonConfig = {
     devServer: {
         historyApiFallback: true,
-        noInfo: true
+        noInfo: true,
+        // force 8080 for now because it needs to be well known for the API to pick up the development version
+        port: 8080
     },
     performance: {
         hints: false
