@@ -40,6 +40,20 @@ namespace Api.Web
     </body>
 </html>";
 
+        private const string ResourceHtml = @"<html>
+    <head>
+      <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8""/>
+      <meta name=""viewport"" content=""width=device-width, initial-scale=1"">
+      <title>Resource</title>
+      {0}
+    </head>
+    <body>
+      <div id=""app"">Intialising ...</div>
+      <script src=""http://localhost:8080/dist/api.js""></script>
+    </body>
+</html>";
+
+
         public HtmlFormMediaFormatter()
         {
             SupportedEncodings.Add(Encoding.UTF8);
@@ -54,7 +68,8 @@ namespace Api.Web
         protected override bool CanWriteType(Type type)
         {
             return typeof(CreateFormRepresentation).IsAssignableFrom(type) ||
-                   typeof(SearchFormRepresentation).IsAssignableFrom(type);
+                   typeof(SearchFormRepresentation).IsAssignableFrom(type) ||
+                   typeof(LinkedRepresentation).IsAssignableFrom(type);
         }
 
         public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
@@ -112,6 +127,12 @@ namespace Api.Web
                 }
 
                 return string.Format(outerHtml, ToHtml(feed), ToHtmlLinks(feed), submitAction);
+            }
+            else if (context.Object is LinkedRepresentation)
+            {
+                var feed = context.Object as LinkedRepresentation;
+
+                return string.Format(ResourceHtml, ToHtmlLinks(feed));
             }
             else
             {

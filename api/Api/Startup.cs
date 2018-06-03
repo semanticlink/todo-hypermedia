@@ -1,11 +1,9 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using System.IO;
 using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
 using Infrastructure.mySql;
 using Infrastructure.NoSQL;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -13,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 
@@ -36,9 +35,9 @@ namespace Api
                 .AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
                 .AddDefaultTokenProviders();
-            
+
             services.AddMvc();
-            
+
             services
                 .AddJwtTokenAuthentication(Configuration)
                 .AddMvcCore(options =>
@@ -61,8 +60,6 @@ namespace Api
                 .AddJsonFormatters(s => s.ContractResolver = new DefaultContractResolver())
                 .AddXmlDataContractSerializerFormatters();
 
-
-
             services
                 .RegisterIoc(HostingEnvironment)
                 .AddTodoCors();
@@ -84,10 +81,17 @@ namespace Api
             if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(
+                        Path.Combine(Directory.GetCurrentDirectory(), "../../client/dist")),
+                    RequestPath = "/dist"
+                });
             }
             else
             {
                 app.UseExceptionHandler("/error");
+                // TODO: app.UseStaticFiles();
             }
 
             app

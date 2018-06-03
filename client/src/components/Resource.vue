@@ -1,10 +1,6 @@
 <template>
     <div>
-
         <div>
-            <b-list-group>
-                <b-list-group-item>{{ self }}</b-list-group-item>
-            </b-list-group>
             <b-btn v-if="canEdit" @click="makeEdit">Edit</b-btn>
             <b-btn v-if="canCreate">Create</b-btn>
         </div>
@@ -44,8 +40,8 @@
 <script>
 
     import axios from 'axios';
-    import linkifyWithClientRouting from '../filters/linkifyWithClientRouting';
-    import { SemanticLink, link } from 'semanticLink';
+    import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
+    import { link, log, SemanticLink } from 'semanticLink';
 
     /**
      * Maps the representation types to the known types that can be rendered (input not select at this stage)
@@ -96,27 +92,28 @@
                 accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8, application/json;q=0.95'
             };
         },
+        created() {
+            log.info(`Resource uri: '${this.apiUri}'`);
+            axios.get(this.apiUri, {headers: {'Accept': this.accept}})
+                .then(response => {
+                    this.response = response;
+                    this.headers = response.headers;
+                    this.representation = (response.data);
+                    this.htmlRepresentation = linkifyToSelf(response.data);
+                    this.requestheaders = response.config.headers;
+
+                });
+
+        },
         computed: {
-            self() {
-
-                axios.get(this.apiUri, {headers: {'Accept': this.accept}})
-                    .then(response => {
-                        this.response = response;
-                        this.headers = response.headers;
-                        this.representation = (response.data);
-                        this.htmlRepresentation = linkifyWithClientRouting(response.data);
-                        this.requestheaders = response.config.headers;
-
-                    });
-                return this.apiUri;
-            },
             canEdit() {
                 return SemanticLink.matches(this.representation, 'edit-form');
             },
             canCreate() {
                 return SemanticLink.matches(this.representation, 'create-form');
             }
-        },
+        }
+        ,
         methods: {
             makeEdit() {
                 const vm = this;
@@ -124,10 +121,12 @@
                     .then(response => {
                         vm.editForm = response.data;
                     });
-            },
+            }
+            ,
             type(t) {
                 return type(t);
-            },
+            }
+            ,
             update() {
                 return;
             }

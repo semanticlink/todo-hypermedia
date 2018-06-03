@@ -1,10 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import { makeAbsolute, makeRelative, toSitePath } from './lib/util/UriMapping';
-import Home from './components/Home.vue';
-import SelectTenants from './components/SelectTenants.vue';
-import Todo from './components/Todo.vue';
-import Roam from './components/Roam.vue';
+import Resource from './components/Resource.vue';
 import { SemanticLink } from 'semanticLink';
 
 Vue.use(VueRouter);
@@ -84,34 +81,15 @@ const makePrefix = clientPath => `/${clientPath}/a/`;
 const makePath = clientPath => `${makePrefix(clientPath)}:apiUri(.*)`;
 
 const clientPath = {
-    SelectTenants: 'tenants',
-    Todo: 'todo',
     Resource: 'roam'
 };
 
 let router = new VueRouter({
     routes: [
         {
-            path: '/',
-            name: 'Home',
-            component: Home,
-        },
-        {
-            path: makePath(clientPath.Roam),
-            name: 'Roam',
-            component: Roam,
-            props: resolve
-        },
-        {
-            path: makePath(clientPath.SelectTenants),
-            name: 'SelectTenants',
-            component: SelectTenants,
-            props: resolve
-        },
-        {
-            path: makePath(clientPath.Todo),
-            name: 'Todo',
-            component: Todo,
+            path: '*',
+            name: 'Resource',
+            component: Resource,
             props: resolve
         }
     ]
@@ -136,7 +114,7 @@ const redirectToSelectTenant = () => router.push(toSitePath('', makePrefix(clien
  * @param {string} representationUri absolute uri of an api resource (eg http://localhost:5000/todo/1)
  * @returns {string} client-side fragment
  */
-const fragmentToRoam = representationUri => `#${toSitePath(makeRelative(representationUri), makePrefix(clientPath.Roam))}`;
+const fragmentToRoam = representationUri => `#${toSitePath(makeRelative(representationUri), makePrefix(clientPath.Resource))}`;
 
 export { redirectToTenant, redirectToSelectTenant, fragmentToRoam };
 export default router;

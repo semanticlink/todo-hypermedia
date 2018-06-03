@@ -41,7 +41,9 @@ namespace Api.Web
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
                     options.IncludeErrorDetails = true;
-                    options.Challenge = $"{JwtBearerDefaults.AuthenticationScheme} realm=\"api\", rel=\"authenticate\"";
+                    // TODO: inject api hosting address
+                    options.Challenge =
+                        $"{JwtBearerDefaults.AuthenticationScheme} realm=\"api\", rel=\"authenticate\" api=\"http://localhost:5000/\"";
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidIssuer = Configuration["JwtIssuer"],

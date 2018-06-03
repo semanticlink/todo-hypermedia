@@ -13,6 +13,7 @@ const clientConfig = {
     entry: {
         // single-page app
         app: './src/main',
+        api: './src/api'
     },
     output: {
         path: path.join(__dirname, 'dist'),

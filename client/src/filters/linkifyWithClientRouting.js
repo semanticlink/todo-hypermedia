@@ -41,7 +41,7 @@ function syntaxHighlight(json) {
  * @param val
  * @returns {*}
  */
-const linkHighlight = val => linkifyHtml(val, {
+const linkHighlightWithClientRouting = val => linkifyHtml(val, {
     // ensure the the attribute target is removed otherwise we create new tabs in the browser
     target: {
         url: undefined
@@ -50,12 +50,29 @@ const linkHighlight = val => linkifyHtml(val, {
     formatHref: fragmentToRoam
 });
 
+const linkHighlightToSelf = val => linkifyHtml(val, {
+    // ensure the the attribute target is removed otherwise we create new tabs in the browser
+    target: {
+        url: undefined
+    }
+});
+
 /**
- * Take an in-memory object and pretty print JSON with clickable links
+ * Take an in-memory object and pretty print JSON with clickable links doing client view mapping to
+ * the router
  * @param {*} obj
  * @param {number=4} spaces
  * @returns {*}
  */
-const linkify = (obj, spaces) => linkHighlight(syntaxHighlight(JSON.stringify(obj, null, spaces || 4)));
+const linkifyWithClientRouting = (obj, spaces) => linkHighlightWithClientRouting(syntaxHighlight(JSON.stringify(obj, null, spaces || 4)));
 
-export default linkify;
+/**
+ * Take an in-memory object and pretty print JSON with clickable links.
+ * @param {*} obj
+ * @param {number=4} spaces
+ * @returns {*}
+ */
+const linkifyToSelf = (obj, spaces) => linkHighlightToSelf(syntaxHighlight(JSON.stringify(obj, null, spaces || 4)));
+
+export { linkifyToSelf, linkifyWithClientRouting };
+export default linkifyWithClientRouting;
