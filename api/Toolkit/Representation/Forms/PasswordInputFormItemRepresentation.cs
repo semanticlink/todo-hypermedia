@@ -7,7 +7,7 @@ namespace Toolkit.Representation.Forms
     {
         public PasswordInputFormItemRepresentation()
         {
-            Type = "http://types/text/password";
+            Type = FormType.Password;
         }
     }
 }

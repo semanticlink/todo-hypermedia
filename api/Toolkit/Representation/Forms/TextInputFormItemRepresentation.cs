@@ -8,7 +8,7 @@ namespace Toolkit.Representation.Forms
     {
         public TextInputFormItemRepresentation()
         {
-            Type = "http://types/text";
+            Type = FormType.Text;
         }
 
     }

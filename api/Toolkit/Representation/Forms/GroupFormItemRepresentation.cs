@@ -7,7 +7,7 @@ namespace Toolkit.Representation.Forms
     {
         public GroupFormItemRepresentation()
         {
-            Type = "http://types/group";
+            Type = FormType.Group;
         }
 
         [DataMember(Name = "items", Order = 100)]

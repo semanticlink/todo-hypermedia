@@ -7,7 +7,7 @@ namespace Toolkit.Representation.Forms
     {
         public CheckInputFormItemRepresentation()
         {
-            Type = "http://types/text";
+            Type = FormType.Check;
         }
 
     }

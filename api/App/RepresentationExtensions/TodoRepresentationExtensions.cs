@@ -155,7 +155,11 @@ namespace App.RepresentationExtensions
                     Name = "completed",
                     Description = "True or false of whether the task is completed. Default: false"
                 },
-                new DateTimeInputFormItemRepresentation {Name = "due", Description = "The UTC date the todo is due"},
+                new DateTimeInputFormItemRepresentation
+                {
+                    Name = "due",
+                    Description = "The UTC date the todo is due"
+                },
             };
         }
     }

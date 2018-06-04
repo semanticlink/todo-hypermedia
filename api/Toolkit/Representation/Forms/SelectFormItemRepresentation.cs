@@ -7,7 +7,7 @@ namespace Toolkit.Representation.Forms
     {
         public SelectFormItemRepresentation()
         {
-            Type = "http://types/select";
+            Type = FormType.Select;
         }
 
         /// <summary>

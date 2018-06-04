@@ -7,7 +7,7 @@ namespace Toolkit.Representation.Forms
     {
         public DateInputFormItemRepresentation()
         {
-            Type = "http://types/date";
+            Type = FormType.Date;
         }
     }
 }

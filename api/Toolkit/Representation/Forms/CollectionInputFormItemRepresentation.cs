@@ -7,7 +7,7 @@ namespace Toolkit.Representation.Forms
     {
         public CollectionInputFormItemRepresentation()
         {
-            Type = "http://types/collection";
+            Type = FormType.Collection;
         }
     }
 }

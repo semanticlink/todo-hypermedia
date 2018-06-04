@@ -92,7 +92,7 @@ namespace App.RepresentationExtensions
         {
             return new FormItemRepresentation[]
             {
-                new TextInputFormItemRepresentation
+                new EmailInputFormItemRepresentation
                 {
                     Name = "email",
                     Description = "The email address of the user",
@@ -136,7 +136,7 @@ namespace App.RepresentationExtensions
         {
             return new FormItemRepresentation[]
             {
-                new TextInputFormItemRepresentation
+                new EmailInputFormItemRepresentation
                 {
                     Name = "email",
                     Description = "The email address of the user",
