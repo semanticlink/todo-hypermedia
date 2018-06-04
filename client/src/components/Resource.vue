@@ -1,38 +1,68 @@
 <template>
     <div>
-        <div>
-            <b-btn v-if="canEdit" @click="makeEdit">Edit</b-btn>
-            <b-btn v-if="canCreate">Create</b-btn>
-        </div>
 
-        <div>
-            <div v-for="(value, key) in requestheaders">
-                <b-badge variant="primary" pill>{{key}}</b-badge>
-                {{value}}
-            </div>
-        </div>
+        <b-tabs>
+            <b-tab title="JSON" active>
 
-        <pre v-html="htmlRepresentation"/>
+                <div>
+                    <b-btn v-if="canEdit" @click="makeEdit">Edit</b-btn>
+                    <b-btn v-if="canCreate">Create</b-btn>
+                </div>
 
-        <div>
-            <div v-for="(value, key) in headers">
-                <b-badge variant="primary" pill>{{key}}</b-badge>
-                {{value}}
-            </div>
-        </div>
+                <pre v-html="htmlRepresentation"/>
 
-        <b-container fluid v-if="canEdit && editForm">
-            <b-row class="my-1" v-for="item in editForm.items" :key="item.name">
-                <b-col sm="3"><label :for="`type-${item.type}`">Type {{ item.name }}:</label></b-col>
-                <b-col sm="9">
-                    <b-form-input :id="`type-${item.type}`"
-                                  :type="type(item.type)"
-                                  v-model="representation[item.name]"
-                                  :placeholder="`${item.description}`"/>
-                </b-col>
-            </b-row>
-            <b-btn @click="update">Update</b-btn>
-        </b-container>
+                <div>
+                    <b-btn v-if="canEdit" @click="makeEdit">Edit</b-btn>
+                    <b-btn v-if="canCreate">Create</b-btn>
+                </div>
+
+                <b-container fluid v-if="canEdit && editForm">
+                    <b-row class="my-1" v-for="item in editForm.items" :key="item.name">
+                        <b-col sm="3"><label :for="`type-${item.type}`">Type {{ item.name }}:</label></b-col>
+                        <b-col sm="9">
+                            <b-form-input :id="`type-${item.type}`"
+                                          :type="type(item.type)"
+                                          v-model="representation[item.name]"
+                                          :placeholder="`${item.description}`"/>
+                        </b-col>
+                    </b-row>
+                    <b-btn @click="update">Update</b-btn>
+                </b-container>
+
+            </b-tab>
+            <b-tab title="Raw">
+                {{ representation }}
+            </b-tab>
+            <b-tab title="Headers">
+
+                <b-card title="Request Headers">
+                    <b-container>
+                        <b-row class="row" v-for="(value, key) in requestheaders">
+                            <b-col cols="2" >
+                                <span class="float-right">{{key}}</span>
+                            </b-col>
+                            <b-col>{{value}}</b-col>
+                        </b-row>
+                    </b-container>
+                </b-card>
+                <b-card title="Response Headers">
+                    <b-container>
+                        <b-row class="row" v-for="(value, key) in headers">
+                            <b-col cols="2">
+                                <span class="float-right">{{key}}</span>
+                            </b-col>
+                            <b-col>{{value}}</b-col>
+                        </b-row>
+                    </b-container>
+                </b-card>
+
+            </b-tab>
+
+            <b-tab title="Logout">
+                <Logout></Logout>
+            </b-tab>
+        </b-tabs>
+
 
     </div>
 </template>
@@ -42,6 +72,7 @@
     import axios from 'axios';
     import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
     import { link, log, SemanticLink } from 'semanticLink';
+    import Logout from './Logout.vue';
 
     /**
      * Maps the representation types to the known types that can be rendered (input not select at this stage)
@@ -77,10 +108,12 @@
 
     };
 
+
     export default {
         props: {
             apiUri: {type: String},
         },
+        components: {Logout},
         data() {
             return {
                 response: {},

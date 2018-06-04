@@ -15,6 +15,7 @@
      * Note: this should be deleting an authentication token
      */
     export default {
+        name: "Logout",
         data() {
             return {
                 authenticated: false

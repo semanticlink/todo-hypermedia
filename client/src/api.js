@@ -6,7 +6,6 @@ import VueLocalStorage from 'vue-localstorage';
 
 import Offline from './components/Offline.vue';
 import Login from './components/Login.vue';
-import Logout from './components/Logout.vue';
 import Resource from './components/Resource.vue';
 
 import { setBearerToken } from './lib/http-interceptors';
@@ -65,6 +64,6 @@ new Vue({
     data: {
         apiUri: document.querySelector('HEAD link[rel="self"]').href
     },
-    components: {Offline, Login, Resource, Logout},
-    template: '<div><Resource :apiUri="this.apiUri"></Resource><Offline/><Login/><Logout/></div>'
+    components: {Offline, Login, Resource},
+    template: '<div><Resource :apiUri="this.apiUri"></Resource><Offline/><Login/></div>'
 });
