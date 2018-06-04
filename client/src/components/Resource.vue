@@ -18,16 +18,21 @@
                 </div>
 
                 <b-container fluid v-if="canEdit && editForm">
-                    <b-row class="my-1" v-for="item in editForm.items" :key="item.name">
-                        <b-col sm="3"><label :for="`type-${item.type}`">Type {{ item.name }}:</label></b-col>
-                        <b-col sm="9">
-                            <b-form-input :id="`type-${item.type}`"
-                                          :type="type(item.type)"
-                                          v-model="representation[item.name]"
-                                          :placeholder="`${item.description}`"/>
-                        </b-col>
-                    </b-row>
-                    <b-btn @click="update">Update</b-btn>
+
+                    <Form :representation="representation" :form="editForm" :on-updated="onUpdated"/>
+
+                    <!--
+                                        <b-row class="my-1" v-for="item in editForm.items" :key="item.name">
+                                            <b-col sm="3"><label :for="`type-${item.type}`">Type {{ item.name }}:</label></b-col>
+                                            <b-col sm="9">
+                                                <b-form-input :id="`type-${item.type}`"
+                                                              :type="type(item.type)"
+                                                              v-model="representation[item.name]"
+                                                              :placeholder="`${item.description}`"/>
+                                            </b-col>
+                                        </b-row>
+                                        <b-btn @click="update">Update</b-btn>
+                    -->
                 </b-container>
 
             </b-tab>
@@ -55,15 +60,15 @@
     import axios from 'axios';
     import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
     import { link, log, SemanticLink } from 'semanticLink';
-    import { mapApiToUiType} from "../lib/form-type-mappings";
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
+    import Form from './Form.vue';
 
     export default {
         props: {
             apiUri: {type: String},
         },
-        components: {Logout, Headers},
+        components: {Logout, Headers, Form},
         data() {
             return {
                 response: {},
@@ -105,7 +110,19 @@
                         vm.editForm = response.data;
                     });
             },
-            type:  mapApiToUiType,
+            onUpdated(representation, response) {
+                axios.get(this.apiUri, {headers: {'Accept': this.accept}})
+                    .then(response => {
+                        this.response = response;
+                        this.headers = response.headers;
+                        this.representation = (response.data);
+                        this.htmlRepresentation = linkifyToSelf(response.data);
+                        this.requestheaders = response.config.headers;
+
+                        
+
+                    });
+            },
             update() {
                 return;
             }
