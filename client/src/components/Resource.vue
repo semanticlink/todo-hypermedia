@@ -2,6 +2,7 @@
     <div>
 
         <b-tabs>
+
             <b-tab title="JSON" active>
 
                 <div>
@@ -30,32 +31,14 @@
                 </b-container>
 
             </b-tab>
+
             <b-tab title="Raw">
                 {{ representation }}
             </b-tab>
+
             <b-tab title="Headers">
-
-                <b-card title="Request Headers">
-                    <b-container>
-                        <b-row class="row" v-for="(value, key) in requestheaders">
-                            <b-col cols="2" >
-                                <span class="float-right">{{key}}</span>
-                            </b-col>
-                            <b-col>{{value}}</b-col>
-                        </b-row>
-                    </b-container>
-                </b-card>
-                <b-card title="Response Headers">
-                    <b-container>
-                        <b-row class="row" v-for="(value, key) in headers">
-                            <b-col cols="2">
-                                <span class="float-right">{{key}}</span>
-                            </b-col>
-                            <b-col>{{value}}</b-col>
-                        </b-row>
-                    </b-container>
-                </b-card>
-
+                <headers title="Request Headers" :headers="requestheaders"/>
+                <headers title="Response Headers" :headers="headers"/>
             </b-tab>
 
             <b-tab title="Logout">
@@ -73,6 +56,7 @@
     import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
     import { link, log, SemanticLink } from 'semanticLink';
     import Logout from './Logout.vue';
+    import Headers from './Headers.vue'
 
     /**
      * Maps the representation types to the known types that can be rendered (input not select at this stage)
@@ -113,7 +97,7 @@
         props: {
             apiUri: {type: String},
         },
-        components: {Logout},
+        components: {Logout, Headers},
         data() {
             return {
                 response: {},
@@ -167,9 +151,8 @@
     }
 </script>
 
-<style>
+<style scoped>
     pre {
-        /*outline: 1px solid #ccc;*/
         padding: 5px;
         margin: 5px;
     }
@@ -193,4 +176,6 @@
     .key {
         color: red;
     }
+
+
 </style>
