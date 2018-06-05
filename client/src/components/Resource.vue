@@ -5,34 +5,16 @@
 
             <b-tab title="JSON" active>
 
-                <div>
-                    <b-btn v-if="canEdit" @click="makeEdit">Edit</b-btn>
-                    <b-btn v-if="canCreate">Create</b-btn>
-                </div>
+                <b-container fluid>
 
-                <pre v-html="htmlRepresentation"/>
+                    <Form :representation="representation"
+                          :formRepresentation="formRepresentation"
+                          :on-updated="onUpdated"
+                          :formRel="formRel"
+                          v-if="formRepresentation"/>
 
-                <div>
-                    <b-btn v-if="canEdit" @click="makeEdit">Edit</b-btn>
-                    <b-btn v-if="canCreate">Create</b-btn>
-                </div>
+                    <pre v-html="htmlRepresentation" ref="representation"/>
 
-                <b-container fluid v-if="canEdit && editForm">
-
-                    <Form :representation="representation" :form="editForm" :on-updated="onUpdated"/>
-
-                    <!--
-                                        <b-row class="my-1" v-for="item in editForm.items" :key="item.name">
-                                            <b-col sm="3"><label :for="`type-${item.type}`">Type {{ item.name }}:</label></b-col>
-                                            <b-col sm="9">
-                                                <b-form-input :id="`type-${item.type}`"
-                                                              :type="type(item.type)"
-                                                              v-model="representation[item.name]"
-                                                              :placeholder="`${item.description}`"/>
-                                            </b-col>
-                                        </b-row>
-                                        <b-btn @click="update">Update</b-btn>
-                    -->
                 </b-container>
 
             </b-tab>
@@ -51,7 +33,6 @@
             </b-tab>
         </b-tabs>
 
-
     </div>
 </template>
 
@@ -59,10 +40,45 @@
 
     import axios from 'axios';
     import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
-    import { link, log, SemanticLink } from 'semanticLink';
+    import { link } from 'semanticLink';
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
+    import Vue from 'vue';
+
+    /**
+     *
+     * @param rel
+     * @returns {HTMLElement[]}
+     */
+    const findLinkRel = (rel) => {
+        return [...document.querySelectorAll('span.string')]      // get all the divs in an array
+            .filter(div => div.innerText.includes(rel))               // get their contents
+            .map(div => div.nextElementSibling.nextElementSibling);
+    };
+
+    const addButtonToHref = (el, propsData = {}) => {
+
+        // https://stackoverflow.com/questions/35927664/how-to-add-dynamic-components-partials-in-vue-js
+        // https://css-tricks.com/creating-vue-js-component-instances-programmatically/
+        const Btn = Vue.extend({
+            template: '<b-button size="sm" variant="secondary" @click="onClick(rel)">{{title}}</b-button>',
+            props: {
+                title: {default: 'Edit'},
+                onClick: {
+                    type: Function, default: () => {
+                    }
+                },
+                rel: {default: 'edit-form'}
+            }
+        });
+
+        const instance = new Btn({propsData});
+
+        el.insertBefore(instance.$mount().$el, el.firstChild);
+    };
+
+    const makeButtonOnLinkRels = (rel, propsData) => findLinkRel(rel).forEach(el => addButtonToHref(el, Object.assign({}, {rel}, propsData)));
 
     export default {
         props: {
@@ -76,38 +92,21 @@
                 headers: null,
                 requestheaders: null,
                 representation: null,
-                editForm: null,
+                formRepresentation: null,
+                formRel: null,
                 accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8, application/json;q=0.95'
             };
         },
         created() {
-            log.info(`Resource uri: '${this.apiUri}'`);
-            axios.get(this.apiUri, {headers: {'Accept': this.accept}})
-                .then(response => {
-                    this.response = response;
-                    this.headers = response.headers;
-                    this.representation = (response.data);
-                    this.htmlRepresentation = linkifyToSelf(response.data);
-                    this.requestheaders = response.config.headers;
-
-                });
-
+            return this.onUpdated()
         },
-        computed: {
-            canEdit() {
-                return SemanticLink.matches(this.representation, 'edit-form');
-            },
-            canCreate() {
-                return SemanticLink.matches(this.representation, 'create-form');
-            }
-        }
-        ,
         methods: {
-            makeEdit() {
+            getForm(rel) {
                 const vm = this;
-                link.get(this.representation, 'edit-form')
+                link.get(this.representation, rel)
                     .then(response => {
-                        vm.editForm = response.data;
+                        vm.formRepresentation = response.data;
+                        vm.formRel = rel;
                     });
             },
             onUpdated(representation, response) {
@@ -119,12 +118,19 @@
                         this.htmlRepresentation = linkifyToSelf(response.data);
                         this.requestheaders = response.config.headers;
 
-                        
+                        this.$nextTick(() => {
+                            makeButtonOnLinkRels('edit-form', {onClick: this.getForm});
+                            makeButtonOnLinkRels('create-form', {onClick: this.getForm, title: 'Add'});
+                        });
 
+                        this.resetForm();
                     });
             },
             update() {
                 return;
+            },
+            resetForm(){
+                this.formRepresentation = null;
             }
         }
     }
