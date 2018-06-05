@@ -5,7 +5,7 @@
 
             <b-tab title="JSON" active>
 
-                <b-container fluid>
+                <b-container fluid class="m-3 pr-3">
 
                     <Form :representation="representation"
                           :formRepresentation="formRepresentation"
@@ -14,23 +14,47 @@
                           :formRel="formRel"
                           v-if="formRepresentation"/>
 
-                    <pre v-html="htmlRepresentation" v-show="!formRepresentation"/>
+                    <div v-show="!formRepresentation">
+                        <b-button size="sm" @click="copyToClipboard">Copy</b-button>
+                        <b-button size="sm" @click="saveToFile">Save</b-button>
+                        <br/>
+                        <pre v-html="htmlRepresentation"/>
+                    </div>
 
                 </b-container>
 
             </b-tab>
 
             <b-tab title="Raw">
-                {{ representation }}
+
+                <b-container fluid class="m-3 pr-3">
+
+                    <b-button size="sm" @click="copyToClipboard">Copy</b-button>
+                    <b-button size="sm" @click="saveToFile">Save</b-button>
+
+                    <b-button size="sm" @click="prettyprint = !prettyprint" v-if="!prettyprint">Pretty Print</b-button>
+                    <b-button size="sm" variant="outline" @click="prettyprint = !prettyprint" v-else>Pretty Print</b-button>
+                    <br/>
+                    <div class="mt-3">
+                        <pre v-if="prettyprint">{{ representation }}</pre>
+                        <code v-else>{{ representation }}</code>
+                    </div>
+
+                </b-container>
             </b-tab>
 
             <b-tab title="Headers">
-                <headers title="Request Headers" :headers="requestHeaders"/>
-                <headers title="Response Headers" :headers="reponseHeaders"/>
+
+                <headers title="Request Headers" :headers="requestHeaders" class="m-3"/>
+                <hr/>
+                <headers title="Response Headers" :headers="responseHeaders" class="m-3"/>
+
             </b-tab>
 
             <b-tab title="Logout">
-                <Logout/>
+                <b-container fluid>
+                    <Logout class="mt-3"/>
+                </b-container>
             </b-tab>
         </b-tabs>
 
@@ -46,6 +70,7 @@
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
+    import { copyToClipboard, saveToFile } from "../lib/raw-helpers";
 
 
     export default {
@@ -68,7 +93,7 @@
                 /**
                  * @type {AxiosResponse.headers}
                  */
-                reponseHeaders: null,
+                responseHeaders: null,
                 /**
                  * @type {AxiosRequestConfig.headers}
                  */
@@ -85,7 +110,12 @@
                  * Default Accept header that asks for HTML > JSON > XML > anything
                  * @type {string}
                  */
-                defaultAccept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8, application/json;q=0.95'
+                defaultAccept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8, application/json;q=0.95',
+                /**
+                 * Print print UI flag. True = formatted down the page, False = no extra white spaces
+                 * @type {boolean}
+                 */
+                prettyprint: false
             };
         },
         created() {
@@ -178,10 +208,10 @@
             getRepresentation() {
                 return axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}})
                     .then(/** @type {AxiosResponse} */response => {
-                        this.reponseHeaders = response.reponseHeaders;
+                        this.responseHeaders = response.headers;
                         this.representation = (response.data);
                         this.htmlRepresentation = linkifyToSelf(response.data);
-                        this.requestHeaders = response.config.reponseHeaders;
+                        this.requestHeaders = response.config.headers;
 
                         this.$nextTick(() => {
                             makeButtonOnLinkifyLinkRels('edit-form', {onClick: this.getForm, title: 'Edit'});
@@ -200,6 +230,17 @@
             },
             resetForm() {
                 this.formRepresentation = null;
+            },
+            copyToClipboard() {
+                copyToClipboard(JSON.stringify(this.representation, null, 2));
+                this.$notify('Copied to clipboard');
+
+            },
+            saveToFile() {
+                saveToFile(
+                    JSON.stringify(this.representation, null, 2),
+                    (this.representation.name || this.representation.title || 'unknown') + '.json',
+                    'application/json');
             }
         }
     }
@@ -230,6 +271,5 @@
     .key {
         color: red;
     }
-
 
 </style>

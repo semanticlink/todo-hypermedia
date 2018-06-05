@@ -1,4 +1,5 @@
 <template>
+    
     <b-form @submit="submit" v-if="authenticated">
         <b-button type="submit" variant="primary">Logout</b-button>
     </b-form>
