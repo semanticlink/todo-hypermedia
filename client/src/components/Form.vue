@@ -12,6 +12,7 @@
                           :placeholder="item.description"></b-form-input>
         </b-form-group>
         <b-button type="submit" variant="primary">Submit</b-button>
+        <b-button variant="secondary" @click="onCancel">Cancel</b-button>
     </b-form>
 
 </template>
@@ -37,6 +38,12 @@
                 default: () => {
                 }
             },
+             onCancel: {
+                type: Function,
+                required: false,
+                default: () => {
+                }
+            },
             formRel: {
                 type: String,
                 required: true
@@ -45,10 +52,20 @@
         data() {
             return {
                 error: null,
+                /**
+                 * An in-memory object of the data that we are going to send back to the server. In the case of a
+                 * create form it will be empty (new) and the edit form it will be a clone of the representation
+                 * to be updated.
+                 *
+                 * @type {*|LinkedRepresentation}
+                 */
                 formObj: null
             }
         },
         created() {
+            this.init();
+         },
+        init(){
             if (this.isCreateForm()) {
                 this.formObj = {};
             } else if (this.isEditForm()) {
@@ -64,6 +81,10 @@
             isEditForm() {
                 return /^edit-form$/.test(this.formRel);
             },
+            /**
+             * On all the fields are entered then eithe make a PUT (edit/update) or POST (create) based on
+             * the referring representation
+             */
             submit() {
                 const changes = this.representation;
 

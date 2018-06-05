@@ -90,16 +90,16 @@
                 response: {},
                 htmlRepresentation: null,
                 headers: null,
-                requestheaders: null,
+                requestHeaders: null,
                 representation: null,
                 editForm: null,
-                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8, application/json;q=0.95'
+                defaultAccept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8, application/json;q=0.95'
             };
         },
         computed: {
             self() {
 
-                axios.get(this.apiUri, {headers: {'Accept': this.accept}})
+                axios.get(this.apiUri, {headers: {'Accept': this.defaultAccept}})
                     .then(response => {
                         this.response = response;
                         this.headers = response.headers;
