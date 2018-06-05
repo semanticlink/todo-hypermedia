@@ -85,11 +85,13 @@
             submit() {
                 const changes = this.representation;
 
-                let verb;
+                let verb, message;
                 if (this.isCreateForm()) {
                     verb = 'post';
+                    message = 'Item created successfully';
                 } else if (this.isEditForm()) {
                     verb = 'put'
+                    message = 'Item updated successfully'
                 } else {
                     log.warn('Trying to display form of unkown type');
                     return
@@ -98,9 +100,11 @@
                 link[verb](this.representation, 'self', 'application/json', this.formObj)
                     .then(/** @type {AxiosResponse} */(r) => {
                         this.onUpdated(changes, r);
+                        this.$notify({text: message, type: 'success'});
+
                     })
                     .catch(/** @type {AxiosError} */error => {
-                        this.error = error.response.statusText;
+                        this.$notify(error.response.statusText)
                     });
             },
             mapApiToUiType: mapApiToUiType

@@ -14,7 +14,7 @@
                           :formRel="formRel"
                           v-if="formRepresentation"/>
 
-                    <pre v-html="htmlRepresentation" ref="representation"/>
+                    <pre v-html="htmlRepresentation" v-show="!formRepresentation"/>
 
                 </b-container>
 
@@ -30,7 +30,7 @@
             </b-tab>
 
             <b-tab title="Logout">
-                <Logout></Logout>
+                <Logout/>
             </b-tab>
         </b-tabs>
 
@@ -42,7 +42,7 @@
     import axios from 'axios';
     import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
     import { makeButtonOnLinkifyLinkRels } from "../filters/makeButtonOnLinkifyLinkRels";
-    import { link } from 'semanticLink';
+    import { link, SemanticLink } from 'semanticLink';
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
@@ -114,7 +114,8 @@
              * @param {string} rel
              * @return {Promise}
              */
-            tryDeleteRepresentation(rel) {
+            tryDelete(rel) {
+
                 return link.delete(this.representation, /self/)
                     .then(/** @type {AxiosResponse} */response => {
 
@@ -131,18 +132,29 @@
                                 }))
                                 .catch(/** @type {AxiosResponse} */response => {
                                     if (response.status === 404 || response.status === 204) {
+
+                                        const uri = SemanticLink.getUri(this.representation, /up/) || '/';
+
                                         this.$notify({
                                             type: 'success',
-                                            text: 'Item successfully deleted. Redirecting to \'up\' link relations'
+                                            title: 'Item successfully deleted.',
+                                            text: `Redirecting to <a href="${uri}">item</a>`
+
                                         });
+
+                                        setTimeout(() => {
+                                            window.location.href = uri;
+                                        }, 3000);
+
+
                                     } else {
                                         log.warn('Request is in weird state');
                                     }
                                 });
                         } else {
                             this.$notify({
-                                type: 'warning',
-                                title: `Response code: ${response.status}`,
+                                type: 'error',
+                                title: response.statusText || '',
                                 text: 'This is weird and should be understood'
                             });
                         }
@@ -151,8 +163,12 @@
                         // try again just to ensure it is deleted
                         // if not stay showing and show an error that it didn't delete
                     })
-                    .catch(/** @type {AxiosResponse} */response => {
-                        this.$notify({title: response.statusText, text: 'You can\'t delete this, sorry', type: 'info'});
+                    .catch(/** @type {AxiosResponse|*} */response => {
+                        this.$notify({
+                            title: response.statusText,
+                            text: 'You can\'t delete this, sorry',
+                            type: 'error'
+                        });
                     });
             },
             /**
@@ -170,10 +186,7 @@
                         this.$nextTick(() => {
                             makeButtonOnLinkifyLinkRels('edit-form', {onClick: this.getForm, title: 'Edit'});
                             makeButtonOnLinkifyLinkRels('create-form', {onClick: this.getForm, title: 'Add'});
-                            makeButtonOnLinkifyLinkRels('self', {
-                                onClick: this.tryDeleteRepresentation,
-                                title: 'Delete'
-                            });
+                            makeButtonOnLinkifyLinkRels('self', {onClick: this.tryDelete, title: 'Delete'});
                         });
 
                         this.resetForm();
