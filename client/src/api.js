@@ -11,11 +11,13 @@ import Resource from './components/Resource.vue';
 import { setBearerToken } from './lib/http-interceptors';
 
 import BootstrapVue from 'bootstrap-vue';
+import Notifications from 'vue-notification';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
 Vue.use(BootstrapVue);
+Vue.use(Notifications);
 
 require('./lib/http-interceptors');
 
@@ -65,5 +67,5 @@ new Vue({
         apiUri: document.querySelector('HEAD link[rel="self"]').href
     },
     components: {Offline, Login, Resource},
-    template: '<div><Resource :apiUri="this.apiUri"></Resource><Offline/><Login/></div>'
+    template: '<div><Resource :apiUri="this.apiUri"></Resource><Offline/><Login/><notifications/></div>'
 });

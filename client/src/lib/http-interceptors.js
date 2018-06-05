@@ -149,7 +149,7 @@ export const WWW_AUTHENTICATE_HEADER = 'www-authenticate';
  *
  * @type {RegExp}
  */
-export const MATCH_WWW_AUTHENTICATE_HEADER = /Bearer realm="api", rel="([^,]*)" api="([^,]*)"/;
+export const MATCH_WWW_AUTHENTICATE_HEADER = /Bearer realm="api", rel=([^,]*), uri=([^,]*)/;
 
 /**
  * Looks inside the 401 response www-authenticate header and gets the link relation

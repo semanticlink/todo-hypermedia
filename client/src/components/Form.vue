@@ -59,13 +59,10 @@
                  *
                  * @type {*|LinkedRepresentation}
                  */
-                formObj: null
+                formObj: {}
             }
         },
         created() {
-            this.init();
-         },
-        init(){
             if (this.isCreateForm()) {
                 this.formObj = {};
             } else if (this.isEditForm()) {
@@ -73,7 +70,7 @@
             } else {
                 log.warn('Trying to display form of unknown type');
             }
-        },
+         },
         methods: {
             isCreateForm() {
                 return /^create-form$/.test(this.formRel);

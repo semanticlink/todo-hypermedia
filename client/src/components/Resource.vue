@@ -94,6 +94,7 @@
         methods: {
             /**
              * On a button click of an action, GET the form so that it can be rendered
+             * @param {string} rel link relation
              */
             getForm(rel) {
                 const vm = this;
@@ -101,6 +102,57 @@
                     .then(response => {
                         vm.formRepresentation = response.data;
                         vm.formRel = rel;
+                    });
+            },
+            /**
+             * Try and delete a representation. Because all 'self' links have a delete option, we'll try and then if
+             * successful move the user back to the 'up' link relation of the deleted resource or if it failed (ie this
+             * isn't an available option) show the message to the user.
+             *
+             * TODO: note this could try OPTIONS first
+             *
+             * @param {string} rel
+             * @return {Promise}
+             */
+            tryDeleteRepresentation(rel) {
+                return link.delete(this.representation, /self/)
+                    .then(/** @type {AxiosResponse} */response => {
+
+                        if (response.status === 204 || response.status === 200 || response.status === 202) {
+
+                            if (response.status === 202) {
+                                this.$notify({type: 'info', text: 'Resource marked for deletion. Confirming deletion'})
+                            }
+
+                            return link.get(this.representation, /self/)
+                                .then(() => this.$notify({
+                                    type: 'error',
+                                    text: 'This item was unable to be deleted and still exists'
+                                }))
+                                .catch(/** @type {AxiosResponse} */response => {
+                                    if (response.status === 404 || response.status === 204) {
+                                        this.$notify({
+                                            type: 'success',
+                                            text: 'Item successfully deleted. Redirecting to \'up\' link relations'
+                                        });
+                                    } else {
+                                        log.warn('Request is in weird state');
+                                    }
+                                });
+                        } else {
+                            this.$notify({
+                                type: 'warning',
+                                title: `Response code: ${response.status}`,
+                                text: 'This is weird and should be understood'
+                            });
+                        }
+
+
+                        // try again just to ensure it is deleted
+                        // if not stay showing and show an error that it didn't delete
+                    })
+                    .catch(/** @type {AxiosResponse} */response => {
+                        this.$notify({title: response.statusText, text: 'You can\'t delete this, sorry', type: 'info'});
                     });
             },
             /**
@@ -116,9 +168,12 @@
                         this.requestHeaders = response.config.reponseHeaders;
 
                         this.$nextTick(() => {
-                            makeButtonOnLinkifyLinkRels('edit-form', {onClick: this.getForm});
+                            makeButtonOnLinkifyLinkRels('edit-form', {onClick: this.getForm, title: 'Edit'});
                             makeButtonOnLinkifyLinkRels('create-form', {onClick: this.getForm, title: 'Add'});
-                            // makeButtonOnLinkifyLinkRels('self', {onClick: this.getForm, title: 'Delete'});
+                            makeButtonOnLinkifyLinkRels('self', {
+                                onClick: this.tryDeleteRepresentation,
+                                title: 'Delete'
+                            });
                         });
 
                         this.resetForm();
