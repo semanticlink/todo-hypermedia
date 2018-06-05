@@ -433,7 +433,7 @@ class SemanticLink {
      *
      * @param {(string|Element|Link[]|LinkedRepresentation)} links
      * @param {(string|RegExp)} relationshipType
-     * @param {string=} mediaType
+     * @param {?string=} mediaType
      * @param {?Promise} cancellable
      * @return {Promise} a promise
      */
@@ -454,7 +454,7 @@ class SemanticLink {
      *
      * @param {(string|Element|Link[]|LinkedRepresentation)} links
      * @param {string|RegExp|string[]|RegExp[]} relationshipType
-     * @param {string=} mediaType
+     * @param {?string=} mediaType
      * @param {?Promise} cancellable
      * @param {*} defaultValue the value to return if the link is not present
      * @return {*}
@@ -476,7 +476,7 @@ class SemanticLink {
      *
      * @param {(string|Element|Link[]|LinkedRepresentation)} links
      * @param {string|RegExp|string[]|RegExp[]} relationshipType
-     * @param {string} mediaType
+     * @param {?string} mediaType
      * @param {*} data
      * @return {Promise}
      */
@@ -488,7 +488,7 @@ class SemanticLink {
      *
      * @param {(string|Element|Link[]|LinkedRepresentation)} links
      * @param {string|RegExp|string[]|RegExp[]} relationshipType
-     * @param {string=} mediaType
+     * @param {?string=} mediaType
      * @param {*} data
      * @return {Promise}
      */
@@ -501,7 +501,7 @@ class SemanticLink {
      *
      * @param {(string|Element|Link[]|LinkedRepresentation)} links
      * @param {string|RegExp|string[]|RegExp[]} relationshipType
-     * @param {string=} mediaType
+     * @param {?string=} mediaType
      * @param {*=} data
      * @return {Promise}http://localhost:8000/client/src/index.html#/survey/specification/a/survey/3209
      */

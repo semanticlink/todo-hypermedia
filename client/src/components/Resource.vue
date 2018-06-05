@@ -146,21 +146,27 @@
              */
             tryDelete(rel) {
 
-                return link.delete(this.representation, /self/)
-                    .then(/** @type {AxiosResponse} */response => {
+                return link.delete(this.representation, /^self$/)
+                    .then(/** @type {AxiosResponse|Error} */response => {
 
+                        // appropriate repsonses from a deleted resource
+                        // seehttps://stackoverflow.com/questions/2342579/http-status-code-for-update-and-delete
                         if (response.status === 204 || response.status === 200 || response.status === 202) {
 
+                            // 202 is that is accepted to be processed (TODO: retry mechanism that isn't immediate)
                             if (response.status === 202) {
                                 this.$notify({type: 'info', text: 'Resource marked for deletion. Confirming deletion'})
                             }
 
-                            return link.get(this.representation, /self/)
+                            // check that it has in fact been deleted
+                            return link.get(this.representation, /^self$/)
+                                // it is an error if it succeeds
                                 .then(() => this.$notify({
                                     type: 'error',
                                     text: 'This item was unable to be deleted and still exists'
                                 }))
                                 .catch(/** @type {AxiosResponse} */response => {
+                                    // success if it isn't found or no content
                                     if (response.status === 404 || response.status === 204) {
 
                                         const uri = SemanticLink.getUri(this.representation, /up/) || '/';
@@ -184,14 +190,11 @@
                         } else {
                             this.$notify({
                                 type: 'error',
-                                title: response.statusText || '',
-                                text: 'This is weird and should be understood'
+                                title: response.statusText || response.message || '',
+                                text: 'This should be fixed'
                             });
                         }
 
-
-                        // try again just to ensure it is deleted
-                        // if not stay showing and show an error that it didn't delete
                     })
                     .catch(/** @type {AxiosResponse|*} */response => {
                         this.$notify({
