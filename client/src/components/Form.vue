@@ -6,15 +6,18 @@
                       :key="item.name"
                       :label="item.name">
             <!-- date time pickers are unrealiable across browsers and devices -->
-            <datetime
-                    v-if="mapApiToUiType(item.type) === 'date' || mapApiToUiType(item.type) === 'datetime'"
-                    :type="mapApiToUiType(item.type)"
-                    v-model="formObj[item.name]"
-                    input-class="form-control"
-                    :phrases="{ok: 'Continue', cancel: 'Exit'}"
-                    use12-hour
-                    :min-datetime="minDatetime"
-            />
+            <template v-if="mapApiToUiType(item.type) === 'date' || mapApiToUiType(item.type) === 'datetime'">
+                <datetime
+                        :type="mapApiToUiType(item.type)"
+                        v-model="formObj[item.name]"
+                        input-class="form-control"
+                        :phrases="{ok: 'Continue', cancel: 'Exit'}"
+                        use12-hour
+                        auto
+                        :min-datetime="minDatetime"
+                ></datetime>
+                <div>{{ localDateTime.zoneName}} ({{ localDateTime.offsetNameLong}}) </div>
+            </template>
             <b-form-radio-group
                     v-else-if="mapApiToUiType(item.type) === 'check'"
                     v-model="formObj[item.name]"
@@ -88,7 +91,8 @@
                  * @type {*|LinkedRepresentation}
                  */
                 formObj: {},
-                minDatetime: LuxonDateTime.local().toISO()
+                minDatetime: LuxonDateTime.local().toISO(),
+                localDateTime: LuxonDateTime.local()
             }
         },
         created() {
