@@ -30,8 +30,9 @@ const mapApiToUiType = type => {
         case 'http://types/check':
             return 'text';
         case 'http://types/date':
-        case 'http://types/date/time':
             return 'date';
+        case 'http://types/date/time':
+            return 'datetime';
         default:
             log.warn(`Form type not found: '${type}'`)
             return 'text';

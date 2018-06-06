@@ -5,11 +5,23 @@
         <b-form-group v-for="item in formRepresentation.items"
                       :key="item.name"
                       :label="item.name">
-            <b-form-input :id="`input-1-${item.name}`"
-                          :type="mapApiToUiType(item.type)"
-                          v-model="formObj[item.name]"
-                          :required="item.required"
-                          :placeholder="item.description"></b-form-input>
+            <!-- date time pickers are unrealiable across browsers and devices -->
+            <datetime
+                    v-if="mapApiToUiType(item.type) == 'date' || mapApiToUiType(item.type) == 'datetime'"
+                    :type="mapApiToUiType(item.type)"
+                    v-model="formObj[item.name]"
+                    input-class="form-control"
+                    :phrases="{ok: 'Continue', cancel: 'Exit'}"
+                    use12-hour
+                    :min-datetime="minDatetime"/>
+            <b-form-input
+                    v-else
+                    :id="`input-1-${item.name}`"
+                    :type="mapApiToUiType(item.type)"
+                    v-model="formObj[item.name]"
+                    :required="item.required"
+                    :placeholder="item.description"/>
+
         </b-form-group>
         <b-button type="submit" variant="primary">Submit</b-button>
         <b-button variant="secondary" @click="onCancel">Cancel</b-button>
@@ -20,9 +32,14 @@
 <script>
     import { mapApiToUiType } from '../lib/form-type-mappings';
     import { link, log } from "semanticLink";
+    import { Datetime } from 'vue-datetime';
+    import { DateTime as LuxonDateTime } from 'luxon'
+    // You need a specific loader for CSS files
+    import 'vue-datetime/dist/vue-datetime.css'
 
     export default {
         name: "Form",
+        components: {datetime: Datetime},
         props: {
             formRepresentation: {
                 type: Object,
@@ -38,7 +55,7 @@
                 default: () => {
                 }
             },
-             onCancel: {
+            onCancel: {
                 type: Function,
                 required: false,
                 default: () => {
@@ -59,7 +76,8 @@
                  *
                  * @type {*|LinkedRepresentation}
                  */
-                formObj: {}
+                formObj: {},
+                minDatetime: LuxonDateTime.local().toISO()
             }
         },
         created() {
@@ -70,7 +88,7 @@
             } else {
                 log.warn('Trying to display form of unknown type');
             }
-         },
+        },
         methods: {
             isCreateForm() {
                 return /^create-form$/.test(this.formRel);
