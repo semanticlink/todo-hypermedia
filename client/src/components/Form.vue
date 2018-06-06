@@ -7,20 +7,31 @@
                       :label="item.name">
             <!-- date time pickers are unrealiable across browsers and devices -->
             <datetime
-                    v-if="mapApiToUiType(item.type) == 'date' || mapApiToUiType(item.type) == 'datetime'"
+                    v-if="mapApiToUiType(item.type) === 'date' || mapApiToUiType(item.type) === 'datetime'"
                     :type="mapApiToUiType(item.type)"
                     v-model="formObj[item.name]"
                     input-class="form-control"
                     :phrases="{ok: 'Continue', cancel: 'Exit'}"
                     use12-hour
-                    :min-datetime="minDatetime"/>
+                    :min-datetime="minDatetime"
+            />
+            <b-form-radio-group
+                    v-else-if="mapApiToUiType(item.type) === 'check'"
+                    v-model="formObj[item.name]"
+                    buttons
+                    button-variant="outline-primary"
+                    size="sm"
+                    :options="[{text: 'True', value: true},{text: 'False', value: false}]"
+            ></b-form-radio-group>
+
             <b-form-input
                     v-else
                     :id="`input-1-${item.name}`"
                     :type="mapApiToUiType(item.type)"
                     v-model="formObj[item.name]"
                     :required="item.required"
-                    :placeholder="item.description"/>
+                    :placeholder="item.description"
+            ></b-form-input>
 
         </b-form-group>
         <b-button type="submit" variant="primary">Submit</b-button>
