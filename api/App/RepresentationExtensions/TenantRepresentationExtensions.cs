@@ -36,13 +36,13 @@ namespace App.RepresentationExtensions
             };
         }
 
-        public static FeedRepresentation ToRepresentation(this IEnumerable<Tenant> tenants, IUrlHelper url)
+        public static FeedRepresentation ToRepresentation(this IEnumerable<Tenant> tenants, string criteria, IUrlHelper url)
         {
-            return new FeedRepresentation
+            var feedRepresentation = new FeedRepresentation
             {
                 Links = new[]
                 {
-                    url.MakeHomeTenantsUri().MakeWebLink(IanaLinkRelation.Self),
+                    criteria.MakeHomeTenantsUri(url).MakeWebLink(IanaLinkRelation.Self),
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
                     url.MakeHomeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Search),
                 },
@@ -50,6 +50,7 @@ namespace App.RepresentationExtensions
                     .Select(c => ToFeedRepresentationItem(c, url))
                     .ToArray()
             };
+            return feedRepresentation;
         }
 
         public static FeedRepresentation ToRepresentation(this IEnumerable<User> users, string tenantId, IUrlHelper url)
