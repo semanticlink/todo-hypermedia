@@ -9,9 +9,7 @@
 
                     <Form :representation="representation"
                           :formRepresentation="formRepresentation"
-                          :on-updated="onUpdated"
                           :on-cancel="onClose"
-                          :formRel="formRel"
                           v-if="formRepresentation"/>
 
                     <div v-show="!formRepresentation">
@@ -33,7 +31,8 @@
                     <b-button size="sm" @click="saveToFile">Save</b-button>
 
                     <b-button size="sm" @click="prettyprint = !prettyprint" v-if="!prettyprint">Pretty Print</b-button>
-                    <b-button size="sm" variant="outline" @click="prettyprint = !prettyprint" v-else>Pretty Print</b-button>
+                    <b-button size="sm" variant="outline" @click="prettyprint = !prettyprint" v-else>Pretty Print
+                    </b-button>
                     <br/>
                     <div class="mt-3">
                         <pre v-if="prettyprint">{{ representation }}</pre>
@@ -160,7 +159,7 @@
 
                             // check that it has in fact been deleted
                             return link.get(this.representation, /^self$/)
-                                // it is an error if it succeeds
+                            // it is an error if it succeeds
                                 .then(() => this.$notify({
                                     type: 'error',
                                     text: 'This item was unable to be deleted and still exists'

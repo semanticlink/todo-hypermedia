@@ -5,7 +5,7 @@
         <b-form-group v-for="item in formRepresentation.items"
                       :key="item.name"
                       :label="item.name">
-            <!-- date time pickers are unrealiable across browsers and devices -->
+            <!-- date time pickers are unreliable across browsers and devices -->
             <template v-if="mapApiToUiType(item.type) === 'date' || mapApiToUiType(item.type) === 'datetime'">
                 <datetime
                         :type="mapApiToUiType(item.type)"
@@ -37,7 +37,7 @@
             ></b-form-input>
 
         </b-form-group>
-        <b-button type="submit" variant="primary">Submit</b-button>
+        <b-button type="submit" variant="primary">{{ submitTitle }}</b-button>
         <b-button variant="secondary" @click="onCancel">Cancel</b-button>
     </b-form>
 
@@ -45,7 +45,7 @@
 
 <script>
     import { mapApiToUiType } from '../lib/form-type-mappings';
-    import { link, log } from "semanticLink";
+    import { link, SemanticLink } from "semanticLink";
     import { Datetime } from 'vue-datetime';
     import { DateTime as LuxonDateTime } from 'luxon'
     // You need a specific loader for CSS files
@@ -56,14 +56,42 @@
      *
      * The semantics of the form are that:
      *
-     * In terms of where and how to send forms:
-     *  - if link rel 'submit' use the href uri to POST to (show title 'Submit')
-     *  - if no link rel 'submit' then PUT to parent resource (aka {@link this.representation} (usually an item)
-     *  - if the link rel 'submit' has name attribute use that for display and override 'Submit'
+     * In terms of the display label:
+     * ==============================
+     *
+     *  1. Default value is 'Submit'
+     *  @example { rel: 'submit' }
+     *
+     *  2. Override default if the link rel 'submit' has name attribute use that for display
+     *  @example { rel: 'submit', name: "Search" }
      *
      * In terms of form values:
-     *  - In the case of POST, start with a new object and fill out values (based on the form)
-     *  - In the case of PUT, clone a new object based on the  existing item (ie prepopulate) and update values (based on the form)
+     * ========================
+     *
+     *  1. In the case of POST, start with a new object and fill out values (based on the form)
+     *  2. In the case of PUT, clone a new object based on the  existing item (ie prepopulate) and
+     *     update values (based on the form)
+     *
+     * In terms of where and how to send forms:
+     * ========================================
+     *
+     * 1. Default verb is POST when 'submit' is present
+     * @example { rel: 'submit', href:"https://example.com/collection/"}
+     *
+     * 2. PUT verb if no link rel 'submit' OR method='PUT'
+     * @example { rel: 'self', href: 'http://example.com/some/form"} <-- no submit
+     *
+     * 3. Set verb when link rel 'method'  is explicitly set
+     * @example { rel: 'submit', method: 'PUT', href:"https://example.com/item"}
+     * @example { rel: 'submit', method: 'POST', href:"https://example.com/collection"}
+     *
+     * 4. send to uri in named href if explicit
+     * @example { rel: 'submit', href:"https://example.com/collection/"}
+     *
+     * 5. send to referring resource if omitted
+     * @example { rel: 'self', href: 'http://example.com/some/form"} <-- no submit
+     * @example { rel: 'submit'}
+     *
      */
     export default {
         name: "Form",
@@ -86,15 +114,6 @@
                 required: true
             },
             /**
-             * @event FormResource.onUpdated
-             */
-            onUpdated: {
-                type: Function,
-                required: false,
-                default: () => {
-                }
-            },
-            /**
              * @event FormResource.onCancel
              */
             onCancel: {
@@ -103,13 +122,6 @@
                 default: () => {
                 }
             },
-            /**
-             * @obsolete
-             */
-            formRel: {
-                type: String,
-                required: true
-            }
         },
         data() {
             return {
@@ -131,56 +143,72 @@
             /**
              * When we show a form on the screen, decide whether to clone or create an in-memory representation
              */
-            if (this.isCreateForm() || this.isSearchForm()) {
-                this.formObj = {};
-            } else if (this.isEditForm()) {
-                this.formObj = Object.assign({}, this.representation);
-            } else {
-                log.warn(`Trying to display form of unknown type: '${this.formRel}'`);
+            this.formObj = this.hasSubmitLinkRel(this.formRepresentation) ?
+                {} :                                        // POST clean/new
+                Object.assign({}, this.representation);     // PUT clone
+        },
+        computed: {
+            /**
+             * Defaults to 'Submit' and is overriden by the link relation 'submit' name value
+             * @example { rel: 'submit', name: 'Search', href: ...
+             * @type {string}
+             */
+            submitTitle() {
+                // KLUDGE: only support one/first submit link rel d
+                const [link, ..._] = SemanticLink.filter(this.formRepresentation, /^submit$/);
+                return (link || {}).name || 'Submit';
             }
         },
         methods: {
-            isCreateForm() {
-                return /^create-form$/.test(this.formRel);
-            },
-            isEditForm() {
-                return /^edit-form$/.test(this.formRel);
-            },
-            isSearchForm() {
-                return /^search$/.test(this.formRel);
+            /**
+             * @param {FormRepresentation} form
+             * @return {boolean}
+             */
+            hasSubmitLinkRel(form) {
+                return SemanticLink.matches(form, /^submit$/);
             },
             /**
              * On all the fields are entered then either make a PUT (edit/update) or POST (create, search) based on
              * the referring representation
              */
             submit() {
-                let changes = this.representation;
-
-                let verb, message, rel, links;
-                if (this.isCreateForm()) {
-                    verb = 'post';
-                    rel = 'submit';
-                    message = 'Item created successfully';
-                    links = this.formRepresentation;
-                } else if (this.isSearchForm()) {
-                    verb = 'post';
-                    rel = 'submit';
-                    message = 'Successful search';
-                    links = this.formRepresentation;
-                } else if (this.isEditForm()) {
-                    verb = 'put';
-                    rel = 'self';
-                    message = 'Item updated successfully';
-                    links = this.representation;
-                } else {
-                    log.warn(`Trying to submit form of unknown type: '${this.formRel}'`);
-                    return
+                /**
+                 * A form will POST if there is a submit link rel
+                 * A form will PUT if no sbmit
+                 * A form will override above if a method is specified
+                 * @param {FormRepresentation} form
+                 * @return {string}
+                 **/
+                function verb(form) {
+                    const [weblink, ..._] = SemanticLink.filter(form, /^submit$/);
+                    if (weblink) {
+                        return (weblink || {}).method || 'post';
+                    } else {
+                        return 'put';
+                    }
                 }
 
-                return link[verb](links, rel, 'application/json', this.formObj)
-                    .then(/** @type {AxiosResponse} */(r) => {
-                        this.$notify({text: message, type: 'success'});
-                        return this.onUpdated(changes, r);
+                const rel = this.hasSubmitLinkRel(this.formRepresentation) ? 'submit' : 'self';
+                const links = this.hasSubmitLinkRel(this.formRepresentation) ? this.formRepresentation : this.representation;
+                const putOrPost = verb(this.formRepresentation);
+
+                return link[putOrPost](links, rel, 'application/json', this.formObj)
+                    .then(/** @type {AxiosResponse} */response => {
+
+                        this.$notify({
+                            text: `${response.statusText} <a href="${response.headers.location}">item<a>`,
+                            type: 'success'
+                        });
+
+                        // on success if updated return to item (204) otherwise go to new (201)
+                        // scope it here otherwise SemanticLink looks to loose scope (??) in the setTimeout
+                        const returnUri = response.status === 201
+                            ? response.headers.location
+                            : SemanticLink.getUri(links, rel);
+
+                        setTimeout(() => {
+                            window.location = returnUri;
+                        }, 4000)
                     })
                     .catch(/** @type {AxiosResponse} */response => {
                         this.$notify({text: response.statusText, type: 'error'});
