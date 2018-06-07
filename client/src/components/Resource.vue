@@ -219,6 +219,7 @@
                         this.$nextTick(() => {
                             makeButtonOnLinkifyLinkRels('edit-form', {onClick: this.getForm, title: 'Edit'});
                             makeButtonOnLinkifyLinkRels('create-form', {onClick: this.getForm, title: 'Add'});
+                            makeButtonOnLinkifyLinkRels('search', {onClick: this.getForm, title: 'Search'});
                             makeButtonOnLinkifyLinkRels('self', {onClick: this.tryDelete, title: 'Delete'});
                         });
 
@@ -226,7 +227,7 @@
                     });
             },
             onUpdated() {
-                this.getRepresentation();
+                return this.getRepresentation();
             },
             onClose() {
                 this.resetForm();

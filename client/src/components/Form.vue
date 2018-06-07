@@ -16,7 +16,7 @@
                         auto
                         :min-datetime="minDatetime"
                 ></datetime>
-                <div>{{ localDateTime.zoneName}} ({{ localDateTime.offsetNameLong}}) </div>
+                <div>{{ localDateTime.zoneName}} ({{ localDateTime.offsetNameLong}})</div>
             </template>
             <b-form-radio-group
                     v-else-if="mapApiToUiType(item.type) === 'check'"
@@ -51,30 +51,61 @@
     // You need a specific loader for CSS files
     import 'vue-datetime/dist/vue-datetime.css'
 
+    /**
+     * A form has the job to POST to a collection or PUT to an item (this is by convention).
+     *
+     * The semantics of the form are that:
+     *
+     * In terms of where and how to send forms:
+     *  - if link rel 'submit' use the href uri to POST to (show title 'Submit')
+     *  - if no link rel 'submit' then PUT to parent resource (aka {@link this.representation} (usually an item)
+     *  - if the link rel 'submit' has name attribute use that for display and override 'Submit'
+     *
+     * In terms of form values:
+     *  - In the case of POST, start with a new object and fill out values (based on the form)
+     *  - In the case of PUT, clone a new object based on the  existing item (ie prepopulate) and update values (based on the form)
+     */
     export default {
         name: "Form",
         components: {datetime: Datetime},
         props: {
-            formRepresentation: {
-                type: Object,
-                required: true
-            },
+            /**
+             * Collection or item representation.
+             * @type {CollectionRepresentation|LinkedRepresentation}
+             */
             representation: {
                 type: Object,
                 required: true
             },
+            /**
+             * Form that specifies the item/inputs to submit back to the server
+             * @type {CollectionRepresentation}
+             */
+            formRepresentation: {
+                type: Object,
+                required: true
+            },
+            /**
+             * @event FormResource.onUpdated
+             */
             onUpdated: {
                 type: Function,
                 required: false,
                 default: () => {
                 }
             },
+            /**
+             * @event FormResource.onCancel
+             */
             onCancel: {
                 type: Function,
                 required: false,
                 default: () => {
                 }
             },
+            /**
+             * @obsolete
+             */
             formRel: {
                 type: String,
                 required: true
@@ -96,12 +127,16 @@
             }
         },
         created() {
-            if (this.isCreateForm()) {
+
+            /**
+             * When we show a form on the screen, decide whether to clone or create an in-memory representation
+             */
+            if (this.isCreateForm() || this.isSearchForm()) {
                 this.formObj = {};
             } else if (this.isEditForm()) {
                 this.formObj = Object.assign({}, this.representation);
             } else {
-                log.warn('Trying to display form of unknown type');
+                log.warn(`Trying to display form of unknown type: '${this.formRel}'`);
             }
         },
         methods: {
@@ -111,33 +146,45 @@
             isEditForm() {
                 return /^edit-form$/.test(this.formRel);
             },
+            isSearchForm() {
+                return /^search$/.test(this.formRel);
+            },
             /**
-             * On all the fields are entered then eithe make a PUT (edit/update) or POST (create) based on
+             * On all the fields are entered then either make a PUT (edit/update) or POST (create, search) based on
              * the referring representation
              */
             submit() {
-                const changes = this.representation;
+                let changes = this.representation;
 
-                let verb, message;
+                let verb, message, rel, links;
                 if (this.isCreateForm()) {
                     verb = 'post';
+                    rel = 'submit';
                     message = 'Item created successfully';
+                    links = this.formRepresentation;
+                } else if (this.isSearchForm()) {
+                    verb = 'post';
+                    rel = 'submit';
+                    message = 'Successful search';
+                    links = this.formRepresentation;
                 } else if (this.isEditForm()) {
-                    verb = 'put'
-                    message = 'Item updated successfully'
+                    verb = 'put';
+                    rel = 'self';
+                    message = 'Item updated successfully';
+                    links = this.representation;
                 } else {
-                    log.warn('Trying to display form of unkown type');
+                    log.warn(`Trying to submit form of unknown type: '${this.formRel}'`);
                     return
                 }
 
-                link[verb](this.representation, 'self', 'application/json', this.formObj)
+                return link[verb](links, rel, 'application/json', this.formObj)
                     .then(/** @type {AxiosResponse} */(r) => {
-                        this.onUpdated(changes, r);
                         this.$notify({text: message, type: 'success'});
-
+                        return this.onUpdated(changes, r);
                     })
-                    .catch(/** @type {AxiosError} */error => {
-                        this.$notify(error.response.statusText)
+                    .catch(/** @type {AxiosResponse} */response => {
+                        this.$notify({text: response.statusText, type: 'error'});
+
                     });
             },
             mapApiToUiType: mapApiToUiType
