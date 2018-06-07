@@ -104,7 +104,7 @@ namespace Api.Controllers
                     // The user is not authenticated and there is no query, so the caller gets no tenants.
                     : new Tenant[] { });
             return enumerable
-                .ToRepresentation(Url);
+                .ToRepresentation(search, Url);
         }
 
 
