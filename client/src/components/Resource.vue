@@ -102,10 +102,6 @@
                  */
                 formRepresentation: null,
                 /**
-                 * @type {string}
-                 */
-                formRel: null,
-                /**
                  * Default Accept header that asks for HTML > JSON > XML > anything
                  * @type {string}
                  */
@@ -130,7 +126,6 @@
                 link.get(this.representation, rel)
                     .then(response => {
                         vm.formRepresentation = response.data;
-                        vm.formRel = rel;
                     });
             },
             /**

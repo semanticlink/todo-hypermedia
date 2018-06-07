@@ -25,26 +25,6 @@ setLogLevel(LEVEL.INFO);
 
 Vue.config.productionTip = false;
 
-
-/*
- * Network of data store
- *
- * This object must be added so that it can reference throughout the application. Apparently the
- * best way to do this is via plugin
- * @see https://stackoverflow.com/questions/37711756/how-to-setup-a-global-store-object
- */
-let store;
-const apiPlugin = {
-    store,
-    install(Vue) {
-        // attach to the root view
-        // access via this.$root.$api
-        Vue.prototype.$api = store;
-    }
-};
-
-Vue.use(apiPlugin);
-
 /**
  * Allows us to access local storage via `this.$localStorage`
  */
