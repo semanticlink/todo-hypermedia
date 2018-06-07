@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Serialization;
 
 namespace Api
 {
-
     public class Startup
     {
         private IHostingEnvironment HostingEnvironment { get; }
@@ -89,7 +89,21 @@ namespace Api
             {
                 app.UseExceptionHandler("/error");
             }
-            
+
+
+            /**
+             * Vary headers are needed so that the back and forward buttons work ie, that we don't
+             * get cache poisioning—in this case the back button would return the json representation
+             * than the html representation.
+             *
+             * see https://docs.microsoft.com/en-us/aspnet/core/performance/caching/middleware?view=aspnetcore-2.1
+             */
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers[HeaderNames.Vary] = new[] {"Accept", "Accept-Encoding"};
+
+                await next();
+            });
 
             /**
              * Handler for error pages to return content negotiated pages. For example, 401 can now
