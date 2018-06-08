@@ -4,6 +4,7 @@ using App.UriFactory;
 using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
+using Toolkit;
 
 namespace Api.Controllers
 {
@@ -24,6 +25,7 @@ namespace Api.Controllers
         {
             return (await _userRepository
                     .GetByIdentityId(id))
+                .ThrowInvalidDataExceptionIfNull($"User '{id}' not found")
                 .ToRepresentation(id, Url);
         }
     }
