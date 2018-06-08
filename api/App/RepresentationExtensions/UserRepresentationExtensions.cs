@@ -26,7 +26,7 @@ namespace App.RepresentationExtensions
                     tenantId.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Up),
                     
                     // edit-form
-                    url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
+                    //url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
                 },
 
                 CreatedAt = user.CreatedAt,
