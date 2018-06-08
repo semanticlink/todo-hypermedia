@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Web;
@@ -27,13 +28,13 @@ namespace Api.Controllers
         private readonly IConfiguration _configuration;
 
         public HomeController(
-            Version version, 
-            User user, 
+            Version version,
+            User user,
             ITenantStore tenantStore,
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             IConfiguration configuration
-            )
+        )
         {
             _version = version;
             _user = user;
@@ -132,27 +133,25 @@ namespace Api.Controllers
             return new TenantRepresentation()
                 .ToTenantSearchFormRepresentation(Url);
         }
-/*
 
         [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateCollectionRouteName)]
-        public AuthenticateRepresentation GetAuthenticateCollection()
+        public FeedRepresentation GetAuthenticateCollection()
         {
-            return new AuthenticateRepresentation()
-                .ToRepresentation(Url);
+            return new User()
+                .ToAuthenticationCollectionRepresentation(Url);
         }
 
         /// <summary>
         ///     A simple login form resource.
         /// </summary>
-        [HttpGet("authenticate/form/login", Name = HomeUriFactory.HomeTenantSearchFormRouteName)]
+        [HttpGet("authenticate/form/login", Name = HomeUriFactory.AuthenticateLoginFormRouteName)]
         public SearchFormRepresentation GetAuthenticateForm()
         {
-            return new TenantRepresentation()
+            return new UserRepresentation()
                 .ToAuthenticateLoginFormRepresentation(Url);
         }
-*/
-        
-        [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateRouteName) ]
+
+        [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateRouteName)]
         public async Task<object> Login([FromBody] UserCreateDataRepresentation model)
         {
             var result = _signInManager.PasswordSignInAsync(

@@ -5,8 +5,8 @@ namespace App.UriFactory
     public static class HomeUriFactory
     {
         public const string SelfRouteName = "Home";
-        
-        
+
+
         public const string AuthenticateRouteName = "Authenticate";
         public const string AuthenticateCollectionRouteName = "AuthenticateCollection";
         public const string AuthenticateLoginFormRouteName = "AuthenticateLoginForm";
@@ -24,9 +24,14 @@ namespace App.UriFactory
             return url.Link(SelfRouteName, new { });
         }
 
-         public static string MakeAuthenticateUri(this IUrlHelper url)
+        public static string MakeAuthenticateUri(this IUrlHelper url)
         {
             return url.Link(AuthenticateRouteName, new { });
+        }
+
+        public static string MakeAuthenticateLoginFormUri(this IUrlHelper url)
+        {
+            return url.Link(AuthenticateLoginFormRouteName, new { });
         }
 
         /// <summary>
@@ -50,7 +55,7 @@ namespace App.UriFactory
         /// </remarks>
         public static string MakeHomeTenantsUri(this IUrlHelper url)
         {
-            return url.Link(TenantsRouteName, new {});
+            return url.Link(TenantsRouteName, new { });
         }
 
         /// <summary>

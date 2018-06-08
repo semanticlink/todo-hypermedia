@@ -1,41 +1,32 @@
 <template>
     <transition name="slideup">
-        <b-form @submit="submit" class="login-indicator" v-if="!authenticated">
-            <b-form-group id="exampleInputGroup1"
-                          label="Email address:"
-                          label-for="exampleInput1"
-                          description="We'll never share your email with anyone else.">
-                <b-form-input id="exampleInput1"
-                              type="email"
-                              v-model="credentials.email"
-                              required
-                              placeholder="Enter your email">
-                </b-form-input>
-            </b-form-group>
-            <b-form-group id="exampleInputGroup2"
-                          label="Your Password:"
-                          label-for="exampleInput2">
-                <b-form-input id="exampleInput2"
-                              type="password"
-                              v-model="credentials.password"
-                              required
-                              placeholder="Enter your password">
-                </b-form-input>
-            </b-form-group>
-            <b-button type="submit" variant="primary">Login</b-button>
-        </b-form>
+        <div>
+            <!-- TODO: styling on a login -->
+            <div> {{ error }}</div>
 
+            <Form class="login-indicator"
+                  :representation="representation"
+                  :formRepresentation="formRepresentation"
+                  :on-submit="onSubmit"
+                  :on-success="onSuccess"
+                  :on-failure="onFailure"
+                  no-cancel
+                  v-if="!authenticated"/>
+
+        </div>
     </transition>
 </template>
 
 <script>
+    import axios from 'axios';
     import EventBus, { loginConfirmed, loginRequired } from '../lib/util/EventBus';
-    import { link, SemanticLink, nodMaker } from 'semanticLink';
+    import { link } from 'semanticLink';
     import { log } from 'logger';
     import { getAuthenticationUri, getBearerLinkRelation, setBearerToken } from '../lib/http-interceptors';
+    import Form from './Form.vue';
 
     /**
-     * This is a simple bool 'lock'. When the event is triggered we don't
+     * This is a simple boolean 'lock'. When the event is triggered we don't
      * want to flood the user with authentication dialogs, rather just present one
      * dialog that gives them the opportunity to make attempts to authenticate.
      *
@@ -47,25 +38,26 @@
 
 
     /**
-     * Holds the error from the 401 handler
-     * @type {AxiosError}
-     */
-    let error;
-
-    /**
      * Login:
      *    - waits for the unauthorised event (triggered by no network)
      */
     export default {
+        components: {Form},
         data() {
             return {
                 authenticated: true,
-                // We need to initialize the component with any
-                // properties that will be used in it
-                credentials: {
-                    email: '',
-                    password: ''
-                },
+                /**
+                 * @type {CollectionRepresentation}
+                 */
+                representation: {},
+                /**
+                 * @type {FormRepresentation}
+                 */
+                formRepresentation: {},
+                /**
+                 * Error message to the user
+                 * @type {string}
+                 */
                 error: ''
             };
         },
@@ -74,93 +66,81 @@
         },
         methods: {
             /**
-             * @param {AxiosError} err
+             * Contains our 401 Error
+             *
+             * Very simple (and awful) implementation.
+             *
+             * The www-authenticate header has the required information:
+             *
+             *   - uri of api
+             *   - link relation to post to
+             *
+             *      1. GET the resource at the authenticate uri
+             *      2. GET the resource with link rel
+             *      3. GET the 'create-form' for the login
+             *      3a. Display the login form in the GUI from these attributes and update/enter
+             *      4. POST the login form back on the uri of referring collection
+             *
+             *
+             * @param {AxiosError} error
              */
-            loginRequired(err) {
-
-                error = err;
+            loginRequired(error) {
 
                 this.authenticated = false;
 
                 if (isPerformingAuthentication) {
                     return;
                 }
-                isPerformingAuthentication = true;
+                axios.get(getAuthenticationUri(error))
+                    .then(response => link.get(response.data, getBearerLinkRelation(error)))
+                    .then(authenticateCollection => {
+                        this.representation = authenticateCollection.data;
+                        return link.get(authenticateCollection.data, /create-form/);
+                    })
+                    .then(authenticateLoginRepresentation => {
+                        this.formRepresentation = authenticateLoginRepresentation.data;
+                        // only turn on the lock once we have the login form ready
+                        isPerformingAuthentication = true;
+                    })
+                    .catch(/** @type {AxiosError|AxiosResponse} */error => {
+                        this.$notify({
+                            title: 'An error means that the login process won\'t work',
+                            text: error.statusText || error.response.statusText,
+                            type: 'error'
+                        });
+                    });
+
             },
-            submit() {
-                const vm = this;
+            onSubmit() {
+                this.error = '';
+            },
+            onSuccess(response) {
 
-                const credentials = {
-                    email: this.credentials.email,
-                    password: this.credentials.password
-                };
+                if (!response.data.token) {
+                    log.error('Bearer token not returned on the key: \'token\'');
+                }
+                setBearerToken(response.data.token);
+                // save bearer token so that when users do a full refresh
+                // we can save the token across a refresh
+                this.$localStorage.set('auth', response.data.token);
 
-                const makeFormEncoded = (obj) => {
-                    let str = [];
-                    for (let key in obj) {
-                        if (obj.hasOwnProperty(key)) {
-                            str.push(encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]));
-                        }
-                    }
-                    return str.join('&');
-                };
+                EventBus.$emit(loginConfirmed);
 
-                /**
-                 * Very simple (and awful) implementation.
-                 *
-                 * The www-authenticate header has the required information:
-                 *
-                 *   - uri of api
-                 *   - link relation to post to
-                 *
-                 *      1. GET the resource at the authenticate uri
-                 *      2. Construct a login object
-                 *      3. POST the login form back on the uri of link relation
-                 *
-                 *
-                 * A better server implementation would:
-                 *
-                 *  - return an authenticate resource
-                 *  - create form for the login (telling where to submit)
-                 *  - we then need to match our client form with the server login form (or display the login form)
-                 *
-                 */
+                isPerformingAuthentication = false;
+                this.authenticated = true;
 
-                return nodMaker
-                    .getResource(nodMaker.makeSparseResourceFromUri(getAuthenticationUri(error)))
-                    .then(authenticator =>
-                        link.post(
-                            authenticator,
-                            getBearerLinkRelation(error),
-                            'application/x-www-form-urlencoded',
-                            makeFormEncoded(credentials))
-                            .then(response => {
+            },
+            onFailure(error) {
 
-                                if (!response.data.token) {
-                                    log.error('Bearer token not returned on the key: \'token\'');
-                                }
-                                setBearerToken(response.data.token);
-                                // save bearer token so that when users do a full refresh
-                                // we can save the token across a refresh
-                                vm.$localStorage.set('auth', response.data.token);
-
-                                EventBus.$emit(loginConfirmed);
-                                isPerformingAuthentication = false;
-                                vm.authenticated = true;
-                            })
-                            .catch(failureResponse => {
-                                vm.error = '';
-                                if (failureResponse && failureResponse.status) {
-                                    log.warn('Authentication failed (' + failureResponse.status + '): ' + failureResponse.statusText);
-                                } else {
-                                    log.warn('Authentication: failed', arguments);
-                                }
-                                vm.error = 'Invalid email/password';
-                            }));
-
-
+                this.$notify({text: 'Authentication: failed'})
+                this.error = '';
+                if (error && error.status) {
+                    log.warn('Authentication failed (' + error.status + '): ' + error.statusText);
+                } else {
+                    log.warn('Authentication: failed', arguments);
+                }
+                this.error = 'Invalid email/password';
             }
-
         }
     };
 </script>

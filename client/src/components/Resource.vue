@@ -218,6 +218,19 @@
                         });
 
                         this.resetForm();
+                    })
+                    .catch(/** @type {AxiosError} */error => {
+
+                        this.responseHeaders = error.response.headers;
+                        this.requestHeaders = error.response.config.headers;
+
+                        this.htmlRepresentation = `<div>${error.response.statusText}</div>`;
+
+                        this.$notify({
+                            title: 'Error',
+                            text: error.response.statusText,
+                            type: 'error'
+                        })
                     });
             },
             onUpdated() {

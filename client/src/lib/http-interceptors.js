@@ -194,8 +194,7 @@ const parseErrorForAuthenticateHeader = error => {
  * @returns {string|undefined} rel
  */
 export const getBearerLinkRelation = error => {
-    const auth = parseErrorForAuthenticateHeader(error);
-    return auth.params.rel;
+    return parseErrorForAuthenticateHeader(error).params.rel;
 };
 
 
@@ -206,8 +205,7 @@ export const getBearerLinkRelation = error => {
  * @returns {string|undefined} uri
  */
 export const getAuthenticationUri = error => {
-    const auth = parseErrorForAuthenticateHeader(error);
-    return auth.params.uri;
+    return parseErrorForAuthenticateHeader(error).params.uri;
 };
 
 

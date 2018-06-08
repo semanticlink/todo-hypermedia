@@ -38,7 +38,7 @@
 
         </b-form-group>
         <b-button type="submit" variant="primary">{{ submitTitle }}</b-button>
-        <b-button variant="secondary" @click="onCancel">Cancel</b-button>
+        <b-button variant="secondary" @click="onCancel" v-if="!noCancel">Cancel</b-button>
     </b-form>
 
 </template>
@@ -114,6 +114,16 @@
                 required: true
             },
             /**
+             * Flag to display the cancel button
+             * Default is to show the cancel button
+             * @type {boolean}
+             */
+            noCancel: {
+                type: Boolean,
+                required: false,
+                default: false
+            },
+            /**
              * @event FormResource.onCancel
              */
             onCancel: {
@@ -121,6 +131,37 @@
                 required: false,
                 default: () => {
                 }
+            },
+            /**
+             * Callback before the form is submitted
+             * @event FormResource.onSubmit
+             */
+            onSubmit: {
+                type: Function,
+                required: false,
+                default: () => {
+                }
+            },
+            /**
+             * An optional callback once the form has been successfully submitted. By default the action is to
+             * - show a notify message
+             * - redirect the page to the collection (POST) or item (PUT)
+             * @event FormResource.onSuccess
+             */
+            onSuccess: {
+                type: Function,
+                required: false,
+                default: null
+            },
+             /**
+             * An optional callback once the form has been submitted but fails. By default the action is to
+             * - show a notify message
+             * @event FormResource.onFailure
+             */
+            onFailure: {
+                type: Function,
+                required: false,
+                default: null
             },
         },
         data() {
@@ -156,7 +197,7 @@
             submitTitle() {
                 // KLUDGE: only support one/first submit link rel d
                 const [link, ..._] = SemanticLink.filter(this.formRepresentation, /^submit$/);
-                return (link || {}).name || 'Submit';
+                return (link || {}).title || 'Submit';
             }
         },
         methods: {
@@ -172,6 +213,9 @@
              * the referring representation
              */
             submit() {
+
+                this.onSubmit();
+
                 /**
                  * A form will POST if there is a submit link rel
                  * A form will PUT if no sbmit
@@ -195,23 +239,34 @@
                 return link[putOrPost](links, rel, 'application/json', this.formObj)
                     .then(/** @type {AxiosResponse} */response => {
 
-                        this.$notify({
-                            text: `${response.statusText} <a href="${response.headers.location}">item<a>`,
-                            type: 'success'
-                        });
+                        if (this.onSuccess) {
+                            this.onSuccess(response);
+                        } else {
 
-                        // on success if updated return to item (204) otherwise go to new (201)
-                        // scope it here otherwise SemanticLink looks to loose scope (??) in the setTimeout
-                        const returnUri = response.status === 201
-                            ? response.headers.location
-                            : SemanticLink.getUri(links, rel);
+                            this.$notify({
+                                text: `${response.statusText} <a href="${response.headers.location}">item<a>`,
+                                type: 'success'
+                            });
 
-                        setTimeout(() => {
-                            window.location = returnUri;
-                        }, 4000)
+                            // on success if updated return to item (204) otherwise go to new (201)
+                            // scope it here otherwise SemanticLink looks to loose scope (??) in the setTimeout
+                            const returnUri = response.status === 201
+                                ? response.headers.location
+                                : SemanticLink.getUri(links, rel);
+
+                            setTimeout(() => {
+                                window.location = returnUri;
+                            }, 4000)
+
+                        }
+
                     })
                     .catch(/** @type {AxiosResponse} */response => {
-                        this.$notify({text: response.statusText, type: 'error'});
+                        if (this.onFailure) {
+                            this.onFailure(response)
+                        } else {
+                            this.$notify({text: response.statusText, type: 'error'});
+                        }
 
                     });
             },

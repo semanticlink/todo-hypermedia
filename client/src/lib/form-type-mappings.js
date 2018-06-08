@@ -23,7 +23,7 @@ const mapApiToUiType = type => {
     switch (type) {
         case 'http://types/text':
             return 'text';
-        case 'http://types/text/passwprd':
+        case 'http://types/text/password':
             return 'password';
         case 'http://types/text/email':
             return 'email';
@@ -36,7 +36,7 @@ const mapApiToUiType = type => {
         case 'http://types/select':
             return 'select';
         default:
-            log.warn(`Form type not found: '${type}'`)
+            log.warn(`Form type not found: '${type}'`);
             return 'text';
     }
 
