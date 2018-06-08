@@ -34,7 +34,8 @@
                     v-model="formObj[item.name]"
                     :required="item.required"
                     :placeholder="item.description"
-            ></b-form-input>
+            ></b-form-input><span class="highlight"></span><span class="bar"></span>
+
 
         </b-form-group>
         <b-button type="submit" variant="primary">{{ submitTitle }}</b-button>

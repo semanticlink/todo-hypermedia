@@ -4,7 +4,7 @@
             <!-- TODO: styling on a login -->
             <div> {{ error }}</div>
 
-            <Form class="login-indicator"
+            <Form class="login"
                   :representation="representation"
                   :formRepresentation="formRepresentation"
                   :on-submit="onSubmit"
@@ -146,27 +146,158 @@
 </script>
 
 <style>
-    .login-indicator {
-        background: #E8EDE9;
-        border-radius: 3px;
-        border-bottom: 2px solid #d3d9d4;
-        padding: 15px 5px;
-        /*text-align: center;*/
-        width: 60%;
-        margin: 5px 0;
-        font-family: sans-serif;
-        color: #202126;
-        box-sizing: border-box;
+
+    * { box-sizing:border-box; }
+
+    body {
+        font-family: Helvetica;
+        background: #eee;
+        -webkit-font-smoothing: antialiased;
     }
 
-    .slideup-enter-active, .slideup-leave-active {
-        transition: transform .2s, opacity .2s;
-        transform: none;
-        opacity: 1;
+    form.login {
+        width: 380px;
+        margin: 4em auto;
+        padding: 3em 2em 2em 2em;
+        background: #fafafa;
+        border: 1px solid #ebebeb;
+        box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
     }
 
-    .slideup-enter, .slideup-leave-active {
-        opacity: 0;
-        transform: translateY(-100%);
+    .login fieldset {
+        position: relative;
+        margin-bottom: 45px;
     }
+
+    .login input {
+        font-size: 18px;
+        padding: 10px 10px 10px 5px;
+        -webkit-appearance: none;
+        display: block;
+        background: #fafafa;
+        color: #636363;
+        width: 100%;
+        border: none;
+        border-radius: 0;
+        border-bottom: 1px solid #757575;
+    }
+
+    .login input:focus { outline: none; }
+
+
+    /* Label */
+
+    .login legend {
+        color: #999;
+        font-size: 18px;
+        font-weight: normal;
+        position: absolute;
+        pointer-events: none;
+        left: 5px;
+        top: -30px;
+        /*top: 10px;*/
+        transition: all 0.2s ease;
+    }
+
+
+    /* active */
+
+    .login input:focus ~ label, input.used ~ label {
+        top: -20px;
+        transform: scale(.75); left: -2px;
+        /* font-size: 14px; */
+        color: #4a89dc;
+    }
+
+
+    /* Underline */
+
+    .login .bar {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+
+    .login .bar:before, .bar:after {
+        content: '';
+        height: 2px;
+        width: 0;
+        bottom: 1px;
+        position: absolute;
+        background: #4a89dc;
+        transition: all 0.2s ease;
+    }
+
+    .bar:before { left: 50%; }
+
+    .bar:after { right: 50%; }
+
+
+    /* active */
+
+    input:focus ~ .bar:before, input:focus ~ .bar:after { width: 50%; }
+
+
+    /* Highlight */
+
+    .login .highlight {
+        position: absolute;
+        height: 60%;
+        width: 100px;
+        top: 25%;
+        left: 0;
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+
+    /* active */
+
+    .login input:focus ~ .highlight {
+        animation: inputHighlighter 0.3s ease;
+    }
+
+
+    /* Animations */
+
+    @keyframes inputHighlighter {
+        from { background: #4a89dc; }
+        to 	{ width: 0; background: transparent; }
+    }
+
+
+    /* Button */
+
+    .login .btn {
+        position: relative;
+        display: inline-block;
+        padding: 12px 24px;
+        margin: .3em 0 1em 0;
+        width: 100%;
+        vertical-align: middle;
+        color: #fff;
+        font-size: 16px;
+        line-height: 20px;
+        -webkit-font-smoothing: antialiased;
+        text-align: center;
+        letter-spacing: 1px;
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid #3160B6;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .login .btn:focus { outline: 0; }
+
+
+    /* Button modifiers */
+
+    .login .btn-primary {
+        background: #4a89dc;
+        text-shadow: 1px 1px 0 rgba(39, 110, 204, .5);
+    }
+
+    .login .btn-primary:hover { background: #357bd8; }
+
+
 </style>
