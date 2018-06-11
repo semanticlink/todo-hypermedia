@@ -36,7 +36,6 @@
      */
     let isPerformingAuthentication;
 
-
     /**
      * Login:
      *    - waits for the unauthorised event (triggered by no network)
@@ -147,12 +146,24 @@
 
 <style>
 
-    * { box-sizing:border-box; }
+    /*
+     *
+     * field set
+     *   legend (label)
+     *   group
+     *     input
+     *     highlight
+     *     bar
+     *
+     *  Basic styling taken from: https://codepen.io/joshadamous/pen/yyyqJZ
+     *
+     *  Note: to create a login closer to material need to use bootstrap-vue component input-group and rework the css
+     *  TODO: write this in less
+     *
+     */
 
-    body {
-        font-family: Helvetica;
-        background: #eee;
-        -webkit-font-smoothing: antialiased;
+    * {
+        box-sizing: border-box;
     }
 
     form.login {
@@ -161,7 +172,7 @@
         padding: 3em 2em 2em 2em;
         background: #fafafa;
         border: 1px solid #ebebeb;
-        box-shadow: rgba(0,0,0,0.14902) 0px 1px 1px 0px,rgba(0,0,0,0.09804) 0px 1px 2px 0px;
+        box-shadow: rgba(0, 0, 0, 0.14902) 0px 1px 1px 0px, rgba(0, 0, 0, 0.09804) 0px 1px 2px 0px;
     }
 
     .login fieldset {
@@ -182,8 +193,9 @@
         border-bottom: 1px solid #757575;
     }
 
-    .login input:focus { outline: none; }
-
+    .login input:focus {
+        outline: none;
+    }
 
     /* Label */
 
@@ -198,17 +210,6 @@
         /*top: 10px;*/
         transition: all 0.2s ease;
     }
-
-
-    /* active */
-
-    .login input:focus ~ label, input.used ~ label {
-        top: -20px;
-        transform: scale(.75); left: -2px;
-        /* font-size: 14px; */
-        color: #4a89dc;
-    }
-
 
     /* Underline */
 
@@ -228,15 +229,19 @@
         transition: all 0.2s ease;
     }
 
-    .bar:before { left: 50%; }
+    .bar:before {
+        left: 50%;
+    }
 
-    .bar:after { right: 50%; }
-
+    .bar:after {
+        right: 50%;
+    }
 
     /* active */
 
-    input:focus ~ .bar:before, input:focus ~ .bar:after { width: 50%; }
-
+    input:focus ~ .bar:before, input:focus ~ .bar:after {
+        width: 50%;
+    }
 
     /* Highlight */
 
@@ -250,21 +255,23 @@
         opacity: 0.5;
     }
 
-
     /* active */
 
     .login input:focus ~ .highlight {
         animation: inputHighlighter 0.3s ease;
     }
 
-
     /* Animations */
 
     @keyframes inputHighlighter {
-        from { background: #4a89dc; }
-        to 	{ width: 0; background: transparent; }
+        from {
+            background: #4a89dc;
+        }
+        to {
+            width: 0;
+            background: transparent;
+        }
     }
-
 
     /* Button */
 
@@ -287,8 +294,10 @@
         cursor: pointer;
         transition: all 0.15s ease;
     }
-    .login .btn:focus { outline: 0; }
 
+    .login .btn:focus {
+        outline: 0;
+    }
 
     /* Button modifiers */
 
@@ -297,7 +306,9 @@
         text-shadow: 1px 1px 0 rgba(39, 110, 204, .5);
     }
 
-    .login .btn-primary:hover { background: #357bd8; }
+    .login .btn-primary:hover {
+        background: #357bd8;
+    }
 
 
 </style>
