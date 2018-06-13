@@ -4,6 +4,7 @@ using App.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
+using Domain.Representation.Enum;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.LinkRelations;
@@ -73,13 +74,13 @@ namespace App.RepresentationExtensions
                 new TextInputFormItemRepresentation
                 {
                     Name = "name",
-                    Description = "The title of the page",
+                    Description = "What needs to be done?",
                     Required = true
                 },
                 new CheckInputFormItemRepresentation
                 {
-                    Name = "completed",
-                    Description = "True or false of whether the task is completed. Default: false"
+                    Name = "state",
+                    Description = "A todo can only toggle between open and complete."
                 },
                 new DateTimeInputFormItemRepresentation {Name = "due", Description = "The UTC date the todo is due"},
             };
@@ -94,7 +95,7 @@ namespace App.RepresentationExtensions
 
                 Due = todo.Due,
 
-                Completed = todo.Completed
+                State = todo.State
             };
         }
 
@@ -114,7 +115,8 @@ namespace App.RepresentationExtensions
                     url.MakeTodoEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
                 },
                 Name = todo.Name,
-                Completed = todo.Completed,
+                Completed = todo.State == TodoState.Complete,
+                State = todo.State,
                 Due = todo.Due
             };
         }
@@ -150,10 +152,31 @@ namespace App.RepresentationExtensions
                     Description = "The title of the page",
                     Required = true
                 },
-                new CheckInputFormItemRepresentation
+                new SelectFormItemRepresentation
                 {
-                    Name = "completed",
-                    Description = "True or false of whether the task is completed. Default: false"
+                    Name = "state",
+                    Description = "A todo can only toggle between open and complete.",
+                    Required = false,
+                    Multiple = false,
+                    Items = new SelectOptionItemRepresentation[]
+                    {
+                        new SelectOptionValueItemRepresentation
+                        {
+                            Type = FormType.Text,
+                            Description = "The todo has been completed",
+                            Label = "Completed",
+                            Value = TodoState.Complete,
+                            Name = "completed",
+                        },
+                        new SelectOptionValueItemRepresentation
+                        {
+                            Type = FormType.Text,
+                            Description = "The todo has been opened",
+                            Label = "Open",
+                            Value = TodoState.Open,
+                            Name = "open",
+                        },
+                    }
                 },
                 new DateTimeInputFormItemRepresentation
                 {

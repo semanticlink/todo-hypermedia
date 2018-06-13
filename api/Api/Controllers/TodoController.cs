@@ -66,7 +66,7 @@ namespace Api.Controllers
                     todo.Name = item.Name
                         .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo must have a name");
 
-                    todo.Completed = item.Completed;
+                    todo.State = item.State;
 
                     todo.Due = item.Due;
                 });

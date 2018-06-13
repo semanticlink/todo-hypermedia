@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Domain.Models;
 using Domain.Persistence;
+using Domain.Representation.Enum;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -74,7 +75,7 @@ namespace Api
             var todoStore = services.GetRequiredService<ITodoStore>();
 
             todoStore.Create(new TodoCreateData {Name = "One Todo"}).ConfigureAwait(false);
-            todoStore.Create(new TodoCreateData {Name = "Two Todo", Completed = true}).ConfigureAwait(false);
+            todoStore.Create(new TodoCreateData {Name = "Two Todo", State = TodoState.Complete}).ConfigureAwait(false);
             todoStore.Create(new TodoCreateData {Name = "Three Todo"}).ConfigureAwait(false);
 
             return services;

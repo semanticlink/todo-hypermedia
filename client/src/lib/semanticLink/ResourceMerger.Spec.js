@@ -290,34 +290,42 @@ describe('Resource Merger:', () => {
                     let form = {
                         'links': [{'rel': 'self', 'href': 'http://localhost:1080/question/logic/item/form/edit'}],
                         'items': [
-                            {'type': 'http://types/text', 'name': 'order', 'description': ''}, {
+                            {
+                                'type': 'http://types/text',
+                                'name': 'order',
+                                'description': ''
+                            },
+                            {
                                 'type': 'http://types/text',
                                 'name': 'type',
                                 'description': 'The rule type'
-                            }, {
+                            },
+                            {
                                 'type': 'http://types/group',
                                 'name': 'expression',
-                                'items': [{
-                                    'type': 'http://types/text',
-                                    'name': 'type',
-                                    'description': 'The expression type (not, and, or)'
-                                }, {
-                                    'type': 'http://types/group',
-                                    'multiple': true,
-                                    'name': 'items',
-                                    'description': 'The expressions - this is recursive back to the \'expression\' group form'
-                                }, {
-                                    'type': 'http://types/select',
-                                    'name': 'question',
-                                    'description': 'The expression type (not, and, or)'
-                                }, {
-                                    'type': 'http://types/select',
-                                    'multiple': true,
-                                    'name': 'questionItem',
-                                    'description': 'The question items'
-                                }],
+                                'items': [
+                                    {
+                                        'type': 'http://types/text',
+                                        'name': 'type',
+                                        'description': 'The expression type (not, and, or)'
+                                    }, {
+                                        'type': 'http://types/group',
+                                        'multiple': true,
+                                        'name': 'items',
+                                        'description': 'The expressions - this is recursive back to the \'expression\' group form'
+                                    }, {
+                                        'type': 'http://types/select',
+                                        'name': 'question',
+                                        'description': 'The expression type (not, and, or)'
+                                    }, {
+                                        'type': 'http://types/select',
+                                        'multiple': true,
+                                        'name': 'questionItem',
+                                        'description': 'The question items'
+                                    }],
                                 'description': 'The logic rule as an expression (c.f. a \'##\' style string)'
-                            }, {
+                            },
+                            {
                                 'type': 'http://types/select',
                                 'name': 'waitQuestion',
                                 'description': 'An optional question'

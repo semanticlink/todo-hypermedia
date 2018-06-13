@@ -30,7 +30,7 @@ namespace Infrastructure.NoSQL
             {
                 Id = id,
                 Name = todo.Name,
-                Completed = todo.Completed,
+                State = todo.State,
                 Due = todo.Due,
                 CreatedAt = DateTime.UtcNow
             };

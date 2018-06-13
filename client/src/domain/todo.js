@@ -1,4 +1,4 @@
-import { nodMaker } from "semanticLink";
+import { nodMaker } from 'semanticLink';
 import { log } from 'logger';
 
 /**
@@ -33,5 +33,26 @@ const getTodos = (apiResource, tenantUri) => {
  */
 const DEFAULT_TODO = { name: '', completed: false };
 
+/**
+ * Creates a new in-memory object based on a form.
+ *
+ * This is a simple implementation that:
+ *  - doesn't support types (everyone is simple a null
+ *  - doesn't support default values (because forms don't have that yet)
+ *
+ * @param todoResource
+ * @returns {Promise<any>}
+ */
+const defaultTodo = todoResource => {
+    return nodMaker
+        .getResource(todoResource)
+        .then(todoCollection => nodMaker.getSingletonResource(todoCollection, 'createForm', /create-form/))
+        .then(createForm => {
+            const obj = {};
+            createForm.items.forEach(item => obj[item] = null);
+            return obj;
+        });
+}
 
-export { getTenant, getTodos, DEFAULT_TODO };
+
+export { getTenant, getTodos, DEFAULT_TODO, defaultTodo };

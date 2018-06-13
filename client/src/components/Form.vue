@@ -5,6 +5,7 @@
         <b-form-group v-for="item in formRepresentation.items"
                       :key="item.name"
                       :label="item.name">
+            <!-- DATE TIME -->
             <!-- date time pickers are unreliable across browsers and devices -->
             <template v-if="mapApiToUiType(item.type) === 'date' || mapApiToUiType(item.type) === 'datetime'">
                 <datetime
@@ -18,6 +19,8 @@
                 ></datetime>
                 <div>{{ localDateTime.zoneName}} ({{ localDateTime.offsetNameLong}})</div>
             </template>
+
+            <!-- RADIO -->
             <b-form-radio-group
                     v-else-if="mapApiToUiType(item.type) === 'check'"
                     v-model="formObj[item.name]"
@@ -27,6 +30,18 @@
                     :options="[{text: 'True', value: true},{text: 'False', value: false}]"
             ></b-form-radio-group>
 
+            <!-- SELECT -->
+            <b-form-select
+                    v-else-if="mapApiToUiType(item.type) === 'select'"
+                    v-model="formObj[item.name]"
+            >
+                <option :value="null" disabled>-- Please select an option --</option>
+                <template v-for="option in item.items">
+                    <option :value="option.value">{{ option.label}}</option>
+                </template>
+            </b-form-select>
+
+            <!-- TEXT -->
             <b-form-input
                     v-else
                     :id="`input-1-${item.name}`"
@@ -34,7 +49,8 @@
                     v-model="formObj[item.name]"
                     :required="item.required"
                     :placeholder="item.description"
-            ></b-form-input><span class="highlight"></span><span class="bar"></span>
+            ></b-form-input>
+            <span class="highlight"></span><span class="bar"></span>
 
 
         </b-form-group>
@@ -154,7 +170,7 @@
                 required: false,
                 default: null
             },
-             /**
+            /**
              * An optional callback once the form has been submitted but fails. By default the action is to
              * - show a notify message
              * @event FormResource.onFailure
