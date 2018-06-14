@@ -51,8 +51,8 @@
      *
      */
 
-    import { nodMaker, SemanticLink } from 'semanticLink';
-    import { log } from 'logger';
+    import { nodMaker, SemanticLink, log } from 'semanticLink';
+    import { mapCompletedToState, mapStateToCompleted } from "../lib/form-type-mappings";
 
     export default {
         props: {
@@ -105,7 +105,12 @@
                     this.remove();
                 }
 
+                // Fancy ui needs to make bool --> state (yuck)
+                this.editItem.state = mapCompletedToState(this.editItem.completed);
+
                 return nodMaker.updateResource(this.item, this.editItem)
+                    // really we should get a copy from the server
+                    .then(() => this.item.completed = mapStateToCompleted(this.editItem.state))
                     .then(() => this.reset())
                     .catch(err => log.error(err));
             },

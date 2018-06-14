@@ -1,6 +1,12 @@
 import { log } from './logger';
 
 /**
+ * Text known input type from the server
+ * @type {string}
+ */
+const TEXT = 'http://types/text';
+
+/**
  * Maps the representation types to the known types that can be rendered (input not select at this stage)
  * @see https://bootstrap-vue.js.org/docs/components/form-input
  * TODO: move to util
@@ -21,7 +27,7 @@ import { log } from './logger';
  */
 const mapApiToUiType = type => {
     switch (type) {
-        case 'http://types/text':
+        case TEXT:
             return 'text';
         case 'http://types/text/password':
             return 'password';
@@ -42,4 +48,23 @@ const mapApiToUiType = type => {
 
 };
 
-export { mapApiToUiType };
+/**
+ * Maps the completed flag (display  helper) to a state of the todo.
+ *
+ * This shows how creating batch processing in this way the client starts to know too much. We could, however, increasing
+ * loosely couple this by at least retrieving this information from the server.
+ *
+ * @param bool
+ * @returns {string}
+ */
+const mapCompletedToState = bool => {
+    return bool
+        ? 'http://example.com/todo/state/complete'
+        : 'http://example.com/todo/state/open';
+};
+
+const mapStateToCompleted = state => {
+    return state === 'http://example.com/todo/state/complete';
+};
+
+export { mapApiToUiType, mapCompletedToState, mapStateToCompleted, TEXT };

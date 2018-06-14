@@ -67,7 +67,7 @@ export default class ResourceMerger {
 
                 const resolveFieldToFieldByType = (textUriOrResource, formItem, options) => {
 
-                    if (formItem.type === 'http://types/text') {
+                    if (formItem.type === 'http://types/text' ||formItem.type === 'http://types/date' || formItem.type === 'http://types/date/time' ) {
                         if (formItem.multiple) {
                             return _(textUriOrResource).mapWaitAll(text => Promise.resolve(text));
                         } else {

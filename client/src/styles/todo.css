@@ -246,7 +246,7 @@ label[for='toggle-all'] {
 
 .footer {
     color: #777;
-    padding: 10px 15px;
+    padding: 10px 15px 30px 15px ;
     height: 20px;
     text-align: center;
     border-top: 1px solid #e6e6e6;
@@ -277,7 +277,7 @@ label[for='toggle-all'] {
 }
 
 .filters {
-    margin: 0;
+    margin: -10px;
     padding: 0;
     list-style: none;
     position: absolute;

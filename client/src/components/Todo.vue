@@ -10,6 +10,7 @@
                        placeholder="What needs to be done?"
                        v-model="newTodo.name"
                        @keyup.enter="addTodo">
+
             </header>
 
             <section class="main" v-show="totalItems" v-cloak>
@@ -63,7 +64,8 @@
     import { log } from 'logger';
     import { redirectToTenant } from 'router';
     import TodoItem from './TodoItem.vue';
-    import { getTenant, getTodos, DEFAULT_TODO } from "domain/todo";
+    import { defaultTodo, getTenant, getTodos } from "domain/todo";
+    import { mapCompletedToState } from "../lib/form-type-mappings";
 
     /**
      * This component displays and allows updates to the todo list
@@ -113,9 +115,9 @@
 
 
     export default {
-        components: { TodoItem },
+        components: {TodoItem},
         props: {
-            apiUri: { type: String },
+            apiUri: {type: String},
         },
         data() {
             return {
@@ -125,12 +127,12 @@
                  *
                  * @type TodoCollectionRepresentation
                  */
-                todoCollection: { items: [] },
+                todoCollection: {items: []},
 
                 /**
-                 * New item holder
+                 * New item holder - this will be initiated in created
                  */
-                newTodo: Object.assign({}, DEFAULT_TODO),
+                newTodo: {name: ""},
 
                 /**
                  * Client-side filtering display that gets set from the incoming URL query: defaults {@link filterEnum.All}
@@ -156,6 +158,7 @@
 
             return getTodos(this.$root.$api, this.apiUri)
                 .then(todos => this.todoCollection = todos)
+                .then(() => this.reset())
                 .catch(err => log.error(err));
 
         },
@@ -175,8 +178,8 @@
                 },
                 set(value) {
                     this.todoCollection.items.forEach(todo => {
-                        // sets the 'known' attribute completed
-                        const updateTodo = Object.assign({}, todo, { completed: value });
+                        // sets the 'known' attribute completed - you SHOULD NOT hard code this but read it from the form
+                        const updateTodo = Object.assign({}, todo, {state: mapCompletedToState(value), completed: value});
                         nodMaker.updateResource(todo, updateTodo)
                             .catch(err => log.error(err));
                     })
@@ -187,10 +190,10 @@
         methods: {
 
             /**
-             * Clears out the new todo reaady to be entered and created
+             * Clears out the new todo ready to be entered and created
              */
             reset() {
-                this.newTodo = Object.assign({}, this.newTodo, DEFAULT_TODO);
+                this.newTodo = Object.assign({}, defaultTodo(this.todoCollection));
             },
 
             /**
@@ -271,10 +274,10 @@
                 let query = {};
                 switch (filter) {
                     case filterEnum.COMPLETED:
-                        query = { query: { completed: '' } };
+                        query = {query: {completed: ''}};
                         break;
                     case filterEnum.ACTIVE:
-                        query = { query: { active: '' } };
+                        query = {query: {active: ''}};
                         break;
                     case filterEnum.ALL:
                     default:
@@ -283,7 +286,6 @@
 
                 return getTenant(this.$root.$api, this.apiUri)
                     .then(tenant => redirectToTenant(tenant, query));
-
 
             }
         }

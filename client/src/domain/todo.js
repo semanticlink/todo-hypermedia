@@ -1,5 +1,5 @@
-import { nodMaker } from 'semanticLink';
-import { log } from 'logger';
+import { log, nodMaker, SemanticLink } from 'semanticLink';
+import { TEXT } from '../lib/form-type-mappings';
 
 /**
  * use the organisation from a provided list (when authenticated)
@@ -27,11 +27,6 @@ const getTodos = (apiResource, tenantUri) => {
         .then(tenant => nodMaker.getNamedCollectionResourceAndItems(tenant, 'todos', /todos/));
 };
 
-/**
- * Default values for a todo item. This *could/should* be retrieved from a create-form on the collection
- * @type {TodoRepresentation}
- */
-const DEFAULT_TODO = { name: '', completed: false };
 
 /**
  * Creates a new in-memory object based on a form.
@@ -47,12 +42,25 @@ const defaultTodo = todoResource => {
     return nodMaker
         .getResource(todoResource)
         .then(todoCollection => nodMaker.getSingletonResource(todoCollection, 'createForm', /create-form/))
-        .then(createForm => {
+        .catch(() => {
+            log.error(`No create form for on '${SemanticLink.getUri(todoResource, /self/)}'`);
+        })
+        .then(form => {
             const obj = {};
-            createForm.items.forEach(item => obj[item] = null);
+
+            if (form && form.items) {
+                form.items.forEach(item => {
+                    obj[item.name] = item.type === TEXT ? '' : null;
+                });
+            } else {
+                log.error(`Form has no fields: '${SemanticLink.getUri(this.formRepresentation, /self/)}'`);
+            }
+
             return obj;
+        })
+        .catch((err) => {
+            log.error(err);
         });
-}
+};
 
-
-export { getTenant, getTodos, DEFAULT_TODO, defaultTodo };
+export { getTenant, getTodos, defaultTodo };
