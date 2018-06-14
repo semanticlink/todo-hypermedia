@@ -25,21 +25,67 @@
         public const string Text = "http://types/text";
         public const string Password = "http://types/text/password";
         public const string Email = "http://types/text/email";
-        
+        public const string Tel = "http://types/text/tel";
+
         /// <summary>
-        ///     Mutually exlcusive selection
+        ///     Mutually exclusive selection
         /// </summary>
         public const string Select = "http://types/select";
-        
+
         /// <summary>
         ///     One-or-more selection
         /// </summary>
         public const string Check = "http://types/check";
-        
+
         public const string Date = "http://types/date";
-        public const string DateTime = "http://types/date/time";
-        
+        public const string DateTime = "http://types/datetime";
+        public const string Time = "http://types/time";
+
         public const string Group = "http://types/group";
+
+        /// <summary>
+        ///     Some values are part of a dynamic set of values (collection) eg in a select. 
+        /// </summary>
+        /// <see cref="Enum"/>
         public const string Collection = "http://types/collection";
+
+        /// <summary>
+        ///     Some values are part of a static set of values (enumeration) eg in a select. 
+        /// </summary>
+        /// <example>
+        ///
+        ///   Used as part of <see cref="Select"/>. In this case, between two options: open, complete
+        ///
+        /// <code>
+        ///   new SelectFormItemRepresentation
+        ///        {
+        ///            Name = "state",
+        ///            Description = "A todo can only toggle between open and complete.",
+        ///            Required = false,
+        ///            Multiple = false,
+        ///            Items = new SelectOptionItemRepresentation[]
+        ///            {
+        ///                new SelectOptionValueItemRepresentation
+        ///                {
+        ///                    Type = FormType.Enum,
+        ///                    Description = "The todo has been completed",
+        ///                    Label = "Completed",
+        ///                    Value = TodoState.Complete,
+        ///                    Name = "completed",
+        ///                },
+        ///                new SelectOptionValueItemRepresentation
+        ///                {
+        ///                    Type = FormType.Enum,
+        ///                    Description = "The todo has been opened",
+        ///                    Label = "Open",
+        ///                    Value = TodoState.Open,
+        ///                    Name = "open",
+        ///                },
+        ///            }
+        ///        },
+        /// </code>
+        /// </example>
+        /// <see cref="Collection"/>
+        public const string Enum = "http://types/enum";
     }
 }

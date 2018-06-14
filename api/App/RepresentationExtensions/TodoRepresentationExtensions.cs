@@ -162,7 +162,7 @@ namespace App.RepresentationExtensions
                     {
                         new SelectOptionValueItemRepresentation
                         {
-                            Type = FormType.Text,
+                            Type = FormType.Enum,
                             Description = "The todo has been completed",
                             Label = "Completed",
                             Value = TodoState.Complete,
@@ -170,7 +170,7 @@ namespace App.RepresentationExtensions
                         },
                         new SelectOptionValueItemRepresentation
                         {
-                            Type = FormType.Text,
+                            Type = FormType.Enum,
                             Description = "The todo has been opened",
                             Label = "Open",
                             Value = TodoState.Open,
