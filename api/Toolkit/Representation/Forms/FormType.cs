@@ -6,7 +6,7 @@
     ///     on the client.
     /// </para>
     /// <para>
-    ///    Also, not all types are rendered natively on browsers eg <see cref="Group"/> <see cref="Collection"/>
+    ///    Also, not all types are rendered natively on browsers eg <see cref="Group"/>, <see cref="Collection"/>, <see cref="Enum"/>
     /// </para>
     /// <remarks>
     ///    Browsers tend now to implement more types eg see https://bootstrap-vue.js.org/docs/components/form-input
@@ -18,7 +18,7 @@
     ///         - Chrome lost support for datetime in version 26, Opera in version 15, and Safari in iOS 7. Instead of using datetime, since support should be deprecated, use date and time as two separate input types.
     ///         - For date and time style input, where supported, the displayed value in the GUI may be different than what is returned by its value.
     ///         - Regardless of input type, the value is always returned as a string representation.
-    /// </remarks
+    /// </remarks>
     /// </summary>
     public static class FormType
     {
@@ -50,8 +50,9 @@
         public const string Collection = "http://types/collection";
 
         /// <summary>
-        ///     Some values are part of a static set of values (enumeration) eg in a select. 
-        /// </summary>
+        /// <para>
+        ///     Some values are part of a static set of values (enumeration) eg in a select.
+        /// </para>
         /// <example>
         ///
         ///   Used as part of <see cref="Select"/>. In this case, between two options: open, complete
@@ -85,6 +86,7 @@
         ///        },
         /// </code>
         /// </example>
+        /// </summary>
         /// <see cref="Collection"/>
         public const string Enum = "http://types/enum";
     }
