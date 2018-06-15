@@ -26,6 +26,9 @@ namespace App.RepresentationExtensions
 
                     // up link to root
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
+                    
+                    // all tags currently created on todos
+                    url.MakeAllTagsCollectionUri().MakeWebLink(CustomLinkRelation.Tags),
 
                     // create-form
                     url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
@@ -110,6 +113,9 @@ namespace App.RepresentationExtensions
 
                     // the collection of todos is the logical parent
                     url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Up),
+                    
+                   // the collection of todos tags (this may or may not have tags ie is an empty collection)
+                    todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
 
                     // edit-form
                     url.MakeTodoEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
@@ -183,6 +189,13 @@ namespace App.RepresentationExtensions
                     Name = "due",
                     Description = "The UTC date the todo is due"
                 },
+                new CollectionInputFormItemRepresentation
+                {
+                    Name = "tags",
+                    Description = "A todo can be grouped by tags (known also as categories)",
+                    Required = false,
+                    Multiple = true
+                }, 
             };
         }
     }

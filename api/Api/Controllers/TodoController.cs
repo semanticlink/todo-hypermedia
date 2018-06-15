@@ -1,10 +1,16 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Reflection.Emit;
+using System.Threading.Tasks;
+using Amazon.DynamoDBv2;
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
+using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.Representation.Forms;
@@ -17,6 +23,7 @@ namespace Api.Controllers
     public class TodoController : Controller
     {
         private readonly ITodoStore _todoStore;
+
 
         public TodoController(ITodoStore todoStore)
         {
@@ -87,6 +94,34 @@ namespace Api.Controllers
         {
             await _todoStore.Delete(id);
             return NoContent();
+        }
+
+        /// Immutable collection for now
+        [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
+        public FeedRepresentation GetTodoTags(string id)
+        {
+            // hardcoded tags for now
+            var tags = new[] {"Work", "Personal", "Grocery List"}.Select(label => new Tag {Name = label});
+
+            return tags
+                .ToFeedRepresentation(id, Url);
+        }
+
+        [HttpPost("{id}/tag/", Name = TagUriFactory.TodoTagCreateRouteName)]
+        public IActionResult CreateTag([FromBody] TagCreateDataRepresentation createData)
+        {
+            // okay so it doesn't but it pretends to for now
+            return new Tag {Name = createData.Name}
+                .MakeTodoTagUri(Url)
+                .MakeCreated();
+        }
+        
+        
+        [HttpGet("{id}/form/create", Name = TagUriFactory.CreateFormRouteName)]
+        [AllowAnonymous]
+        public CreateFormRepresentation GetCreateForm(string id)
+        {
+            return id.ToTagCreateFormRepresentation(Url);
         }
     }
 }
