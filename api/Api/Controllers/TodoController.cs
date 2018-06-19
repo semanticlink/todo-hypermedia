@@ -139,7 +139,7 @@ namespace Api.Controllers
             {
                 throw new ObjectNotFoundException($"Tag not found '{tagId}'");
             }
-            
+
             return (await _tagStore
                     .Get(tagId))
                 .ToTodoRepresentation(id, Url);

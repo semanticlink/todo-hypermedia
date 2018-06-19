@@ -17,8 +17,13 @@ namespace IntegrationTests
                 await TableNameConstants
                     .Todo
                     .CreateTable(dbProvider.Client);
+                await TableNameConstants
+                    .Tag
+                    .CreateTable(dbProvider.Client);
 
-                var todoStore = new TodoStore(dbProvider.Context);
+                var tagStore = new TagStore(dbProvider.Context);
+
+                var todoStore = new TodoStore(dbProvider.Context, tagStore);
 
                 var id = await todoStore.Create(new TodoCreateData {Name = "baba"});
 
@@ -43,7 +48,7 @@ namespace IntegrationTests
                     .CreateTable(dbProvider.Client);
 
                 var tagStore = new TagStore(dbProvider.Context);
-                var todoStore = new TodoStore(dbProvider.Context);
+                var todoStore = new TodoStore(dbProvider.Context, tagStore);
 
                 var s = await Task
                     .WhenAll(new[] {"Work", "Play"}

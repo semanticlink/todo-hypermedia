@@ -27,7 +27,10 @@ namespace App.RepresentationExtensions
                     url.MakeAllTagsCollectionUri().MakeWebLink(IanaLinkRelation.Up),
                 },
 
-                Name = tag.Name
+                Name = tag.Name,
+                Count = tag.Count,
+                CreatedAt = tag.CreatedAt,
+                UpdatedAt = tag.UpdatedAt
             };
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Domain.Models;
@@ -12,9 +13,15 @@ namespace Infrastructure.NoSQL
     {
         private readonly IDynamoDBContext _context;
 
-        public TodoStore(IDynamoDBContext context)
+        private readonly Action<string> _increment;
+        private readonly Action<string> _decrement;
+
+        public TodoStore(IDynamoDBContext context, ITagStore tagStore)
         {
             _context = context;
+
+            _increment = async id => { await tagStore.IncrementCountOnTag(id); };
+            _decrement = async id => { await tagStore.DecrementCountOnTag(id); };
         }
 
         public async Task<string> Create(TodoCreateData todo)
@@ -32,6 +39,8 @@ namespace Infrastructure.NoSQL
                 Tags = todo.Tags
             };
 
+            await Task.WhenAll(todo.Tags.Select(async tagId => _increment(tagId)));
+            
             await _context.SaveAsync(create);
 
             return id;
@@ -52,6 +61,10 @@ namespace Infrastructure.NoSQL
         {
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
+            
+            // TODO:
+            // TODO: need to diff the tags and alter the count
+            // TODO:
 
             updater(todo);
             todo.Id = id;
@@ -68,7 +81,7 @@ namespace Infrastructure.NoSQL
             await _context.SaveAsync(todo);
         }
 
-        public async Task UpdateTag(string id, string tagId)
+        public async Task UpdateTag(string id, string tagId, Action<string> add = null)
         {
             await Update(id, todo =>
             {
@@ -78,6 +91,15 @@ namespace Infrastructure.NoSQL
                 }
 
                 todo.Tags.Add(tagId);
+
+                if (add.IsNull())
+                {
+                    _increment(tagId);
+                }
+                else
+                {
+                    add?.Invoke(tagId);
+                }
             });
         }
 
@@ -89,13 +111,32 @@ namespace Infrastructure.NoSQL
             await _context.DeleteAsync(todo);
         }
 
-        public async Task DeleteTag(string id, string tagId)
+        public async Task DeleteTag(string id, string tagId, Action<string> remove = null)
         {
             await Update(id, todo =>
             {
                 if (!todo.Tags.IsNullOrEmpty())
                 {
-                    todo.Tags.RemoveAll(tag => tag == tagId);
+                    todo.Tags.RemoveAll(tag =>
+                    {
+                        if (tag == tagId)
+                        {
+                            if (remove.IsNull())
+                            {
+                                _decrement(tagId);
+                            }
+                            else
+                            {
+                                remove?.Invoke(tagId);
+                            }
+
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    });
                 }
             });
         }
