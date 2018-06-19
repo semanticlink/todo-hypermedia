@@ -1,16 +1,13 @@
-﻿using System.Linq;
-using System.Reflection.Emit;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
-using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.Representation.Forms;
@@ -22,12 +19,13 @@ namespace Api.Controllers
     [Authorize]
     public class TodoController : Controller
     {
+        private readonly ITagStore _tagStore;
         private readonly ITodoStore _todoStore;
 
-
-        public TodoController(ITodoStore todoStore)
+        public TodoController(ITodoStore todoStore, ITagStore tagStore)
         {
             _todoStore = todoStore;
+            _tagStore = tagStore;
         }
 
         [HttpGet("", Name = TodoUriFactory.SelfRouteName)]
@@ -49,7 +47,7 @@ namespace Api.Controllers
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation todo)
         {
             return (await _todoStore.Create(todo
-                    .ThrowInvalidDataExceptionIfNull("Invalid create data")
+                    .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
                     .FromRepresentation(Url)))
                 .MakeTodoUri(Url)
                 .MakeCreated();
@@ -58,8 +56,10 @@ namespace Api.Controllers
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
         public async Task<TodoRepresentation> GetById(string id)
         {
-            return (await _todoStore
-                    .Get(id))
+            var todo = await _todoStore
+                .Get(id);
+
+            return todo
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
                 .ToRepresentation(Url);
         }
@@ -96,28 +96,41 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        /// Immutable collection for now
-        [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
-        public FeedRepresentation GetTodoTags(string id)
-        {
-            // hardcoded tags for now
-            var tags = new[] {"Work", "Personal", "Grocery List"}.Select(label => new Tag {Name = label});
+        /********************
+         *  Tags
+         ********************/
 
-            return tags
+        [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
+        public async Task<FeedRepresentation> GetTodoTags(string id)
+        {
+            var todo = await _todoStore.Get(id);
+
+            return (await _tagStore.Get(todo.Tags))
                 .ToFeedRepresentation(id, Url);
         }
 
         [HttpPost("{id}/tag/", Name = TagUriFactory.TodoTagCreateRouteName)]
-        public IActionResult CreateTag([FromBody] TagCreateDataRepresentation createData)
+        public async Task<CreatedResult> CreateTag([FromBody] TagCreateDataRepresentation tag, string id)
         {
-            // okay so it doesn't but it pretends to for now
-            return new Tag {Name = createData.Name}
+            var tagId = await _tagStore.Create(tag
+                .ThrowInvalidDataExceptionIfNull("Invalid tag create data")
+                .FromRepresentation());
+
+            await _todoStore.Update(id, todo =>
+            {
+                if (!todo.Tags.Contains(tagId))
+                {
+                    todo.Tags.Add(tagId);
+                }
+            });
+
+            return tagId
                 .MakeTodoTagUri(Url)
                 .MakeCreated();
         }
-        
-        
-        [HttpGet("{id}/form/create", Name = TagUriFactory.CreateFormRouteName)]
+
+
+        [HttpGet("{id}/tag/form/create", Name = TagUriFactory.CreateFormRouteName)]
         [AllowAnonymous]
         public CreateFormRepresentation GetCreateForm(string id)
         {

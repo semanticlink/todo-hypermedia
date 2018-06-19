@@ -15,9 +15,9 @@ public static class TagUriFactory
         return url.Link(TodoTagsRouteName, new {id = id});
     }
 
-    public static string MakeTodoTagUri(this Tag tag, IUrlHelper url)
+    public static string MakeTodoTagUri(this string id, IUrlHelper url)
     {
-        return url.Link(TagRouteName, new {label = tag.Name});
+        return url.Link(TagRouteName, new {id = id});
     }
 
     public static string MakeAllTagsCollectionUri(this IUrlHelper url)

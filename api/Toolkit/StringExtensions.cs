@@ -9,7 +9,7 @@ namespace Toolkit
         ///     The standard method on string is not an extension method, so provide a thunk.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsNullOrWhitespace(this string str)
+        public static bool IsNullOrWhitespace([CanBeNull] this string str)
         {
             return string.IsNullOrWhiteSpace(str);
         }

@@ -14,9 +14,6 @@ namespace Infrastructure.NoSQL
     {
         private readonly IDynamoDBContext _context;
 
-        public const string TableName = TableNameConstants.Tenant;
-        private const string HashKey = HashKeyConstants.DEFAULT;
-
         public TenantStore(IDynamoDBContext context)
         {
             _context = context;
@@ -46,36 +43,17 @@ namespace Infrastructure.NoSQL
 
         public async Task<Tenant> Get(string id)
         {
-            return (await _context
-                    .ScanAsync<Tenant>(new List<ScanCondition>
-                    {
-                        new ScanCondition(HashKey, ScanOperator.Equal, id)
-                    })
-                    .GetRemainingAsync())
-                .FirstOrDefault();
+            return await _context.FirstOrDefault<Tenant>(id);
         }
 
         public async Task<Tenant> GetByCode(string code)
         {
-            return (await _context
-                    .ScanAsync<Tenant>(new List<ScanCondition>()
-
-                        {
-                            new ScanCondition("Code", ScanOperator.Equal, code)
-                        }
-                    )
-                    .GetRemainingAsync())
-                .FirstOrDefault();
+            return await _context.FirstOrDefault<Tenant>(nameof(Tenant.Code), code);
         }
 
         public async Task<IEnumerable<Tenant>> GetTenantsForUser(string id)
         {
-            return await _context
-                .ScanAsync<Tenant>(new List<ScanCondition>
-                {
-                    new ScanCondition(HashKey, ScanOperator.Equal, id)
-                })
-                .GetRemainingAsync();
+            return await _context.Where<Tenant>(id);
         }
 
         public Task<IEnumerable<User>> GetUsersByTenant(string id)

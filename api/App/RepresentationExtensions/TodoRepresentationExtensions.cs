@@ -115,11 +115,11 @@ namespace App.RepresentationExtensions
                     url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Up),
                     
                    // the collection of todos tags (this may or may not have tags ie is an empty collection)
-                    todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
+                    todo.Tags.IsNullOrEmpty() ? null : todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
 
                     // edit-form
                     url.MakeTodoEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
-                },
+                }.RemoveNulls(),
                 Name = todo.Name,
                 Completed = todo.State == TodoState.Complete,
                 State = todo.State,

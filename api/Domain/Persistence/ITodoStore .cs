@@ -10,7 +10,7 @@ namespace Domain.Persistence
         Task<string> Create(TodoCreateData todo);
         Task<Todo> Get(string id);
         Task<IEnumerable<Todo>> GetAll();
-        Task Update(string todoId, Action<Todo> updater);
-        Task Delete(string todoId);
+        Task Update(string id, Action<Todo> updater);
+        Task Delete(string id);
     }
 }

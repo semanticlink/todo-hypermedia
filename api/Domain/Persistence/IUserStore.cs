@@ -5,7 +5,7 @@ using Domain.Models;
 
 namespace Domain.Persistence
 {
-   public interface IUserStore
+    public interface IUserStore
     {
         Task<string> Create(string tenantId, string identityId);
         Task<User> Get(string id);

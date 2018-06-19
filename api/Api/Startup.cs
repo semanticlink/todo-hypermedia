@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Serialization;
+using Toolkit;
 
 namespace Api
 {
@@ -128,15 +129,14 @@ namespace Api
         {
             var client = app.ApplicationServices.GetService<IAmazonDynamoDB>();
 
-            TableNameConstants
-                .Todo
-                .CreateTable(client)
-                .ConfigureAwait(false);
+            new[]
+                {
+                    TableNameConstants.Todo,
+                    TableNameConstants.Tenant,
+                    TableNameConstants.Tag,
+                }
+                .ForEach(table => table.CreateTable(client).ConfigureAwait(false));
 
-            TableNameConstants
-                .Tenant
-                .CreateTable(client)
-                .ConfigureAwait(false);
 
             return app;
         }

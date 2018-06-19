@@ -5,6 +5,7 @@ using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
+using Toolkit;
 using Toolkit.LinkRelations;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
@@ -20,14 +21,14 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    tag.MakeTodoTagUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    tag.Id.MakeTodoTagUri(url).MakeWebLink(IanaLinkRelation.Self),
                 },
 
                 Name = tag.Name
             };
         }
 
-        public static FeedRepresentation ToAllTagReadOnlyFeedRepresentation(this IEnumerable<Tag> tags, IUrlHelper url)
+        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Tag> tags, IUrlHelper url)
         {
             return new FeedRepresentation
             {
@@ -46,6 +47,7 @@ namespace App.RepresentationExtensions
                     .ToArray()
             };
         }
+
         public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Tag> tags, string id, IUrlHelper url)
         {
             return new FeedRepresentation
@@ -55,8 +57,8 @@ namespace App.RepresentationExtensions
                     // self
                     id.MakeTodoTagCollectionUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // up link to todo collection
-                    url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Up),
+                    // up link to the referring todo
+                    id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // no create form because this is readonly collection
                     id.MakeTagCreateFormUri(url).MakeWebLink(IanaLinkRelation.CreateForm)
@@ -71,7 +73,7 @@ namespace App.RepresentationExtensions
         {
             return new FeedItemRepresentation
             {
-                Id = tag.MakeTodoTagUri(url),
+                Id = tag.Id.MakeTodoTagUri(url),
                 Title = tag.Name,
             };
         }
@@ -90,12 +92,20 @@ namespace App.RepresentationExtensions
                 {
                     // this collection
                     id.MakeTagCreateFormUri(url).MakeWebLink(IanaLinkRelation.Self),
-                    
+
                     // submit against the parent collection
                     id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Submit),
-                    
                 },
                 Items = MakeCreateFormItems()
+            };
+        }
+
+        public static TagCreateData FromRepresentation(this TagCreateDataRepresentation todo)
+        {
+            return new TagCreateData
+            {
+                Name = todo.Name
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A tag requires a name"),
             };
         }
 

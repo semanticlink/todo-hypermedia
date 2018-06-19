@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation.Enum;
@@ -17,16 +20,16 @@ namespace Api
     /// </summary>
     public static class SeedDb
     {
-        public static IWebHost InitialiseDynamoDb(this IWebHost host, IHostingEnvironment HostingEnvironment)
+        public static IWebHost InitialiseDynamoDb(this IWebHost host, IHostingEnvironment hostingEnvironment)
         {
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 try
                 {
-                    if (HostingEnvironment.IsDevelopment())
+                    if (hostingEnvironment.IsDevelopment())
                     {
-                        services.SeedTestData();
+                        services.SeedTestData().ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
@@ -42,7 +45,7 @@ namespace Api
         /// <summary>
         ///     Creates a tenant, user on the tenant and some todos
         /// </summary>
-        public static IServiceProvider SeedTestData(this IServiceProvider services)
+        public static async Task<IServiceProvider> SeedTestData(this IServiceProvider services)
         {
             var logger = services.GetRequiredService<ILogger<Program>>();
 
@@ -67,16 +70,34 @@ namespace Api
             userManager.CreateAsync(user, "Test123!").ConfigureAwait(false);
 
             // now, we have the identity user, link this into the new user
-            userStore.Create(
-                    tenantId.ThrowAccessDeniedExceptionIfNull("No tenant provided to create a user"),
-                    user.Id.ThrowAccessDeniedExceptionIfNull("No identity provided to create user"))
-                .ConfigureAwait(false);
+            await userStore.Create(
+                tenantId.ThrowAccessDeniedExceptionIfNull("No tenant provided to create a user"),
+                user.Id.ThrowAccessDeniedExceptionIfNull("No identity provided to create user"));
+
+            var tagStore = services.GetRequiredService<ITagStore>();
+
+            // create some global tags
+
+            var tagIds = (await Task
+                    .WhenAll(new[] {"Work", "Personal", "Grocery List"}
+                        .Select(tag => tagStore.Create(new TagCreateData {Name = tag}))))
+                .Where(result => result != null)
+                .ToList();
 
             var todoStore = services.GetRequiredService<ITodoStore>();
 
-            todoStore.Create(new TodoCreateData {Name = "One Todo"}).ConfigureAwait(false);
-            todoStore.Create(new TodoCreateData {Name = "Two Todo", State = TodoState.Complete}).ConfigureAwait(false);
-            todoStore.Create(new TodoCreateData {Name = "Three Todo"}).ConfigureAwait(false);
+            await todoStore.Create(new TodoCreateData {Name = "One Todo"});
+            await todoStore.Create(new TodoCreateData
+            {
+                Name = "Two Todo (tag)",
+                Tags = new List<string> {tagIds.First()},
+                State = TodoState.Complete
+            });
+            await todoStore.Create(new TodoCreateData
+            {
+                Name = "Three Todo (tagged)",
+                Tags = tagIds
+            });
 
             return services;
         }

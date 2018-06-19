@@ -1,10 +1,9 @@
-﻿using System.Linq;
+﻿using System.Threading.Tasks;
 using App.RepresentationExtensions;
-using Domain.Models;
+using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
@@ -13,21 +12,32 @@ namespace Api.Controllers
     [Authorize]
     public class TagController : Controller
     {
-        /// Immutable collection for the all the todos
+        private readonly ITagStore _tagStore;
+
+
+        public TagController(ITagStore tagStore)
+        {
+            _tagStore = tagStore;
+        }
+
+        /// <summary>
+        ///     Tags that live across all tenants
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("", Name = TagUriFactory.AllTagsRouteName)]
-        public FeedRepresentation GetAllTags()
+        public async Task<FeedRepresentation> GetAllTags()
         {
-            // hard coded, in practice these are harvested from all the todos
-            var tags = new[] {"Work", "Personal", "Grocery List"}.Select(label => new Tag {Name = label});
-            return tags
-                .ToAllTagReadOnlyFeedRepresentation(Url);
+            return (await _tagStore
+                    .GetAll())
+                .ToFeedRepresentation(Url);
         }
 
-        [HttpGet("{label}", Name = TagUriFactory.TagRouteName)]
-        public TagRepresentation Get(string label)
+        [HttpGet("{id}", Name = TagUriFactory.TagRouteName)]
+        public async Task<TagRepresentation> Get(string id)
         {
-            return new Tag {Name = label}.ToRepresentation(Url);
+            return (await _tagStore
+                    .Get(id))
+                .ToRepresentation(Url);
         }
-
     }
 }

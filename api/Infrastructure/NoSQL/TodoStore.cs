@@ -14,9 +14,6 @@ namespace Infrastructure.NoSQL
     {
         private readonly IDynamoDBContext _context;
 
-        public const string TableName = TableNameConstants.Todo;
-        private const string HashKey = HashKeyConstants.DEFAULT;
-
         public TodoStore(IDynamoDBContext context)
         {
             _context = context;
@@ -32,7 +29,9 @@ namespace Infrastructure.NoSQL
                 Name = todo.Name,
                 State = todo.State,
                 Due = todo.Due,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                // TODO: validation/cross checking of tag references
+                Tags = todo.Tags
             };
 
             await _context.SaveAsync(create);
@@ -42,29 +41,23 @@ namespace Infrastructure.NoSQL
 
         public async Task<Todo> Get(string id)
         {
-            return (await _context
-                    .ScanAsync<Todo>(new List<ScanCondition>
-                    {
-                        new ScanCondition(HashKey, ScanOperator.Equal, id)
-                    })
-                    .GetRemainingAsync())
-                .SingleOrDefault();
+            return await _context.WhereById<Todo>(id);
         }
 
         public async Task<IEnumerable<Todo>> GetAll()
         {
-            return await _context
-                .ScanAsync<Todo>(new List<ScanCondition>())
-                .GetRemainingAsync();
+            return await _context.Where<Todo>();
         }
 
-        public async Task Update(string todoId, Action<Todo> updater)
+
+        public async Task Update(string id, Action<Todo> updater)
         {
-            var todo = await Get(todoId)
+            var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
 
             updater(todo);
-            todo.Id = todoId;
+            todo.Id = id;
+            todo.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveAsync(todo);
         }

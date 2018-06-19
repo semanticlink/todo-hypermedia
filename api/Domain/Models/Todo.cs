@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Amazon.DynamoDBv2.DataModel;
 using Domain.Representation.Enum;
 
@@ -22,6 +23,14 @@ namespace Domain.Models
         /// <see cref="TodoState"/>
         public string State { get; set; }
 
+        /// <summary>
+        ///     Todos can be tagged as a way of grouping.
+        /// </summary>
+        /// <remarks>
+        ///    This is an array of hash key IDs. See <see cref="Models.Tag"/>
+        /// </remarks>
+        [DynamoDBProperty("Tag")]   
+        public List<string> Tags { get; set; }
 
         public DateTime Due { get; set; }
 

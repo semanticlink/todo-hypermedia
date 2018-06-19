@@ -32,6 +32,7 @@ namespace IntegrationTests
                 Assert.Equal(code, tenant.Code);
                 Assert.Equal("baba", tenant.Name);
                 Assert.Equal("new one", tenant.Description);
+                
             }
         }
     }

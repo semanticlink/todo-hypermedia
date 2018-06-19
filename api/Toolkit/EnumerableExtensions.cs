@@ -3,15 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NLog.Filters;
 
 namespace Toolkit
 {
     public delegate string ToString<in T>(T anObject);
-    
+
     public static class EnumerableExtensions
     {
-        
-        
         public static string ToQuotedCsvString<T>(
             this IEnumerable<T> items)
         {
@@ -43,7 +42,7 @@ namespace Toolkit
                 yield return singleItem;
             }
         }
- 
+
         public static bool IsNullOrEmpty<T>(this IEnumerable<T> items) where T : class
         {
             return items == null || !items.Any();
@@ -66,8 +65,8 @@ namespace Toolkit
         {
             return collection ?? new T[] { };
         }
-        
-        
+
+
         /// <summary>
         ///     A function very similar to string.Join(), but the items are
         ///     a delegate and a prefix and suffix are supported.
@@ -110,8 +109,8 @@ namespace Toolkit
 
             return str.ToString();
         }
-        
-        
+
+
         /// <summary>
         ///     A function very similar to string.Join(), but the items are
         ///     a delegate and a prefix and suffix are supported.
@@ -154,6 +153,5 @@ namespace Toolkit
 
             return str.ToString();
         }
-
     }
 }
