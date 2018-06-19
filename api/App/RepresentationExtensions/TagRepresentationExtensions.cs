@@ -21,7 +21,27 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    tag.Id.MakeTodoTagUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    tag.Id.MakeTagUri(url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // up
+                    url.MakeAllTagsCollectionUri().MakeWebLink(IanaLinkRelation.Up),
+                },
+
+                Name = tag.Name
+            };
+        }
+
+        public static TagRepresentation ToTodoRepresentation(this Tag tag, string todoId, IUrlHelper url)
+        {
+            return new TagRepresentation
+            {
+                Links = new[]
+                {
+                    // self
+                    tag.Id.MakeTodoTagUri(todoId, url).MakeWebLink(IanaLinkRelation.Self),
+
+                    //canonical
+                    tag.Id.MakeTagUri(url).MakeWebLink(IanaLinkRelation.Canonical),
                 },
 
                 Name = tag.Name
@@ -43,7 +63,7 @@ namespace App.RepresentationExtensions
                     // no create form because this is readonly collection
                 },
                 Items = tags
-                    .Select(t => t.MakeTodoFeedItemRepresentation(url))
+                    .Select(t => t.MakeFeedItemRepresentation(url))
                     .ToArray()
             };
         }
@@ -64,16 +84,30 @@ namespace App.RepresentationExtensions
                     id.MakeTagCreateFormUri(url).MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = tags
-                    .Select(t => t.MakeTodoFeedItemRepresentation(url))
+                    .Select(t => t.MakeTodoFeedItemRepresentation(id, url))
                     .ToArray()
             };
         }
 
-        private static FeedItemRepresentation MakeTodoFeedItemRepresentation(this Tag tag, IUrlHelper url)
+        private static FeedItemRepresentation MakeTodoFeedItemRepresentation(
+            this Tag tag,
+            string todoId,
+            IUrlHelper url)
         {
             return new FeedItemRepresentation
             {
-                Id = tag.Id.MakeTodoTagUri(url),
+                Id = tag.Id.MakeTodoTagUri(todoId, url),
+                Title = tag.Name,
+            };
+        }
+
+        private static FeedItemRepresentation MakeFeedItemRepresentation(
+            this Tag tag,
+            IUrlHelper url)
+        {
+            return new FeedItemRepresentation
+            {
+                Id = tag.Id.MakeTagUri(url),
                 Title = tag.Name,
             };
         }

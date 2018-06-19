@@ -13,5 +13,6 @@ namespace Domain.Persistence
         Task Update(string id, Action<Todo> updater);
         Task UpdateTag(string id, string tagId);
         Task Delete(string id);
+        Task DeleteTag(string id, string tagId);
     }
 }

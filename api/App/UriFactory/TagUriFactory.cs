@@ -6,7 +6,8 @@ public static class TagUriFactory
     public const string AllTagsRouteName = "AllTagsRouteName";
     public const string TodoTagsRouteName = "TodosTagsRouteName";
     public const string CreateFormRouteName = "TagsCreateRouteName";
-    public const string TagRouteName = "TodoTagRouteName";
+    public const string TodoTagRouteName = "TodoTagRouteName";
+    public const string TagRouteName = "TagRouteName";
 
     public const string TodoTagCreateRouteName = "TodoTagCreateRouteName";
 
@@ -15,7 +16,12 @@ public static class TagUriFactory
         return url.Link(TodoTagsRouteName, new {id = id});
     }
 
-    public static string MakeTodoTagUri(this string id, IUrlHelper url)
+    public static string MakeTodoTagUri(this string id, string todoId, IUrlHelper url)
+    {
+        return url.Link(TodoTagRouteName, new {id = todoId, tagId = id});
+    }
+
+    public static string MakeTagUri(this string id, IUrlHelper url)
     {
         return url.Link(TagRouteName, new {id = id});
     }
@@ -32,6 +38,6 @@ public static class TagUriFactory
 
     public static string MakeCreateTagUri(this IUrlHelper url)
     {
-        return url.Link(TagRouteName, new { });
+        return url.Link(TodoTagRouteName, new { });
     }
 }

@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2.DataModel;
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
-using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Authorization;
@@ -120,7 +117,7 @@ namespace Api.Controllers
             await _todoStore.UpdateTag(id, tagId);
 
             return tagId
-                .MakeTodoTagUri(Url)
+                .MakeTodoTagUri(id, Url)
                 .MakeCreated();
         }
 
@@ -130,6 +127,29 @@ namespace Api.Controllers
         public CreateFormRepresentation GetCreateForm(string id)
         {
             return id.ToTagCreateFormRepresentation(Url);
+        }
+
+        [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
+        public async Task<TagRepresentation> Get(string id, string tagId)
+        {
+            var todo = await _todoStore.Get(id)
+                .ThrowInvalidDataExceptionIfNull($"Todo not found '{id}'");
+
+            if (todo.Tags.IsNull() || !todo.Tags.Contains(tagId))
+            {
+                throw new ObjectNotFoundException($"Tag not found '{tagId}'");
+            }
+            
+            return (await _tagStore
+                    .Get(tagId))
+                .ToTodoRepresentation(id, Url);
+        }
+
+        [HttpDelete("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
+        public async Task<IActionResult> DeleteTag(string id, string tagId)
+        {
+            await _todoStore.DeleteTag(id, tagId);
+            return NoContent();
         }
     }
 }

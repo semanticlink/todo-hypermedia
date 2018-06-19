@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
 using Toolkit;
@@ -59,6 +57,14 @@ namespace Infrastructure.NoSQL
             todo.Id = id;
             todo.UpdatedAt = DateTime.UtcNow;
 
+            // if tags have been removed, it looks like you can't hand
+            // though an empty list but rather need to null it.
+            // TODO: check this is true
+            if (todo.Tags.IsNullOrEmpty())
+            {
+                todo.Tags = null;
+            }
+
             await _context.SaveAsync(todo);
         }
 
@@ -81,6 +87,17 @@ namespace Infrastructure.NoSQL
                 .ThrowObjectNotFoundExceptionIfNull();
 
             await _context.DeleteAsync(todo);
+        }
+
+        public async Task DeleteTag(string id, string tagId)
+        {
+            await Update(id, todo =>
+            {
+                if (!todo.Tags.IsNullOrEmpty())
+                {
+                    todo.Tags.RemoveAll(tag => tag == tagId);
+                }
+            });
         }
     }
 }
