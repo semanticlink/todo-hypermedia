@@ -39,8 +39,11 @@ namespace Infrastructure.NoSQL
                 Tags = todo.Tags
             };
 
-            await Task.WhenAll(todo.Tags.Select(async tagId => _increment(tagId)));
-            
+            if (!todo.Tags.IsNull())
+            {
+                await Task.WhenAll(todo.Tags?.Select(async tagId => _increment(tagId)));
+            }
+
             await _context.SaveAsync(create);
 
             return id;
@@ -61,7 +64,7 @@ namespace Infrastructure.NoSQL
         {
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
-            
+
             // TODO:
             // TODO: need to diff the tags and alter the count
             // TODO:
