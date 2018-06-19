@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Api.Web;
@@ -118,10 +119,12 @@ namespace Api.Controllers
 
             await _todoStore.Update(id, todo =>
             {
-                if (!todo.Tags.Contains(tagId))
+                if (todo.Tags.IsNull())
                 {
-                    todo.Tags.Add(tagId);
+                    todo.Tags = new List<string>();
                 }
+
+                todo.Tags.Add(tagId);
             });
 
             return tagId
