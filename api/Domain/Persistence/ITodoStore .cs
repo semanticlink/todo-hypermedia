@@ -11,6 +11,7 @@ namespace Domain.Persistence
         Task<Todo> Get(string id);
         Task<IEnumerable<Todo>> GetAll();
         Task Update(string id, Action<Todo> updater);
+        Task UpdateTag(string id, string tagId);
         Task Delete(string id);
     }
 }

@@ -62,6 +62,19 @@ namespace Infrastructure.NoSQL
             await _context.SaveAsync(todo);
         }
 
+        public async Task UpdateTag(string id, string tagId)
+        {
+            await Update(id, todo =>
+            {
+                if (todo.Tags.IsNull())
+                {
+                    todo.Tags = new List<string>();
+                }
+
+                todo.Tags.Add(tagId);
+            });
+        }
+
         public async Task Delete(string id)
         {
             var todo = await Get(id)

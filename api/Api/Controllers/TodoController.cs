@@ -117,15 +117,7 @@ namespace Api.Controllers
                 .ThrowInvalidDataExceptionIfNull("Invalid tag create data")
                 .FromRepresentation());
 
-            await _todoStore.Update(id, todo =>
-            {
-                if (todo.Tags.IsNull())
-                {
-                    todo.Tags = new List<string>();
-                }
-
-                todo.Tags.Add(tagId);
-            });
+            await _todoStore.UpdateTag(id, tagId);
 
             return tagId
                 .MakeTodoTagUri(Url)
