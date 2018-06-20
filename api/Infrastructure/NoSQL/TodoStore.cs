@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Domain.Models;
@@ -12,16 +11,12 @@ namespace Infrastructure.NoSQL
     public class TodoStore : ITodoStore
     {
         private readonly IDynamoDBContext _context;
-
-        private readonly Action<string> _increment;
-        private readonly Action<string> _decrement;
+        private readonly TagCountUpdater _tagCount;
 
         public TodoStore(IDynamoDBContext context, ITagStore tagStore)
         {
             _context = context;
-
-            _increment = async id => { await tagStore.IncrementCountOnTag(id); };
-            _decrement = async id => { await tagStore.DecrementCountOnTag(id); };
+            _tagCount = new TagCountUpdater(tagStore);
         }
 
         public async Task<string> Create(TodoCreateData todo)
@@ -39,12 +34,10 @@ namespace Infrastructure.NoSQL
                 Tags = todo.Tags
             };
 
-            if (!todo.Tags.IsNull())
-            {
-                await Task.WhenAll(todo.Tags?.Select(async tagId => _increment(tagId)));
-            }
-
             await _context.SaveAsync(create);
+
+            // update the global tags counter
+            await _tagCount.Update(todo.Tags);
 
             return id;
         }
@@ -65,43 +58,38 @@ namespace Infrastructure.NoSQL
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            // TODO:
-            // TODO: need to diff the tags and alter the count
-            // TODO:
+            // clone (shallow value types) the tags (which may be null) so that we can difference between old and new
+            var initialTags = todo.Tags.Clone();
 
             updater(todo);
+
+            // no messing with the ID allowed
             todo.Id = id;
+            // no messing with the update time allowed
             todo.UpdatedAt = DateTime.UtcNow;
 
             // if tags have been removed, it looks like you can't hand
             // though an empty list but rather need to null it.
             // TODO: check this is true
-            if (todo.Tags.IsNullOrEmpty())
-            {
-                todo.Tags = null;
-            }
+            todo.Tags = !todo.Tags.IsNullOrEmpty() ? todo.Tags : null;
 
             await _context.SaveAsync(todo);
+            await _tagCount.Update(initialTags, todo.Tags);
         }
 
-        public async Task UpdateTag(string id, string tagId, Action<string> add = null)
+        /// <summary>
+        ///     Add tags to the todo. You are not able to add duplicates.
+        /// </summary>
+        public async Task AddTag(string id, string tagId, Action<string> add = null)
         {
             await Update(id, todo =>
             {
-                if (todo.Tags.IsNull())
-                {
-                    todo.Tags = new List<string>();
-                }
+                todo.Tags = todo.Tags ?? new List<string>();
 
-                todo.Tags.Add(tagId);
-
-                if (add.IsNull())
+                // do not allow duplicates
+                if (!todo.Tags.Contains(tagId))
                 {
-                    _increment(tagId);
-                }
-                else
-                {
-                    add?.Invoke(tagId);
+                    todo.Tags.Add(tagId);
                 }
             });
         }
@@ -111,37 +99,14 @@ namespace Infrastructure.NoSQL
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
 
+
             await _context.DeleteAsync(todo);
+            await _tagCount.Update(todo.Tags, new List<string>());
         }
 
         public async Task DeleteTag(string id, string tagId, Action<string> remove = null)
         {
-            await Update(id, todo =>
-            {
-                if (!todo.Tags.IsNullOrEmpty())
-                {
-                    todo.Tags.RemoveAll(tag =>
-                    {
-                        if (tag == tagId)
-                        {
-                            if (remove.IsNull())
-                            {
-                                _decrement(tagId);
-                            }
-                            else
-                            {
-                                remove?.Invoke(tagId);
-                            }
-
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    });
-                }
-            });
+            await Update(id, todo => todo.Tags?.RemoveAll(tag => tag == tagId));
         }
     }
 }

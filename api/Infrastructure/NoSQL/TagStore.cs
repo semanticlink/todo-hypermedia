@@ -24,6 +24,7 @@ namespace Infrastructure.NoSQL
 
             var tag = tags.FirstOrDefault();
 
+            // only create a new tag, if it doesn't already exist
             if (tag.IsNotNull() && !tag.Id.IsNullOrWhitespace())
             {
                 return tag.Id;
@@ -35,7 +36,8 @@ namespace Infrastructure.NoSQL
             {
                 Id = id,
                 Name = createData.Name,
-                Count = 1,
+                // initialise the counter (note: adding a tag to the global set is not the same adding to a todo)
+                Count = 0,
                 CreatedAt = now,
                 UpdatedAt = now
             };

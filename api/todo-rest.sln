@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Toolkit", "Toolkit\Toolkit.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "IntegrationTests\IntegrationTests.csproj", "{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroTests", "MicroTests\MicroTests.csproj", "{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4388BA7E-73F2-4AFB-AF38-140D401B1DCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

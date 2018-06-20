@@ -52,7 +52,7 @@ namespace Infrastructure.NoSQL
         {
             return ids.IsNull()
                 ? new List<T>()
-                : await context.Where<T>(new ScanCondition(HashKeyConstants.DEFAULT, ScanOperator.In, ids.ToArray()));
+                : await context.Where<T>(new ScanCondition(HashKeyConstants.DEFAULT, ScanOperator.In, ids.Distinct().ToArray()));
         }
 
         public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, ScanCondition scanCondition)

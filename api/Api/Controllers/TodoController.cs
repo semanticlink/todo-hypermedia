@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
@@ -114,13 +113,12 @@ namespace Api.Controllers
                 .ThrowInvalidDataExceptionIfNull("Invalid tag create data")
                 .FromRepresentation());
 
-            await _todoStore.UpdateTag(id, tagId);
+            await _todoStore.AddTag(id, tagId);
 
             return tagId
                 .MakeTodoTagUri(id, Url)
                 .MakeCreated();
         }
-
 
         [HttpGet("{id}/tag/form/create", Name = TagUriFactory.CreateFormRouteName)]
         [AllowAnonymous]
