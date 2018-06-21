@@ -72,7 +72,8 @@ namespace Api
             // now, we have the identity user, link this into the new user
             await userStore.Create(
                 tenantId.ThrowAccessDeniedExceptionIfNull("No tenant provided to create a user"),
-                user.Id.ThrowAccessDeniedExceptionIfNull("No identity provided to create user"));
+                user.Id.ThrowAccessDeniedExceptionIfNull("No identity provided to create user"),
+                user.Email);
 
             var tagStore = services.GetRequiredService<ITagStore>();
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using App.UriFactory;
+using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
@@ -24,33 +25,30 @@ namespace App.RepresentationExtensions
 
                     // logical parent of user is a tenant
                     tenantId.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Up),
-                    
+
                     // edit-form
-                    //url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
+                    url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
                 },
 
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt
             };
         }
-        
-        public static FeedRepresentation ToFeedRepresentation(
-            this IEnumerable<User> users,
-            string tenantId,
-            IUrlHelper url)
+
+        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<User> users, IUrlHelper url)
         {
             return new FeedRepresentation
             {
                 Links = new[]
                 {
                     // self
-                    //tenantId.MakeTenantUsersCollectionUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    url.MakeUserCollectoinUri().MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to root
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // create-form
-                    url.MakeUserCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
+                    // todos
+                    url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos),
                 },
                 Items = users
                     .Select(t => t.MakeUserFeedItemRepresentation(url))
@@ -63,6 +61,7 @@ namespace App.RepresentationExtensions
             return new FeedItemRepresentation
             {
                 Id = user.Id.MakeUserUri(url),
+                Title = user.Name
             };
         }
 
@@ -97,7 +96,12 @@ namespace App.RepresentationExtensions
                     Name = "email",
                     Description = "The email address of the user",
                     Required = true
-                }
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "name",
+                    Description = "The name of the user to be shown on the screen"
+                },
             };
         }
 
@@ -141,6 +145,11 @@ namespace App.RepresentationExtensions
                     Name = "email",
                     Description = "The email address of the user",
                     Required = true
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "name",
+                    Description = "The name of the user to be shown on the screen"
                 }
             };
         }

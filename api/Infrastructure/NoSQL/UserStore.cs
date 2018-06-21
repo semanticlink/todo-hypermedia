@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
@@ -21,7 +20,7 @@ namespace Infrastructure.NoSQL
             _context = context;
         }
 
-        public async Task<string> Create(string tenantId, string identityId)
+        public async Task<string> Create(string tenantId, string identityId, string name)
         {
             var id = Guid.NewGuid().ToString();
 
@@ -31,7 +30,8 @@ namespace Infrastructure.NoSQL
             {
                 Id = id,
                 IdentityId = identityId,
-                tenantId = tenantId,
+                TenantId = tenantId,
+                Name = name,
                 CreatedAt = now,
                 UpdatedAt = now
             };
@@ -43,25 +43,23 @@ namespace Infrastructure.NoSQL
 
         public async Task<User> Get(string id)
         {
-            return await SingleOrDefault(new ScanCondition(HashKey, ScanOperator.Equal, id));
+            return await _context.SingleOrDefault<User>(id);
         }
 
         public async Task<User> GetByIdentityId(string identityId)
         {
-            return await SingleOrDefault(new ScanCondition("IdentityId", ScanOperator.Equal, identityId));
+            return await _context.SingleOrDefault<User>(nameof(User.IdentityId), identityId);
         }
 
 
         public async Task<User> GetByTenant(string tenantId)
         {
-            return await SingleOrDefault(new ScanCondition("TenantId", ScanOperator.Equal, tenantId));
+            return await _context.SingleOrDefault<User>(nameof(User.TenantId), tenantId);
         }
 
         public async Task<IEnumerable<User>> GetAll()
         {
-            return await _context
-                .ScanAsync<User>(new List<ScanCondition>())
-                .GetRemainingAsync();
+            return await _context.Where<User>();
         }
 
         public async Task Update(string userId, Action<User> updater)
@@ -81,17 +79,6 @@ namespace Infrastructure.NoSQL
                 .ThrowObjectNotFoundExceptionIfNull();
 
             await _context.DeleteAsync(user);
-        }
-
-        private async Task<User> SingleOrDefault(ScanCondition scanCondition)
-        {
-            return (await _context
-                    .ScanAsync<User>(new List<ScanCondition>
-                    {
-                        scanCondition
-                    })
-                    .GetRemainingAsync())
-                .SingleOrDefault();
         }
     }
 }

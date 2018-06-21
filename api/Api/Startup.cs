@@ -1,4 +1,6 @@
-﻿using Amazon.DynamoDBv2;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
 using Infrastructure.mySql;
@@ -32,7 +34,12 @@ namespace Api
         {
             services
                 .AddDbContext<ApplicationIdentityDbContext>()
-                .AddIdentity<IdentityUser, IdentityRole>()
+                .AddIdentity<IdentityUser, IdentityRole>(options =>
+                {
+                    // cross-reference to use the userId used in the JWT
+                    // see https://github.com/aspnet/Security/issues/1043
+                    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
+                })
                 .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
                 .AddDefaultTokenProviders();
 

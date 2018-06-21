@@ -26,7 +26,11 @@ namespace Api.Web
             this IServiceCollection services,
             IConfiguration Configuration)
         {
+            // Needed, well documented as a problem
+            // see https://github.com/aspnet/Security/issues/1043
+            // see https://dev.to/coolgoose/setting-up-jwt-and-identity-authorizationauthentication-in-asp-net-core-4l45
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+            
             services
                 .AddAuthentication(
                     sharedOptions =>

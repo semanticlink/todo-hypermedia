@@ -23,6 +23,11 @@
         public const string Authenticate = "authenticate";
         
         /// <summary>
+        ///     Link to the collection avaiallable to the authenticated user
+        /// </summary>
+        public const string Me = "me";
+        
+        /// <summary>
         ///     Tenants collection for authenticated users
         /// </summary>
         public const string Tenants = "tenants";

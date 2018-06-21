@@ -7,7 +7,7 @@ namespace Domain.Persistence
 {
     public interface IUserStore
     {
-        Task<string> Create(string tenantId, string identityId);
+        Task<string> Create(string tenantId, string identityId, string name);
         Task<User> Get(string id);
         Task<User> GetByIdentityId(string id);
         Task<User> GetByTenant(string tenantId);
