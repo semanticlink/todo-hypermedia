@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Domain.Models;
 using Infrastructure.NoSQL;
-using Toolkit;
 using Xunit;
 
 namespace IntegrationTests

@@ -71,7 +71,6 @@ namespace Api.Controllers
                         .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo must have a name");
 
                     todo.State = item.State;
-
                     todo.Due = item.Due;
                 });
             return NoContent();
@@ -93,9 +92,10 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        /********************
-         *  Tags
-         ********************/
+        ////////////////////////////////////////////////
+        /// 
+        //  The tags on the todo collection
+        //  ===============================
 
         [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         public async Task<FeedRepresentation> GetTodoTags(string id)
@@ -133,10 +133,9 @@ namespace Api.Controllers
             var todo = await _todoStore.Get(id)
                 .ThrowInvalidDataExceptionIfNull($"Todo not found '{id}'");
 
-            if (todo.Tags.IsNull() || !todo.Tags.Contains(tagId))
-            {
-                throw new ObjectNotFoundException($"Tag not found '{tagId}'");
-            }
+            todo.Tags
+                .ThrowObjectNotFoundExceptionIfNull()
+                .ThrowObjectNotFoundExceptionIf(tags => tags.Contains(tagId), $"Tag not found '{tagId}'");
 
             return (await _tagStore
                     .Get(tagId))

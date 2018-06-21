@@ -23,7 +23,6 @@ namespace Api.Controllers
         /// <summary>
         ///     Tags that live across all tenants
         /// </summary>
-        /// <returns></returns>
         [HttpGet("", Name = TagUriFactory.AllTagsRouteName)]
         public async Task<FeedRepresentation> GetAllTags()
         {
