@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
-using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
+using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
@@ -17,30 +17,54 @@ namespace Api.Controllers
     [Authorize]
     public class UserController : Controller
     {
-        private readonly IUserStore _userStore;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ITodoStore _todoStore;
 
-        public UserController(IUserStore userStore)
+        public UserController(
+            UserManager<IdentityUser> userManager,
+            ITodoStore todoStore)
         {
-            _userStore = userStore;
+            _userManager = userManager;
+            _todoStore = todoStore;
         }
 
-        [HttpGet("", Name = UserUriFactory.SelfRouteName)]
-        public FeedRepresentation Index()
+        [HttpGet("me", Name = UserUriFactory.UserMeName)]
+        public IActionResult Me()
         {
-            return new List<User>
-                {
-                    User.ToUser()
-                }
-                .ToFeedRepresentation(Url);
+            return User.ToUser()
+                .Id
+                .MakeUserUri(Url)
+                .MakeRedirect();
         }
 
         [HttpGet("{id}", Name = UserUriFactory.UserRouteName)]
         public async Task<UserRepresentation> Get(string id)
         {
-            return (await _userStore
-                    .Get(id))
+            return (await _userManager.FindByIdAsync(id))
                 .ThrowInvalidDataExceptionIfNull($"User '{id}' not found")
                 .ToRepresentation(id, Url);
+        }
+
+
+        /// <summary>
+        ///     A public stateless edit form that is fully cacheable.
+        /// </summary>
+        [HttpGet("form/edit", Name = UserUriFactory.EditFormRouteName)]
+        public FormRepresentation GetEditForm()
+        {
+            return Url.ToUserEditFormRepresentation();
+        }
+
+        /////////////////////////
+        //
+        // Todo collection on a user
+
+        [HttpGet("{id}/todo", Name = UserUriFactory.UserTodoCollectionName)]
+        public async Task<FeedRepresentation> GetUserTodos(string id)
+        {
+            return (await _todoStore
+                    .GetAll())
+                .ToFeedRepresentation(id, Url);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Persistence
 {
@@ -26,6 +27,12 @@ namespace Domain.Persistence
         /// </summary>
         /// <returns></returns>
         Task<IEnumerable<Todo>> GetAll();
+        
+        /// <summary>
+        ///     Retrieve a full set of todos by <see cref="IdentityUser"/>
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<Todo>> GetByUser();
         
         /// <summary>
         ///     Update details of a <see cref="Todo"/> that includes checking if the <see cref="Todo.Tags"/> have changed

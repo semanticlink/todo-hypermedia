@@ -52,6 +52,12 @@ namespace Infrastructure.NoSQL
             return await _context.Where<Todo>();
         }
 
+        public async Task<IEnumerable<Todo>> GetByUser()
+        {
+            // TODO: implement by user
+            return await GetAll();
+        }
+
 
         public async Task Update(string id, Action<Todo> updater)
         {

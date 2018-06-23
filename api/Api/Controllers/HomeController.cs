@@ -170,15 +170,17 @@ namespace Api.Controllers
             // TODO: fix this mess
             var user = _userManager.Users.SingleOrDefault(r => r.Email == model.Email);
 
+/*
             var u = await _userStore.GetByName(model.Email)
                 .ThrowAccessDeniedExceptionIfNull();
+*/
 
             /*
              * TODO: this should actually create a new resource and return its uri rather than just the token
              */
-            return u.Id
+            return user.Id
                 .MakeUserUri(Url)
-                .MakeCreatedToken(_configuration.GenerateJwtToken(u.Id, model.Email, user));
+                .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, model.Email, user));
         }
     }
 }

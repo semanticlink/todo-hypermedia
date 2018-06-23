@@ -25,14 +25,6 @@ namespace Api.Controllers
             _tagStore = tagStore;
         }
 
-        [HttpGet("", Name = TodoUriFactory.SelfRouteName)]
-        public async Task<FeedRepresentation> GetAll()
-        {
-            return (await _todoStore
-                    .GetAll())
-                .ToFeedRepresentation(Url);
-        }
-
         [HttpGet("form/create", Name = TodoUriFactory.CreateFormRouteName)]
         public CreateFormRepresentation GetCreateForm()
         {

@@ -15,20 +15,18 @@ namespace App.RepresentationExtensions
 {
     public static class TodoRepresentationExtensions
     {
-        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Todo> todos, IUrlHelper url)
+        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Todo> todos, string userId, IUrlHelper url)
         {
             return new FeedRepresentation
             {
                 Links = new[]
                 {
                     // self
-                    url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Self),
+                    userId.MakeUserTodoCollectionUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // up link to root
-                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
+                    // up link to user
+                    userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
                     
-                    // all tags currently created on todos
-                    url.MakeAllTagsCollectionUri().MakeWebLink(CustomLinkRelation.Tags),
 
                     // create-form
                     url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)

@@ -19,10 +19,16 @@ namespace App.RepresentationExtensions
                     // root of the api
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Self),
                     
+                    // authentication resource that is point to in the 401 response
                     url.MakeAuthenticateUri().MakeWebLink(CustomLinkRelation.Authenticate),
                     
-                    url.MakeUserCollectoinUri().MakeWebLink(CustomLinkRelation.Me),
+                    // a virtual resource that redirects to the user
+                    url.MakeUserMeUri().MakeWebLink(CustomLinkRelation.Me),
                     
+                    // all tags currently created across todos
+                    url.MakeAllTagsCollectionUri().MakeWebLink(CustomLinkRelation.Tags),
+
+                    //  tenant collection which has the tenant search on it
                     url.MakeHomeTenantsUri().MakeWebLink(CustomLinkRelation.Tenants),
                 },
                 Version = api.Version
