@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
 using Toolkit;
@@ -11,8 +10,6 @@ namespace Infrastructure.NoSQL
 {
     public class UserStore : IUserStore
     {
-        public const string TableName = TableNameConstants.User;
-        private const string HashKey = HashKeyConstants.DEFAULT;
         private readonly IDynamoDBContext _context;
 
         public UserStore(IDynamoDBContext context)
@@ -22,6 +19,13 @@ namespace Infrastructure.NoSQL
 
         public async Task<string> Create(string tenantId, string identityId, string name)
         {
+            name
+                .ThrowArgumentNullExceptionIfNull("Name must have a value");
+            
+            (await Get(name))
+                .Id
+                .ThrowInvalidDataExceptionIfNotNullOrWhiteSpace("User already created");
+
             var id = Guid.NewGuid().ToString();
 
             var now = DateTime.UtcNow;
@@ -46,15 +50,14 @@ namespace Infrastructure.NoSQL
             return await _context.SingleOrDefault<User>(id);
         }
 
-        public async Task<User> GetByIdentityId(string identityId)
+        public async Task<User> GetByName(string nameAsEmail)
         {
-            return await _context.SingleOrDefault<User>(nameof(User.IdentityId), identityId);
+            return await _context.FirstOrDefault<User>(nameof(User.Name), nameAsEmail);
         }
-
 
         public async Task<User> GetByTenant(string tenantId)
         {
-            return await _context.SingleOrDefault<User>(nameof(User.TenantId), tenantId);
+            return await _context.FirstOrDefault<User>(nameof(User.TenantId), tenantId);
         }
 
         public async Task<IEnumerable<User>> GetAll()

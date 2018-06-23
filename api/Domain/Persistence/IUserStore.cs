@@ -9,7 +9,7 @@ namespace Domain.Persistence
     {
         Task<string> Create(string tenantId, string identityId, string name);
         Task<User> Get(string id);
-        Task<User> GetByIdentityId(string id);
+        Task<User> GetByName(string nameAsEmail);
         Task<User> GetByTenant(string tenantId);
         Task<IEnumerable<User>> GetAll();
         Task Update(string userId, Action<User> updater);

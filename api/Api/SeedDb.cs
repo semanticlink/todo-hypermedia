@@ -67,7 +67,13 @@ namespace Api
             var userStore = services.GetRequiredService<IUserStore>();
 
             var user = new IdentityUser {UserName = "test@rewire.nz", Email = "test@rewire.nz"};
-            userManager.CreateAsync(user, "Test123!").ConfigureAwait(false);
+
+            var identityUser = (await userManager.FindByNameAsync(user.UserName));
+            
+            if (identityUser.IsNull() || identityUser.Id.IsNullOrWhitespace())
+            {
+                await userManager.CreateAsync(user, "Test123!");
+            }
 
             // now, we have the identity user, link this into the new user
             await userStore.Create(

@@ -26,6 +26,7 @@ namespace Api.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly IUserStore _userStore;
 
         public HomeController(
             Version version,
@@ -33,7 +34,8 @@ namespace Api.Controllers
             ITenantStore tenantStore,
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            IConfiguration configuration
+            IConfiguration configuration,
+            IUserStore userStore
         )
         {
             _version = version;
@@ -42,6 +44,7 @@ namespace Api.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _userStore = userStore;
         }
 
         [HttpGet("", Name = HomeUriFactory.SelfRouteName)]
@@ -154,24 +157,28 @@ namespace Api.Controllers
         [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateRouteName)]
         public async Task<object> Login([FromBody] UserCreateDataRepresentation model)
         {
-            var result = _signInManager.PasswordSignInAsync(
+            var result = await _signInManager.PasswordSignInAsync(
                 model.Email,
                 model.Password,
                 isPersistent: false,
                 lockoutOnFailure: false);
 
-            (await result)
+            result
                 .Succeeded
                 .ThrowInvalidDataExceptionIf(x => x.Equals(false), result.ToString());
 
+            // TODO: fix this mess
             var user = _userManager.Users.SingleOrDefault(r => r.Email == model.Email);
+
+            var u = await _userStore.GetByName(model.Email)
+                .ThrowAccessDeniedExceptionIfNull();
 
             /*
              * TODO: this should actually create a new resource and return its uri rather than just the token
              */
-            return user.Id
+            return u.Id
                 .MakeUserUri(Url)
-                .MakeCreatedToken(_configuration.GenerateJwtToken(model.Email, user));
+                .MakeCreatedToken(_configuration.GenerateJwtToken(u.Id, model.Email, user));
         }
     }
 }

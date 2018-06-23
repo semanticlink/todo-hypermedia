@@ -5,6 +5,7 @@ using Api.Web;
 using App;
 using Infrastructure.mySql;
 using Infrastructure.NoSQL;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -50,7 +51,7 @@ namespace Api
             });
 
             services
-                .AddJwtTokenAuthentication(Configuration)
+                .AddAuthenticationWithJwtToken(Configuration)
                 .AddMvcCore(options =>
                 {
                     options.RespectBrowserAcceptHeader = true;
@@ -118,10 +119,20 @@ namespace Api
              * return an text/html page for authenticating.
              */
             app.UseStatusCodePagesWithReExecute("/error/{0}");
-
+            
             app
                 .UseTodoCors()
+                
+                /*
+                 *
+                 * Auth 2.0 now only has a single authenticatio middleware and invokes
+                 *  based on registration in 'AddAuthentication' in ConfigureServices
+                 *
+                 * see https://github.com/aspnet/Security/issues/1310
+                 */
                 .UseAuthentication()
+                
+                
                 .UseMvc()
                 // requires a dynamoDb instance - see readme for setup in docker
                 .MigrateDynamoDb()

@@ -60,7 +60,7 @@ namespace App.RepresentationExtensions
         {
             return new FeedItemRepresentation
             {
-                Id = user.Id.MakeUserUri(url),
+                Id = user.IdentityId.MakeUserUri(url),
                 Title = user.Name
             };
         }
