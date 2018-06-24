@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
@@ -46,6 +47,16 @@ namespace Infrastructure.NoSQL
         public async Task<Todo> Get(string id)
         {
             return await _context.WhereById<Todo>(id);
+        }
+
+        public async Task<Todo> GetByIdAndTag(string id, string tagId)
+        {
+            return (await _context.Where<Todo>(new List<ScanCondition>
+                {
+                    new ScanCondition(HashKeyConstants.DEFAULT, ScanOperator.Equal, id),
+                    new ScanCondition(nameof(Todo.Tags), ScanOperator.Contains, tagId)
+                }))
+                .FirstOrDefault();
         }
 
         public async Task<IEnumerable<Todo>> GetAll()

@@ -88,7 +88,6 @@ namespace Api.Controllers
         /// 
         //  The tags on the todo collection
         //  ===============================
-
         [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         public async Task<FeedRepresentation> GetTodoTags(string id)
         {
@@ -122,12 +121,9 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         public async Task<TagRepresentation> Get(string id, string tagId)
         {
-            var todo = await _todoStore.Get(id)
-                .ThrowInvalidDataExceptionIfNull($"Todo not found '{id}'");
+            (await _todoStore.GetByIdAndTag(id, tagId))
+                .ThrowInvalidDataExceptionIfNull($"Todo with tag not found '{id}'");
 
-            todo.Tags
-                .ThrowObjectNotFoundExceptionIfNull()
-                .ThrowObjectNotFoundExceptionIf(tags => tags.Contains(tagId), $"Tag not found '{tagId}'");
 
             return (await _tagStore
                     .Get(tagId))

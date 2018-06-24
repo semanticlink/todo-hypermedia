@@ -52,6 +52,9 @@ namespace App.RepresentationExtensions
                 {
                     // self
                     tag.Id.MakeTodoTagUri(todoId, url).MakeWebLink(IanaLinkRelation.Self),
+                    
+                    // up to the containing todo tag collection
+                    todoId.MakeTodoTagCollectionUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     //canonical
                     tag.Id.MakeTagUri(url).MakeWebLink(IanaLinkRelation.Canonical),

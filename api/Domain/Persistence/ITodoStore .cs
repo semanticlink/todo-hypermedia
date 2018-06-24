@@ -18,10 +18,13 @@ namespace Domain.Persistence
         /// <summary>
         ///     Retrieve a <see cref="Todo"/> based on its id
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         Task<Todo> Get(string id);
 
+        /// <summary>
+        ///     Retrieve a <see cref="Todo"/> based on its id and the presence of a tag.
+        /// </summary>
+        Task<Todo> GetByIdAndTag(string id, string tagId);
+        
         /// <summary>
         ///     Retrieve a full set of tags (ie the global collection) regardless of <see cref="Tenant"/>
         /// </summary>
@@ -31,15 +34,12 @@ namespace Domain.Persistence
         /// <summary>
         ///     Retrieve a full set of todos by <see cref="IdentityUser"/>
         /// </summary>
-        /// <returns></returns>
         Task<IEnumerable<Todo>> GetByUser();
 
         /// <summary>
         ///     Update details of a <see cref="Todo"/> that includes checking if the <see cref="Todo.Tags"/> have changed
         ///     and alter the global <see cref="Tag.Count"/> (increment or decrement)
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="updater"></param>
         Task Update(string id, Action<Todo> updater);
 
         /// <summary>
@@ -54,8 +54,6 @@ namespace Domain.Persistence
         ///     Remove a <see cref="Todo"/> from the collection for and decrement <see cref="Tag.Count"/> on the global
         ///     collection
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
         Task Delete(string id);
 
         /// <summary>
@@ -71,5 +69,6 @@ namespace Domain.Persistence
         /// </summary>
         /// <param name="tagId"><see cref="Tag.Id"/> of the tag to be searched across all todos</param>
         Task<IEnumerable<Todo>> GetByTag(string tagId);
+
     }
 }
