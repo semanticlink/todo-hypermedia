@@ -8,6 +8,7 @@ public static class TagUriFactory
     public const string CreateFormRouteName = "TagsCreateRouteName";
     public const string TodoTagRouteName = "TodoTagRouteName";
     public const string TagRouteName = "TagRouteName";
+    public const string TagTodoCollectionRouteName = "TagTodoCollectionRouteName";
 
     public const string TodoTagCreateRouteName = "TodoTagCreateRouteName";
 
@@ -39,5 +40,10 @@ public static class TagUriFactory
     public static string MakeCreateTagUri(this IUrlHelper url)
     {
         return url.Link(TodoTagRouteName, new { });
+    }
+
+    public static string MakeTagTodoCollectionUri(this string id, IUrlHelper url)
+    {
+        return url.Link(TagTodoCollectionRouteName, new { id });
     }
 }

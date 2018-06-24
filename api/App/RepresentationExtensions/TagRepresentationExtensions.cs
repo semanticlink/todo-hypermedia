@@ -25,12 +25,22 @@ namespace App.RepresentationExtensions
 
                     // up
                     url.MakeAllTagsCollectionUri().MakeWebLink(IanaLinkRelation.Up),
+
+                    // todos that contain this tag
+                    tag.Id.MakeTagTodoCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
                 },
 
                 Name = tag.Name,
-                Count = tag.Count,
-                CreatedAt = tag.CreatedAt,
+
+                /**
+                 * Each tag is immutable, ie created and updated are always the same. This value is set in the
+                 * Last-Modified header so is not transfered in the payload.
+                 */
+
+/*
+                CreatedsAt = tag.CreatedAt,
                 UpdatedAt = tag.UpdatedAt
+*/
             };
         }
 
@@ -61,7 +71,7 @@ namespace App.RepresentationExtensions
                     url.MakeAllTagsCollectionUri().MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to todo collection
-                    url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Up),
+                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
                     // no create form because this is readonly collection
                 },

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
 using Toolkit;
@@ -113,6 +114,11 @@ namespace Infrastructure.NoSQL
         public async Task DeleteTag(string id, string tagId, Action<string> remove = null)
         {
             await Update(id, todo => todo.Tags?.RemoveAll(tag => tag == tagId));
+        }
+
+        public async Task<IEnumerable<Todo>> GetByTag(string tagId)
+        {
+            return await _context.Where<Todo>(new ScanCondition(nameof(Todo.Tags), ScanOperator.Contains, tagId));
         }
     }
 }

@@ -15,7 +15,11 @@ namespace App.RepresentationExtensions
 {
     public static class TodoRepresentationExtensions
     {
-        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Todo> todos, string userId, IUrlHelper url)
+        /// <summary>
+        ///     Feed reperesentation of todos parented on a user
+        /// </summary>
+        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Todo> todos, string userId,
+            IUrlHelper url)
         {
             return new FeedRepresentation
             {
@@ -26,10 +30,34 @@ namespace App.RepresentationExtensions
 
                     // up link to user
                     userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
-                    
+
 
                     // create-form
                     url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
+                },
+                Items = todos
+                    .Select(t => t.MakeTodoFeedItemRepresentation(url))
+                    .ToArray()
+            };
+        }
+
+        /// <summary>
+        ///     Feed reperesentation of todos parented on a tags
+        /// </summary>
+        public static FeedRepresentation ToTodosOnTagFeedRepresentation(
+            this IEnumerable<Todo> todos, 
+            string tagId,
+            IUrlHelper url)
+        {
+            return new FeedRepresentation
+            {
+                Links = new[]
+                {
+                    // self
+                    tagId.MakeTagTodoCollectionUri(url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // up link to user
+                    tagId.MakeTagUri(url).MakeWebLink(IanaLinkRelation.Up),
                 },
                 Items = todos
                     .Select(t => t.MakeTodoFeedItemRepresentation(url))
@@ -111,8 +139,8 @@ namespace App.RepresentationExtensions
 
                     // the collection of todos is the logical parent
                     url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Up),
-                    
-                   // the collection of todos tags (this may or may not have tags ie is an empty collection)
+
+                    // the collection of todos tags (this may or may not have tags ie is an empty collection)
                     todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
 
                     // edit-form
@@ -193,7 +221,7 @@ namespace App.RepresentationExtensions
                     Description = "A todo can be grouped by tags (known also as categories)",
                     Required = false,
                     Multiple = true
-                }, 
+                },
             };
         }
     }

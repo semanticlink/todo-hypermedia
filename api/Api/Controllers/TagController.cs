@@ -13,11 +13,13 @@ namespace Api.Controllers
     public class TagController : Controller
     {
         private readonly ITagStore _tagStore;
+        private readonly ITodoStore _todoStore;
 
 
-        public TagController(ITagStore tagStore)
+        public TagController(ITagStore tagStore, ITodoStore todoStore)
         {
             _tagStore = tagStore;
+            _todoStore = todoStore;
         }
 
         /// <summary>
@@ -37,6 +39,14 @@ namespace Api.Controllers
             return (await _tagStore
                     .Get(id))
                 .ToRepresentation(Url);
+        }
+
+        [HttpGet("{id}/todo", Name = TagUriFactory.TagTodoCollectionRouteName)]
+        public async Task<FeedRepresentation> GetTagTodoCollection(string id)
+        {
+            return (await _todoStore
+                    .GetByTag(id))
+                .ToTodosOnTagFeedRepresentation(id, Url);
         }
     }
 }
