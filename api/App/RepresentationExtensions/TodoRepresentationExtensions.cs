@@ -45,7 +45,7 @@ namespace App.RepresentationExtensions
         ///     Feed reperesentation of todos parented on a tags
         /// </summary>
         public static FeedRepresentation ToTodosOnTagFeedRepresentation(
-            this IEnumerable<Todo> todos, 
+            this IEnumerable<Todo> todos,
             string tagId,
             IUrlHelper url)
         {
@@ -128,7 +128,7 @@ namespace App.RepresentationExtensions
             };
         }
 
-        public static TodoRepresentation ToRepresentation(this Todo todo, IUrlHelper url)
+        public static TodoRepresentation ToRepresentation(this Todo todo, string userId, IUrlHelper url)
         {
             return new TodoRepresentation
             {
@@ -137,8 +137,8 @@ namespace App.RepresentationExtensions
                     // self
                     todo.Id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // the collection of todos is the logical parent
-                    url.MakeTodoCollectionUri().MakeWebLink(IanaLinkRelation.Up),
+                    // up - the collection of user todos is the logical parent
+                    userId.MakeUserTodoCollectionUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // the collection of todos tags (this may or may not have tags ie is an empty collection)
                     todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),

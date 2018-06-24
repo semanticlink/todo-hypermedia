@@ -2,6 +2,7 @@
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
+using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Authorization;
@@ -45,12 +46,10 @@ namespace Api.Controllers
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
         public async Task<TodoRepresentation> GetById(string id)
         {
-            var todo = await _todoStore
-                .Get(id);
-
-            return todo
+            return (await _todoStore
+                    .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(Url);
+                .ToRepresentation(User.ToUser().Id, Url);
         }
 
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
