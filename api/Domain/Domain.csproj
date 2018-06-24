@@ -9,7 +9,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.8" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.3.10.2" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Extensions.Identity.Stores, Version=2.0.3.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
