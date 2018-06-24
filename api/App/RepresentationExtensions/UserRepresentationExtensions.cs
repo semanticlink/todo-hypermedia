@@ -32,6 +32,8 @@ namespace App.RepresentationExtensions
                     // edit-form
                     url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
                 },
+                
+                Email = user.Email,
             };
         }
 
