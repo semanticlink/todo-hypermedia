@@ -37,37 +37,6 @@ namespace App.RepresentationExtensions
             };
         }
 
-        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<User> users, IUrlHelper url)
-        {
-            return new FeedRepresentation
-            {
-                Links = new[]
-                {
-                    // self
-                    url.MakeUserCollectionUri().MakeWebLink(IanaLinkRelation.Self),
-
-                    // up link to root
-                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
-
-                    // todos
-                    url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos),
-                },
-                Items = users
-                    .Select(t => t.MakeUserFeedItemRepresentation(url))
-                    .ToArray()
-            };
-        }
-
-        private static FeedItemRepresentation MakeUserFeedItemRepresentation(this User user, IUrlHelper url)
-        {
-            return new FeedItemRepresentation
-            {
-                Id = user.IdentityId.MakeUserUri(url),
-                Title = user.Name
-            };
-        }
-
-
         /// <summary>
         ///     Get the create form to describe to clients of the API how to
         ///     modify instances on the resource

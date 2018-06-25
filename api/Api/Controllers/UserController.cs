@@ -35,8 +35,8 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public IActionResult Me()
         {
-            return User.ToUser()
-                .Id
+            return User
+                .GetId()
                 .MakeUserUri(Url)
                 .MakeRedirect();
         }

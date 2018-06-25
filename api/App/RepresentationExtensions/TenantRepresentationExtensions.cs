@@ -4,6 +4,7 @@ using App.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit.LinkRelations;
 using Toolkit.Representation.LinkedRepresentation;
@@ -53,7 +54,7 @@ namespace App.RepresentationExtensions
             return feedRepresentation;
         }
 
-        public static FeedRepresentation ToRepresentation(this IEnumerable<User> users, string tenantId, IUrlHelper url)
+        public static FeedRepresentation ToRepresentation(this IEnumerable<IdentityUser> users, string tenantId, IUrlHelper url)
         {
             return new FeedRepresentation
             {
@@ -63,7 +64,7 @@ namespace App.RepresentationExtensions
                     tenantId.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Up),
                 },
                 Items = users
-                    .Select(u => ToFeedRepresentationItem(u, url))
+                    .Select(u => ToFeedRepresentationItem(u.Id, url))
                     .ToArray()
             };
         }
@@ -78,11 +79,11 @@ namespace App.RepresentationExtensions
             };
         }
 
-        private static FeedItemRepresentation ToFeedRepresentationItem(this User user, IUrlHelper url)
+        private static FeedItemRepresentation ToFeedRepresentationItem(this string userId, IUrlHelper url)
         {
             return new FeedItemRepresentation
             {
-                Id = user.Id.MakeUserUri(url)
+                Id = userId.MakeUserUri(url)
             };
         }
     }

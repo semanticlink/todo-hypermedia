@@ -13,12 +13,10 @@ namespace Infrastructure.NoSQL
     public class TodoStore : ITodoStore
     {
         private readonly IDynamoDBContext _context;
-        private readonly TagCountUpdater _tagCount;
 
         public TodoStore(IDynamoDBContext context, ITagStore tagStore)
         {
             _context = context;
-            _tagCount = new TagCountUpdater(tagStore);
         }
 
         public async Task<string> Create(TodoCreateData todo)
@@ -37,9 +35,6 @@ namespace Infrastructure.NoSQL
             };
 
             await _context.SaveAsync(create);
-
-            // update the global tags counter
-            await _tagCount.Update(todo.Tags);
 
             return id;
         }
@@ -76,9 +71,6 @@ namespace Infrastructure.NoSQL
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            // clone (shallow value types) the tags (which may be null) so that we can difference between old and new
-            var initialTags = todo.Tags.Clone();
-
             updater(todo);
 
             // no messing with the ID allowed
@@ -92,7 +84,6 @@ namespace Infrastructure.NoSQL
             todo.Tags = !todo.Tags.IsNullOrEmpty() ? todo.Tags : null;
 
             await _context.SaveAsync(todo);
-            await _tagCount.Update(initialTags, todo.Tags);
         }
 
         /// <summary>
@@ -119,7 +110,6 @@ namespace Infrastructure.NoSQL
 
 
             await _context.DeleteAsync(todo);
-            await _tagCount.Update(todo.Tags, new List<string>());
         }
 
         public async Task DeleteTag(string id, string tagId, Action<string> remove = null)

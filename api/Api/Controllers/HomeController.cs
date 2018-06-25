@@ -22,7 +22,6 @@ namespace Api.Controllers
     public class HomeController : Controller
     {
         private readonly Version _version;
-        private readonly User _user;
         private readonly ITenantStore _tenantStore;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
@@ -30,7 +29,6 @@ namespace Api.Controllers
 
         public HomeController(
             Version version,
-            User user,
             ITenantStore tenantStore,
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
@@ -38,7 +36,6 @@ namespace Api.Controllers
         )
         {
             _version = version;
-            _user = user;
             _tenantStore = tenantStore;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -97,20 +94,19 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetTenants([FromQuery(Name = "q")] string search = null)
         {
-            var enumerable = (!string.IsNullOrWhiteSpace(search)
-                //
-                //  Regardless of whether the caller is authenticated or not, a query with a name
-                //  will return a collection with zero or one items matched by tenant code.
-                //
-                ? (await _tenantStore.GetByCode(search)).ToEnumerable()
-                //
-                : _user != null
-                    // If the user is authenticated, then return all tenants that the user has access to.
-                    ? (await _tenantStore.GetTenantsForUser(_user.Id))
+            return (!string.IsNullOrWhiteSpace(search)
+                    //
+                    //  Regardless of whether the caller is authenticated or not, a query with a name
+                    //  will return a collection with zero or one items matched by tenant code.
+                    //
+                    ? (await _tenantStore.GetByCode(search)).ToEnumerable()
+                    //
+                    : User != null
+                        // If the user is authenticated, then return all tenants that the user has access to.
+                        ? await _tenantStore.GetTenantsForUser(User.GetId())
 
-                    // The user is not authenticated and there is no query, so the caller gets no tenants.
-                    : new Tenant[] { });
-            return enumerable
+                        // The user is not authenticated and there is no query, so the caller gets no tenants.
+                        : new Tenant[] { })
                 .ToRepresentation(search, Url);
         }
 
@@ -144,8 +140,7 @@ namespace Api.Controllers
         [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateCollectionRouteName)]
         public FeedRepresentation GetAuthenticateCollection()
         {
-            return new User()
-                .ToAuthenticationCollectionRepresentation(Url);
+            return Url .ToAuthenticationCollectionRepresentation();
         }
 
         /// <summary>
@@ -177,7 +172,9 @@ namespace Api.Controllers
             /*
              * TODO: this should actually create a new resource and return its uri rather than just the token
              */
-            return user.Id
+            return user
+                .ThrowAccessDeniedExceptionIfNull("User creation denied")
+                .Id
                 .MakeUserUri(Url)
                 .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, model.Email, user));
         }

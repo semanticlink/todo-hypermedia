@@ -30,16 +30,9 @@ namespace App
              */
             services.AddScoped<ITodoStore, TodoStore>();
             services.AddScoped<ITenantStore, TenantStore>();
-            services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<ITagStore, TagStore>();
 
             services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);
-
-
-            /**
-             * Currently, this is the logged in user
-             */
-            services.AddSingleton(new User {Id = Guid.NewGuid().ToString()});
 
             return services;
         }

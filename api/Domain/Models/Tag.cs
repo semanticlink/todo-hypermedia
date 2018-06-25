@@ -3,6 +3,9 @@ using Amazon.DynamoDBv2.DataModel;
 
 namespace Domain.Models
 {
+    /// <summary>
+    ///     An immutable collection of tags that can be used across <see cref="Todo"/>s
+    /// </summary>
     [DynamoDBTable("Tag")]
     public class Tag
     {
@@ -10,9 +13,6 @@ namespace Domain.Models
 
         public string Name { get; set; }
 
-        public long Count { get; set; }
-
-        public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

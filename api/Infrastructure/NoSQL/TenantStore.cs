@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
+using Microsoft.AspNetCore.Identity;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
@@ -56,7 +55,7 @@ namespace Infrastructure.NoSQL
             return await _context.Where<Tenant>(id);
         }
 
-        public Task<IEnumerable<User>> GetUsersByTenant(string id)
+        public Task<IEnumerable<IdentityUser>> GetUsersByTenant(string id)
         {
             throw new NotImplementedException();
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Web
@@ -9,16 +8,27 @@ namespace Api.Web
     public static class AuthenticationExtensions
     {
         /// <summary>
-        ///     Retrieves the user details from the <see cref="ControllerBase.User"/> from the JWT.
+        /// Retrieves the user Id from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Sub"/>).
         /// </summary>
-        public static User ToUser(this ClaimsPrincipal user)
+        public static string GetId(this ClaimsPrincipal user)
         {
-            return new User
-            {
-                Id = user.Value(JwtRegisteredClaimNames.Sub),
-                Name = user.Value(JwtRegisteredClaimNames.Email),
-                IdentityId = user.Value(JwtRegisteredClaimNames.Jti),
-            };
+            return user.Value(JwtRegisteredClaimNames.Sub);
+        }
+
+        /// <summary>
+        /// Retrieves the user name (email) from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Email"/>).
+        /// </summary>
+        public static string GetName(this ClaimsPrincipal user)
+        {
+            return user.Value(JwtRegisteredClaimNames.Email);
+        }
+
+        /// <summary>
+        /// Retrieves the user Identity Id from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Jti"/>).
+        /// </summary>
+        public static string GetIdentityId(this ClaimsPrincipal user)
+        {
+            return user.Value(JwtRegisteredClaimNames.Jti);
         }
 
         private static string Value(this ClaimsPrincipal user, string type)
@@ -40,7 +50,8 @@ namespace Api.Web
                  *
                  */
                 throw new NullReferenceException(
-                    $"Ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed or type '{type}' is not available as a claim", e);
+                    $"Ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed or type '{type}' is not available as a claim",
+                    e);
             }
         }
     }

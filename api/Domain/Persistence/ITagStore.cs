@@ -10,8 +10,6 @@ namespace Domain.Persistence
         Task<Tag> Get(string id);
         Task<IEnumerable<Tag>> Get(List<string> id);
         Task<IEnumerable<Tag>> GetAll();
-        Task IncrementCountOnTag(string id);
-        Task DecrementCountOnTag(string id);
         Task Delete(string id);
     }
 }

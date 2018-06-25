@@ -37,9 +37,7 @@ namespace Infrastructure.NoSQL
                 Id = id,
                 Name = createData.Name,
                 // initialise the counter (note: adding a tag to the global set is not the same adding to a todo)
-                Count = 0,
                 CreatedAt = now,
-                UpdatedAt = now
             };
 
             await _context.SaveAsync(create);
@@ -47,26 +45,6 @@ namespace Infrastructure.NoSQL
             return id;
         }
 
-
-        public async Task IncrementCountOnTag(string id)
-        {
-            var tag = await Get(id)
-                .ThrowObjectNotFoundExceptionIfNull();
-
-            tag.Count++;
-
-            await _context.SaveAsync(tag);
-        }
-
-        public async Task DecrementCountOnTag(string id)
-        {
-            var tag = await Get(id)
-                .ThrowObjectNotFoundExceptionIfNull();
-
-            tag.Count--;
-
-            await _context.SaveAsync(tag);
-        }
 
         public async Task<Tag> Get(string id)
         {
@@ -99,8 +77,6 @@ namespace Infrastructure.NoSQL
                 .ThrowObjectNotFoundExceptionIfNull();
 
             updater(tag);
-
-            tag.Count++;
 
             await _context.SaveAsync(tag);
         }

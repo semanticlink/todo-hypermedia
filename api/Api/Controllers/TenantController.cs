@@ -18,16 +18,11 @@ namespace Api.Controllers
     public class TenantController : Controller
     {
         private readonly ITenantStore _tenantRepository;
-        private readonly IUserStore _userRepository;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public TenantController(
-            ITenantStore tenantRepository,
-            IUserStore userRepository,
-            UserManager<IdentityUser> userManager)
+        public TenantController(ITenantStore tenantRepository, UserManager<IdentityUser> userManager)
         {
             _tenantRepository = tenantRepository;
-            _userRepository = userRepository;
             _userManager = userManager;
         }
 
@@ -73,15 +68,14 @@ namespace Api.Controllers
             };
 
             var result = _userManager.CreateAsync(user, model.Password);
-            (await result)                
+            (await result)
                 .Succeeded
-                .ThrowInvalidDataExceptionIf(x => x.Equals(false)&& !result.ToString().Contains("DuplicateUserName"), result.ToString());
+                .ThrowInvalidDataExceptionIf(x => x.Equals(false) && !result.ToString().Contains("DuplicateUserName"),
+                    result.ToString());
 
             // now, we have the identity user, link this into the new user
-            return (await _userRepository.Create(
-                    id.ThrowAccessDeniedExceptionIfNull("No tenant provided to create a user"),
-                    user.Id.ThrowAccessDeniedExceptionIfNull("No identity provided to create user"), 
-                    user.UserName ?? user.Email))
+            return user
+                .Id
                 .MakeUserUri(Url)
                 .MakeCreated();
         }

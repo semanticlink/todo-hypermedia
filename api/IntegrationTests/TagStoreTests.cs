@@ -23,13 +23,6 @@ namespace IntegrationTests
                 var tag = await tagStore.Get(id);
 
                 Assert.Equal("working", tag.Name);
-                Assert.Equal(1, tag.Count);
-
-                await tagStore.IncrementCountOnTag(tag.Id);
-
-                Assert.Equal(1, tag.Count);
-                tag = await tagStore.Get(id);
-                Assert.Equal(2, tag.Count);
 
                 await tagStore.Delete(id);
             }
