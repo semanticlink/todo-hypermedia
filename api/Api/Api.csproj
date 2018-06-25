@@ -34,4 +34,9 @@
       <Name>Utils</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Marvin.Cache.Headers, Version=2.1.1.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\lib\Marvin.Cache.Headers.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
