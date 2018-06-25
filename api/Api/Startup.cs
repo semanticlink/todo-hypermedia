@@ -1,11 +1,9 @@
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
 using Infrastructure.mySql;
 using Infrastructure.NoSQL;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -48,6 +46,7 @@ namespace Api
             {
                 // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
                 options.RespectBrowserAcceptHeader = true; // false by default
+                
             });
 
             services
@@ -74,6 +73,64 @@ namespace Api
 
             services
                 .RegisterIoc(HostingEnvironment)
+                /**
+                 *  Add http cache headers. 
+                 *
+                 *  see https://github.com/KevinDockx/HttpCacheHeaders
+                 * 
+                 *  Based on this library:
+                 *
+                 *  - there is no cache profiles
+                 *  - see each cache has to be wired up on attributes across: HttpCacheExpiration & HttpCacheValidation
+                 *  - etags are set via its own hash (want to override this in the future because we can get this from the database)
+                 *
+                 * This library sets headers:
+                 *
+                 *     - Cache-Control ([private|public],[no-cache|no-store],max-age,must-revalidate (see https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9)
+                 *     - ETag
+                 *     - Expires
+                 *     - Last-Modified
+                 *     - Vary
+                 * 
+                 *  see for caching information https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching
+                 * 
+                 *  So in the Controllers, currently the main stratgies:
+                 * 
+                 *  - Collections: no caching
+                 *  - Items: low caching
+                 *  - Readonly Collections/Items: cacheable
+                 *  - Virtual Resources: no caching
+                 *
+                 * Here are some base strategies that will need to be altered depending on the nature of the resource:
+                 *
+                 *  Collections
+                 *         Cache-Control: private,max-age=60
+                 *
+                 *         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+                 *         [HttpCacheValidation(AddNoCache = true)]
+                 * 
+                 *  Items
+                 *         Cache-Control: private,max-age=60
+                 *
+                 *         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+                 *         [HttpCacheValidation(AddNoCache = true)]
+                 * 
+                 *  Readonly
+                 *         Cache-Control: public,max-age=3600
+                 *
+                 *         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDurection.Long)]
+                 *         [HttpCacheValidation]
+                 * 
+                 *  Virtual Resources
+                 *         Cache-Control: private,max-age=60
+                 *
+                 *         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+                 *         [HttpCacheValidation(AddNoCache = true)]
+                 *
+                 * WARNING: class attributes ARE NOT OVERRIDDEN by method attributes
+                 *         Therefore, add attributes per method rather than per class
+                 * 
+                 */
                 .AddHttpCacheHeaders()
                 .AddTodoCors();
 
@@ -107,6 +164,9 @@ namespace Api
              * than the html representation.
              *
              * see https://docs.microsoft.com/en-us/aspnet/core/performance/caching/middleware?view=aspnetcore-2.1
+             *
+             * Note: this is a backup strategy for .AddHttpCacheHeaders
+             * 
              */
             app.Use(async (context, next) =>
             {
@@ -133,9 +193,8 @@ namespace Api
                  */
                 .UseAuthentication()
 
-                // add HttpCacheHeaders middleware to the request pipeline
+                // paried with .AddHttpCacheHeaders middleware to the request pipeline
                 .UseHttpCacheHeaders()
-                
                 .UseMvc()
                 // requires a dynamoDb instance - see readme for setup in docker
                 .MigrateDynamoDb()
