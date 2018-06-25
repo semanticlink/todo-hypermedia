@@ -5,7 +5,7 @@ using Amazon.Runtime;
 
 namespace IntegrationTests
 {
-    internal static class DynamoDbServerTestUtils
+	public static class DynamoDbServerTestUtils
 	{
 		public static DisposableDatabase CreateDatabase() => new DisposableDatabase();
 
