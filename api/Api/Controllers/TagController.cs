@@ -2,6 +2,7 @@
 using App.RepresentationExtensions;
 using Domain.Persistence;
 using Domain.Representation;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit.Representation.LinkedRepresentation;
@@ -26,6 +27,8 @@ namespace Api.Controllers
         ///     Tags that live across all tenants
         /// </summary>
         [HttpGet("", Name = TagUriFactory.AllTagsRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetAllTags()
         {
             return (await _tagStore
@@ -34,6 +37,8 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}", Name = TagUriFactory.TagRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<TagRepresentation> Get(string id)
         {
             return (await _tagStore
@@ -42,6 +47,8 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}/todo", Name = TagUriFactory.TagTodoCollectionRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetTagTodoCollection(string id)
         {
             return (await _todoStore

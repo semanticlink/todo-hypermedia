@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Web;
+using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -26,7 +27,6 @@ namespace Api.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
-        private readonly IUserStore _userStore;
 
         public HomeController(
             Version version,
@@ -34,8 +34,7 @@ namespace Api.Controllers
             ITenantStore tenantStore,
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
-            IConfiguration configuration,
-            IUserStore userStore
+            IConfiguration configuration
         )
         {
             _version = version;
@@ -44,10 +43,10 @@ namespace Api.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
-            _userStore = userStore;
         }
 
-        [HttpGet("", Name = HomeUriFactory.SelfRouteName)]
+        [HttpGet("", Name = HomeUriFactory.SelfRouteName)]     
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public ApiRepresentation GetApi()
         {
             return new ApiVersion
@@ -66,6 +65,8 @@ namespace Api.Controllers
         ///     Provides a redirect URL for locating a tenant without disclosing the name of any other tenants.
         /// </summary>
         [HttpGet(@"a/{tenantCode:regex(^[[\w\d\-\.]]+$)}")]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<IActionResult> GetTenant(string tenantCode)
         {
             return (await _tenantStore
@@ -92,6 +93,8 @@ namespace Api.Controllers
         ///     be empty.
         /// </remarks>
         [HttpGet("tenant/", Name = HomeUriFactory.TenantsRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetTenants([FromQuery(Name = "q")] string search = null)
         {
             var enumerable = (!string.IsNullOrWhiteSpace(search)
@@ -131,6 +134,7 @@ namespace Api.Controllers
         ///     A simple search form resource.
         /// </summary>
         [HttpGet("tenant/form/search", Name = HomeUriFactory.HomeTenantSearchFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public SearchFormRepresentation GetTenantsSearchForm()
         {
             return new TenantRepresentation()
@@ -148,6 +152,7 @@ namespace Api.Controllers
         ///     A simple login form resource.
         /// </summary>
         [HttpGet("authenticate/form/login", Name = HomeUriFactory.AuthenticateLoginFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public SearchFormRepresentation GetAuthenticateForm()
         {
             return new UserRepresentation()
@@ -167,13 +172,7 @@ namespace Api.Controllers
                 .Succeeded
                 .ThrowInvalidDataExceptionIf(x => x.Equals(false), result.ToString());
 
-            // TODO: fix this mess
             var user = _userManager.Users.SingleOrDefault(r => r.Email == model.Email);
-
-/*
-            var u = await _userStore.GetByName(model.Email)
-                .ThrowAccessDeniedExceptionIfNull();
-*/
 
             /*
              * TODO: this should actually create a new resource and return its uri rather than just the token

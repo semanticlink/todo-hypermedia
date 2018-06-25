@@ -4,6 +4,7 @@ using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Persistence;
 using Domain.Representation;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +13,7 @@ using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
 {
-    [Route("tenant/")]
+    [Route("tenant")]
     [Authorize]
     public class TenantController : Controller
     {
@@ -31,6 +32,8 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}", Name = TenantUriFactory.SelfRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<TenantRepresentation> Get(string id)
         {
             return (await _tenantRepository
@@ -44,6 +47,8 @@ namespace Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}/user/", Name = TenantUriFactory.TenantUsersRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetUsers(string id)
         {
             return (await _tenantRepository

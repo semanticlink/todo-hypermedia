@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
 using Api.Web;
+using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
@@ -26,12 +28,16 @@ namespace Api.Controllers
             _tagStore = tagStore;
         }
 
-        [HttpGet("form/create", Name = TodoUriFactory.CreateFormRouteName)]
-        public CreateFormRepresentation GetCreateForm()
+        [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
+        public async Task<TodoRepresentation> GetById(string id)
         {
-            return Url.ToTodoCreateFormRepresentation();
+            return (await _todoStore
+                    .Get(id))
+                .ThrowObjectNotFoundExceptionIfNull("todo not found")
+                .ToRepresentation(User.ToUser().Id, Url);
         }
-
 
         [HttpPost]
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation todo)
@@ -41,15 +47,6 @@ namespace Api.Controllers
                     .FromRepresentation(Url)))
                 .MakeTodoUri(Url)
                 .MakeCreated();
-        }
-
-        [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
-        public async Task<TodoRepresentation> GetById(string id)
-        {
-            return (await _todoStore
-                    .Get(id))
-                .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(User.ToUser().Id, Url);
         }
 
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
@@ -71,9 +68,17 @@ namespace Api.Controllers
         ///     A public stateless edit form that is fully cacheable.
         /// </summary>
         [HttpGet("form/edit", Name = TodoUriFactory.EditFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public FormRepresentation GetEditForm()
         {
             return Url.ToTodoEditFormRepresentation();
+        }
+
+        [HttpGet("form/create", Name = TodoUriFactory.CreateFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        public CreateFormRepresentation GetCreateForm()
+        {
+            return Url.ToTodoCreateFormRepresentation();
         }
 
         [HttpDelete("{id}", Name = TodoUriFactory.TodoRouteName)]
@@ -88,6 +93,8 @@ namespace Api.Controllers
         //  The tags on the todo collection
         //  ===============================
         [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetTodoTags(string id)
         {
             var todo = await _todoStore.Get(id);
@@ -111,6 +118,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}/tag/form/create", Name = TagUriFactory.CreateFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AllowAnonymous]
         public CreateFormRepresentation GetCreateForm(string id)
         {

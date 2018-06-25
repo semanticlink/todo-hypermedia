@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Api.Web;
+using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Persistence;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
+using Marvin.Cache.Headers;
 
 namespace Api.Controllers
 {
@@ -29,6 +31,8 @@ namespace Api.Controllers
         }
 
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public IActionResult Me()
         {
             return User.ToUser()
@@ -38,6 +42,8 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}", Name = UserUriFactory.UserRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<UserRepresentation> Get(string id)
         {
             return (await _userManager.FindByIdAsync(id))
@@ -50,6 +56,7 @@ namespace Api.Controllers
         ///     A public stateless edit form that is fully cacheable.
         /// </summary>
         [HttpGet("form/edit", Name = UserUriFactory.EditFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public FormRepresentation GetEditForm()
         {
             return Url.ToUserEditFormRepresentation();
