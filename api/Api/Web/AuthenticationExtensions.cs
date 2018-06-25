@@ -37,9 +37,10 @@ namespace Api.Web
                  *  With either of these methods, no User.Principal is loaded onto the Context.User
                  *
                  *  see https://github.com/aspnet/Security/issues/1310
+                 *
                  */
                 throw new NullReferenceException(
-                    $"Ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed or type '{type}' is not available as a claim");
+                    $"Ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed or type '{type}' is not available as a claim", e);
             }
         }
     }
