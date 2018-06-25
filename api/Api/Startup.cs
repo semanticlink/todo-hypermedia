@@ -1,4 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Amazon.DynamoDBv2;
 using Api.Web;
@@ -74,6 +74,7 @@ namespace Api
 
             services
                 .RegisterIoc(HostingEnvironment)
+                .AddHttpCacheHeaders()
                 .AddTodoCors();
 
             services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
@@ -131,7 +132,9 @@ namespace Api
                  * see https://github.com/aspnet/Security/issues/1310
                  */
                 .UseAuthentication()
-                
+
+                // add HttpCacheHeaders middleware to the request pipeline
+                .UseHttpCacheHeaders()
                 
                 .UseMvc()
                 // requires a dynamoDb instance - see readme for setup in docker
