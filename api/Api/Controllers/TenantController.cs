@@ -17,12 +17,12 @@ namespace Api.Controllers
     [Authorize]
     public class TenantController : Controller
     {
-        private readonly ITenantStore _tenantRepository;
+        private readonly ITenantStore _tenantStore;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public TenantController(ITenantStore tenantRepository, UserManager<IdentityUser> userManager)
+        public TenantController(ITenantStore tenantStore, UserManager<IdentityUser> userManager)
         {
-            _tenantRepository = tenantRepository;
+            _tenantStore = tenantStore;
             _userManager = userManager;
         }
 
@@ -31,7 +31,7 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<TenantRepresentation> Get(string id)
         {
-            return (await _tenantRepository
+            return (await _tenantStore
                     .Get(id))
                 .ToRepresentation(Url);
         }
@@ -46,7 +46,7 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetUsers(string id)
         {
-            return (await _tenantRepository
+            return (await _tenantStore
                     .GetUsersByTenant(id))
                 .ToRepresentation(id, Url);
         }
@@ -72,6 +72,8 @@ namespace Api.Controllers
                 .Succeeded
                 .ThrowInvalidDataExceptionIf(x => x.Equals(false) && !result.ToString().Contains("DuplicateUserName"),
                     result.ToString());
+
+            await _tenantStore.AddUser(id, user.Id);
 
             // now, we have the identity user, link this into the new user
             return user

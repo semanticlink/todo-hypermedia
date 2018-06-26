@@ -11,7 +11,7 @@ namespace Domain.Persistence
         Task<Tenant> Get(string id);
         Task<Tenant> GetByCode(string code);
         Task<IEnumerable<Tenant>> GetTenantsForUser(string userId);
-        Task<IEnumerable<IdentityUser>> GetUsersByTenant(string id);
+        Task<IEnumerable<string>> GetUsersByTenant(string id);
         /// <summary>
         ///     Add a user to a tenant, if the tenant exists.
         /// </summary>

@@ -43,7 +43,7 @@ namespace Api
         }
 
         /// <summary>
-        ///     Creates a tenant, user on the tenant and some todos
+        ///     Creates a tenant, user on the tenant and some todos with tags
         /// </summary>
         public static async Task<IServiceProvider> SeedTestData(this IServiceProvider services)
         {
@@ -67,11 +67,13 @@ namespace Api
 
             var user = new IdentityUser {UserName = "test@rewire.nz", Email = "test@rewire.nz"};
 
-            var identityUser = (await userManager.FindByNameAsync(user.UserName));
-            
-            if (identityUser.IsNull() || identityUser.Id.IsNullOrWhitespace())
+            if (!userManager.Users.Any(u => u.UserName.Equals(user.UserName)))
             {
-                await userManager.CreateAsync(user, "Test123!");
+                var result = await userManager.CreateAsync(user, "Test123!");
+                if (result.Succeeded)
+                {
+                    await tenantStore.AddUser(tenantId, user.Id);
+                }
             }
 
             var tagStore = services.GetRequiredService<ITagStore>();

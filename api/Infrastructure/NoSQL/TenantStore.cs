@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
 using Microsoft.AspNetCore.Identity;
@@ -54,12 +55,12 @@ namespace Infrastructure.NoSQL
 
         public async Task<IEnumerable<Tenant>> GetTenantsForUser(string userId)
         {
-            return await _context.Where<Tenant>(userId);
+            return await _context.Where<Tenant>(new ScanCondition(nameof(Tenant.User), ScanOperator.Contains, userId));
         }
 
-        public Task<IEnumerable<IdentityUser>> GetUsersByTenant(string id)
+        public async Task<IEnumerable<string>> GetUsersByTenant(string id)
         {
-            throw new NotImplementedException();
+            return (await Get(id)).User;
         }
 
         public async Task AddUser(string id, string userId)
@@ -102,7 +103,7 @@ namespace Infrastructure.NoSQL
             // though an empty list but rather need to null it.
             // TODO: check this is true
             tenant.User = !tenant.User.IsNullOrEmpty() ? tenant.User : null;
-            
+
             tenant.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveAsync(tenant);
