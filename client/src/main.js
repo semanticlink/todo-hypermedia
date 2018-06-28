@@ -1,8 +1,13 @@
+import { authService } from './lib/AuthService';
+
+authService.handleAuthentication();
+
+
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.conf with an alias.
 import Vue from 'vue';
 import router from './router';
-import {LEVEL, nodMaker, setLogLevel} from 'semanticLink';
+import { LEVEL, nodMaker, setLogLevel } from 'semanticLink';
 import VueLocalStorage from 'vue-localstorage';
 
 import App from './App.vue';
@@ -13,7 +18,7 @@ import AbstractTenant from './components/AbstractTenant.vue';
 import DroppableModel from './components/DroppableModel';
 import DraggableModel from './components/DraggableModel';
 import DragAndDroppableModel from './components/DragAndDroppableModel';
-import {setBearerToken} from './lib/http-interceptors';
+import { setBearerToken } from './lib/http-interceptors';
 
 import BootstrapVue from 'bootstrap-vue';
 
