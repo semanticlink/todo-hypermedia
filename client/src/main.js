@@ -1,5 +1,8 @@
+/**
+ * Intercept incoming authentication callbacks with Tokens on the hash
+ *
+ */
 import { authService } from './lib/AuthService';
-
 authService.handleAuthentication();
 
 

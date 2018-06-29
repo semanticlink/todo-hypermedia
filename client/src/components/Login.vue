@@ -22,8 +22,16 @@
     import EventBus, { loginConfirmed, loginRequired } from '../lib/util/EventBus';
     import { link } from 'semanticLink';
     import { log } from 'logger';
-    import { getAuthenticationUri, getBearerLinkRelation, setBearerToken } from '../lib/http-interceptors';
+    import {
+        getAuthenticationUri,
+        getBearerLinkRelation,
+        setBearerToken,
+        AUTH0_REALM,
+        getAuthenticationRealm
+    } from '../lib/http-interceptors';
     import Form from './Form.vue';
+    import { authService } from "../lib/AuthService";
+    import { SemanticLink, _ } from "semanticLink";
 
     /**
      * This is a simple boolean 'lock'. When the event is triggered we don't
@@ -65,6 +73,13 @@
         },
         methods: {
             /**
+             * @param {FormRepresentation} form
+             * @return {boolean}
+             */
+            hasSubmitLinkRel(form) {
+                return SemanticLink.matches(form, /^submit$/);
+            },
+            /**
              * Contains our 401 Error
              *
              * Very simple (and awful) implementation.
@@ -90,7 +105,77 @@
                 if (isPerformingAuthentication) {
                     return;
                 }
-                axios.get(getAuthenticationUri(error))
+
+                if (getAuthenticationRealm(error) === AUTH0_REALM) {
+
+                    // ream="auth0"
+
+                    authService
+                        .login()
+                        .then(authResult => {
+                            return this.loadLoginForm(error)
+                                .then(() => this.submitForm(authResult, this.formRepresentation, this.representation));
+                        })
+                        .then(this.onSuccess)
+                        .catch(this.onFailure);
+
+                } else {
+
+                    // realm="api"
+
+                    this.loadLoginForm(error)
+                        .then(this.onSuccess)
+                        .catch(this.onFailure);
+                }
+
+
+            },
+            /**
+             *
+             * @param {*} data
+             * @param {FormRepresentation}form
+             * @param {CollectionRepresentation} collection
+             * @returns {Promise<AxiosResponse<any>>}
+             */
+            submitForm(data, form, collection) {
+                /**
+                 * A form will POST if there is a submit link rel
+                 * A form will PUT if no submit
+                 * A form will override above if a method is specified
+                 * @param {FormRepresentation} form
+                 * @return {string}
+                 **/
+                function verb(form) {
+                    const [weblink, ..._] = SemanticLink.filter(form, /^submit$/);
+                    if (weblink) {
+                        return (weblink || {}).method || 'post';
+                    } else {
+                        return 'put';
+                    }
+                }
+
+                /**
+                 * Only send back the fields from the data that are matched to the fields on the form
+                 */
+                function pickFieldsFromForm(data, form) {
+
+                    const fields = form.items.map(item => item.name);
+                    return _(data).pick(fields);
+                }
+
+                const rel = this.hasSubmitLinkRel(form) ? 'submit' : 'self';
+                const links = this.hasSubmitLinkRel(form) ? form : collection;
+                const putOrPost = verb(form);
+
+                return link[putOrPost](links, rel, 'application/json', pickFieldsFromForm(data, form));
+            },
+            /**
+             *
+             * @param error
+             * @returns {Promise<AxiosResponse<any>>}
+             */
+            loadLoginForm(error) {
+                return axios.get(getAuthenticationUri(error))
                     .then(response => link.get(response.data, getBearerLinkRelation(error)))
                     .then(authenticateCollection => {
                         this.representation = authenticateCollection.data;
@@ -100,13 +185,6 @@
                         this.formRepresentation = authenticateLoginRepresentation.data;
                         // only turn on the lock once we have the login form ready
                         isPerformingAuthentication = true;
-                    })
-                    .catch(/** @type {AxiosError|AxiosResponse} */error => {
-                        this.$notify({
-                            title: 'An error means that the login process won\'t work',
-                            text: error.statusText || error.response.statusText,
-                            type: 'error'
-                        });
                     });
 
             },
@@ -131,14 +209,11 @@
             },
             onFailure(error) {
 
-                this.$notify({text: 'Authentication: failed'})
-                this.error = '';
-                if (error && error.status) {
-                    log.warn('Authentication failed (' + error.status + '): ' + error.statusText);
-                } else {
-                    log.warn('Authentication: failed', arguments);
-                }
-                this.error = 'Invalid email/password';
+                this.$notify({
+                    title: 'An error means that the login process won\'t work',
+                    text: error || error.statusText || error.response.statusText,
+                    type: 'error'
+                });
             }
         }
     };

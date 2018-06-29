@@ -181,7 +181,7 @@ export default class AuthService {
                     AuthService.setSession(authResult);
                     return response(authResult);
                 } else {
-                    log.error(err);
+                    log.error('[Auth] ', err);
                     return reject(err);
                 }
 
@@ -225,7 +225,7 @@ export default class AuthService {
             if (err) {
                 // this is the expected behaviour that the user is mostly not coming from auth0
             } else if (!authResult) {
-                log.error('[Authresult] unexpected empty result.');
+                log.error('[Auth] unexpected empty result.');
             } else {
                 log.debug('Auth token found in the hash');
                 this.close(authResult);

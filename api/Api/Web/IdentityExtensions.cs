@@ -117,7 +117,7 @@ namespace Api.Web
         public static string GenerateJwtToken(this IConfiguration configuration,
             string userId,
             string email,
-            IdentityUser user)
+            string identityId)
         {
             var claims = new List<Claim>
             {
@@ -140,7 +140,7 @@ namespace Api.Web
                  *
                  * NOTE: currently there is no need to include this
                  */
-                new Claim(JwtRegisteredClaimNames.Jti, user.Id),
+                new Claim(JwtRegisteredClaimNames.Jti, identityId),
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"]));

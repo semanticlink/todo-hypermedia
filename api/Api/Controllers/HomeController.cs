@@ -137,8 +137,15 @@ namespace Api.Controllers
                 .ToTenantSearchFormRepresentation(Url);
         }
 
-        [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateCollectionRouteName)]
+        [HttpGet("authenticate/login", Name = HomeUriFactory.AuthenticateLoginCollectionRouteName)]
         public FeedRepresentation GetAuthenticateCollection()
+        {
+            return Url.ToAuthenticationCollectionRepresentation();
+        }
+
+ 
+        [HttpGet("authenticate/bearer", Name = HomeUriFactory.AuthenticateBearerCollectionRouteName)]
+        public FeedRepresentation GetBearerAuthenticateCollection()
         {
             return Url.ToAuthenticationCollectionRepresentation();
         }
@@ -187,8 +194,9 @@ namespace Api.Controllers
                 .ThrowAccessDeniedExceptionIfNull("User creation denied")
                 .Id
                 .MakeUserUri(Url)
-                .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, model.Email, user));
+                .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, model.Email, user.Id));
         }
+        
         [HttpPost("authenticate/bearer", Name = HomeUriFactory.AuthenticateBearerRouteName)]
         public IActionResult Login([FromBody] UserBearerCreateDataRepresentation model)
         {
@@ -197,16 +205,17 @@ namespace Api.Controllers
             // signin?    
             
             var fromDecodedToken = "from decoded token";
-            var user = _userManager.Users.SingleOrDefault(r => r.Email == fromDecodedToken);
+            var identityUser = _userManager.Users.SingleOrDefault(r => r.Email == fromDecodedToken);
 
             /*
              * TODO: this should actually create a new resource and return its uri rather than just the token
              */
-            return user
+            return /*user
                 .ThrowAccessDeniedExceptionIfNull("User authentication denied")
                 .Id
-                .MakeUserUri(Url)
-                .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, fromDecodedToken, user));
+                .MakeUserUri(Url)*/
+                ""
+                .MakeCreatedToken(_configuration.GenerateJwtToken("dfdf", fromDecodedToken, "ddf"));
         }
     }
 }

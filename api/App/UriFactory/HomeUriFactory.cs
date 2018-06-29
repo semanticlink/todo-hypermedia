@@ -9,7 +9,8 @@ namespace App.UriFactory
 
         public const string AuthenticateUsernamePasswordRouteName = "AuthenticatePassword";
         public const string AuthenticateBearerRouteName = "AuthenticateBearer";
-        public const string AuthenticateCollectionRouteName = "AuthenticateCollection";
+        public const string AuthenticateLoginCollectionRouteName = "AuthenticateLoginCollection";
+        public const string AuthenticateBearerCollectionRouteName = "AuthenticateBearerCollection";
         public const string AuthenticateLoginFormRouteName = "AuthenticateLoginForm";
         public const string AuthenticateBearerFormRouteName = "AuthenticateBearerForm";
 
@@ -43,7 +44,7 @@ namespace App.UriFactory
 
         public static string MakeAuthenticateBearerFormUri(this IUrlHelper url)
         {
-            return url.Link(AuthenticateLoginFormRouteName, new { });
+            return url.Link(AuthenticateBearerFormRouteName, new { });
         }
 
         /// <summary>

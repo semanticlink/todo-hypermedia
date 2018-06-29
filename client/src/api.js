@@ -1,3 +1,10 @@
+/**
+ * Intercept incoming authentication callbacks with Tokens on the hash
+ *
+ */
+import { authService } from './lib/AuthService';
+authService.handleAuthentication();
+
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.conf with an alias.
 import Vue from 'vue';
@@ -21,7 +28,7 @@ Vue.use(Notifications);
 
 require('./lib/http-interceptors');
 
-setLogLevel(LEVEL.INFO);
+setLogLevel(LEVEL.DEBUG);
 
 Vue.config.productionTip = false;
 
