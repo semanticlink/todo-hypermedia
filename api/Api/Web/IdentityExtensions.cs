@@ -15,6 +15,8 @@ namespace Api.Web
 {
     public static class IdentityExtensions
     {
+        public const string Auth0AuthenticationSchemeName = "Auth0";
+        
         /// <summary>
         /// <para>
         ///    Add Identity for authenticn. Note as of Auth 2.0, all types needed are regsitered
@@ -64,6 +66,22 @@ namespace Api.Web
                         AuthenticationOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                     }
                 )
+                .AddJwtBearer(Auth0AuthenticationSchemeName, options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.IncludeErrorDetails = true;
+                    // TODO: inject api hosting address
+                    options.Challenge =
+                        $"{JwtBearerDefaults.AuthenticationScheme} realm=\"api\", rel=auth0, uri=http://localhost:5000/";
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = configuration["JwtIssuer"],
+                        ValidAudience = configuration["JwtIssuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"])),
+                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
+                    };
+                })
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = false;
@@ -79,7 +97,8 @@ namespace Api.Web
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"])),
                         ClockSkew = TimeSpan.Zero // remove delay of token when expire
                     };
-                });
+                })
+                ;
 
             return services;
         }

@@ -4,6 +4,8 @@ using Api.Web;
 using App;
 using Infrastructure.mySql;
 using Infrastructure.NoSQL;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -46,11 +48,23 @@ namespace Api
             {
                 // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
                 options.RespectBrowserAcceptHeader = true; // false by default
-                
             });
 
             services
                 .AddAuthenticationWithJwtToken(Configuration)
+                /**
+                 * Set multiple bearer tokens. This pairs with .AddAuthententication to expose
+                 * multiple www-authenticate headers on a 401
+                 *
+                 * see https://stackoverflow.com/questions/49694383/use-multiple-jwt-bearer-authentication
+                 */
+                .AddAuthorization(options =>
+                {
+                    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, IdentityExtensions.Auth0AuthenticationSchemeName)
+                        .Build();
+                })
                 .AddMvcCore(options =>
                 {
                     options.RespectBrowserAcceptHeader = true;
@@ -70,6 +84,7 @@ namespace Api
                 })
                 .AddJsonFormatters(s => s.ContractResolver = new DefaultContractResolver())
                 .AddXmlDataContractSerializerFormatters();
+
 
             services
                 .RegisterIoc(HostingEnvironment)
