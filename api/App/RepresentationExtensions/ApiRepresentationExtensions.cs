@@ -20,7 +20,7 @@ namespace App.RepresentationExtensions
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Self),
                     
                     // authentication resource that is point to in the 401 response
-                    url.MakeAuthenticateUri().MakeWebLink(CustomLinkRelation.Authenticate),
+                    url.MakeAuthenticateBearerUri().MakeWebLink(CustomLinkRelation.Authenticate),
                     
                     // a virtual resource that redirects to the user
                     url.MakeUserMeUri().MakeWebLink(CustomLinkRelation.Me),

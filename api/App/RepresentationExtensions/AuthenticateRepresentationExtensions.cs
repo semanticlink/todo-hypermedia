@@ -15,12 +15,13 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    url.MakeAuthenticateUri().MakeWebLink(IanaLinkRelation.Self),
+                    url.MakeAuthenticateBearerUri().MakeWebLink(IanaLinkRelation.Self),
 
                     // logical parent of authenticate is root
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // todos
+                    // forms
+                    url.MakeAuthenticateBearerFormUri().MakeWebLink(IanaLinkRelation.CreateForm),
                     url.MakeAuthenticateLoginFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
                 },
 

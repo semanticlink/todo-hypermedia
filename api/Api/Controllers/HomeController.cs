@@ -42,7 +42,7 @@ namespace Api.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet("", Name = HomeUriFactory.SelfRouteName)]     
+        [HttpGet("", Name = HomeUriFactory.SelfRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public ApiRepresentation GetApi()
         {
@@ -140,7 +140,7 @@ namespace Api.Controllers
         [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateCollectionRouteName)]
         public FeedRepresentation GetAuthenticateCollection()
         {
-            return Url .ToAuthenticationCollectionRepresentation();
+            return Url.ToAuthenticationCollectionRepresentation();
         }
 
         /// <summary>
@@ -154,7 +154,18 @@ namespace Api.Controllers
                 .ToAuthenticateLoginFormRepresentation(Url);
         }
 
-        [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateRouteName)]
+        /// <summary>
+        ///     A simple bearer form resource.
+        /// </summary>
+        [HttpGet("authenticate/form/auth0", Name = HomeUriFactory.AuthenticateBearerFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        public SearchFormRepresentation GetAuthenticateBearerForm()
+        {
+            return new UserRepresentation()
+                .ToAuthenticateBearerFormRepresentation(Url);
+        }
+
+        [HttpPost("authenticate/login", Name = HomeUriFactory.AuthenticateUsernamePasswordRouteName)]
         public async Task<object> Login([FromBody] UserCreateDataRepresentation model)
         {
             var result = await _signInManager.PasswordSignInAsync(
@@ -177,6 +188,25 @@ namespace Api.Controllers
                 .Id
                 .MakeUserUri(Url)
                 .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, model.Email, user));
+        }
+        [HttpPost("authenticate/bearer", Name = HomeUriFactory.AuthenticateBearerRouteName)]
+        public IActionResult Login([FromBody] UserBearerCreateDataRepresentation model)
+        {
+           // decode Auth0 token
+            
+            // signin?    
+            
+            var fromDecodedToken = "from decoded token";
+            var user = _userManager.Users.SingleOrDefault(r => r.Email == fromDecodedToken);
+
+            /*
+             * TODO: this should actually create a new resource and return its uri rather than just the token
+             */
+            return user
+                .ThrowAccessDeniedExceptionIfNull("User authentication denied")
+                .Id
+                .MakeUserUri(Url)
+                .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, fromDecodedToken, user));
         }
     }
 }

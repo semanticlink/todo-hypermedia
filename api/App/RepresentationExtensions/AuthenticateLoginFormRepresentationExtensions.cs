@@ -27,7 +27,7 @@ namespace App.RepresentationExtensions
                 {
                     url.MakeAuthenticateLoginFormUri().MakeWebLink(IanaLinkRelation.Self),
                     url.MakeHomeTenantsUri().MakeWebLink(IanaLinkRelation.Up),
-                    url.MakeAuthenticateUri().MakeWebLink(CustomLinkRelation.Submit, "Login"),
+                    url.MakeAuthenticateBearerUri().MakeWebLink(CustomLinkRelation.Submit, "Login"),
                 },
                 Items = MakeSearchFormItems(),
             };
@@ -48,6 +48,44 @@ namespace App.RepresentationExtensions
                     Name = "password",
                     Required = true,
                     Description = "The password for the email credential."
+                }
+            };
+        }
+
+        /// <summary>
+        ///     A form to describe <see cref="AuthenticateBearerRepresentation" />
+        /// </summary>
+        public static SearchFormRepresentation ToAuthenticateBearerFormRepresentation(
+            this UserRepresentation nullUser,
+            IUrlHelper url)
+        {
+            return new SearchFormRepresentation
+            {
+                Links = new[]
+                {
+                    url.MakeAuthenticateLoginFormUri().MakeWebLink(IanaLinkRelation.Self),
+                    url.MakeHomeTenantsUri().MakeWebLink(IanaLinkRelation.Up),
+                    url.MakeAuthenticateBearerUri().MakeWebLink(CustomLinkRelation.Submit),
+                },
+                Items = MakeBearerFormItems(),
+            };
+        }
+
+        private static FormItemRepresentation[] MakeBearerFormItems()
+        {
+            return new FormItemRepresentation[]
+            {
+                new TextInputFormItemRepresentation
+                {
+                    Name = "accessToken",
+                    Description = "The JWT access token from the third party (Auth0) provider.",
+                    Required = true
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "tokenType",
+                    Required = true,
+                    Description = "The token type: Default: 'Bearer'"
                 }
             };
         }

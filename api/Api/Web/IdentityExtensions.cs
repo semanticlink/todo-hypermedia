@@ -73,7 +73,7 @@ namespace Api.Web
                     options.IncludeErrorDetails = true;
                     // TODO: inject api hosting address
                     options.Challenge =
-                        $"{JwtBearerDefaults.AuthenticationScheme} realm=\"api\", rel=auth0, uri=http://localhost:5000/";
+                        $"{JwtBearerDefaults.AuthenticationScheme} realm=\"auth0\", rel=authenticate, uri=http://localhost:5000/";
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidIssuer = configuration["JwtIssuer"],

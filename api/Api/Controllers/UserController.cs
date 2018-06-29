@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Api.Web;
 using App;
 using App.RepresentationExtensions;
@@ -66,7 +66,13 @@ namespace Api.Controllers
         //
         // Todo collection on a user
 
+        /// <summary>
+        ///     User todo collection
+        /// </summary>
+        /// <see cref="TodoController.GetById"/>
         [HttpGet("{id}/todo", Name = UserUriFactory.UserTodoCollectionName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetUserTodos(string id)
         {
             return (await _todoStore

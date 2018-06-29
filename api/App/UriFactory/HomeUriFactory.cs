@@ -7,9 +7,11 @@ namespace App.UriFactory
         public const string SelfRouteName = "Home";
 
 
-        public const string AuthenticateRouteName = "Authenticate";
+        public const string AuthenticateUsernamePasswordRouteName = "AuthenticatePassword";
+        public const string AuthenticateBearerRouteName = "AuthenticateBearer";
         public const string AuthenticateCollectionRouteName = "AuthenticateCollection";
         public const string AuthenticateLoginFormRouteName = "AuthenticateLoginForm";
+        public const string AuthenticateBearerFormRouteName = "AuthenticateBearerForm";
 
         /// <summary>
         ///     A logical resource that is the collection of all tenants
@@ -24,12 +26,22 @@ namespace App.UriFactory
             return url.Link(SelfRouteName, new { });
         }
 
-        public static string MakeAuthenticateUri(this IUrlHelper url)
+        public static string MakeAuthenticatePasswordUri(this IUrlHelper url)
         {
-            return url.Link(AuthenticateRouteName, new { });
+            return url.Link(AuthenticateUsernamePasswordRouteName, new { });
+        }
+
+        public static string MakeAuthenticateBearerUri(this IUrlHelper url)
+        {
+            return url.Link(AuthenticateBearerRouteName, new { });
         }
 
         public static string MakeAuthenticateLoginFormUri(this IUrlHelper url)
+        {
+            return url.Link(AuthenticateLoginFormRouteName, new { });
+        }
+
+        public static string MakeAuthenticateBearerFormUri(this IUrlHelper url)
         {
             return url.Link(AuthenticateLoginFormRouteName, new { });
         }

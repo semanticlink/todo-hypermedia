@@ -1,4 +1,4 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
@@ -62,7 +62,7 @@ namespace Api
                 {
                     options.DefaultPolicy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, IdentityExtensions.Auth0AuthenticationSchemeName)
+                        .AddAuthenticationSchemes(/*JwtBearerDefaults.AuthenticationScheme, */IdentityExtensions.Auth0AuthenticationSchemeName)
                         .Build();
                 })
                 .AddMvcCore(options =>
@@ -195,10 +195,9 @@ namespace Api
              * return an text/html page for authenticating.
              */
             app.UseStatusCodePagesWithReExecute("/error/{0}");
-            
+
             app
                 .UseTodoCors()
-                
                 /*
                  *
                  * Auth 2.0 now only has a single authenticatio middleware and invokes
