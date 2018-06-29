@@ -146,11 +146,18 @@ export const AUTHORIZATION_HEADER = 'Authorization';
  */
 export const BEARER = 'Bearer';
 /**
- * Name of the realm we are matching against, yes-hardcoded to us
+ * Name of the realm when matching against our own api provider
  * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
  * @type {string}
  */
-export const API = 'api';
+export const API_REALM = 'api';
+
+/**
+ * Name of the realm when matching for Auth0 provider
+ * @example www-authenticate: Bearer realm="auth0", rel=authenticate, uri=http://example.com
+ * @type {string}
+ */
+export const AUTH0_REALM = 'auth0';
 
 /**
  * Looks inside the 401 response www-authenticate header and returns the header details
@@ -180,8 +187,8 @@ const parseErrorForAuthenticateHeader = error => {
      */
     const auth = authorization.parse(wwwAuthenticate);
 
-    if (!auth && auth.scheme === BEARER && auth.params.rel === API) {
-        log.error(`No ${BEARER} token on realm '${API}' with link rel found: '${wwwAuthenticate}'`);
+    if (!auth && auth.scheme === BEARER && auth.params.rel === API_REALM) {
+        log.error(`No ${BEARER} token on realm '${API_REALM}' with link rel found: '${wwwAuthenticate}'`);
     }
 
     return auth;
@@ -206,6 +213,16 @@ export const getBearerLinkRelation = error => {
  */
 export const getAuthenticationUri = error => {
     return parseErrorForAuthenticateHeader(error).params.uri;
+};
+
+/**
+ * Looks inside the 401 response www-authenticate header and gets the representation uri
+ *
+ * @param {AxiosError} error
+ * @returns {string|undefined} uri
+ */
+export const getAuthenticationRealm = error => {
+    return parseErrorForAuthenticateHeader(error).params.realm;
 };
 
 
