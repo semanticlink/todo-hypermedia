@@ -8,11 +8,9 @@ namespace App.UriFactory
 
 
         public const string AuthenticateUsernamePasswordRouteName = "AuthenticatePassword";
-        public const string AuthenticateBearerRouteName = "AuthenticateBearer";
+        public const string AuthenticateJsonWebTokenRouteName = "AuthenticateJWT";
         public const string AuthenticateLoginCollectionRouteName = "AuthenticateLoginCollection";
-        public const string AuthenticateBearerCollectionRouteName = "AuthenticateBearerCollection";
         public const string AuthenticateLoginFormRouteName = "AuthenticateLoginForm";
-        public const string AuthenticateBearerFormRouteName = "AuthenticateBearerForm";
 
         /// <summary>
         ///     A logical resource that is the collection of all tenants
@@ -32,19 +30,14 @@ namespace App.UriFactory
             return url.Link(AuthenticateUsernamePasswordRouteName, new { });
         }
 
-        public static string MakeAuthenticateBearerUri(this IUrlHelper url)
+        public static string MakeAuthenticateJsonWebTokenUri(this IUrlHelper url)
         {
-            return url.Link(AuthenticateBearerRouteName, new { });
+            return url.Link(AuthenticateJsonWebTokenRouteName, new { });
         }
 
         public static string MakeAuthenticateLoginFormUri(this IUrlHelper url)
         {
             return url.Link(AuthenticateLoginFormRouteName, new { });
-        }
-
-        public static string MakeAuthenticateBearerFormUri(this IUrlHelper url)
-        {
-            return url.Link(AuthenticateBearerFormRouteName, new { });
         }
 
         /// <summary>

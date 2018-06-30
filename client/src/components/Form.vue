@@ -67,49 +67,8 @@
     import { DateTime as LuxonDateTime } from 'luxon'
     // You need a specific loader for CSS files
     import 'vue-datetime/dist/vue-datetime.css'
+    import FormService from "../lib/FormService";
 
-    /**
-     * A form has the job to POST to a collection or PUT to an item (this is by convention).
-     *
-     * The semantics of the form are that:
-     *
-     * In terms of the display label:
-     * ==============================
-     *
-     *  1. Default value is 'Submit'
-     *  @example { rel: 'submit' }
-     *
-     *  2. Override default if the link rel 'submit' has name attribute use that for display
-     *  @example { rel: 'submit', name: "Search" }
-     *
-     * In terms of form values:
-     * ========================
-     *
-     *  1. In the case of POST, start with a new object and fill out values (based on the form)
-     *  2. In the case of PUT, clone a new object based on the  existing item (ie prepopulate) and
-     *     update values (based on the form)
-     *
-     * In terms of where and how to send forms:
-     * ========================================
-     *
-     * 1. Default verb is POST when 'submit' is present
-     * @example { rel: 'submit', href:"https://example.com/collection/"}
-     *
-     * 2. PUT verb if no link rel 'submit' OR method='PUT'
-     * @example { rel: 'self', href: 'http://example.com/some/form"} <-- no submit
-     *
-     * 3. Set verb when link rel 'method'  is explicitly set
-     * @example { rel: 'submit', method: 'PUT', href:"https://example.com/item"}
-     * @example { rel: 'submit', method: 'POST', href:"https://example.com/collection"}
-     *
-     * 4. send to uri in named href if explicit
-     * @example { rel: 'submit', href:"https://example.com/collection/"}
-     *
-     * 5. send to referring resource if omitted
-     * @example { rel: 'self', href: 'http://example.com/some/form"} <-- no submit
-     * @example { rel: 'submit'}
-     *
-     */
     export default {
         name: "Form",
         components: {datetime: Datetime},
@@ -124,7 +83,7 @@
             },
             /**
              * Form that specifies the item/inputs to submit back to the server
-             * @type {CollectionRepresentation}
+             * @type {FormRepresentation}
              */
             formRepresentation: {
                 type: Object,
@@ -201,9 +160,7 @@
             /**
              * When we show a form on the screen, decide whether to clone or create an in-memory representation
              */
-            this.formObj = this.hasSubmitLinkRel(this.formRepresentation) ?
-                {} :                                        // POST clean/new
-                Object.assign({}, this.representation);     // PUT clone
+            this.formObj = FormService.makeFormObj(this.formRepresentation, this.representation);
         },
         computed: {
             /**
@@ -219,13 +176,6 @@
         },
         methods: {
             /**
-             * @param {FormRepresentation} form
-             * @return {boolean}
-             */
-            hasSubmitLinkRel(form) {
-                return SemanticLink.matches(form, /^submit$/);
-            },
-            /**
              * On all the fields are entered then either make a PUT (edit/update) or POST (create, search) based on
              * the referring representation
              */
@@ -233,27 +183,7 @@
 
                 this.onSubmit();
 
-                /**
-                 * A form will POST if there is a submit link rel
-                 * A form will PUT if no sbmit
-                 * A form will override above if a method is specified
-                 * @param {FormRepresentation} form
-                 * @return {string}
-                 **/
-                function verb(form) {
-                    const [weblink, ..._] = SemanticLink.filter(form, /^submit$/);
-                    if (weblink) {
-                        return (weblink || {}).method || 'post';
-                    } else {
-                        return 'put';
-                    }
-                }
-
-                const rel = this.hasSubmitLinkRel(this.formRepresentation) ? 'submit' : 'self';
-                const links = this.hasSubmitLinkRel(this.formRepresentation) ? this.formRepresentation : this.representation;
-                const putOrPost = verb(this.formRepresentation);
-
-                return link[putOrPost](links, rel, 'application/json', this.formObj)
+                return FormService.submitForm(this.formObj, this.formRepresentation, this.representation)
                     .then(/** @type {AxiosResponse} */response => {
 
                         if (this.onSuccess) {

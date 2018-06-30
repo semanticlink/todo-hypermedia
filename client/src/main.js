@@ -21,7 +21,7 @@ import AbstractTenant from './components/AbstractTenant.vue';
 import DroppableModel from './components/DroppableModel';
 import DraggableModel from './components/DraggableModel';
 import DragAndDroppableModel from './components/DragAndDroppableModel';
-import { setBearerToken } from './lib/http-interceptors';
+import { setBearerTokenOnHeaders } from './lib/http-interceptors';
 
 import BootstrapVue from 'bootstrap-vue';
 
@@ -70,7 +70,7 @@ Vue.use(VueLocalStorage, {name: 'localStorage'});
  * If there is an already set authorisation bearer token then use it by default
  */
 if (Vue.localStorage.get('auth')) {
-    setBearerToken(Vue.localStorage.get('auth'));
+    setBearerTokenOnHeaders(Vue.localStorage.get('auth'));
 }
 
 //  TODO: understand inline-templates so that this does haven't to be registered globally

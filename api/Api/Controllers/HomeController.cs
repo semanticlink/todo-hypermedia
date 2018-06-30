@@ -137,15 +137,37 @@ namespace Api.Controllers
                 .ToTenantSearchFormRepresentation(Url);
         }
 
-        [HttpGet("authenticate/login", Name = HomeUriFactory.AuthenticateLoginCollectionRouteName)]
-        public FeedRepresentation GetAuthenticateCollection()
+
+        ///////////////////////////////////////////////////////////////
+        //
+        //  The authentication resources
+        //  ============================
+        //
+        //  Currently supporting:
+        //    - username/password login from aspnet core identity services
+        //    - auth0 external authentication
+        //
+
+
+        /// <summary>
+        ///     The configuration for the clients to talk to the Auth0 service
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("authenticate/auth0", Name = HomeUriFactory.AuthenticateJsonWebTokenRouteName)]
+        public Auth0Representation GetBearerAuthenticateCollection()
         {
-            return Url.ToAuthenticationCollectionRepresentation();
+            return new Auth0Configuration
+                {
+                    // TODO: inject - these are currently the test settings
+                    Audience = "todo-rest-test",
+                    ClientId = "3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8",
+                    Domain = "rewire-sample.au.auth0.com",
+                }
+                .ToRepresentation(Url);
         }
 
- 
-        [HttpGet("authenticate/bearer", Name = HomeUriFactory.AuthenticateBearerCollectionRouteName)]
-        public FeedRepresentation GetBearerAuthenticateCollection()
+        [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateLoginCollectionRouteName)]
+        public FeedRepresentation GetAuthenticateCollection()
         {
             return Url.ToAuthenticationCollectionRepresentation();
         }
@@ -161,18 +183,7 @@ namespace Api.Controllers
                 .ToAuthenticateLoginFormRepresentation(Url);
         }
 
-        /// <summary>
-        ///     A simple bearer form resource.
-        /// </summary>
-        [HttpGet("authenticate/form/auth0", Name = HomeUriFactory.AuthenticateBearerFormRouteName)]
-        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
-        public SearchFormRepresentation GetAuthenticateBearerForm()
-        {
-            return new UserRepresentation()
-                .ToAuthenticateBearerFormRepresentation(Url);
-        }
-
-        [HttpPost("authenticate/login", Name = HomeUriFactory.AuthenticateUsernamePasswordRouteName)]
+        [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateUsernamePasswordRouteName)]
         public async Task<object> Login([FromBody] UserCreateDataRepresentation model)
         {
             var result = await _signInManager.PasswordSignInAsync(
@@ -195,27 +206,6 @@ namespace Api.Controllers
                 .Id
                 .MakeUserUri(Url)
                 .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, model.Email, user.Id));
-        }
-        
-        [HttpPost("authenticate/bearer", Name = HomeUriFactory.AuthenticateBearerRouteName)]
-        public IActionResult Login([FromBody] UserBearerCreateDataRepresentation model)
-        {
-           // decode Auth0 token
-            
-            // signin?    
-            
-            var fromDecodedToken = "from decoded token";
-            var identityUser = _userManager.Users.SingleOrDefault(r => r.Email == fromDecodedToken);
-
-            /*
-             * TODO: this should actually create a new resource and return its uri rather than just the token
-             */
-            return /*user
-                .ThrowAccessDeniedExceptionIfNull("User authentication denied")
-                .Id
-                .MakeUserUri(Url)*/
-                ""
-                .MakeCreatedToken(_configuration.GenerateJwtToken("dfdf", fromDecodedToken, "ddf"));
         }
     }
 }

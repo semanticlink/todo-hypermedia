@@ -6,7 +6,6 @@ using System.Text;
 using Infrastructure.mySql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -15,7 +14,14 @@ namespace Api.Web
 {
     public static class IdentityExtensions
     {
-        public const string Auth0AuthenticationSchemeName = "Auth0";
+        /// <summary>
+        ///     Authentication sscheme for against external integrations such as Auth0 that return a JSON Web Token (JWT).
+        ///     see https://tools.ietf.org/html/rfc7519
+        /// </summary>
+        /// <remarks>
+        ///    We are not calling JWT across the wire as to avoid confusion with Java Web Tokens
+        /// </remarks>
+        public const string Auth0AuthenticationSchemeName = "JSONWebToken";
         
         /// <summary>
         /// <para>
@@ -71,9 +77,9 @@ namespace Api.Web
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
                     options.IncludeErrorDetails = true;
-                    // TODO: inject api hosting address
+                    // TODO: inject api hosting address and uri construction
                     options.Challenge =
-                        $"{JwtBearerDefaults.AuthenticationScheme} realm=\"auth0\", rel=authenticate, uri=http://localhost:5000/";
+                        $"{Auth0AuthenticationSchemeName} realm=\"api\", uri=http://localhost:5000/authenticate/auth0";
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidIssuer = configuration["JwtIssuer"],

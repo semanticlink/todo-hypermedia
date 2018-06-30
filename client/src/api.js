@@ -15,7 +15,7 @@ import Offline from './components/Offline.vue';
 import Login from './components/Login.vue';
 import Resource from './components/Resource.vue';
 
-import { setBearerToken } from './lib/http-interceptors';
+import { setBearerTokenOnHeaders } from './lib/http-interceptors';
 
 import BootstrapVue from 'bootstrap-vue';
 import Notifications from 'vue-notification';
@@ -41,7 +41,7 @@ Vue.use(VueLocalStorage, {name: 'localStorage'});
  * If there is an already set authorisation bearer token then use it by default
  */
 if (Vue.localStorage.get('auth')) {
-    setBearerToken(Vue.localStorage.get('auth'));
+    setBearerTokenOnHeaders(Vue.localStorage.get('auth'));
 }
 
 /**

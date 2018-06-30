@@ -104,7 +104,7 @@ axios.interceptors.response.use(
 /**
  * Set the bearer token in the headers for this axios instance
  */
-export const setBearerToken = (token) => {
+export const setBearerTokenOnHeaders = (token) => {
 
     if (!token) {
         log.info('Authentication: no access token found');
@@ -116,6 +116,28 @@ export const setBearerToken = (token) => {
         config => {
             config.withCredentials = true;
             config.headers[AUTHORIZATION_HEADER] = authorization.format({scheme: BEARER, token: token});
+            return config;
+        },
+        err => Promise.reject(err));
+    return Promise.resolve();
+
+};
+
+/**
+ * Set the bearer token in the headers for this axios instance
+ */
+export const setJsonWebTokenOnHeaders = (token) => {
+
+    if (!token) {
+        log.info('Authentication: no access token found');
+    }
+
+    log.info('Authentication: setting access token');
+
+    axios.interceptors.request.use(
+        config => {
+            config.withCredentials = true;
+            config.headers[AUTHORIZATION_HEADER] = authorization.format({scheme: JWT, token: token});
             return config;
         },
         err => Promise.reject(err));
@@ -145,6 +167,15 @@ export const AUTHORIZATION_HEADER = 'Authorization';
  * @type {string}
  */
 export const BEARER = 'Bearer';
+
+/**
+ * We are using JSON Web Token (JWT and not Java Web Tokens) authentication  here (for now)
+ * @see https://tools.ietf.org/html/rfc7235
+ * @example www-authenticate: JSONWebToken realm="api", uri=http://example.com/authenticate/jwt
+ * @type {string}
+ */
+export const JWT = 'JSONWebToken';
+
 /**
  * Name of the realm when matching against our own api provider
  * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
@@ -160,14 +191,23 @@ export const API_REALM = 'api';
 export const AUTH0_REALM = 'auth0';
 
 /**
+ * @class WWWAuthenticateHeader
+ * @property {string} scheme
+ * @property {string} token
+ * @property {string} params.realm
+ * @property {string} params.rel
+ * @property {string} params.uri
+ */
+
+/**
  * Looks inside the 401 response www-authenticate header and returns the header details
  *
  * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
  *
  * TODO: this does not implement multiple www-authenticate headers
- * TODO: this doesn not deal with underlying implementation of multiple realms in one header
+ * TODO: this does not deal with underlying implementation of multiple realms in one header
  * @param {AxiosError} error
- * @returns {{scheme: string, token: string, params: {realm: string, rel: string, uri: string}}}
+ * @returns {WWWAuthenticateHeader}
  */
 const parseErrorForAuthenticateHeader = error => {
     if (!error && !error.response) {
@@ -183,12 +223,13 @@ const parseErrorForAuthenticateHeader = error => {
 
     /**
      * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
+     * @example www-authenticate: JSONWebToken realm="api", uri=http://example.com/auth0
      * @type {{scheme: string, token: string, params: {realm: string, rel: string, uri: string}}}
      */
     const auth = authorization.parse(wwwAuthenticate);
 
-    if (!auth && auth.scheme === BEARER && auth.params.rel === API_REALM) {
-        log.error(`No ${BEARER} token on realm '${API_REALM}' with link rel found: '${wwwAuthenticate}'`);
+    if (!auth && (auth.scheme === BEARER || auth.scheme === JWT) && auth.params.rel === API_REALM) {
+        log.error(`No ${BEARER} or ${JWT} scheme on realm '${API_REALM}' with link rel found: '${wwwAuthenticate}'`);
     }
 
     return auth;
@@ -198,7 +239,7 @@ const parseErrorForAuthenticateHeader = error => {
  * Looks inside the 401 response www-authenticate header and gets the link relation
  *
  * @param {AxiosError} error
- * @returns {string|undefined} rel
+ * @returns {WWWAuthenticateHeader.params.rel} rel
  */
 export const getBearerLinkRelation = error => {
     return parseErrorForAuthenticateHeader(error).params.rel;
@@ -209,20 +250,30 @@ export const getBearerLinkRelation = error => {
  * Looks inside the 401 response www-authenticate header and gets the representation uri
  *
  * @param {AxiosError} error
- * @returns {string|undefined} uri
+ * @returns {WWWAuthenticateHeader.params.uri} uri
  */
 export const getAuthenticationUri = error => {
     return parseErrorForAuthenticateHeader(error).params.uri;
 };
 
 /**
- * Looks inside the 401 response www-authenticate header and gets the representation uri
+ * Looks inside the 401 response www-authenticate header and gets the realm
  *
  * @param {AxiosError} error
- * @returns {string|undefined} uri
+ * @returns {WWWAuthenticateHeader.params.realm} realm
  */
 export const getAuthenticationRealm = error => {
     return parseErrorForAuthenticateHeader(error).params.realm;
+};
+
+/**
+ * Looks inside the 401 response www-authenticate header and gets the scheme
+ *
+ * @param {AxiosError} error
+ * @returns {WWWAuthenticateHeader.scheme} scheme
+ */
+export const getAuthenticationScheme = error => {
+    return parseErrorForAuthenticateHeader(error).scheme;
 };
 
 

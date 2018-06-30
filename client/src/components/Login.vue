@@ -18,20 +18,18 @@
 </template>
 
 <script>
-    import axios from 'axios';
     import EventBus, { loginConfirmed, loginRequired } from '../lib/util/EventBus';
-    import { link } from 'semanticLink';
     import { log } from 'logger';
     import {
-        getAuthenticationUri,
-        getBearerLinkRelation,
-        setBearerToken,
-        AUTH0_REALM,
-        getAuthenticationRealm
+        setBearerTokenOnHeaders,
+        getAuthenticationScheme,
+        JWT,
+        BEARER, setJsonWebTokenOnHeaders
     } from '../lib/http-interceptors';
     import Form from './Form.vue';
-    import { authService } from "../lib/AuthService";
-    import { SemanticLink, _ } from "semanticLink";
+    import AuthService, { authService } from "../lib/AuthService";
+    import FormService from "../lib/FormService";
+    import BearerTokenService from "../lib/BearerTokenService";
 
     /**
      * This is a simple boolean 'lock'. When the event is triggered we don't
@@ -73,28 +71,7 @@
         },
         methods: {
             /**
-             * @param {FormRepresentation} form
-             * @return {boolean}
-             */
-            hasSubmitLinkRel(form) {
-                return SemanticLink.matches(form, /^submit$/);
-            },
-            /**
-             * Contains our 401 Error
-             *
-             * Very simple (and awful) implementation.
-             *
-             * The www-authenticate header has the required information:
-             *
-             *   - uri of api
-             *   - link relation to post to
-             *
-             *      1. GET the resource at the authenticate uri
-             *      2. GET the resource with link rel
-             *      3. GET the 'create-form' for the login
-             *      3a. Display the login form in the GUI from these attributes and update/enter
-             *      4. POST the login form back on the uri of referring collection
-             *
+             * Login/authenticate based on www-authenticate headers in the 401 response/error
              *
              * @param {AxiosError} error
              */
@@ -106,100 +83,91 @@
                     return;
                 }
 
-                if (getAuthenticationRealm(error) === AUTH0_REALM) {
+                if (getAuthenticationScheme(error) === JWT) {
 
-                    // ream="auth0"
+                    // JSONWebToken authentication
 
-                    authService
-                        .login()
-                        .then(authResult => {
-                            return this.loadLoginForm(error)
-                                .then(() => this.submitForm(authResult, this.formRepresentation, this.representation));
+                    /**
+                     *  Use our JSONWebToken authentication scheme to get a token from external provider (Auth0)
+                     */
+
+                    AuthService.loadFrom401JsonWebTokenChallenge(error)
+                        .then(configuration => {
+                            return new AuthService(configuration).login()
+
+
                         })
-                        .then(this.onSuccess)
+                        .then(/** @type {AuthResult} */authResult => {
+
+                            if (!authResult || !authResult.accessToken) {
+                                log.error('Json web token not returned on the key: \'accessToken\'');
+                            }
+                            setJsonWebTokenOnHeaders(authResult.accessToken);
+
+                            BearerTokenService.setToken(authResult.accessToken);
+
+                            EventBus.$emit(loginConfirmed);
+
+                            isPerformingAuthentication = false;
+                            this.authenticated = true;
+
+                        })
                         .catch(this.onFailure);
 
+                } else if (getAuthenticationScheme(error) === BEARER) {
+
+                    // Bearer authentication
+
+                    /**
+                     * Contains our 401 Error
+                     *
+                     * Very simple (and awful) implementation.
+                     *
+                     * The www-authenticate header has the required information:
+                     *
+                     *   - uri of api
+                     *   - link relation to post to
+                     *
+                     *      1. GET the resource at the authenticate uri
+                     *      2. GET the resource with link rel
+                     *      3. GET the 'create-form' for the login
+                     *      3a. Display the login form in the GUI from these attributes and update/enter
+                     *      4. POST the login form back on the uri of referring collection
+                     *
+                     */
+                    FormService.loadFormFrom401BearerChallenge(error)
+                        .then(([form, collection]) => {
+                            // these get bound to the form control that displays the login
+                            this.formRepresentation = form;
+                            this.representation = collection;
+                            // only turn on the lock once we have the login form ready
+                            isPerformingAuthentication = true;
+                        })
+                        // note in this work flow onSuccess is called by the form
+                        .catch(this.onFailure);
                 } else {
 
-                    // realm="api"
-
-                    this.loadLoginForm(error)
-                        .then(this.onSuccess)
-                        .catch(this.onFailure);
+                    log.error('Unable to authenticate, no known www-authenticate type');
                 }
 
-
-            },
-            /**
-             *
-             * @param {*} data
-             * @param {FormRepresentation}form
-             * @param {CollectionRepresentation} collection
-             * @returns {Promise<AxiosResponse<any>>}
-             */
-            submitForm(data, form, collection) {
-                /**
-                 * A form will POST if there is a submit link rel
-                 * A form will PUT if no submit
-                 * A form will override above if a method is specified
-                 * @param {FormRepresentation} form
-                 * @return {string}
-                 **/
-                function verb(form) {
-                    const [weblink, ..._] = SemanticLink.filter(form, /^submit$/);
-                    if (weblink) {
-                        return (weblink || {}).method || 'post';
-                    } else {
-                        return 'put';
-                    }
-                }
-
-                /**
-                 * Only send back the fields from the data that are matched to the fields on the form
-                 */
-                function pickFieldsFromForm(data, form) {
-
-                    const fields = form.items.map(item => item.name);
-                    return _(data).pick(fields);
-                }
-
-                const rel = this.hasSubmitLinkRel(form) ? 'submit' : 'self';
-                const links = this.hasSubmitLinkRel(form) ? form : collection;
-                const putOrPost = verb(form);
-
-                return link[putOrPost](links, rel, 'application/json', pickFieldsFromForm(data, form));
-            },
-            /**
-             *
-             * @param error
-             * @returns {Promise<AxiosResponse<any>>}
-             */
-            loadLoginForm(error) {
-                return axios.get(getAuthenticationUri(error))
-                    .then(response => link.get(response.data, getBearerLinkRelation(error)))
-                    .then(authenticateCollection => {
-                        this.representation = authenticateCollection.data;
-                        return link.get(authenticateCollection.data, /create-form/);
-                    })
-                    .then(authenticateLoginRepresentation => {
-                        this.formRepresentation = authenticateLoginRepresentation.data;
-                        // only turn on the lock once we have the login form ready
-                        isPerformingAuthentication = true;
-                    });
 
             },
             onSubmit() {
                 this.error = '';
             },
+            /**
+             * Assumes that the payment of the resource has token field available.
+             *
+             * @param {AxiosResponse} response
+             */
             onSuccess(response) {
 
                 if (!response.data.token) {
                     log.error('Bearer token not returned on the key: \'token\'');
                 }
-                setBearerToken(response.data.token);
-                // save bearer token so that when users do a full refresh
-                // we can save the token across a refresh
-                this.$localStorage.set('auth', response.data.token);
+                setBearerTokenOnHeaders(response.data.token);
+
+                BearerTokenService.setToken(response.data.token);
 
                 EventBus.$emit(loginConfirmed);
 

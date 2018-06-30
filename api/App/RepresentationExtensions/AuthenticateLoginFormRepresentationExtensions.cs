@@ -27,7 +27,7 @@ namespace App.RepresentationExtensions
                 {
                     url.MakeAuthenticateLoginFormUri().MakeWebLink(IanaLinkRelation.Self),
                     url.MakeHomeTenantsUri().MakeWebLink(IanaLinkRelation.Up),
-                    url.MakeAuthenticateBearerUri().MakeWebLink(CustomLinkRelation.Submit, "Login"),
+                    url.MakeAuthenticateJsonWebTokenUri().MakeWebLink(CustomLinkRelation.Submit, "Login"),
                 },
                 Items = MakeSearchFormItems(),
             };
@@ -65,7 +65,7 @@ namespace App.RepresentationExtensions
                 {
                     url.MakeAuthenticateLoginFormUri().MakeWebLink(IanaLinkRelation.Self),
                     url.MakeHomeTenantsUri().MakeWebLink(IanaLinkRelation.Up),
-                    url.MakeAuthenticateBearerUri().MakeWebLink(CustomLinkRelation.Submit),
+                    url.MakeAuthenticateJsonWebTokenUri().MakeWebLink(CustomLinkRelation.Submit),
                 },
                 Items = MakeBearerFormItems(),
             };

@@ -1,5 +1,8 @@
 import auth0 from 'auth0-js';
 import { log } from 'logger';
+import axios from 'axios';
+import { getAuthenticationUri } from './http-interceptors';
+
 
 /**
  * Authorisation config for Auth0
@@ -18,7 +21,6 @@ import { log } from 'logger';
  *
  * @see https://auth0.com/docs/libraries/auth0js/v9
  */
-
 /**
  * Authorisation config for Auth0
  *
@@ -125,7 +127,7 @@ const KEY = {
 export default class AuthService {
 
     /**
-     * @param {AuthServiceConfiguration=} options
+     * @param {AuthServiceConfiguration|Auth0ConfigurationRepresentation=} options
      */
     constructor(options) {
 
@@ -169,7 +171,7 @@ export default class AuthService {
 
     /**
      * Login via auth0 popup window
-     * @returns {Promise<any>}
+     * @returns {Promise<AuthResult|any>}
      */
     login() {
 
@@ -245,6 +247,33 @@ export default class AuthService {
         localStorage.setItem(KEY.ACCESS_TOKEN, authResult.accessToken);
         localStorage.setItem(KEY.ID_TOKEN, authResult.idToken);
         localStorage.setItem(KEY.EXPIRES_AT, expiresAt);
+    }
+
+    /**
+     * Authorisation config for Auth0
+     *
+     * @class Auth0ConfigurationRepresentation
+     * @extends LinkedRepresentation
+     * @property {string} clientID Your Auth0 client ID.
+     * @property {string} audience The default audience to be used for requesting API access.
+     * @property {string} scope The scopes which you want to request authorization for. These must be separated by a space. You can request any of the standard OIDC scopes about users, such as profile and email, custom claims that must conform to a namespaced format, or any scopes supported by the target API (for example, read:contacts). Include offline_access to get a Refresh Token.
+     * @property {string} responseType It can be any space separated list of the values code, token, id_token. It defaults to 'token', unless a redirectUri is provided, then it defaults to 'code'.
+     * @property {string} clientID Your Auth0 client ID.
+     *
+     * @see https://auth0.com/docs/libraries/auth0js/v9
+     */
+
+    /**
+     *
+     * Uses the www-authenticate header to load up the collection and the create form
+     * ready for submission back to the api
+     *
+     * @param {AxiosError} error 401 trapped error with www-authenticate header
+     * @returns {Promise<AxiosResponse<Auth0ConfigurationRepresentation>>}
+     */
+    static loadFrom401JsonWebTokenChallenge(error) {
+        let authenticationConfigurationUri = getAuthenticationUri(error);
+        return axios.get(authenticationConfigurationUri);
     }
 
 }
