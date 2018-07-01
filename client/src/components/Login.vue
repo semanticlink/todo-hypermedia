@@ -93,9 +93,7 @@
 
                     AuthService.loadFrom401JsonWebTokenChallenge(error)
                         .then(configuration => {
-                            return new AuthService(configuration).login()
-
-
+                            return new AuthService(configuration.data).login();
                         })
                         .then(/** @type {AuthResult} */authResult => {
 

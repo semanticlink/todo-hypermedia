@@ -81,15 +81,6 @@ import { getAuthenticationUri } from './http-interceptors';
  * @property {string} tokenType
  */
 
-/**
- *
- * @type {AuthServiceConfiguration}
- */
-export const AUTH_CONFIG = {
-    clientID: '3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8',
-    domain: 'rewire-sample.au.auth0.com',
-    audience: 'todo-rest-test'
-};
 
 /**
  * Local storage keys
@@ -121,9 +112,16 @@ const KEY = {
     /**
      * Datetime when the token expire
      */
-    EXPIRES_AT: 'expires_at'
+    EXPIRES_AT: 'expires_at',
+    /**
+     * Client configuration is the serialised {@link AuthConfigurationRepresentation}
+     */
+    CLIENT_CONFIGURATION: 'clientConfig'
 };
 
+/**
+ * AuthService needs to be inst
+ */
 export default class AuthService {
 
     /**
@@ -131,32 +129,33 @@ export default class AuthService {
      */
     constructor(options) {
 
-        /**
-         * offline_access - returns refresh token
-         * @see https://auth0.com/docs/libraries/auth0js/v9#webauth-authorize-
-         * @type {string}
-         */
-        const requestedScopes = 'openid profile offline_access';
+        // update the client configuration to the last know set so that we can
+        // get a valid auth0 client (ie with state) upon return into the site
+        // and without a www-authenticate challenge
+        options = options ? options : AuthService.clientConfiguration;
+        AuthService.clientConfiguration = options;
 
+        this.init(options);
+
+        log.debug('[Auth0] loaded');
+    }
+
+    init(options) {
         /**
          *  @type {AuthServiceConfiguration}
          */
         const opts = Object.assign(
-            {},
-
             {
-                responseType: 'token id_token',
-                scope: requestedScopes,
-                leeway: 30,
+                domain: '',
+                clientID: '',
+                audience: '',
+                scope: '',
                 redirectUri: window.location.origin,
                 nonce: AuthService.makeNonce()
             },
-            AUTH_CONFIG,
             options);
 
         this.auth0 = new auth0.WebAuth(opts);
-
-        log.debug('[Auth0] loaded');
     }
 
     /**
@@ -213,6 +212,12 @@ export default class AuthService {
     }
 
     /**
+     * @class AuthError
+     * @property {string} error
+     * @property {string} errorMessage
+     */
+
+    /**
      * At this stage, call this on every entry into the application to check to
      * see if we have returned from auth0 authentication.
      *
@@ -222,18 +227,35 @@ export default class AuthService {
      *
      */
     handleAuthentication() {
-        this.auth0.parseHash((err, /** @type {AuthResult} */authResult) => {
+        this.auth0.parseHash((/** @type {AuthError}*/err, /** @type {AuthResult} */authResult) => {
 
+            //ignore the err because handleAuthentication is called on all entries to the site
             if (err) {
-                // this is the expected behaviour that the user is mostly not coming from auth0
-            } else if (!authResult) {
-                log.error('[Auth] unexpected empty result.');
-            } else {
-                log.debug('Auth token found in the hash');
+                log.warn(`[Auth] ${err.error}: ${err.errorMessage}`);
+            }
+
+            if (authResult) {
                 this.close(authResult);
             }
+
         });
 
+    }
+
+    /**
+     * Auth0 client configuration from the api
+     * @returns {Auth0ConfigurationRepresentation}
+     */
+    static get clientConfiguration() {
+        return JSON.parse(localStorage.getItem(KEY.CLIENT_CONFIGURATION));
+    }
+
+    /**
+     * Auth0 client configuration from the api
+     * @param {Auth0ConfigurationRepresentation} configuration
+     */
+    static set clientConfiguration(configuration) {
+        localStorage.setItem(KEY.CLIENT_CONFIGURATION, JSON.stringify(configuration));
     }
 
     /**
