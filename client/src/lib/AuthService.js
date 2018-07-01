@@ -265,22 +265,87 @@ export default class AuthService {
      */
     static setSession(authResult) {
         // Set the time that the access token will expire at
-        const expiresAt = JSON.stringify((authResult.expiresIn * 1000) + new Date().getTime());
+        const expiresAt = (authResult.expiresIn * 1000) + new Date().getTime();
         localStorage.setItem(KEY.ACCESS_TOKEN, authResult.accessToken);
         localStorage.setItem(KEY.ID_TOKEN, authResult.idToken);
         localStorage.setItem(KEY.EXPIRES_AT, expiresAt);
     }
 
+    /**
+     * Removes all user auth session which effectively logouts out the user
+     */
+    static clearSession() {
+        localStorage.removeItem(KEY.ACCESS_TOKEN);
+        localStorage.removeItem(KEY.ID_TOKEN);
+        localStorage.removeItem(KEY.EXPIRES_AT);
+    }
+
+    /**
+     * Checks whether the user has a current access token that is past its expiry time.
+     *
+     * This assumes that the if there is an advance datetime so too is there an access token to send.
+     * @returns {boolean}
+     */
+    static get isAuthenticated() {
+        return new Date().getTime() < AuthService.tokenExpiresAt;
+    }
+
+    /**
+     * The access token provided from auth0
+     *
+     * The Access Token is a credential that can be used by an application to access an API. It can
+     * be any type of token (such as an opaque string or a JWT) and is meant for an API. Its purpose
+     * is to inform the API that the bearer of this token has been authorized to access the API and
+     * perform specific actions (as specified by the scope that has been granted). The Access Token
+     * should be used as a Bearer credential and transmitted in an HTTP Authorization header to the API.
+     *
+     * @see https://auth0.com/docs/tokens/access-token
+     * @returns {string | null}
+     */
     static get accessToken() {
         return localStorage.getItem(KEY.ACCESS_TOKEN);
     }
 
-    static get ReissueToken() {
+    /**
+     * The token granting token provided from auth0 to be used on reissue (and other functions)
+     *
+     * A Refresh Token is a special kind of token that contains the information required to obtain a
+     * new Access Token or ID Token. Usually, a user will need a new Access Token only after the
+     * previous one expires, or when gaining access to a new resource for the first time. Refresh Tokens are
+     * subject to strict storage requirements to ensure that they are not leaked. Also, Refresh Tokens
+     * can be revoked by the Authorization Server.
+     *
+     * @see https://auth0.com/docs/tokens/refresh_token
+     * @returns {string | null}
+     */
+    static get RefreshToken() {
+        throw Error('Not implemented');
+    }
+
+
+    /**
+     * The token granting token provided from auth0 that contains the user profile
+     *
+     * The ID Token is a JSON Web Token (JWT) that contains user profile information
+     * (like the user's name, email, and so forth), represented in the form of claims.
+     * These claims are statements about the user, which can be trusted if the consumer
+     * of the token can verify its signature.
+     *
+     * @see https://auth0.com/docs/tokens/id-token
+     * @returns {string | null}
+     */
+    static get IdToken() {
         return localStorage.getItem(KEY.ID_TOKEN);
     }
 
-    static get tokenExpires() {
-        return localStorage.getItem(KEY.EXPIRES_AT);
+    /**
+     * The expiry time of the access token . It useds Javascript date getTime() method which returns the
+     * numeric value corresponding to the time for the specified date according to universal time.
+     * The value returned by the getTime method is the number of milliseconds since 1 January 1970 00:00:00.
+     * @returns {number | null}
+     */
+    static get tokenExpiresAt() {
+        return parseInt(localStorage.getItem(KEY.EXPIRES_AT));
     }
 
     /**

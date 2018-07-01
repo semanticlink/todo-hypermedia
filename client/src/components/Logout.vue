@@ -8,6 +8,8 @@
 
 <script>
     import EventBus, { loginConfirmed } from '../lib/util/EventBus';
+    import BearerTokenService from '../lib/BearerTokenService';
+    import AuthService from '../lib/AuthService';
 
     /**
      * Logout:
@@ -28,10 +30,11 @@
         },
         methods: {
             loginConfirmed() {
-                this.authenticated = this.$localStorage.get('auth');
+                this.authenticated = BearerTokenService.token || AuthService.isAuthenticated;
             },
             submit() {
-                this.$localStorage.remove('auth');
+                BearerTokenService.clear();
+                AuthService.clearSession();
                 this.authenticated = false;
             }
 

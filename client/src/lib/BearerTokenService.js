@@ -12,7 +12,6 @@ const KEY = {
 export default class BearerTokenService {
 
     /**
-     *
      * Sets access token in the locale storage
      * @param {string} token
      */
@@ -23,11 +22,17 @@ export default class BearerTokenService {
     }
 
     /**
-     *
      * Sets access token in the locale storage
      */
     static get token() {
         return localStorage.getItem(KEY.AUTH_TOKEN);
+    }
+
+    /**
+     * Removes the access in the local storage (effectively logging out)
+     */
+    static clear() {
+        localStorage.removeItem(KEY.AUTH_TOKEN);
     }
 
 }

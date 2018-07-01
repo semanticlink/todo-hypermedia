@@ -3,6 +3,7 @@
  *
  */
 import { authService } from './lib/AuthService';
+
 authService.handleAuthentication();
 
 // The Vue build version to load with the `import` command
@@ -15,7 +16,9 @@ import Offline from './components/Offline.vue';
 import Login from './components/Login.vue';
 import Resource from './components/Resource.vue';
 
-import { setBearerTokenOnHeaders } from './lib/http-interceptors';
+import { setBearerTokenOnHeaders, setJsonWebTokenOnHeaders } from './lib/http-interceptors';
+import BearerTokenService from './lib/BearerTokenService';
+import AuthService from './lib/AuthService';
 
 import BootstrapVue from 'bootstrap-vue';
 import Notifications from 'vue-notification';
@@ -38,10 +41,14 @@ Vue.config.productionTip = false;
 Vue.use(VueLocalStorage, {name: 'localStorage'});
 
 /*
- * If there is an already set authorisation bearer token then use it by default
+ * Setup authorisation headers if already existing
  */
-if (Vue.localStorage.get('auth')) {
-    setBearerTokenOnHeaders(Vue.localStorage.get('auth'));
+if (BearerTokenService.token) {
+    setBearerTokenOnHeaders(BearerTokenService.token);
+}
+
+if (AuthService.accessToken) {
+    setJsonWebTokenOnHeaders(AuthService.accessToken);
 }
 
 /**
