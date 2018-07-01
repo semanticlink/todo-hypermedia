@@ -176,13 +176,13 @@ export default class AuthService {
 
         log.debug('Opening popup login window');
 
-        this.auth0.popup.authorize({}, (err, authResult) => {
+        this.auth0.popup.authorize({}, (err, /** @type {AuthResult} */authResult) => {
             if (authResult) {
                 AuthService.setSession(authResult);
             }
 
             // KLUDGE: false negative of entering into a page when we don't want authentication
-            if (err && err.code === null){
+            if (err && err.code === null) {
                 return;
             }
 
@@ -269,6 +269,18 @@ export default class AuthService {
         localStorage.setItem(KEY.ACCESS_TOKEN, authResult.accessToken);
         localStorage.setItem(KEY.ID_TOKEN, authResult.idToken);
         localStorage.setItem(KEY.EXPIRES_AT, expiresAt);
+    }
+
+    static get accessToken() {
+        return localStorage.getItem(KEY.ACCESS_TOKEN);
+    }
+
+    static get ReissueToken() {
+        return localStorage.getItem(KEY.ID_TOKEN);
+    }
+
+    static get tokenExpires() {
+        return localStorage.getItem(KEY.EXPIRES_AT);
     }
 
     /**

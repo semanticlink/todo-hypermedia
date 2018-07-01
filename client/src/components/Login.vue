@@ -100,7 +100,6 @@
                                     log.error('Json web token not returned on the key: \'accessToken\'');
                                 }
                                 setJsonWebTokenOnHeaders(authResult.accessToken);
-                                BearerTokenService.token = authResult.accessToken;
 
                                 EventBus.$emit(loginConfirmed);
 

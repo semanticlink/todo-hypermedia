@@ -4,9 +4,9 @@
  */
 const KEY = {
     /**
-     * JWT Access token returned from the api
+     * JWT Access token returned from the api for username/password
      */
-    AUTH_TOKEN: 'auth',
+    AUTH_TOKEN: 'bearer',
 };
 
 export default class BearerTokenService {

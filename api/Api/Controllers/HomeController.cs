@@ -159,8 +159,8 @@ namespace Api.Controllers
             return new Auth0Configuration
                 {
                     // TODO: inject - these are currently the test settings
-                    Audience = "todo-rest-test",
                     ClientId = "3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8",
+                    Audience = "todo-rest-test",
                     Domain = "rewire-sample.au.auth0.com",
                 }
                 .ToRepresentation(Url);

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using Infrastructure.mySql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +25,7 @@ namespace Api.Web
         ///    We are not calling JWT across the wire as to avoid confusion with Java Web Tokens
         /// </remarks>
         public const string Auth0AuthenticationSchemeName = "JSONWebToken";
-        
+
         /// <summary>
         /// <para>
         ///    Add Identity for authenticn. Note as of Auth 2.0, all types needed are regsitered
@@ -46,6 +49,8 @@ namespace Api.Web
             // see https://github.com/aspnet/Security/issues/1043
             // see https://dev.to/coolgoose/setting-up-jwt-and-identity-authorizationauthentication-in-asp-net-core-4l45
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+
+            var domain = $"https://{configuration["Auth0:Domain"]}/";
 
             services
                 .AddAuthentication(
@@ -74,21 +79,21 @@ namespace Api.Web
                 )
                 .AddJwtBearer(Auth0AuthenticationSchemeName, options =>
                 {
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
-                    options.IncludeErrorDetails = true;
+                    // see https://auth0.com/blog/securing-asp-dot-net-core-2-applications-with-jwts/
+                    //
+                    // As requested when creating it, our API will use RS256 as the algorithm for signing tokens.
+                    // Since RS256 uses a private/public key pair, it verifies the tokens against the
+                    // public key for our Auth0 account. The ASP.NET Core JWT middleware will handle downloading
+                    // the JSON Web Key Set (JWKS) file containing the public key for us, and will use that
+                    // to verify the access_token signature.
+                    options.Authority = domain;
+                    options.Audience = configuration["Auth0:Audience"];
+
                     // TODO: inject api hosting address and uri construction
                     options.Challenge =
                         $"{Auth0AuthenticationSchemeName} realm=\"api\", uri=http://localhost:5000/authenticate/auth0";
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidIssuer = configuration["JwtIssuer"],
-                        ValidAudience = configuration["JwtIssuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"])),
-                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
-                    };
                 })
-                .AddJwtBearer(options =>
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
@@ -105,6 +110,18 @@ namespace Api.Web
                     };
                 })
                 ;
+
+            // see https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
+            // allows profiles on [Authorize]
+            services.AddAuthorization(options =>
+            {
+                // eg [Authorize("profile")]
+                options.AddPolicy("profile", policy =>
+                    policy.Requirements.Add(new HasScopeRequirement("profile", domain)));
+            });
+
+            // register the scope authorization handler
+            services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 
             return services;
         }
@@ -162,6 +179,78 @@ namespace Api.Web
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>
+    ///    code from https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
+    /// </remarks>
+    public class HasScopeRequirement : IAuthorizationRequirement
+    {
+        public string Issuer { get; }
+        public string Scope { get; }
+
+        public HasScopeRequirement(string scope, string issuer)
+        {
+            Scope = scope ?? throw new ArgumentNullException(nameof(scope));
+            Issuer = issuer ?? throw new ArgumentNullException(nameof(issuer));
+        }
+    }
+
+    /// <summary>    ///     Looks inside the scope of the JSON Web Token Authorization Header
+    /// <example>
+    ///
+    ///     Payload (data) of the JWT:
+    ///     
+    ///     <code>
+    ///     {
+    ///         "iss": "https://rewire-sample.au.auth0.com/",
+    ///         "sub": "auth0|5b32b696a8c12d3b9a32b138",
+    ///         "aud": [
+    ///             "todo-rest-test",
+    ///             "https://rewire-sample.au.auth0.com/userinfo"
+    ///         ],
+    ///         "iat": 1530411996,
+    ///         "exp": 1530419196,
+    ///         "azp": "3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8",
+    ///         "scope": "openid profile read:todo"
+    ///     }
+    ///     </code>
+    /// </example>
+    /// </summary>
+    /// <remarks>
+    ///    code from https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
+    /// </remarks>
+    public class HasScopeHandler : AuthorizationHandler<HasScopeRequirement>
+    {
+        private const string Scope = "scope";
+        
+        protected override Task HandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            HasScopeRequirement requirement)
+        {
+            // If user does not have the scope claim, get out of here
+            if (!context.User.HasClaim(c => c.Type == Scope && c.Issuer == requirement.Issuer))
+            {
+                return Task.CompletedTask;
+            }
+
+            // Split the scopes string into an array
+            var scopes = context.User
+                .FindFirst(c => c.Type == Scope && c.Issuer == requirement.Issuer)
+                .Value
+                .Split(' ');
+
+            // Succeed if the scope array contains the required scope
+            if (scopes.Any(s => s == requirement.Scope))
+            {
+                context.Succeed(requirement);
+            }
+
+            return Task.CompletedTask;
         }
     }
 }
