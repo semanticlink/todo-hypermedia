@@ -6,8 +6,6 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
-using Microsoft.AspNetCore.Identity;
-using Remotion.Linq.Parsing.Structure.IntermediateModel;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
@@ -60,7 +58,10 @@ namespace Infrastructure.NoSQL
 
         public async Task<IEnumerable<string>> GetUsersByTenant(string id)
         {
-            return (await Get(id)).User;
+            var usersByTenant = (await  Get(id)).User;
+            return !usersByTenant.IsNullOrEmpty()
+                ? usersByTenant
+                : new List<string>();
         }
 
         public async Task AddUser(string id, string userId)

@@ -32,6 +32,11 @@
         /// </summary>
         public const string Tenants = "tenants";
         
+        /// <summary>
+        ///     Users collection on a tenant
+        /// </summary>
+        public const string Users = "users";
+        
 
         ///************************************
         ///

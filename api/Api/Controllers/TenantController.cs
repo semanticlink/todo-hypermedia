@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Api.Web;
 using App.RepresentationExtensions;
 using App.UriFactory;
@@ -26,9 +27,17 @@ namespace Api.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        ///   The basic information about a tenant. 
+        /// </summary>
+        /// <remarks>
+        ///    There is a small level of disclosure here because we want to be able to allow anonymous users
+        ///     to find this tenant and then be able to register against it.
+        /// </remarks>
         [HttpGet("{id}", Name = TenantUriFactory.SelfRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [AllowAnonymous]
         public async Task<TenantRepresentation> Get(string id)
         {
             return (await _tenantStore
@@ -44,10 +53,12 @@ namespace Api.Controllers
         [HttpGet("{id}/user/", Name = TenantUriFactory.TenantUsersRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [AllowAnonymous]
         public async Task<FeedRepresentation> GetUsers(string id)
         {
-            return (await _tenantStore
-                    .GetUsersByTenant(id))
+            return (User.Identity.IsAuthenticated
+                    ? await _tenantStore.GetUsersByTenant(id)
+                    : new List<string>())
                 .ToRepresentation(id, Url);
         }
 

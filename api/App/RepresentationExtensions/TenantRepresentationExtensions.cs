@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using App.UriFactory;
+using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace App.RepresentationExtensions
                     // url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
                     
                     // users over the entire tenant
+                    tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users)
                 },
 
                 Code = tenant.Code,
