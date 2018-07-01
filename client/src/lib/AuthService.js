@@ -170,26 +170,26 @@ export default class AuthService {
 
     /**
      * Login via auth0 popup window
-     * @returns {Promise<AuthResult|any>}
+     * @param {Function} cb
      */
-    login() {
+    login(cb) {
 
         log.debug('Opening popup login window');
 
-        return new Promise((response, reject) => {
-            this.auth0.popup.authorize({}, (err, authResult) => {
-                if (!err) {
-                    AuthService.setSession(authResult);
-                    return response(authResult);
-                } else {
-                    log.error('[Auth] ', err);
-                    return reject(err);
-                }
+        this.auth0.popup.authorize({}, (err, authResult) => {
+            if (authResult) {
+                AuthService.setSession(authResult);
+            }
 
-            });
+            // KLUDGE: false negative of entering into a page when we don't want authentication
+            if (err && err.code === null){
+                return;
+            }
+
+            cb(err, authResult);
         });
-
     }
+
 
     /**
      * Auto closes the popup window upon return from auth0

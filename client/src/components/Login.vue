@@ -27,7 +27,7 @@
         BEARER, setJsonWebTokenOnHeaders
     } from '../lib/http-interceptors';
     import Form from './Form.vue';
-    import AuthService, { authService } from "../lib/AuthService";
+    import AuthService from "../lib/AuthService";
     import FormService from "../lib/FormService";
     import BearerTokenService from "../lib/BearerTokenService";
 
@@ -93,21 +93,20 @@
 
                     AuthService.loadFrom401JsonWebTokenChallenge(error)
                         .then(configuration => {
-                            return new AuthService(configuration.data).login();
-                        })
-                        .then(/** @type {AuthResult} */authResult => {
+                            let authService = new AuthService(configuration.data);
+                            authService.login((err, authResult) => {
 
-                            if (!authResult || !authResult.accessToken) {
-                                log.error('Json web token not returned on the key: \'accessToken\'');
-                            }
-                            setJsonWebTokenOnHeaders(authResult.accessToken);
+                                if (!authResult || !authResult.accessToken) {
+                                    log.error('Json web token not returned on the key: \'accessToken\'');
+                                }
+                                setJsonWebTokenOnHeaders(authResult.accessToken);
+                                BearerTokenService.token = authResult.accessToken;
 
-                            BearerTokenService.setToken(authResult.accessToken);
+                                EventBus.$emit(loginConfirmed);
 
-                            EventBus.$emit(loginConfirmed);
-
-                            isPerformingAuthentication = false;
-                            this.authenticated = true;
+                                isPerformingAuthentication = false;
+                                this.authenticated = true;
+                            })
 
                         })
                         .catch(this.onFailure);
@@ -163,9 +162,9 @@
                 if (!response.data.token) {
                     log.error('Bearer token not returned on the key: \'token\'');
                 }
-                setBearerTokenOnHeaders(response.data.token);
 
-                BearerTokenService.setToken(response.data.token);
+                setBearerTokenOnHeaders(response.data.token);
+                BearerTokenService.token = response.data.token;
 
                 EventBus.$emit(loginConfirmed);
 

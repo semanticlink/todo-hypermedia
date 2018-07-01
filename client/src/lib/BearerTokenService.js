@@ -16,18 +16,18 @@ export default class BearerTokenService {
      * Sets access token in the locale storage
      * @param {string} token
      */
-    static setToken(token) {
+    static set token(token) {
         // save bearer token so that when users do a full refresh
         // we can save the token across a refresh
-        localStorage.set(KEY.AUTH_TOKEN, token);
+        localStorage.setItem(KEY.AUTH_TOKEN, token);
     }
 
     /**
      *
      * Sets access token in the locale storage
      */
-    static getToken() {
-        localStorage.get(KEY.AUTH_TOKEN);
+    static get token() {
+        return localStorage.getItem(KEY.AUTH_TOKEN);
     }
 
 }
