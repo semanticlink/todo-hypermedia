@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using App.UriFactory;
-using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit.LinkRelations;
 using Toolkit.Representation.LinkedRepresentation;
@@ -25,8 +23,10 @@ namespace App.RepresentationExtensions
                     // logical parent of tenant is root
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // todos
-                    url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
+                    // todos over the entire tenant
+                    // url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
+                    
+                    // users over the entire tenant
                 },
 
                 Code = tenant.Code,

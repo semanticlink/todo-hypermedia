@@ -3,7 +3,6 @@ using Api.Web;
 using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
-using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
@@ -15,6 +14,7 @@ using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
 {
+    /// <see cref="UserController.GetUserTodos"/> for the todo collection as they are parented on a user
     [Route("todo")]
     [Authorize]
     public class TodoController : Controller

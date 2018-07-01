@@ -9,6 +9,7 @@ using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,7 @@ using Toolkit.Representation.LinkedRepresentation;
 namespace Api.Controllers
 {
     [Route("")]
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly Version _version;
@@ -92,6 +94,7 @@ namespace Api.Controllers
         [HttpGet("tenant/", Name = HomeUriFactory.TenantsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [Authorize]
         public async Task<FeedRepresentation> GetTenants([FromQuery(Name = "q")] string search = null)
         {
             return (!string.IsNullOrWhiteSpace(search)
@@ -101,7 +104,7 @@ namespace Api.Controllers
                     //
                     ? (await _tenantStore.GetByCode(search)).ToEnumerable()
                     //
-                    : User != null
+                    : User != null && User.Identity.IsAuthenticated
                         // If the user is authenticated, then return all tenants that the user has access to.
                         ? await _tenantStore.GetTenantsForUser(User.GetId())
 
