@@ -156,13 +156,9 @@ namespace Api.Controllers
         [HttpGet("authenticate/auth0", Name = HomeUriFactory.AuthenticateJsonWebTokenRouteName)]
         public Auth0Representation GetBearerAuthenticateCollection()
         {
-            return new Auth0Configuration
-                {
-                    // TODO: inject - these are currently the test settings
-                    ClientId = "3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8",
-                    Audience = "todo-rest-test",
-                    Domain = "rewire-sample.au.auth0.com",
-                }
+            return _configuration
+                .GetSection(Auth0Configuration.SectionName)
+                .Get<Auth0Configuration>()
                 .ToRepresentation(Url);
         }
 

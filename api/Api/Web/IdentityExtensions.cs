@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Models;
 using Infrastructure.mySql;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -51,8 +52,10 @@ namespace Api.Web
             // see https://dev.to/coolgoose/setting-up-jwt-and-identity-authorizationauthentication-in-asp-net-core-4l45
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
 
-            //  TODO: wrap with fault tolerance
-            var domain = $"https://{configuration["Auth0:Domain"]}/";
+
+            var auth0 = configuration.GetSection(Auth0Configuration.SectionName).Get<Auth0Configuration>();
+
+            var domain = $"https://{auth0.Domain}/";
 
             services
                 .AddAuthentication(
@@ -62,7 +65,7 @@ namespace Api.Web
                          * Authenticate using AuthenticationOptions.DefaultAuthenticateScheme to set httpContext.User
                          */
                         AuthenticationOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-
+                        ;
                         /**
                          * The default scheme to use with [Authorize] attributed methods.
                          *
@@ -89,8 +92,7 @@ namespace Api.Web
                     // the JSON Web Key Set (JWKS) file containing the public key for us, and will use that
                     // to verify the access_token signature.
                     options.Authority = domain;
-                    //  TODO: wrap with fault tolerance
-                    options.Audience = configuration["Auth0:Audience"];
+                    options.Audience = auth0.Audience;
 
 
                     // see https://www.jerriepelser.com/blog/accessing-tokens-aspnet-core-2/
@@ -174,7 +176,7 @@ namespace Api.Web
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"])),
                         ClockSkew = TimeSpan.Zero // remove delay of token when expire
                     };
-                }) ;
+                });
 /*
 
             // see https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
