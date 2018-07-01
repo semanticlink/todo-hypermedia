@@ -51,6 +51,7 @@ namespace Api.Web
             // see https://dev.to/coolgoose/setting-up-jwt-and-identity-authorizationauthentication-in-asp-net-core-4l45
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
 
+            //  TODO: wrap with fault tolerance
             var domain = $"https://{configuration["Auth0:Domain"]}/";
 
             services
@@ -88,6 +89,7 @@ namespace Api.Web
                     // the JSON Web Key Set (JWKS) file containing the public key for us, and will use that
                     // to verify the access_token signature.
                     options.Authority = domain;
+                    //  TODO: wrap with fault tolerance
                     options.Audience = configuration["Auth0:Audience"];
 
 
@@ -172,8 +174,7 @@ namespace Api.Web
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"])),
                         ClockSkew = TimeSpan.Zero // remove delay of token when expire
                     };
-                })
-                ;
+                }) ;
 /*
 
             // see https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
