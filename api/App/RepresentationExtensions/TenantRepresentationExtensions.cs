@@ -28,7 +28,7 @@ namespace App.RepresentationExtensions
                     // url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
                     
                     // users over the entire tenant
-                    tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users)
+                    tenant.Id.MakeRegisterUserCreateFormUri(url).MakeWebLink(CustomLinkRelation.Users)
                 },
 
                 Code = tenant.Code,
@@ -64,6 +64,7 @@ namespace App.RepresentationExtensions
                 {
                     tenantId.MakeTenantUsersUri(url).MakeWebLink(IanaLinkRelation.Self),
                     tenantId.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    tenantId.MakeRegisterUserCreateFormUri(url).MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = userIds
                     .Select(id => ToFeedRepresentationItem(id, url))

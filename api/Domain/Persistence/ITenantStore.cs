@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Persistence
 {

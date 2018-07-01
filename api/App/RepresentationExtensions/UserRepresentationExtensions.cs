@@ -76,6 +76,47 @@ namespace App.RepresentationExtensions
             };
         }
 
+
+        /// <summary>
+        ///     Get the create form to describe to clients of the API how to
+        ///     modify instances on the resource
+        /// </summary>
+        /// <seealso cref = "UserCreateDataRepresentation" />
+        public static CreateFormRepresentation ToRegisterUserCreateFormRepresentation(this string tenantId, IUrlHelper url)
+        {
+            return new CreateFormRepresentation
+            {
+                Links = new[]
+                {
+                    // this collection
+                    tenantId.MakeRegisterUserCreateFormUri(url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // Create a new organisation on the collection
+                    tenantId.MakeTenantUsersUri(url).MakeWebLink(IanaLinkRelation.Up),
+                },
+                Items = MakeRegisterUserCreateFormItems()
+            };
+        }
+
+        private static FormItemRepresentation[] MakeRegisterUserCreateFormItems()
+        {
+            return new FormItemRepresentation[]
+            {
+                new EmailInputFormItemRepresentation
+                {
+                    Name = "email",
+                    Description = "The email address of the user",
+                    Required = false
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "name",
+                    Description = "The name of the user to be shown on the screen",
+                    Required = false
+                },
+            };
+        }
+
         public static UserCreateData FromRepresentation(this UserCreateDataRepresentation user, IUrlHelper url)
         {
             return new UserCreateData

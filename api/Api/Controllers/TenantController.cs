@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Web;
+using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Persistence;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
+using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
@@ -42,6 +44,7 @@ namespace Api.Controllers
         {
             return (await _tenantStore
                     .Get(id))
+                .ThrowObjectNotFoundExceptionIfNull("Invalid tenant")
                 .ToRepresentation(Url);
         }
 
@@ -65,27 +68,37 @@ namespace Api.Controllers
                 .ToRepresentation(id, Url);
         }
 
+        [HttpGet("{id}/form/register/user", Name=UserUriFactory.RegisterCreateFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AllowAnonymous]
+        public async Task<CreateFormRepresentation> RegisterUserCreateForm(string id)
+        {
+            return (await _tenantStore.Get(id))
+                .ThrowObjectNotFoundExceptionIfNull("Invalid tenant")
+                .Id
+                .ToRegisterUserCreateFormRepresentation(Url);
+        }
+
         /// <summary>
-        ///     Create a user on a tenant. Creating a user requires that it is registered in the identity provider. 
+        ///     Create a user on a tenant. Creating a user requires that the incoming request is authenticated
+        ///     because we use external id as a foreign key on the user.  
         /// </summary>
         /// <remarks>
-        ///    A user cannot be created and logged in in the same transaction.
+        ///    A user is already authenticated and thus merely created 
         /// </remarks>
         [HttpPost("{id}/user")]
         [AllowAnonymous] // this should be restricture to role/claim
-        public async Task<object> CreateUser([FromBody] UserCreateDataRepresentation model, string id)
+        public async Task<object> RegisterUser([FromBody] UserCreateDataRepresentation model, string id)
         {
+
+            (await _tenantStore.Get(id))
+                .ThrowObjectNotFoundExceptionIfNull("Invalid tenant");
+            
             var user = new IdentityUser
             {
                 UserName = model.Email.ThrowInvalidDataExceptionIfNullOrWhiteSpace("No email provided"),
                 Email = model.Email
             };
-
-            var result = _userManager.CreateAsync(user, model.Password);
-            (await result)
-                .Succeeded
-                .ThrowInvalidDataExceptionIf(x => x.Equals(false) && !result.ToString().Contains("DuplicateUserName"),
-                    result.ToString());
 
             await _tenantStore.AddUser(id, user.Id);
 
