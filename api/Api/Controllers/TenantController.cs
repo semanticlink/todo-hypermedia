@@ -48,8 +48,11 @@ namespace Api.Controllers
         /// <summary>
         ///     User collection on a tenant
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <remarks>
+        ///    Authenticated users will get back a list of users. TOOD: role-based access. Anonymous
+        ///    users get back an empty collection. This allows us to parent the creation of new users off
+        ///    the tenant and allow users who are unknown but authenticated to register themselves.
+        /// </remarks>
         [HttpGet("{id}/user/", Name = TenantUriFactory.TenantUsersRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
