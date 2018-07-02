@@ -51,34 +51,33 @@ namespace Api
 
             logger.LogInformation("Seeding DynamoDb data");
 
+            //////////////////////////
+            // Seed a tenant
+            // =============
+            //
             var tenantStore = services.GetRequiredService<ITenantStore>();
-
-            var tenantId = tenantStore.Create(new TenantCreateData
-                {
-                    Code = "rewire.example.nz",
-                    Name = "Rewire NZ",
-                    Description = "A sample tenant (company/organisation)"
-                })
-                .ConfigureAwait(false)
-                .GetAwaiter()
-                .GetResult();
-
-            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-
-            var user = new IdentityUser {UserName = "test@rewire.nz", Email = "test@rewire.nz"};
-
-            if (!userManager.Users.Any(u => u.UserName.Equals(user.UserName)))
+            var tenantId = await tenantStore.Create(new TenantCreateData
             {
-                var result = await userManager.CreateAsync(user, "Test123!");
-                if (result.Succeeded)
-                {
-                    await tenantStore.AddUser(tenantId, user.Id);
-                }
-            }
+                Code = "rewire.example.nz",
+                Name = "Rewire NZ",
+                Description = "A sample tenant (company/organisation)"
+            });
 
-            var tagStore = services.GetRequiredService<ITagStore>();
+            //////////////////////////
+            // Seed a user
+            // =============
+            //
+            // Assume a known Auth0 (test) user, register a user and then link to tenant
+            var userId = await services.GetRequiredService<IUserStore>()
+                .Create("auth0|34545", "test@rewire.nz", "test");
+            await tenantStore.AddUser(tenantId, userId);
 
+            //////////////////////////
+            // Seed global tags
+            // =============
+            //
             // create some global tags
+            var tagStore = services.GetRequiredService<ITagStore>();
 
             var tagIds = (await Task
                     .WhenAll(new[] {"Work", "Personal", "Grocery List"}
@@ -86,6 +85,10 @@ namespace Api
                 .Where(result => result != null)
                 .ToList();
 
+            //////////////////////////
+            // Seed some todos
+            // =============
+            //
             var todoStore = services.GetRequiredService<ITodoStore>();
 
             await todoStore.Create(new TodoCreateData {Name = "One Todo"});
