@@ -8,7 +8,7 @@ namespace Infrastructure.NoSQL
 {
     public static class DynamoUtils
     {
-        public static async Task WaitForActiveTable(this IAmazonDynamoDB client, string userTableName)
+        public static async Task WaitForActiveTable(this string userTableName, IAmazonDynamoDB client)
         {
             bool active;
             do
@@ -57,18 +57,18 @@ namespace Infrastructure.NoSQL
                     WriteCapacityUnits = writeCapacityUnits
                 }
             );
-            Console.WriteLine("Sending request to build table...");
+            Console.WriteLine($"Building table: {TableName}");
             try
             {
                 var result = await client.CreateTableAsync(request);
-                Console.WriteLine("Table created.");
+                Console.WriteLine($"Table created: {TableName}");
             }
             catch (ResourceInUseException)
             {
                 // Table already created, just describe it
-                Console.WriteLine("Table already exists. Fetching description...");
+                Console.WriteLine($"Table already exists: {TableName}");
                 var result = await client.DescribeTableAsync(TableName);
-                Console.WriteLine($"Using table: {result.Table.TableName} ");
+                Console.WriteLine($"Using: {result.Table.TableName} ");
             }
 
             return client;

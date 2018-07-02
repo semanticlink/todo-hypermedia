@@ -227,7 +227,6 @@ namespace Api
                 .AllTables
                 .ForEach(table => table.CreateTable(client).ConfigureAwait(false));
 
-
             return app;
         }
     }

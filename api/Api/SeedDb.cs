@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Amazon.DynamoDBv2;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation.Enum;
+using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Toolkit;
 
 namespace Api
 {
@@ -35,7 +34,7 @@ namespace Api
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while migrating the database.");
+                    logger.LogError(ex, "An error occurred while seeding the database.");
                 }
             }
 
@@ -50,6 +49,12 @@ namespace Api
             var logger = services.GetRequiredService<ILogger<Program>>();
 
             logger.LogInformation("Seeding DynamoDb data");
+            
+            var client = services.GetRequiredService<IAmazonDynamoDB>();
+
+            TableNameConstants
+                .AllTables
+                .ForEach(table => table.WaitForActiveTable(client).ConfigureAwait(false));
 
             //////////////////////////
             // Seed a tenant
@@ -62,6 +67,7 @@ namespace Api
                 Name = "Rewire NZ",
                 Description = "A sample tenant (company/organisation)"
             });
+            logger.LogInformation($"[Seed] tenant '{tenantId}'");
 
             //////////////////////////
             // Seed a user
@@ -77,8 +83,10 @@ namespace Api
             var userId = await services
                 .GetRequiredService<IUserStore>()
                 .Create(knownAuth0Id, "test@rewire.nz", "test");
-            
+            logger.LogInformation($"[Seed] user '{userId}'");
+          
             await tenantStore.AddUser(tenantId, userId);
+            logger.LogInformation($"[Seed] registered user against tenant '{tenantId}'");
 
             //////////////////////////
             // Seed global tags
@@ -93,6 +101,7 @@ namespace Api
                         .Select(tag => tagStore.Create(new TagCreateData {Name = tag}))))
                 .Where(result => result != null)
                 .ToList();
+            logger.LogInformation($"[Seed] tags");
 
             //////////////////////////
             // Seed some todos
@@ -112,6 +121,8 @@ namespace Api
                 Name = "Three Todo (tagged)",
                 Tags = tagIds
             });
+            logger.LogInformation($"[Seed] todos");
+
 
             return services;
         }
