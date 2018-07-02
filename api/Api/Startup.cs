@@ -61,7 +61,8 @@ namespace Api
                 {
                     options.DefaultPolicy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes(/*JwtBearerDefaults.AuthenticationScheme, */App.AuthenticatorDefaults.ExternalAuthenticationSchemeName)
+                        .AddAuthenticationSchemes( /*JwtBearerDefaults.AuthenticationScheme, */
+                            App.AuthenticatorDefaults.ExternalAuthenticationSchemeName)
                         .Build();
                 })
                 .AddMvcCore(options =>
@@ -222,12 +223,8 @@ namespace Api
         {
             var client = app.ApplicationServices.GetService<IAmazonDynamoDB>();
 
-            new[]
-                {
-                    TableNameConstants.Todo,
-                    TableNameConstants.Tenant,
-                    TableNameConstants.Tag,
-                }
+            TableNameConstants
+                .AllTables
                 .ForEach(table => table.CreateTable(client).ConfigureAwait(false));
 
 

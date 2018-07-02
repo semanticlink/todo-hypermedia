@@ -30,11 +30,10 @@ namespace Infrastructure.NoSQL
                 return tag.Id;
             }
 
-            var id = Guid.NewGuid().ToString();
             var now = DateTime.UtcNow;
             var create = new Tag
             {
-                Id = id,
+                Id = IdGenerator.New(),
                 Name = createData.Name,
                 // initialise the counter (note: adding a tag to the global set is not the same adding to a todo)
                 CreatedAt = now,
@@ -42,7 +41,7 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(create);
 
-            return id;
+            return create.Id;
         }
 
 

@@ -23,12 +23,11 @@ namespace Infrastructure.NoSQL
         {
             tenant.Code.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Code cannot be empty");
 
-            var id = Guid.NewGuid().ToString();
-
             var now = DateTime.UtcNow;
+            
             var create = new Tenant
             {
-                Id = id,
+                Id = IdGenerator.New(),
                 Name = tenant.Name,
                 Code = tenant.Code,
                 Description = tenant.Description,
@@ -38,7 +37,7 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(create);
 
-            return id;
+            return create.Id;
         }
 
         public async Task<Tenant> Get(string id)

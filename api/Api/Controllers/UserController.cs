@@ -52,8 +52,14 @@ namespace Api.Controllers
         public async Task<UserRepresentation> Get(string id)
         {
             var domain = _configuration.GetSection(Auth0Configuration.SectionName).Get<Auth0Configuration>().Domain;
+            
             return (await _userStore.Get(id))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
+/*
+ TODO: authorisation-write this check that the authenticated user matches the requested user
+                .ThrowAccessDeniedExceptionIf(user =>
+                    user.ExternalIds.Contains(User.GetExternalId()), $"User '{id}' does not match")
+*/
                 .ToRepresentation(Url);
         }
 

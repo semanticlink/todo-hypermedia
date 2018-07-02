@@ -68,8 +68,16 @@ namespace Api
             // =============
             //
             // Assume a known Auth0 (test) user, register a user and then link to tenant
-            var userId = await services.GetRequiredService<IUserStore>()
-                .Create("auth0|34545", "test@rewire.nz", "test");
+            //
+
+            // KLUDGE: taken from a precreated user and then decoded JWT through https://jwt.io
+            // grab it from the Authorization header in a request
+            var knownAuth0Id = "auth0|5b32b696a8c12d3b9a32b138";
+
+            var userId = await services
+                .GetRequiredService<IUserStore>()
+                .Create(knownAuth0Id, "test@rewire.nz", "test");
+            
             await tenantStore.AddUser(tenantId, userId);
 
             //////////////////////////
@@ -77,6 +85,7 @@ namespace Api
             // =============
             //
             // create some global tags
+            //
             var tagStore = services.GetRequiredService<ITagStore>();
 
             var tagIds = (await Task

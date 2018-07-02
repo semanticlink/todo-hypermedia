@@ -21,8 +21,7 @@ namespace Infrastructure.NoSQL
 
         public async Task<string> Create(TodoCreateData todo)
         {
-            var id = Guid.NewGuid().ToString();
-
+            var id = IdGenerator.New();
             var create = new Todo
             {
                 Id = id,

@@ -23,13 +23,12 @@ namespace Infrastructure.NoSQL
             (await GetByExternalId(externalId))
                 .ThrowInvalidDataExceptionIfNotNull("User already created");
 
-            var id = Guid.NewGuid().ToString();
-
+            // KLUDGE: both need to be injected
             var now = DateTime.UtcNow;
 
             var create = new User
             {
-                Id = id,
+                Id = IdGenerator.New(),
                 ExternalIds = new List<string> {externalId},
                 Email = email,
                 Name = name,
@@ -39,7 +38,7 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(create);
 
-            return id;
+            return create.Id;
         }
 
         public async Task<User> Get(string id)

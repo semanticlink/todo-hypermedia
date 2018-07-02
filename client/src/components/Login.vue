@@ -4,15 +4,6 @@
             <!-- TODO: styling on a login -->
             <div> {{ error }}</div>
 
-            <Form class="login"
-                  :representation="representation"
-                  :formRepresentation="formRepresentation"
-                  :on-submit="onSubmit"
-                  :on-success="onSuccess"
-                  :on-failure="onFailure"
-                  no-cancel
-                  v-if="!authenticated"/>
-
         </div>
     </transition>
 </template>
@@ -21,15 +12,14 @@
     import EventBus, { loginConfirmed, loginRequired } from '../lib/util/EventBus';
     import { log } from 'logger';
     import {
-        setBearerTokenOnHeaders,
         getAuthenticationScheme,
         JWT,
-        BEARER, setJsonWebTokenOnHeaders, getAuthenticationRealm
+        setJsonWebTokenOnHeaders,
+        getAuthenticationRealm,
+        AUTH0_REALM
     } from '../lib/http-interceptors';
     import Form from './Form.vue';
     import AuthService from "../lib/AuthService";
-    import FormService from "../lib/FormService";
-    import BearerTokenService from "../lib/BearerTokenService";
 
     /**
      * This is a simple boolean 'lock'. When the event is triggered we don't
@@ -53,15 +43,6 @@
                 authenticated: true,
                 /**
                  * @type {CollectionRepresentation}
-                 */
-                representation: {},
-                /**
-                 * @type {FormRepresentation}
-                 */
-                formRepresentation: {},
-                /**
-                 * Error message to the user
-                 * @type {string}
                  */
                 error: ''
             };
@@ -89,7 +70,6 @@
 
                     // JSONWebToken authentication
 
-                    console.log("xxxxx")
                     /**
                      *  Use our jwt authentication scheme to get a token from external provider (Auth0)
                      */
@@ -103,61 +83,34 @@
 
                             let authenticationRealm = getAuthenticationRealm(error);
 
-                            if (authenticationRealm === cfg.realm) {
+                            if (authenticationRealm === cfg.realm && authenticationRealm === AUTH0_REALM) {
 
                                 AuthService
                                     .makeFromRepresentation(cfg)
                                     .login((err, authResult) => {
 
-                                        if (!authResult || !authResult.accessToken) {
-                                            log.error('Json web token not returned on the key: \'accessToken\'');
+                                        if (!err) {
+
+                                            if (!authResult || !authResult.accessToken) {
+                                                log.error('Json web token not returned on the key: \'accessToken\'');
+                                            } else {
+                                                // note: can't get this working as a promise so needs to be a callback
+                                                this.onSuccess(authResult.accessToken);
+                                            }
+
+                                        } else {
+                                            this.onFailure(err);
                                         }
-                                        setJsonWebTokenOnHeaders(authResult.accessToken);
 
-                                        EventBus.$emit(loginConfirmed);
-
-                                        isPerformingAuthentication = false;
-                                        this.authenticated = true;
                                     })
 
                             } else {
-                                return Promise.reject(`[Authenticator] Realm unknown: '${authenticationRealm}'`);
+                                return Promise.reject(`[Authenticator] Realm mismatch: '${AUTH0_REALM}'`);
                             }
 
                         })
                         .catch(this.onFailure);
 
-                } else if (authenticationScheme === BEARER) {
-
-                    // Bearer authentication
-
-                    /**
-                     * Contains our 401 Error
-                     *
-                     * Very simple (and awful) implementation.
-                     *
-                     * The www-authenticate header has the required information:
-                     *
-                     *   - uri of api
-                     *   - link relation to post to
-                     *
-                     *      1. GET the resource at the authenticate uri
-                     *      2. GET the resource with link rel
-                     *      3. GET the 'create-form' for the login
-                     *      3a. Display the login form in the GUI from these attributes and update/enter
-                     *      4. POST the login form back on the uri of referring collection
-                     *
-                     */
-                    FormService.loadFormFrom401BearerChallenge(error)
-                        .then(([form, collection]) => {
-                            // these get bound to the form control that displays the login
-                            this.formRepresentation = form;
-                            this.representation = collection;
-                            // only turn on the lock once we have the login form ready
-                            isPerformingAuthentication = true;
-                        })
-                        // note in this work flow onSuccess is called by the form
-                        .catch(this.onFailure);
                 } else {
 
                     log.error(`[Authenticator] www-authenticate type unknown: '${authenticationScheme}'`);
@@ -169,18 +122,11 @@
                 this.error = '';
             },
             /**
-             * Assumes that the payment of the resource has token field available.
-             *
-             * @param {AxiosResponse} response
+             * @param {string} accessToken
              */
-            onSuccess(response) {
+            onSuccess(accessToken) {
 
-                if (!response.data.token) {
-                    log.error('Bearer token not returned on the key: \'token\'');
-                }
-
-                setBearerTokenOnHeaders(response.data.token);
-                BearerTokenService.token = response.data.token;
+                setJsonWebTokenOnHeaders(accessToken);
 
                 EventBus.$emit(loginConfirmed);
 
