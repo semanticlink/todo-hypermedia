@@ -22,15 +22,14 @@ namespace Api.Web
         /// <remarks>
         ///    We are not calling JWT across the wire as to avoid confusion with Java Web Tokens
         /// </remarks>
-        public const string Auth0AuthenticationSchemeName = "JSONWebToken";
+        public const string Auth0AuthenticationSchemeName = "jwt";
 
         /// <summary>
         /// <para>
         ///    Add Identity for authenticn. Note as of Auth 2.0, all types needed are regsitered
         ///    under AddAuthentication.
         ///</para>
-        /// <para>
-        ///  At this stage:
+        /// <para>        ///  At this stage:
         ///    - persisted in MySql (via entity framework)
         ///    - use JWT (bearer) tokens
         ///    Currently, it is authenticated or not (no roles or claims)
@@ -107,7 +106,7 @@ namespace Api.Web
 
                     // TODO: inject api hosting address and uri construction
                     options.Challenge =
-                        $"{Auth0AuthenticationSchemeName} realm=\"api\", uri=http://localhost:5000/authenticate/auth0";
+                        $"{Auth0AuthenticationSchemeName} realm=\"api-auth0\", uri=http://localhost:5000/authenticate/auth0";
 
                     options.Events = new JwtBearerEvents
                     {

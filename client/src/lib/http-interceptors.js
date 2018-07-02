@@ -174,7 +174,7 @@ export const BEARER = 'Bearer';
  * @example www-authenticate: JSONWebToken realm="api", uri=http://example.com/authenticate/jwt
  * @type {string}
  */
-export const JWT = 'JSONWebToken';
+export const JWT = 'jwt';
 
 /**
  * Name of the realm when matching against our own api provider
@@ -188,7 +188,7 @@ export const API_REALM = 'api';
  * @example www-authenticate: Bearer realm="auth0", rel=authenticate, uri=http://example.com
  * @type {string}
  */
-export const AUTH0_REALM = 'auth0';
+export const AUTH0_REALM = 'api-auth0';
 
 /**
  * @class WWWAuthenticateHeader
