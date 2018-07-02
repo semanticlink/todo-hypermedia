@@ -24,7 +24,7 @@
         setBearerTokenOnHeaders,
         getAuthenticationScheme,
         JWT,
-        BEARER, setJsonWebTokenOnHeaders
+        BEARER, setJsonWebTokenOnHeaders, getAuthenticationRealm
     } from '../lib/http-interceptors';
     import Form from './Form.vue';
     import AuthService from "../lib/AuthService";
@@ -83,34 +83,51 @@
                     return;
                 }
 
-                if (getAuthenticationScheme(error) === JWT) {
+                const authenticationScheme = getAuthenticationScheme(error);
+
+                if (authenticationScheme === JWT) {
 
                     // JSONWebToken authentication
 
+                    console.log("xxxxx")
                     /**
-                     *  Use our JSONWebToken authentication scheme to get a token from external provider (Auth0)
+                     *  Use our jwt authentication scheme to get a token from external provider (Auth0)
                      */
 
                     AuthService.loadFrom401JsonWebTokenChallenge(error)
                         .then(configuration => {
-                            let authService = new AuthService(configuration.data);
-                            authService.login((err, authResult) => {
 
-                                if (!authResult || !authResult.accessToken) {
-                                    log.error('Json web token not returned on the key: \'accessToken\'');
-                                }
-                                setJsonWebTokenOnHeaders(authResult.accessToken);
 
-                                EventBus.$emit(loginConfirmed);
+                            /** @type {Auth0ConfigurationRepresentation} */
+                            const cfg = configuration.data;
 
-                                isPerformingAuthentication = false;
-                                this.authenticated = true;
-                            })
+                            let authenticationRealm = getAuthenticationRealm(error);
+
+                            if (authenticationRealm === cfg.realm) {
+
+                                AuthService
+                                    .makeFromRepresentation(cfg)
+                                    .login((err, authResult) => {
+
+                                        if (!authResult || !authResult.accessToken) {
+                                            log.error('Json web token not returned on the key: \'accessToken\'');
+                                        }
+                                        setJsonWebTokenOnHeaders(authResult.accessToken);
+
+                                        EventBus.$emit(loginConfirmed);
+
+                                        isPerformingAuthentication = false;
+                                        this.authenticated = true;
+                                    })
+
+                            } else {
+                                return Promise.reject(`[Authenticator] Realm unknown: '${authenticationRealm}'`);
+                            }
 
                         })
                         .catch(this.onFailure);
 
-                } else if (getAuthenticationScheme(error) === BEARER) {
+                } else if (authenticationScheme === BEARER) {
 
                     // Bearer authentication
 
@@ -143,7 +160,7 @@
                         .catch(this.onFailure);
                 } else {
 
-                    log.error('Unable to authenticate, no known www-authenticate type');
+                    log.error(`[Authenticator] www-authenticate type unknown: '${authenticationScheme}'`);
                 }
 
 
@@ -172,7 +189,7 @@
 
             },
             onFailure(error) {
-
+                log.error(error);
                 this.$notify({
                     title: 'An error means that the login process won\'t work',
                     text: error || error.statusText || error.response.statusText,

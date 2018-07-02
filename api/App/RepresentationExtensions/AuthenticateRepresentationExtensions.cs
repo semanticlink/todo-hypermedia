@@ -1,4 +1,5 @@
-﻿using App.UriFactory;
+﻿using System.Linq;
+using App.UriFactory;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
@@ -47,8 +48,8 @@ namespace App.RepresentationExtensions
                 ClientId = auth0Representation.ClientId,
                 Domain = auth0Representation.Domain,
                 Leeway = auth0Representation.Leeway,
-                RequestedScopes = auth0Representation.RequestedScopes,
-                ResponseType = auth0Representation.ResponseType,
+                RequestedScopes = auth0Representation.RequestedScopes.Split(' ').ToList(),
+                ResponseType = auth0Representation.ResponseType.Split(' ').ToList(),
                 Realm = AuthenticatorDefaults.AuthenticatorAuth0Realm
             };
         }

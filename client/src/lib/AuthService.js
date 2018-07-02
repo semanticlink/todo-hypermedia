@@ -119,9 +119,6 @@ const KEY = {
     CLIENT_CONFIGURATION: 'clientConfig'
 };
 
-/**
- * AuthService needs to be inst
- */
 export default class AuthService {
 
     /**
@@ -133,14 +130,11 @@ export default class AuthService {
         // get a valid auth0 client (ie with state) upon return into the site
         // and without a www-authenticate challenge
         options = options ? options : AuthService.clientConfiguration;
-        AuthService.clientConfiguration = options;
 
-        this.init(options);
+        if (options) {
+            AuthService.clientConfiguration = options;
+        }
 
-        log.debug('[Auth0] loaded');
-    }
-
-    init(options) {
         /**
          *  @type {AuthServiceConfiguration}
          */
@@ -156,6 +150,8 @@ export default class AuthService {
             options);
 
         this.auth0 = new auth0.WebAuth(opts);
+
+        log.debug('[Auth0] loaded');
     }
 
     /**
@@ -355,9 +351,12 @@ export default class AuthService {
      * @extends LinkedRepresentation
      * @property {string} clientID Your Auth0 client ID.
      * @property {string} audience The default audience to be used for requesting API access.
-     * @property {string} scope The scopes which you want to request authorization for. These must be separated by a space. You can request any of the standard OIDC scopes about users, such as profile and email, custom claims that must conform to a namespaced format, or any scopes supported by the target API (for example, read:contacts). Include offline_access to get a Refresh Token.
-     * @property {string} responseType It can be any space separated list of the values code, token, id_token. It defaults to 'token', unless a redirectUri is provided, then it defaults to 'code'.
+     * @property {string} domain The default audience to be used for requesting API access.
+     * @property {string[]} scope The scopes which you want to request authorization for. These must be separated by a space. You can request any of the standard OIDC scopes about users, such as profile and email, custom claims that must conform to a namespaced format, or any scopes supported by the target API (for example, read:contacts). Include offline_access to get a Refresh Token.
+     * @property {string[]} responseType It can be any space separated list of the values code, token, id_token. It defaults to 'token', unless a redirectUri is provided, then it defaults to 'code'.
      * @property {string} clientID Your Auth0 client ID.
+     * @property {number} leeway A value in seconds; leeway to allow for clock skew with regard to JWT expiration times.
+     * @property {string} realm The realm to be matched with www-authenticate header.
      *
      * @see https://auth0.com/docs/libraries/auth0js/v9
      */
@@ -373,6 +372,31 @@ export default class AuthService {
     static loadFrom401JsonWebTokenChallenge(error) {
         let authenticationConfigurationUri = getAuthenticationUri(error);
         return axios.get(authenticationConfigurationUri);
+    }
+
+    /**
+     * Transform an across the wire {@link Auth0ConfigurationRepresentation} into the configuration for this service
+     * @param {Auth0ConfigurationRepresentation} cfg
+     * @returns {AuthServiceConfiguration}
+     */
+    static toConfiguration(cfg) {
+        return {
+            clientID: cfg.clientID,
+            domain: cfg.domain,
+            audience: cfg.audience,
+            scope: cfg.scope.join(' '),
+            leeway: cfg.leeway,
+            responseType: cfg.responseType.join(' ')
+        };
+    }
+
+    /**
+     * Factory method to create an AuthService based on the {@link Auth0ConfigurationRepresentation}
+     * @param {Auth0ConfigurationRepresentation} cfg
+     * @returns {AuthService}
+     */
+    static makeFromRepresentation(cfg) {
+        return new AuthService(AuthService.toConfiguration(cfg));
     }
 
 }
