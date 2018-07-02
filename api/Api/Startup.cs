@@ -4,7 +4,6 @@ using Api.Web;
 using App;
 using Infrastructure.mySql;
 using Infrastructure.NoSQL;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -62,7 +61,7 @@ namespace Api
                 {
                     options.DefaultPolicy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes(/*JwtBearerDefaults.AuthenticationScheme, */IdentityExtensions.Auth0AuthenticationSchemeName)
+                        .AddAuthenticationSchemes(/*JwtBearerDefaults.AuthenticationScheme, */App.AuthenticatorDefaults.ExternalAuthenticationSchemeName)
                         .Build();
                 })
                 .AddMvcCore(options =>
@@ -172,7 +171,7 @@ namespace Api
                 app.UseExceptionHandler("/error");
             }
 
-
+/*// TODO: remove this as it has been supercede by .UseHttpCacheHeaders
             /**
              * Vary headers are needed so that the back and forward buttons work ie, that we don't
              * get cache poisioning—in this case the back button would return the json representation
@@ -182,13 +181,13 @@ namespace Api
              *
              * Note: this is a backup strategy for .AddHttpCacheHeaders
              * 
-             */
+             #1#
             app.Use(async (context, next) =>
             {
                 context.Response.Headers[HeaderNames.Vary] = new[] {"Accept", "Accept-Encoding"};
 
                 await next();
-            });
+            });*/
 
             /**
              * Handler for error pages to return content negotiated pages. For example, 401 can now

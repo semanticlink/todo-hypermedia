@@ -22,6 +22,7 @@
         ///    Collection of different authenticate strategies available
         /// </summary>
         public const string Authenticate = "authenticate";
+        public const string Authenticator = "authenticator";
 
         /// <summary>
         ///     Link to the configuration of the Auth0 service

@@ -54,7 +54,7 @@ namespace Api.Controllers
             var domain = _configuration.GetSection(Auth0Configuration.SectionName).Get<Auth0Configuration>().Domain;
             return (await _userStore.Get(id))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
-                .ToRepresentation(domain, Url);
+                .ToRepresentation(Url);
         }
 
 

@@ -58,6 +58,7 @@ namespace Api.Web
             {
                 var feed = context.Object as LinkedRepresentation;
 
+                
                 return string.Format(ResourceHtml, ToHtmlLinks(feed));
             }
             else

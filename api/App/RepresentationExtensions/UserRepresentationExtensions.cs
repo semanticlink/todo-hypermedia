@@ -25,18 +25,11 @@ namespace App.RepresentationExtensions
     /// 
     public class Auth0Id
     {
-        private readonly string _domain;
-        private const string UrlTemplate = "https://{0}/{1}";
         private const char Delimiter = '|';
-        private const string Title = "externalId";
+        private const string Rel = CustomLinkRelation.Authenticator;
 
-        public Auth0Id(string domain)
-        {
-            _domain = domain;
-        }
-
-        private string Uri { get; set; }
-        private string Rel { get; set; }
+        private string Id { get; set; }
+        private string Title { get; set; }
 
         /// <summary>
         ///     Very simple parser on bar delimited
@@ -48,8 +41,8 @@ namespace App.RepresentationExtensions
 
             if (provider.Length == 2)
             {
-                Uri = string.Format(UrlTemplate, _domain, provider.Last());
-                Rel = CustomLinkRelation.Auth0;
+                Id = provider.Last();
+                Title = provider.First();
             }
             else
             {
@@ -58,16 +51,16 @@ namespace App.RepresentationExtensions
             }
         }
 
-        public WebLink MakeWebLink(string id)
+        public WebLink MakeWebLink(string id, IUrlHelper url)
         {
             Parse(id);
-            return Uri.MakeWebLink(Rel, Title);
+            return Id.MakeUserAuthenticator(Title, url).MakeWebLink(Rel, Title);
         }
 
-        public WebLink[] MakeWebLinks(List<string> ids)
+        public WebLink[] MakeWebLinks(List<string> ids, IUrlHelper url)
         {
             return ids
-                .Select(MakeWebLink)
+                .Select(id => MakeWebLink(id, url))
                 .ToArray();
         }
     }
@@ -75,7 +68,7 @@ namespace App.RepresentationExtensions
 
     public static class UserRepresentationExtensions
     {
-        public static UserRepresentation ToRepresentation(this User user, string domain,
+        public static UserRepresentation ToRepresentation(this User user,
             IUrlHelper url)
         {
             return new UserRepresentation
@@ -94,7 +87,7 @@ namespace App.RepresentationExtensions
                         // edit-form
                         url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
                     }
-                    .Concat(new Auth0Id(domain) .MakeWebLinks(user.ExternalIds))
+                    .Concat(new Auth0Id().MakeWebLinks(user.ExternalIds, url))
                     .ToArray()
                     .RemoveNulls(),
                 Email = user.Email,

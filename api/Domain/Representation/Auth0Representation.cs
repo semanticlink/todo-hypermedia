@@ -35,5 +35,8 @@ namespace Domain.Representation
 
         [DataMember(Name = "responseType", Order = 100, EmitDefaultValue = false)]
         public string ResponseType { get; set; }
+
+        [DataMember(Name = "realm", Order = 100, EmitDefaultValue = false)]
+        public string Realm { get; set; } = "api-auth0";
     }
 }

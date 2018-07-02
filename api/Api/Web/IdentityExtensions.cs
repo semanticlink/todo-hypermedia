@@ -10,27 +10,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using App;
 
 namespace Api.Web
 {
     public static class IdentityExtensions
     {
         /// <summary>
-        ///     Authentication sscheme for against external integrations such as Auth0 that return a JSON Web Token (JWT).
-        ///     see https://tools.ietf.org/html/rfc7519
-        /// </summary>
-        /// <remarks>
-        ///    We are not calling JWT across the wire as to avoid confusion with Java Web Tokens
-        /// </remarks>
-        public const string Auth0AuthenticationSchemeName = "jwt";
-
-        /// <summary>
         /// <para>
         ///    Add Identity for authenticn. Note as of Auth 2.0, all types needed are regsitered
         ///    under AddAuthentication.
         ///</para>
         /// <para>        ///  At this stage:
-        ///    - persisted in MySql (via entity framework)
         ///    - use JWT (bearer) tokens
         ///    Currently, it is authenticated or not (no roles or claims)
         /// </para>
@@ -77,7 +68,7 @@ namespace Api.Web
                         AuthenticationOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                     }
                 )
-                .AddJwtBearer(Auth0AuthenticationSchemeName, options =>
+                .AddJwtBearer(AuthenticatorDefaults.ExternalAuthenticationSchemeName, options =>
                 {
                     // see https://auth0.com/blog/securing-asp-dot-net-core-2-applications-with-jwts/
                     //
@@ -106,7 +97,7 @@ namespace Api.Web
 
                     // TODO: inject api hosting address and uri construction
                     options.Challenge =
-                        $"{Auth0AuthenticationSchemeName} realm=\"api-auth0\", uri=http://localhost:5000/authenticate/auth0";
+                        $"{AuthenticatorDefaults.ExternalAuthenticationSchemeName} realm=\"{AuthenticatorDefaults.AuthenticatorAuth0Realm}\" uri=http://localhost:5000/authenticate/auth0";
 
                     options.Events = new JwtBearerEvents
                     {
@@ -138,7 +129,7 @@ namespace Api.Web
                                 }
 
                                 // note the space in the prefix
-                                var schemePrefx = $"{Auth0AuthenticationSchemeName} ";
+                                var schemePrefx = $"{AuthenticatorDefaults.ExternalAuthenticationSchemeName} ";
                                 if (authorization.StartsWith(schemePrefx, StringComparison.OrdinalIgnoreCase))
                                 {
                                     // this then gets picked up further in the pipeline to be processes

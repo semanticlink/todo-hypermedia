@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using App.UriFactory;
-using Domain.LinkRelations;
+﻿using App.UriFactory;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +9,7 @@ namespace App.RepresentationExtensions
 {
     public static class AuthenicateRepresentationExtensions
     {
-        public static AuthenticateRepresentation ToAuthenticateRepresentation(this IUrlHelper url)
+        public static AuthenticateRepresentation ToAuthenticateRepresentation(this string authenticator, IUrlHelper url)
         {
             return new AuthenticateRepresentation
             {
@@ -23,13 +21,15 @@ namespace App.RepresentationExtensions
                     // logical parent of authenticate is root
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    url.MakeAuthenicateAuth0Uri().MakeWebLink(CustomLinkRelation.Auth0)
+                    // authenicator (note: future is an array of authenticators
+                    authenticator.MakeAuthenicatorUri(url).MakeWebLink(authenticator)
                 },
             };
         }
 
-        public static Auth0Representation ToAuth0Representation(
+        public static Auth0Representation ToAuthenticatorRepresentation(
             this Auth0Configuration auth0Representation,
+            string authenticator,
             IUrlHelper url)
         {
             return new Auth0Representation
@@ -37,7 +37,7 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    url.MakeAuthenicateAuth0Uri().MakeWebLink(IanaLinkRelation.Self),
+                    authenticator.MakeAuthenicatorUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // logical parent is authenticate
                     url.MakeAuthenicateUri().MakeWebLink(IanaLinkRelation.Up),
@@ -48,7 +48,8 @@ namespace App.RepresentationExtensions
                 Domain = auth0Representation.Domain,
                 Leeway = auth0Representation.Leeway,
                 RequestedScopes = auth0Representation.RequestedScopes,
-                ResponseType = auth0Representation.ResponseType
+                ResponseType = auth0Representation.ResponseType,
+                Realm = AuthenticatorDefaults.AuthenticatorAuth0Realm
             };
         }
     }

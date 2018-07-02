@@ -15,5 +15,6 @@
         public int Leeway { get; set; } = 30;
         public string RequestedScopes { get; set; } = "openid profile offline_access";
         public string ResponseType { get; set; } = "token id_token";
+        
     }
 }
