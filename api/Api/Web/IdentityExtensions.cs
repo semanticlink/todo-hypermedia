@@ -107,7 +107,7 @@ namespace Api.Web
 
                     // TODO: inject api hosting address and uri construction
                     options.Challenge =
-                        $"{Auth0AuthenticationSchemeName} realm=\"api\", uri=http://localhost:5000/authenticate";
+                        $"{Auth0AuthenticationSchemeName} realm=\"api\", uri=http://localhost:5000/authenticate/auth0";
 
                     options.Events = new JwtBearerEvents
                     {

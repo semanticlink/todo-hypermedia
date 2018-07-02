@@ -22,6 +22,9 @@ namespace App.RepresentationExtensions
                     // a virtual resource that redirects to the user
                     url.MakeUserMeUri().MakeWebLink(CustomLinkRelation.Me),
                     
+                    // all authentication approaches
+                    url.MakeAuthenicateUri().MakeWebLink(CustomLinkRelation.Authenticate),
+                    
                     // all tags currently created across todos
                     url.MakeAllTagsCollectionUri().MakeWebLink(CustomLinkRelation.Tags),
 

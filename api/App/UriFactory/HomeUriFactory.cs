@@ -7,11 +7,6 @@ namespace App.UriFactory
         public const string SelfRouteName = "Home";
 
 
-        public const string AuthenticateUsernamePasswordRouteName = "AuthenticatePassword";
-        public const string AuthenticateJsonWebTokenRouteName = "AuthenticateJWT";
-        public const string AuthenticateLoginCollectionRouteName = "AuthenticateLoginCollection";
-        public const string AuthenticateLoginFormRouteName = "AuthenticateLoginForm";
-
         /// <summary>
         ///     A logical resource that is the collection of all tenants
         /// </summary>
@@ -25,20 +20,6 @@ namespace App.UriFactory
             return url.Link(SelfRouteName, new { });
         }
 
-        public static string MakeAuthenticatePasswordUri(this IUrlHelper url)
-        {
-            return url.Link(AuthenticateUsernamePasswordRouteName, new { });
-        }
-
-        public static string MakeAuthenticateJsonWebTokenUri(this IUrlHelper url)
-        {
-            return url.Link(AuthenticateJsonWebTokenRouteName, new { });
-        }
-
-        public static string MakeAuthenticateLoginFormUri(this IUrlHelper url)
-        {
-            return url.Link(AuthenticateLoginFormRouteName, new { });
-        }
 
         /// <summary>
         ///     A collection resource for the list of tenants, given a string search criteria
