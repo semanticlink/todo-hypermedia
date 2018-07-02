@@ -28,7 +28,7 @@ namespace App.RepresentationExtensions
                     // url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
                     
                     // users over the entire tenant
-                    tenant.Id.MakeRegisterUserCreateFormUri(url).MakeWebLink(CustomLinkRelation.Users)
+                    tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users)
                 },
 
                 Code = tenant.Code,

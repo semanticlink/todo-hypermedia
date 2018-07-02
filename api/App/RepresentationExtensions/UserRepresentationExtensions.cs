@@ -15,7 +15,7 @@ namespace App.RepresentationExtensions
 {
     public static class UserRepresentationExtensions
     {
-        public static UserRepresentation ToRepresentation(this IdentityUser user, string tenantId, IUrlHelper url)
+        public static UserRepresentation ToRepresentation(this User user, string tenantId, IUrlHelper url)
         {
             return new UserRepresentation
             {
@@ -32,8 +32,11 @@ namespace App.RepresentationExtensions
                     // edit-form
                     url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
                 },
-                
+
                 Email = user.Email,
+                Name = user.Name,
+                CreatedAt = user.CreatedAt,
+                ExternalIds = user.ExternalIds
             };
         }
 
@@ -42,47 +45,8 @@ namespace App.RepresentationExtensions
         ///     modify instances on the resource
         /// </summary>
         /// <seealso cref = "UserCreateDataRepresentation" />
-        public static CreateFormRepresentation ToUserCreateFormRepresentation(this IUrlHelper url)
-        {
-            return new CreateFormRepresentation
-            {
-                Links = new[]
-                {
-                    // this collection
-                    url.MakeUserCreateFormUri().MakeWebLink(IanaLinkRelation.Self),
-
-                    // Create a new organisation on the collection
-//                    tenantId.MakeTenantUsersCollectionUri(url).MakeWebLink(IanaLinkRelation.Up),
-                },
-                Items = MakeCreateFormItems()
-            };
-        }
-
-        private static FormItemRepresentation[] MakeCreateFormItems()
-        {
-            return new FormItemRepresentation[]
-            {
-                new EmailInputFormItemRepresentation
-                {
-                    Name = "email",
-                    Description = "The email address of the user",
-                    Required = true
-                },
-                new TextInputFormItemRepresentation
-                {
-                    Name = "name",
-                    Description = "The name of the user to be shown on the screen"
-                },
-            };
-        }
-
-
-        /// <summary>
-        ///     Get the create form to describe to clients of the API how to
-        ///     modify instances on the resource
-        /// </summary>
-        /// <seealso cref = "UserCreateDataRepresentation" />
-        public static CreateFormRepresentation ToRegisterUserCreateFormRepresentation(this string tenantId, IUrlHelper url)
+        public static CreateFormRepresentation ToRegisterUserCreateFormRepresentation(this string tenantId,
+            IUrlHelper url)
         {
             return new CreateFormRepresentation
             {
@@ -93,6 +57,9 @@ namespace App.RepresentationExtensions
 
                     // Create a new organisation on the collection
                     tenantId.MakeTenantUsersUri(url).MakeWebLink(IanaLinkRelation.Up),
+
+                    // submit
+                    tenantId.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Submit)
                 },
                 Items = MakeRegisterUserCreateFormItems()
             };
@@ -116,16 +83,6 @@ namespace App.RepresentationExtensions
                 },
             };
         }
-
-        public static UserCreateData FromRepresentation(this UserCreateDataRepresentation user, IUrlHelper url)
-        {
-            return new UserCreateData
-            {
-                Email = user.Email
-                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires an email"),
-            };
-        }
-
 
         /// <summary>
         ///     Get the create form to describe to clients of the API how to
@@ -162,6 +119,13 @@ namespace App.RepresentationExtensions
                 {
                     Name = "name",
                     Description = "The name of the user to be shown on the screen"
+                },
+                new CollectionInputFormItemRepresentation()
+                {
+                    Name = "externalIds",
+                    Description = "Linked systems of authentication [not implemented]",
+                    Multiple = true,
+                    Required = false,
                 }
             };
         }

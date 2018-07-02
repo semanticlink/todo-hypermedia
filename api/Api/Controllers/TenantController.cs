@@ -4,6 +4,7 @@ using Api.Web;
 using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
+using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
@@ -21,12 +22,12 @@ namespace Api.Controllers
     public class TenantController : Controller
     {
         private readonly ITenantStore _tenantStore;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IUserStore _userStore;
 
-        public TenantController(ITenantStore tenantStore, UserManager<IdentityUser> userManager)
+        public TenantController(ITenantStore tenantStore, IUserStore userStore)
         {
             _tenantStore = tenantStore;
-            _userManager = userManager;
+            _userStore = userStore;
         }
 
         /// <summary>
@@ -52,23 +53,22 @@ namespace Api.Controllers
         ///     User collection on a tenant
         /// </summary>
         /// <remarks>
-        ///    Authenticated users will get back a list of users. TOOD: role-based access. Anonymous
+        ///    Authenticated users will get back a list of users. Authenticted but unregistered
         ///    users get back an empty collection. This allows us to parent the creation of new users off
         ///    the tenant and allow users who are unknown but authenticated to register themselves.
         /// </remarks>
         [HttpGet("{id}/user/", Name = TenantUriFactory.TenantUsersRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [AllowAnonymous]
         public async Task<FeedRepresentation> GetUsers(string id)
         {
-            return (User.Identity.IsAuthenticated
+            return (await _userStore.IsRegistered(User.GetExternalId())
                     ? await _tenantStore.GetUsersByTenant(id)
                     : new List<string>())
                 .ToRepresentation(id, Url);
         }
 
-        [HttpGet("{id}/form/register/user", Name=UserUriFactory.RegisterCreateFormRouteName)]
+        [HttpGet("{id}/form/user", Name = UserUriFactory.RegisterCreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AllowAnonymous]
         public async Task<CreateFormRepresentation> RegisterUserCreateForm(string id)
@@ -87,24 +87,21 @@ namespace Api.Controllers
         ///    A user is already authenticated and thus merely created 
         /// </remarks>
         [HttpPost("{id}/user")]
-        [AllowAnonymous] // this should be restricture to role/claim
         public async Task<object> RegisterUser([FromBody] UserCreateDataRepresentation model, string id)
         {
-
             (await _tenantStore.Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("Invalid tenant");
-            
-            var user = new IdentityUser
-            {
-                UserName = model.Email.ThrowInvalidDataExceptionIfNullOrWhiteSpace("No email provided"),
-                Email = model.Email
-            };
 
-            await _tenantStore.AddUser(id, user.Id);
+            var externalId = User.GetExternalId();
+            var user = await _userStore.GetByExternalId(externalId);
+            var userId = user.IsNull()
+                ? await _userStore.Create(externalId, model.Email, model.Name)
+                : user.Id;
+
+            await _tenantStore.AddUser(id, userId);
 
             // now, we have the identity user, link this into the new user
-            return user
-                .Id
+            return userId
                 .MakeUserUri(Url)
                 .MakeCreated();
         }

@@ -20,7 +20,6 @@ namespace Infrastructure.NoSQL
 
         public async Task<string> Create(string externalId, string email, string name)
         {
-            
             (await GetByExternalId(externalId))
                 .ThrowInvalidDataExceptionIfNotNull("User already created");
 
@@ -52,9 +51,14 @@ namespace Infrastructure.NoSQL
         {
             externalId
                 .ThrowInvalidDataExceptionIfNullOrWhiteSpace("External Id must be set");
-            
+
             return await _context.FirstOrDefault<User>(
-                    new ScanCondition(nameof(User.ExternalIds), ScanOperator.Contains, externalId));
+                new ScanCondition(nameof(User.ExternalIds), ScanOperator.Contains, externalId));
+        }
+
+        public async Task<bool> IsRegistered(string externalId)
+        {
+            return (await GetByExternalId(externalId)).IsNotNull();
         }
 
         public async Task<IEnumerable<User>> GetAll()

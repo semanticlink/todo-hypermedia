@@ -106,7 +106,7 @@ namespace Api.Controllers
                     //
                     : User != null && User.Identity.IsAuthenticated
                         // If the user is authenticated, then return all tenants that the user has access to.
-                        ? await _tenantStore.GetTenantsForUser(User.GetId())
+                        ? await _tenantStore.GetTenantsForUser(User.GetExternalId())
 
                         // The user is not authenticated and there is no query, so the caller gets no tenants.
                         : new Tenant[] { })
@@ -183,28 +183,9 @@ namespace Api.Controllers
         }
 
         [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateUsernamePasswordRouteName)]
-        public async Task<object> Login([FromBody] UserCreateDataRepresentation model)
+        public Task<object> Login([FromBody] UserCreateDataRepresentation model)
         {
-            var result = await _signInManager.PasswordSignInAsync(
-                model.Email,
-                model.Password,
-                isPersistent: false,
-                lockoutOnFailure: false);
-
-            result
-                .Succeeded
-                .ThrowInvalidDataExceptionIf(x => x.Equals(false), result.ToString());
-
-            var user = _userManager.Users.SingleOrDefault(r => r.Email == model.Email);
-
-            /*
-             * TODO: this should actually create a new resource and return its uri rather than just the token
-             */
-            return user
-                .ThrowAccessDeniedExceptionIfNull("User creation denied")
-                .Id
-                .MakeUserUri(Url)
-                .MakeCreatedToken(_configuration.GenerateJwtToken(user.Id, model.Email, user.Id));
+            throw new NotImplementedException("Username/password no longer supported");
         }
     }
 }

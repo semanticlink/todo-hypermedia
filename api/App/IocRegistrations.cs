@@ -1,8 +1,6 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using Domain.Models;
 using Domain.Persistence;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
@@ -30,6 +28,7 @@ namespace App
              */
             services.AddScoped<ITodoStore, TodoStore>();
             services.AddScoped<ITenantStore, TenantStore>();
+            services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<ITagStore, TagStore>();
 
             services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);

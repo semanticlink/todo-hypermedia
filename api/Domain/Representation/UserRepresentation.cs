@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Toolkit.Representation.LinkedRepresentation;
 
@@ -9,8 +10,11 @@ namespace Domain.Representation
         [DataMember(Name = "email", Order = 40, EmitDefaultValue = false)] 
         public string Email { get; set; }
 
-        [DataMember(Name = "password", Order = 50, EmitDefaultValue = false)] 
-        public string Password { get; set; }
+        [DataMember(Name = "name", Order = 50, EmitDefaultValue = false)] 
+        public string Name { get; set; }
+
+        [DataMember(Name = "externalIds", Order = 50, EmitDefaultValue = false)]
+        public List<string> ExternalIds { get; set; }
                 
         [DataMember(Name = "createdAt", Order = 100, EmitDefaultValue = false)]
         public DateTime CreatedAt { get; set; }

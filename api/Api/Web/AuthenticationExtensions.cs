@@ -10,7 +10,7 @@ namespace Api.Web
         /// <summary>
         /// Retrieves the user Id from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Sub"/>).
         /// </summary>
-        public static string GetId(this ClaimsPrincipal user)
+        public static string GetExternalId(this ClaimsPrincipal user)
         {
             return user.Value(JwtRegisteredClaimNames.Sub);
         }

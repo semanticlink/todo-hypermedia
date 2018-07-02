@@ -36,7 +36,7 @@ namespace Api.Controllers
             return (await _todoStore
                     .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(User.GetId(), Url);
+                .ToRepresentation(User.GetExternalId(), Url);
         }
 
         [HttpPost]

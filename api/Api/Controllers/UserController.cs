@@ -6,7 +6,6 @@ using App.UriFactory;
 using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.Representation.Forms;
@@ -19,24 +18,25 @@ namespace Api.Controllers
     [Authorize]
     public class UserController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly IUserStore _userStore;
         private readonly ITodoStore _todoStore;
 
         public UserController(
-            UserManager<IdentityUser> userManager,
+            IUserStore userStore,
             ITodoStore todoStore)
         {
-            _userManager = userManager;
+            _userStore = userStore;
             _todoStore = todoStore;
         }
 
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        public IActionResult Me()
+        public async Task<IActionResult> Me()
         {
-            return User
-                .GetId()
+            return (await _userStore.GetByExternalId(User.GetExternalId()))
+                .ThrowObjectNotFoundExceptionIfNull("User does not exist")
+                .Id
                 .MakeUserUri(Url)
                 .MakeRedirect();
         }
@@ -46,8 +46,8 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<UserRepresentation> Get(string id)
         {
-            return (await _userManager.FindByIdAsync(id))
-                .ThrowInvalidDataExceptionIfNull($"User '{id}' not found")
+            return (await _userStore.Get(id))
+                .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
                 .ToRepresentation(id, Url);
         }
 
