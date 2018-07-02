@@ -11,12 +11,11 @@ using Microsoft.Extensions.Configuration;
 namespace Api.Controllers
 {
     [Route("authenticate")]
-    [AllowAnonymous]
-    public class AuthenticationController : Controller
+    public class AuthenticateController : Controller
     {
         private readonly IConfiguration _configuration;
 
-        public AuthenticationController(IConfiguration configuration
+        public AuthenticateController(IConfiguration configuration
         )
         {
             _configuration = configuration;
@@ -37,6 +36,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet("", Name = AuthenticateUriFactory.DefaultRoute)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AllowAnonymous]
         public AuthenticateRepresentation Index()
         {
             return Url.ToAuthenticateRepresentation();
@@ -46,8 +46,7 @@ namespace Api.Controllers
         ///     The configuration for the clients to talk to the Auth0 service
         /// </summary>
         [HttpGet("auth0", Name = AuthenticateUriFactory.Auth0RouteName)]
-        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
-        [Authorize]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private, MaxAge = CacheDuration.Long)]
         public Auth0Representation Auth0()
         {
             return _configuration

@@ -68,6 +68,18 @@ namespace Api.Controllers
             return Url.ToUserEditFormRepresentation();
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser([FromBody] UserEditData model, string id)
+        {
+            await _userStore.Update(id, user =>
+            {
+                user.Email = model.Email;
+                user.Name = model.Name;
+                // TODO user.ExternalIds
+            });
+            return NoContent();
+        }
+
         /////////////////////////
         //
         // Todo collection on a user
