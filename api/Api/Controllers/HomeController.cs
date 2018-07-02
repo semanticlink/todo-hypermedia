@@ -10,7 +10,6 @@ using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Toolkit;
@@ -25,22 +24,16 @@ namespace Api.Controllers
     {
         private readonly Version _version;
         private readonly ITenantStore _tenantStore;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
 
         public HomeController(
             Version version,
             ITenantStore tenantStore,
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
             IConfiguration configuration
         )
         {
             _version = version;
             _tenantStore = tenantStore;
-            _userManager = userManager;
-            _signInManager = signInManager;
             _configuration = configuration;
         }
 
@@ -138,31 +131,6 @@ namespace Api.Controllers
         {
             return new TenantRepresentation()
                 .ToTenantSearchFormRepresentation(Url);
-        }
-
-
-        ///////////////////////////////////////////////////////////////
-        //
-        //  The authentication resources
-        //  ============================
-        //
-        //  Currently supporting:
-        //    - username/password login from aspnet core identity services
-        //    - auth0 external authentication
-        //
-
-
-        /// <summary>
-        ///     The configuration for the clients to talk to the Auth0 service
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateJsonWebTokenRouteName)]
-        public Auth0Representation GetBearerAuthenticateCollection()
-        {
-            return _configuration
-                .GetSection(Auth0Configuration.SectionName)
-                .Get<Auth0Configuration>()
-                .ToRepresentation(Url);
         }
     }
 }
