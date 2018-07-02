@@ -1,39 +1,105 @@
-﻿using App.UriFactory;
+﻿using System.Collections.Generic;
+using System.Linq;
+using App.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
+using Toolkit;
 using Toolkit.LinkRelations;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
 
 namespace App.RepresentationExtensions
 {
+    /// <summary>
+    ///     A class to be able to read the Auth0 Id format and take in the the domain and spit out something
+    ///     semi sensible
+    /// <example>
+    ///    auth0|5b32b696a8c12d3b9a32b138
+    ///    rel = auth0
+    ///    uri = https://somesubdomain.auth0.com/5b32b696a8c12d3b9a32b138
+    ///    title = externalId
+    /// </example> 
+    /// </summary>
+    /// 
+    public class Auth0Id
+    {
+        private readonly string _domain;
+        private const string UrlTemplate = "https://{0}/{1}";
+        private const char Delimiter = '|';
+        private const string Title = "externalId";
+
+        public Auth0Id(string domain)
+        {
+            _domain = domain;
+        }
+
+        private string Uri { get; set; }
+        private string Rel { get; set; }
+
+        /// <summary>
+        ///     Very simple parser on bar delimited
+        /// </summary>
+        /// <param name="id"></param>
+        private void Parse(string id)
+        {
+            var provider = id.Split(Delimiter);
+
+            if (provider.Length == 2)
+            {
+                Uri = string.Format(UrlTemplate, _domain, provider.Last());
+                Rel = CustomLinkRelation.Auth0;
+            }
+            else
+            {
+                // TODO logging
+                // we don't have a format we recognise
+            }
+        }
+
+        public WebLink MakeWebLink(string id)
+        {
+            Parse(id);
+            return Uri.MakeWebLink(Rel, Title);
+        }
+
+        public WebLink[] MakeWebLinks(List<string> ids)
+        {
+            return ids
+                .Select(MakeWebLink)
+                .ToArray();
+        }
+    }
+
+
     public static class UserRepresentationExtensions
     {
-        public static UserRepresentation ToRepresentation(this User user, IUrlHelper url)
+        public static UserRepresentation ToRepresentation(this User user, string domain,
+            IUrlHelper url)
         {
             return new UserRepresentation
             {
                 Links = new[]
-                {
-                    // self
-                    user.Id.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    {
+                        // self
+                        user.Id.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // logical parent of user is home
-                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
+                        // logical parent of user is home
+                        url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // todos
-                    user.Id.MakeUserTodoCollectionUri(url).MakeWebLink(CustomLinkRelation.Todos),
+                        // todos
+                        user.Id.MakeUserTodoCollectionUri(url).MakeWebLink(CustomLinkRelation.Todos),
 
-                    // edit-form
-                    url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
-                },
-
+                        // edit-form
+                        url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
+                    }
+                    .Concat(new Auth0Id(domain) .MakeWebLinks(user.ExternalIds))
+                    .ToArray()
+                    .RemoveNulls(),
                 Email = user.Email,
                 Name = user.Name,
                 CreatedAt = user.CreatedAt,
-                ExternalIds = user.ExternalIds
             };
         }
 

@@ -3,6 +3,7 @@ using Api.Web;
 using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
+using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +12,7 @@ using Toolkit;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
 using Marvin.Cache.Headers;
+using Microsoft.Extensions.Configuration;
 
 namespace Api.Controllers
 {
@@ -20,13 +22,16 @@ namespace Api.Controllers
     {
         private readonly IUserStore _userStore;
         private readonly ITodoStore _todoStore;
+        private readonly IConfiguration _configuration;
 
         public UserController(
             IUserStore userStore,
-            ITodoStore todoStore)
+            ITodoStore todoStore,
+            IConfiguration configuration)
         {
             _userStore = userStore;
             _todoStore = todoStore;
+            _configuration = configuration;
         }
 
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
@@ -46,9 +51,10 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<UserRepresentation> Get(string id)
         {
+            var domain = _configuration.GetSection(Auth0Configuration.SectionName).Get<Auth0Configuration>().Domain;
             return (await _userStore.Get(id))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
-                .ToRepresentation(Url);
+                .ToRepresentation(domain, Url);
         }
 
 
