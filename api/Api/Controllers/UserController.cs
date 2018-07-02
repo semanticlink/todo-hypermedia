@@ -48,7 +48,7 @@ namespace Api.Controllers
         {
             return (await _userStore.Get(id))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
-                .ToRepresentation(id, Url);
+                .ToRepresentation(Url);
         }
 
 

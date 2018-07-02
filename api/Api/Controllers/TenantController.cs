@@ -4,12 +4,10 @@ using Api.Web;
 using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
-using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.Representation.Forms;
@@ -68,7 +66,7 @@ namespace Api.Controllers
                 .ToRepresentation(id, Url);
         }
 
-        [HttpGet("{id}/form/user", Name = UserUriFactory.RegisterCreateFormRouteName)]
+        [HttpGet("{id}/form/user/create", Name = UserUriFactory.RegisterCreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AllowAnonymous]
         public async Task<CreateFormRepresentation> RegisterUserCreateForm(string id)

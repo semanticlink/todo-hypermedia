@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using App.UriFactory;
+﻿using App.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Toolkit;
 using Toolkit.LinkRelations;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
@@ -15,7 +11,7 @@ namespace App.RepresentationExtensions
 {
     public static class UserRepresentationExtensions
     {
-        public static UserRepresentation ToRepresentation(this User user, string tenantId, IUrlHelper url)
+        public static UserRepresentation ToRepresentation(this User user, IUrlHelper url)
         {
             return new UserRepresentation
             {
@@ -24,9 +20,10 @@ namespace App.RepresentationExtensions
                     // self
                     user.Id.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // logical parent of user is a tenant
-                    tenantId.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    // logical parent of user is home
+                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
+                    // todos
                     user.Id.MakeUserTodoCollectionUri(url).MakeWebLink(CustomLinkRelation.Todos),
 
                     // edit-form

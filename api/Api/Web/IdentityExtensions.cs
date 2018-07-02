@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using Domain.Models;
 using Infrastructure.mySql;
@@ -13,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Web
 {
@@ -160,22 +156,6 @@ namespace Api.Web
                             return Task.CompletedTask;
                         }
                     };
-                })
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-                {
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
-                    options.IncludeErrorDetails = true;
-                    // TODO: inject api hosting address
-                    options.Challenge =
-                        $"{JwtBearerDefaults.AuthenticationScheme} realm=\"api\", rel=authenticate, uri=http://localhost:5000/";
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidIssuer = configuration["JwtIssuer"],
-                        ValidAudience = configuration["JwtIssuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"])),
-                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
-                    };
                 });
 /*
 
@@ -204,50 +184,6 @@ namespace Api.Web
         {
             db.Database.EnsureCreated();
             return app;
-        }
-
-        public static string GenerateJwtToken(this IConfiguration configuration,
-            string userId,
-            string email,
-            string identityId)
-        {
-            var claims = new List<Claim>
-            {
-                /**
-                 * Unique user identifier
-                 *
-                 * see https://tools.ietf.org/html/rfc7519#section-4.1.2
-                 */
-                new Claim(JwtRegisteredClaimNames.Sub, userId),
-                /**
-                 * 
-                 *
-                 * see http://tools.ietf.org/html/rfc7519#section-4
-                 */
-                new Claim(JwtRegisteredClaimNames.Email, email),
-                /**
-                 * Unique identifier for the JWT. This is handed through from the signin service
-                 *
-                 * see https://tools.ietf.org/html/rfc7519#section-4.1.7
-                 *
-                 * NOTE: currently there is no need to include this
-                 */
-                new Claim(JwtRegisteredClaimNames.Jti, identityId),
-            };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(Convert.ToDouble(configuration["JwtExpireDays"]));
-
-            var token = new JwtSecurityToken(
-                configuration["JwtIssuer"],
-                configuration["JwtIssuer"],
-                claims,
-                expires: expires,
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 

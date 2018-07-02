@@ -156,36 +156,13 @@ namespace Api.Controllers
         ///     The configuration for the clients to talk to the Auth0 service
         /// </summary>
         /// <returns></returns>
-        [HttpGet("authenticate/auth0", Name = HomeUriFactory.AuthenticateJsonWebTokenRouteName)]
+        [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateJsonWebTokenRouteName)]
         public Auth0Representation GetBearerAuthenticateCollection()
         {
             return _configuration
                 .GetSection(Auth0Configuration.SectionName)
                 .Get<Auth0Configuration>()
                 .ToRepresentation(Url);
-        }
-
-        [HttpGet("authenticate", Name = HomeUriFactory.AuthenticateLoginCollectionRouteName)]
-        public FeedRepresentation GetAuthenticateCollection()
-        {
-            return Url.ToAuthenticationCollectionRepresentation();
-        }
-
-        /// <summary>
-        ///     A simple login form resource.
-        /// </summary>
-        [HttpGet("authenticate/form/login", Name = HomeUriFactory.AuthenticateLoginFormRouteName)]
-        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
-        public SearchFormRepresentation GetAuthenticateForm()
-        {
-            return new UserRepresentation()
-                .ToAuthenticateLoginFormRepresentation(Url);
-        }
-
-        [HttpPost("authenticate", Name = HomeUriFactory.AuthenticateUsernamePasswordRouteName)]
-        public Task<object> Login([FromBody] UserCreateDataRepresentation model)
-        {
-            throw new NotImplementedException("Username/password no longer supported");
         }
     }
 }
