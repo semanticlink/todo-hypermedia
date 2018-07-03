@@ -159,9 +159,9 @@ export const API_AUTH0_REALM = 'api-auth0';
  * @property {string} params.realm
  * @property {?string} params.rel
  * @property {string} params.uri
- * @property {?string} error [invalid_request|invalid_token|insufficient_scope] these may be included
- * @property {?string} error_description
- * @property {?string} error_uri
+ * @property {?string} params.error [invalid_request|invalid_token|insufficient_scope] these may be included
+ * @property {?string} params.error_description
+ * @property {?string} params.error_uri
  *
  * @see from AspNetCore Authentication JwtBearerHandler https://github.com/aspnet/Security/blob/master/src/Microsoft.AspNetCore.Authentication.JwtBearer/JwtBearerHandler.cs#L63
  *
@@ -177,6 +177,16 @@ export const API_AUTH0_REALM = 'api-auth0';
  * @see Error Codes: https://tools.ietf.org/html/rfc6750#section-3.1
  */
 
+
+/**
+ * Known error codes for invalid token
+ * @see Error Codes: https://tools.ietf.org/html/rfc6750#section-3.1
+ * @type {{ERROR: string, DESCRIPTION: string}}
+ */
+export const INVALID_TOKEN = {
+    ERROR: 'invalid_token',
+    DESCRIPTION: 'The access token is expired'
+};
 
 
 /**
@@ -221,7 +231,7 @@ const parseErrorForAuthenticateHeader = error => {
  */
 export const renewToken = error => {
     const header = parseErrorForAuthenticateHeader(error);
-    return header.error === 'invalid_token' && header.error_description === 'The access token is expired';
+    return header.params.error === INVALID_TOKEN.ERROR && header.params.error_description === INVALID_TOKEN.DESCRIPTION;
 };
 
 /**
