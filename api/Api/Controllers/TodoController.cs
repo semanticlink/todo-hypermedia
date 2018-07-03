@@ -20,12 +20,14 @@ namespace Api.Controllers
     public class TodoController : Controller
     {
         private readonly ITagStore _tagStore;
+        private readonly IUserStore _userStore;
         private readonly ITodoStore _todoStore;
 
-        public TodoController(ITodoStore todoStore, ITagStore tagStore)
+        public TodoController(ITodoStore todoStore, ITagStore tagStore, IUserStore userStore)
         {
             _todoStore = todoStore;
             _tagStore = tagStore;
+            _userStore = userStore;
         }
 
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
@@ -33,10 +35,12 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<TodoRepresentation> GetById(string id)
         {
+            var user = await _userStore.GetByExternalId(User.GetExternalId());
+
             return (await _todoStore
                     .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(User.GetExternalId(), Url);
+                .ToRepresentation(user.Id, Url);
         }
 
         [HttpPost]
