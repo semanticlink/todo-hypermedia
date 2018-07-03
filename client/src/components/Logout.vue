@@ -8,7 +8,6 @@
 
 <script>
     import EventBus, { loginConfirmed } from '../lib/util/EventBus';
-    import BearerTokenService from '../lib/BearerTokenService';
     import AuthService from '../lib/AuthService';
 
     /**
@@ -30,10 +29,9 @@
         },
         methods: {
             loginConfirmed() {
-                this.authenticated = BearerTokenService.token || AuthService.isAuthenticated;
+                this.authenticated = AuthService.isAuthenticated;
             },
             submit() {
-                BearerTokenService.clear();
                 AuthService.clearSession();
                 this.authenticated = false;
             }
