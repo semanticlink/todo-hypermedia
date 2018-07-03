@@ -46,28 +46,46 @@ namespace Api
         /// </summary>
         public static async Task<IServiceProvider> SeedTestData(this IServiceProvider services)
         {
+            /**
+             * Get registered services before going off. Avoids loosing the IServiceProvider
+             */
             var logger = services.GetRequiredService<ILogger<Program>>();
+            var tenantStore = services.GetRequiredService<ITenantStore>();
+            var userStore = services.GetRequiredService<IUserStore>();
+            var tagStore = services.GetRequiredService<ITagStore>();
+            var todoStore = services.GetRequiredService<ITodoStore>();
 
-            logger.LogInformation("Seeding DynamoDb data");
-            
+
             var client = services.GetRequiredService<IAmazonDynamoDB>();
 
-            TableNameConstants
-                .AllTables
-                .ForEach(table => table.WaitForActiveTable(client).ConfigureAwait(false));
+            logger.LogInformation("[Seed] DynamoDb tables");
+
+            await Task.WhenAll(
+                TableNameConstants
+                    .AllTables
+                    .Select(table => table.WaitForActiveTable(client)));
+
+            logger.LogInformation("[Seed] data");
 
             //////////////////////////
             // Seed a tenant
             // =============
             //
-            var tenantStore = services.GetRequiredService<ITenantStore>();
-            var tenantId = await tenantStore.Create(new TenantCreateData
+            string tenantId = "";
+            try
             {
-                Code = "rewire.example.nz",
-                Name = "Rewire NZ",
-                Description = "A sample tenant (company/organisation)"
-            });
-            logger.LogInformation($"[Seed] tenant '{tenantId}'");
+                tenantId = await tenantStore.Create(new TenantCreateData
+                {
+                    Code = "rewire.example.nz",
+                    Name = "Rewire NZ",
+                    Description = "A sample tenant (company/organisation)"
+                });
+                logger.LogInformation($"[Seed] tenant '{tenantId}'");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             //////////////////////////
             // Seed a user
@@ -79,14 +97,37 @@ namespace Api
             // KLUDGE: taken from a precreated user and then decoded JWT through https://jwt.io
             // grab it from the Authorization header in a request
             var knownAuth0Id = "auth0|5b32b696a8c12d3b9a32b138";
+            string userId = "";
+            try
+            {
+                userId = await userStore.Create(knownAuth0Id, "test@rewire.nz", "test");
+            }
+            catch (Exception e)
+            {
+                if (e.Message.Equals("User already created"))
+                {
+                    userId = (await userStore.GetByExternalId(knownAuth0Id)).Id;
+                }
+                else
+                {
+                    Console.WriteLine(e);
+                }
+            }
+            finally
+            {
+                logger.LogInformation($"[Seed] user '{userId}'");
+            }
 
-            var userId = await services
-                .GetRequiredService<IUserStore>()
-                .Create(knownAuth0Id, "test@rewire.nz", "test");
-            logger.LogInformation($"[Seed] user '{userId}'");
-          
-            await tenantStore.AddUser(tenantId, userId);
-            logger.LogInformation($"[Seed] registered user against tenant '{tenantId}'");
+
+            try
+            {
+                await tenantStore.AddUser(tenantId, userId);
+                logger.LogInformation($"[Seed] registered user against tenant '{tenantId}'");
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e.ToString());
+            }
 
             //////////////////////////
             // Seed global tags
@@ -94,35 +135,46 @@ namespace Api
             //
             // create some global tags
             //
-            var tagStore = services.GetRequiredService<ITagStore>();
-
-            var tagIds = (await Task
-                    .WhenAll(new[] {"Work", "Personal", "Grocery List"}
-                        .Select(tag => tagStore.Create(new TagCreateData {Name = tag}))))
-                .Where(result => result != null)
-                .ToList();
-            logger.LogInformation($"[Seed] tags");
+            List<string> tagIds = new List<string>();
+            try
+            {
+                tagIds = (await Task
+                        .WhenAll(new[] {"Work", "Personal", "Grocery List"}
+                            .Select(tag => tagStore.Create(new TagCreateData {Name = tag}))))
+                    .Where(result => result != null)
+                    .ToList();
+                logger.LogInformation($"[Seed] tags");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             //////////////////////////
             // Seed some todos
             // =============
             //
-            var todoStore = services.GetRequiredService<ITodoStore>();
 
-            await todoStore.Create(new TodoCreateData {Name = "One Todo"});
-            await todoStore.Create(new TodoCreateData
+            try
             {
-                Name = "Two Todo (tag)",
-                Tags = new List<string> {tagIds.First()},
-                State = TodoState.Complete
-            });
-            await todoStore.Create(new TodoCreateData
+                await todoStore.Create(new TodoCreateData {Name = "One Todo"});
+                await todoStore.Create(new TodoCreateData
+                {
+                    Name = "Two Todo (tag)",
+                    Tags = new List<string> {tagIds.First()},
+                    State = TodoState.Complete
+                });
+                await todoStore.Create(new TodoCreateData
+                {
+                    Name = "Three Todo (tagged)",
+                    Tags = tagIds
+                });
+                logger.LogInformation($"[Seed] todos");
+            }
+            catch (Exception e)
             {
-                Name = "Three Todo (tagged)",
-                Tags = tagIds
-            });
-            logger.LogInformation($"[Seed] todos");
-
+                Console.WriteLine(e);
+            }
 
             return services;
         }

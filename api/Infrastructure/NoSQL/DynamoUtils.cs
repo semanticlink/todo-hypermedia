@@ -24,6 +24,8 @@ namespace Infrastructure.NoSQL
                 Console.WriteLine($"Waiting for table {userTableName} to become active...");
                 await Task.Delay(TimeSpan.FromSeconds(5));
             } while (!active);
+
+            Console.WriteLine($"Table {userTableName} active");
         }
 
         public static async Task<IAmazonDynamoDB> CreateTable(
