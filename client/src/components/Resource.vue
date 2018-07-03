@@ -193,7 +193,7 @@
                     .catch(/** @type {AxiosResponse|*} */response => {
                         this.$notify({
                             title: response.statusText,
-                            text: 'You can\'t delete this, sorry',
+                            text: 'You can\'t delete this.',
                             type: 'error'
                         });
                     });
