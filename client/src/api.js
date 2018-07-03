@@ -16,8 +16,7 @@ import Offline from './components/Offline.vue';
 import Login from './components/Login.vue';
 import Resource from './components/Resource.vue';
 
-import { setBearerTokenOnHeaders, setJsonWebTokenOnHeaders } from './lib/http-interceptors';
-import BearerTokenService from './lib/BearerTokenService';
+import { setJsonWebTokenOnHeaders } from './lib/http-interceptors';
 import AuthService from './lib/AuthService';
 
 import BootstrapVue from 'bootstrap-vue';
@@ -40,12 +39,6 @@ Vue.config.productionTip = false;
  */
 Vue.use(VueLocalStorage, {name: 'localStorage'});
 
-/*
- * Setup authorisation headers if already existing
- */
-if (BearerTokenService.token) {
-    setBearerTokenOnHeaders(BearerTokenService.token);
-}
 
 if (AuthService.accessToken) {
     setJsonWebTokenOnHeaders(AuthService.accessToken);

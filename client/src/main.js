@@ -22,8 +22,7 @@ import DroppableModel from './components/DroppableModel';
 import DraggableModel from './components/DraggableModel';
 import DragAndDroppableModel from './components/DragAndDroppableModel';
 
-import { setBearerTokenOnHeaders, setJsonWebTokenOnHeaders } from './lib/http-interceptors';
-import BearerTokenService from './lib/BearerTokenService';
+import { setJsonWebTokenOnHeaders } from './lib/http-interceptors';
 import AuthService from './lib/AuthService';
 
 import BootstrapVue from 'bootstrap-vue';
@@ -68,13 +67,6 @@ Vue.use(apiPlugin);
  * Allows us to access local storage via `this.$localStorage`
  */
 Vue.use(VueLocalStorage, {name: 'localStorage'});
-
-/*
- * If there is an already set authorisation bearer token then use it by default
- */
-if (BearerTokenService.token) {
-    setBearerTokenOnHeaders(BearerTokenService.token);
-}
 
 if (AuthService.accessToken) {
     setJsonWebTokenOnHeaders(AuthService.accessToken);

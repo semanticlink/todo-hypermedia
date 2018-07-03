@@ -100,29 +100,6 @@ axios.interceptors.response.use(
             return Promise.reject(error);
         }
     });
-
-/**
- * Set the bearer token in the headers for this axios instance
- */
-export const setBearerTokenOnHeaders = (token) => {
-
-    if (!token) {
-        log.info('Authentication: no access token found');
-    }
-
-    log.info('Authentication: setting access token');
-
-    axios.interceptors.request.use(
-        config => {
-            config.withCredentials = true;
-            config.headers[AUTHORIZATION_HEADER] = authorization.format({scheme: BEARER, token: token});
-            return config;
-        },
-        err => Promise.reject(err));
-    return Promise.resolve();
-
-};
-
 /**
  * Set the bearer token in the headers for this axios instance
  */
@@ -161,14 +138,6 @@ export const WWW_AUTHENTICATE_HEADER = 'www-authenticate';
 export const AUTHORIZATION_HEADER = 'Authorization';
 
 /**
- * We are using Bearer authentication exlusively here (for now)
- * @see https://tools.ietf.org/html/rfc7235
- * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
- * @type {string}
- */
-export const BEARER = 'Bearer';
-
-/**
  * We are using JSON Web Token (JWT and not Java Web Tokens) authentication  here (for now)
  * @see https://tools.ietf.org/html/rfc7235
  * @example www-authenticate: JSONWebToken realm="api", uri=http://example.com/authenticate/jwt
@@ -177,27 +146,38 @@ export const BEARER = 'Bearer';
 export const JWT = 'jwt';
 
 /**
- * Name of the realm when matching against our own api provider
- * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
- * @type {string}
- */
-export const API_REALM = 'api';
-
-/**
  * Name of the realm when matching for Auth0 provider
  * @example www-authenticate: Bearer realm="auth0", rel=authenticate, uri=http://example.com
  * @type {string}
  */
-export const AUTH0_REALM = 'api-auth0';
+export const API_AUTH0_REALM = 'api-auth0';
 
 /**
  * @class WWWAuthenticateHeader
- * @property {string} scheme
- * @property {string} token
+ * @property {string} scheme Default: jwt
+ * @property {?string} token Usually used in conjunction with scheme 'Bearer'
  * @property {string} params.realm
- * @property {string} params.rel
+ * @property {?string} params.rel
  * @property {string} params.uri
+ * @property {?string} error [invalid_request|invalid_token|insufficient_scope] these may be included
+ * @property {?string} error_description
+ * @property {?string} error_uri
+ *
+ * @see from AspNetCore Authentication JwtBearerHandler https://github.com/aspnet/Security/blob/master/src/Microsoft.AspNetCore.Authentication.JwtBearer/JwtBearerHandler.cs#L63
+ *
+ * @example
+ *
+ * Success
+ *
+ * WWW-Authenticate: jwt realm="api-auth0", uri=https://example.com/authenticate/auth0
+ *
+ * Error
+ *
+ * WWW-Authenticate: jwt realm="api-auth0", error="invalid_token", error_description="The access token expired"
+ * @see Error Codes: https://tools.ietf.org/html/rfc6750#section-3.1
  */
+
+
 
 /**
  * Looks inside the 401 response www-authenticate header and returns the header details
@@ -222,17 +202,26 @@ const parseErrorForAuthenticateHeader = error => {
     }
 
     /**
-     * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
-     * @example www-authenticate: JSONWebToken realm="api", uri=http://example.com/auth0
+     * @example www-authenticate: jwt realm="api-auth0", uri=http://example.com/authenticate/auth0
      * @type {{scheme: string, token: string, params: {realm: string, rel: string, uri: string}}}
      */
     const auth = authorization.parse(wwwAuthenticate);
 
-    if (!auth && (auth.scheme === BEARER || auth.scheme === JWT) && auth.params.rel === API_REALM) {
-        log.error(`No ${BEARER} or ${JWT} scheme on realm '${API_REALM}' with link rel found: '${wwwAuthenticate}'`);
+    if (!auth && auth.scheme === JWT && auth.params.rel === API_AUTH0_REALM) {
+        log.error(`No '${JWT}' scheme on realm '${API_AUTH0_REALM}' with link rel found: '${wwwAuthenticate}'`);
     }
 
     return auth;
+};
+
+/**
+ * Looks inside the 401 response wwww-authenticate headers to see if it is an expired token that needs renewal
+ * @param error
+ * @returns {boolean}
+ */
+export const renewToken = error => {
+    const header = parseErrorForAuthenticateHeader(error);
+    return header.error === 'invalid_token' && header.error_description === 'The access token is expired';
 };
 
 /**
@@ -241,9 +230,7 @@ const parseErrorForAuthenticateHeader = error => {
  * @param {AxiosError} error
  * @returns {WWWAuthenticateHeader.params.rel} rel
  */
-export const getBearerLinkRelation = error => {
-    return parseErrorForAuthenticateHeader(error).params.rel;
-};
+export const getBearerLinkRelation = error => parseErrorForAuthenticateHeader(error).params.rel;
 
 
 /**
@@ -252,9 +239,7 @@ export const getBearerLinkRelation = error => {
  * @param {AxiosError} error
  * @returns {WWWAuthenticateHeader.params.uri} uri
  */
-export const getAuthenticationUri = error => {
-    return parseErrorForAuthenticateHeader(error).params.uri;
-};
+export const getAuthenticationUri = error => parseErrorForAuthenticateHeader(error).params.uri;
 
 /**
  * Looks inside the 401 response www-authenticate header and gets the realm
@@ -262,9 +247,7 @@ export const getAuthenticationUri = error => {
  * @param {AxiosError} error
  * @returns {WWWAuthenticateHeader.params.realm} realm
  */
-export const getAuthenticationRealm = error => {
-    return parseErrorForAuthenticateHeader(error).params.realm;
-};
+export const getAuthenticationRealm = error => parseErrorForAuthenticateHeader(error).params.realm;
 
 /**
  * Looks inside the 401 response www-authenticate header and gets the scheme
@@ -272,9 +255,7 @@ export const getAuthenticationRealm = error => {
  * @param {AxiosError} error
  * @returns {WWWAuthenticateHeader.scheme} scheme
  */
-export const getAuthenticationScheme = error => {
-    return parseErrorForAuthenticateHeader(error).scheme;
-};
+export const getAuthenticationScheme = error => parseErrorForAuthenticateHeader(error).scheme;
 
 
 

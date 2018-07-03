@@ -186,6 +186,13 @@ export default class AuthService {
         });
     }
 
+    /**
+     * Renew the access token
+     */
+    renewToken(){
+        new Error('Not implemented');
+    }
+
 
     /**
      * Auto closes the popup window upon return from auth0

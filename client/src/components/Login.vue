@@ -16,7 +16,7 @@
         JWT,
         setJsonWebTokenOnHeaders,
         getAuthenticationRealm,
-        AUTH0_REALM
+        API_AUTH0_REALM, renewToken
     } from '../lib/http-interceptors';
     import Form from './Form.vue';
     import AuthService from "../lib/AuthService";
@@ -81,32 +81,44 @@
                             /** @type {Auth0ConfigurationRepresentation} */
                             const cfg = configuration.data;
 
-                            let authenticationRealm = getAuthenticationRealm(error);
+                            if (renewToken(error)){
 
-                            if (authenticationRealm === cfg.realm && authenticationRealm === AUTH0_REALM) {
+                                log.info('Renewing token');
 
                                 AuthService
                                     .makeFromRepresentation(cfg)
-                                    .login((err, authResult) => {
-
-                                        if (!err) {
-
-                                            if (!authResult || !authResult.accessToken) {
-                                                log.error('Json web token not returned on the key: \'accessToken\'');
-                                            } else {
-                                                // note: can't get this working as a promise so needs to be a callback
-                                                this.onSuccess(authResult.accessToken);
-                                            }
-
-                                        } else {
-                                            this.onFailure(err);
-                                        }
-
-                                    })
+                                    .renewToken();
 
                             } else {
-                                return Promise.reject(`[Authenticator] Realm mismatch: '${AUTH0_REALM}'`);
+
+                                const authenticationRealm = getAuthenticationRealm(error);
+
+                                if (authenticationRealm === cfg.realm && authenticationRealm === API_AUTH0_REALM) {
+
+                                    AuthService
+                                        .makeFromRepresentation(cfg)
+                                        .login((err, authResult) => {
+
+                                            if (!err) {
+
+                                                if (!authResult || !authResult.accessToken) {
+                                                    log.error('Json web token not returned on the key: \'accessToken\'');
+                                                } else {
+                                                    // note: can't get this working as a promise so needs to be a callback
+                                                    this.onSuccess(authResult.accessToken);
+                                                }
+
+                                            } else {
+                                                this.onFailure(err);
+                                            }
+
+                                        })
+
+                                } else {
+                                    return Promise.reject(`[Authenticator] Realm mismatch: '${API_AUTH0_REALM}'`);
+                                }
                             }
+
 
                         })
                         .catch(this.onFailure);
