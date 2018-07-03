@@ -37,7 +37,7 @@ const mapApiToUiType = type => {
             return 'check';
         case 'http://types/date':
             return 'date';
-        case 'http://types/date/time':
+        case 'http://types/datetime':
             return 'datetime';
         case 'http://types/select':
             return 'select';
