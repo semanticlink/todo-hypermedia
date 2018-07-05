@@ -9,4 +9,5 @@ namespace Toolkit.Representation.LinkedRepresentation
         [DataMember(Name = "items", Order = 20)]
         public FeedItemRepresentation[] Items { get; set; }
     }
+    
 }

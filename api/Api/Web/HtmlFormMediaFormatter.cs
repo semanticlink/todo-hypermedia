@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 using Toolkit.Representation.LinkedRepresentation;
 
@@ -44,7 +45,10 @@ namespace Api.Web
 
         public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
-            return context.HttpContext.Response.WriteAsync(this.ToHtml(context));
+            IServiceProvider serviceProvider = context.HttpContext.RequestServices;
+            var logger = serviceProvider.GetService(typeof(ILogger<UriListInputFormatter>)) as ILogger;
+
+            return context.HttpContext.Response.WriteAsync(this.ToHtml(context, logger));
         }
 
         /// <summary>
@@ -52,19 +56,18 @@ namespace Api.Web
         ///     around a resource that when the client recieves it then comes back to the server for the JSON
         ///     represntation.
         /// </summary>
-         private string ToHtml(OutputFormatterWriteContext context)
+        private string ToHtml(OutputFormatterWriteContext context, ILogger logger)
         {
             if (context.Object is LinkedRepresentation)
             {
                 var feed = context.Object as LinkedRepresentation;
 
-                
+
                 return string.Format(ResourceHtml, ToHtmlLinks(feed));
             }
             else
             {
-                // TODO: inject logging
-//                Log.Error("Unsupported representation");
+                logger.LogError("Unsupported representation");
             }
 
             return string.Empty;

@@ -13,9 +13,8 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Serialization;
-using Toolkit;
+using Morcatko.AspNetCore.JsonMergePatch;
 
 namespace Api
 {
@@ -43,11 +42,15 @@ namespace Api
                 .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
                 .AddDefaultTokenProviders();
 
-            services.AddMvc(options =>
-            {
+            services
                 // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
-                options.RespectBrowserAcceptHeader = true; // false by default
-            });
+                .AddMvc(options => options.RespectBrowserAcceptHeader = true) // default: false
+                /**
+                 * Add HTTP Patch support for JSON Merge Patch (performs partial resource updates but not JSON Patch that is part of AspNetCore)
+                 * mime type: application/merge-patch+json
+                 * see https://tools.ietf.org/html/rfc7396
+                 */
+                .AddJsonMergePatch();
 
             services
                 .AddAuthenticationWithJwtToken(Configuration)
@@ -76,15 +79,17 @@ namespace Api
                     // Important: InputFormatters are used only when [FromBody] is used 
                     // in the parameter's list of the action
                     options.InputFormatters.Add(new FormUrlEncodedMediaFormatter());
+                    options.InputFormatters.Add(new UriListInputFormatter());
+
 
                     // Content-negotitation output types
                     options.OutputFormatters.Add(new HtmlFormMediaFormatter());
+//                    options.OutputFormatters.Add(new UriListOutputFormatter());
 
                     options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
                 })
                 .AddJsonFormatters(s => s.ContractResolver = new DefaultContractResolver())
                 .AddXmlDataContractSerializerFormatters();
-
 
             services
                 .RegisterIoc(HostingEnvironment)
@@ -210,6 +215,7 @@ namespace Api
                 // paried with .AddHttpCacheHeaders middleware to the request pipeline
                 .UseHttpCacheHeaders()
                 .UseMvc()
+
                 // requires a dynamoDb instance - see readme for setup in docker
                 .MigrateDynamoDb()
                 // requires a mysql instance - see readme for setup in docker
