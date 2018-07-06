@@ -6,7 +6,7 @@ namespace Domain.Models
     /// <summary>
     ///     An immutable collection of tags that can be used across <see cref="Todo"/>s
     /// </summary>
-    [DynamoDBTable("Tag")]
+    [DynamoDBTable(TableNameConstants.Tag)]
     public class Tag
     {
         [DynamoDBHashKey] public string Id { get; set; }

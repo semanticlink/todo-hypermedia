@@ -4,7 +4,7 @@ using Amazon.DynamoDBv2.DataModel;
 
 namespace Domain.Models
 {
-    [DynamoDBTable("User")]
+    [DynamoDBTable(TableNameConstants.User)]
     public class User
     {
         [DynamoDBHashKey] public string Id { set; get; }

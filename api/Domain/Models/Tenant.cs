@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Models
 {
-    [DynamoDBTable("Tenant")]
+    [DynamoDBTable(TableNameConstants.Tenant)]
     public class Tenant
     {
         [DynamoDBHashKey] public string Id { get; set; }

@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Domain.Models;
 using Infrastructure.NoSQL;
 using Xunit;
 

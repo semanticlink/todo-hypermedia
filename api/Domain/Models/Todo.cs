@@ -5,7 +5,7 @@ using Domain.Representation.Enum;
 
 namespace Domain.Models
 {
-    [DynamoDBTable("Todo")]
+    [DynamoDBTable(TableNameConstants.Todo)]
     public class Todo
     {
         [DynamoDBHashKey] public string Id { get; set; }

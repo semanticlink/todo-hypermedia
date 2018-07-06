@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Domain.Models;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
@@ -55,6 +56,12 @@ namespace Infrastructure.NoSQL
             return ids.IsNull()
                 ? new List<T>()
                 : await context.Where<T>(new ScanCondition(HashKeyConstants.DEFAULT, ScanOperator.In, ids.Distinct().ToArray()));
+        }
+
+        public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, List<ScanCondition> scanConditions)
+            where T : class
+        {
+            return (await context.Where<T>(scanConditions)).SingleOrDefault();
         }
 
         public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, ScanCondition scanCondition)

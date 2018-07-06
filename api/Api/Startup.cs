@@ -2,6 +2,7 @@
 using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
+using Domain.Models;
 using Infrastructure.mySql;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Authorization;
