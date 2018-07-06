@@ -185,7 +185,7 @@ export const API_AUTH0_REALM = 'api-auth0';
  */
 export const INVALID_TOKEN = {
     ERROR: 'invalid_token',
-    DESCRIPTION: 'The access token is expired'
+    DESCRIPTION: 'The token is expired'
 };
 
 

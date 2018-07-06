@@ -191,6 +191,19 @@ export default class AuthService {
      */
     renewToken(){
         new Error('Not implemented');
+
+   /*     this.auth0.renewAuth({
+            audience: AUTH_CONFIG.audience,
+            redirectUri: AUTH_CONFIG.silentCallbackURL,
+            usePostMessage: true
+        }, (err, result) => {
+            if (err) {
+                //alert(`Could not get a new token using silent authentication (${err.error}).`);
+            } else {
+                //alert(`Successfully renewed auth!`);
+                this.setSession(result);
+            }
+        });*/
     }
 
 
