@@ -28,19 +28,12 @@ namespace IntegrationTests
 
             var id = await store.Create(userId, resourceId, ResourceType.Todo, Permissions.Get);
 
-            Assert.NotNull(await store.Get(userId, resourceId));
+            var userRights = await store.Get(userId, resourceId);
+            Assert.NotNull(userRights);
 
+            Assert.Equal(Permissions.Get, userRights.Rights);
+            Assert.Equal(ResourceType.Todo, userRights.Type);
             await DbProvider.Context.DeleteAsync<UserRights>(id);
-        }
-
-        [Fact]
-        public void something()
-        {
-            var j = Permissions.Get;
-            Assert.Equal(1L, (int)j);
-
-            j = Permissions.Get | Permissions.Put;
-            Assert.Equal(3, (int)j);
         }
     }
 }

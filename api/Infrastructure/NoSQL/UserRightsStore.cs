@@ -38,8 +38,8 @@ namespace Infrastructure.NoSQL
                 Id = id,
                 UserId = userId,
                 ResourceId = resourceId,
-                Rights = permissions.ToInt(),
-                Type = resourceType.ToInt()
+                Rights = permissions,
+                Type = resourceType
             };
 
             await _dbContext.SaveAsync(userRights);
@@ -52,7 +52,7 @@ namespace Infrastructure.NoSQL
             var userRight = (await Get(userId, resourceId))
                 .ThrowObjectNotFoundExceptionIfNull($"Users rights not found: '{userId}' '{resourceId}'");
 
-            userRight.Rights = permissions.ToInt();
+            userRight.Rights = permissions;
 
             await _dbContext.SaveAsync(userRight);
         }
@@ -67,14 +67,4 @@ namespace Infrastructure.NoSQL
             });
         }
     }
-}
-
-[DynamoDBTable(TableNameConstants.UserRights)]
-public class UserRights
-{
-    [DynamoDBHashKey] public string Id { get; set; }
-    public int Type { get; set; }
-    public string ResourceId { get; set; }
-    public string UserId { get; set; }
-    public long Rights { get; set; }
 }
