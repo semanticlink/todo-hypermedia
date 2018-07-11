@@ -2,26 +2,28 @@
 
 namespace Domain.Models
 {
-    public class TableNameConstants
+    public static class TableNameConstants
     {
         public const string Todo = "Todo";
         public const string Tenant = "Tenant";
         public const string User = "User";
         public const string Tag = "Tag";
-        public const string UserRights = "UserRights";
+        public const string UserRight = "UserRight";
+        public const string UserInheritRight = "UserInheritRight";
 
-        public static List<string> AllTables = new List<string>
+        public static readonly List<string> AllTables = new List<string>
         {
             Todo,
             Tenant,
             User,
             Tag,
-            UserRights
+            UserRight,
+            UserInheritRight
         };
     }
 
-    public class HashKeyConstants
+    public static class HashKeyConstants
     {
-        public const string DEFAULT = "Id";
+        public const string Default = "Id";
     }
 }

@@ -4,10 +4,10 @@ namespace Domain.Models
 {
     public static class UserRightsExtensions
     {
-        public static bool Allow(this UserRights userRights, Permissions permissions)
+        public static bool Allow(this UserRight userRight, Permission permission)
         {
-            var tryParse = Enum.TryParse<Permissions>(userRights.Rights.ToString(), out var userPerms);
-            return tryParse && userPerms.HasFlag(permissions);
+            var tryParse = Enum.TryParse<Permission>(userRight.Rights.ToString(), out var userPerms);
+            return tryParse && userPerms.HasFlag(permission);
         }
     }
 }

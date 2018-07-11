@@ -22,48 +22,89 @@ namespace Infrastructure.NoSQL
             string userId,
             string resourceId,
             ResourceType resourceType,
-            Permissions permissions)
+            Permission permission)
         {
-            var userRights = (await Get(userId, resourceId));
+            var userRight = await Get(userId, resourceId);
 
-            if (userRights.IsNotNull())
+            if (userRight.IsNotNull())
             {
-                return userRights.Id;
+                return userRight.Id;
             }
 
             var id = IdGenerator.New();
 
-            userRights = new UserRights
+            userRight = new UserRight
             {
                 Id = id,
                 UserId = userId,
                 ResourceId = resourceId,
-                Rights = permissions,
+                Rights = permission,
                 Type = resourceType
             };
 
-            await _dbContext.SaveAsync(userRights);
+            await _dbContext.SaveAsync(userRight);
 
             return id;
         }
 
-        public async void Update(string userId, string resourceId, Permissions permissions)
+        public async Task<string> CreateInherit(
+            ResourceType inheritType,
+            string userId,
+            string resourceId,
+            ResourceType resourceType,
+            Permission permission)
+        {
+            var inheritRight = await GetInherit(userId, resourceId);
+
+            if (inheritRight.IsNotNull())
+            {
+                return inheritRight.Id;
+            }
+
+            var id = IdGenerator.New();
+
+            inheritRight = new UserInheritRight
+            {
+                Id = id,
+                UserId = userId,
+                ResourceId = resourceId,
+                Rights = permission,
+                Type = resourceType,
+                InheritType = inheritType
+            };
+
+            await _dbContext.SaveAsync(inheritRight);
+
+            return id;
+        }
+
+        public async void Update(string userId, string resourceId, Permission permission)
         {
             var userRight = (await Get(userId, resourceId))
                 .ThrowObjectNotFoundExceptionIfNull($"Users rights not found: '{userId}' '{resourceId}'");
 
-            userRight.Rights = permissions;
+            userRight.Rights = permission;
 
             await _dbContext.SaveAsync(userRight);
         }
 
 
-        public async Task<UserRights> Get(string userId, string resourceId)
+        public async Task<UserRight> Get(string userId, string resourceId)
         {
-            return await _dbContext.SingleOrDefault<UserRights>(new List<ScanCondition>
+            return await Get<UserRight>(userId, resourceId);
+        }
+
+        private async Task<UserInheritRight> GetInherit(string userId, string resourceId)
+        {
+            return await Get<UserInheritRight>(userId, resourceId);
+        }
+
+        private async Task<T> Get<T>(string userId, string resourceId) where T : class
+        {
+            return await _dbContext.SingleOrDefault<T>(new List<ScanCondition>
             {
-                new ScanCondition(nameof(UserRights.UserId), ScanOperator.Equal, userId),
-                new ScanCondition(nameof(UserRights.ResourceId), ScanOperator.Equal, resourceId)
+                new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId),
+                new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId)
             });
         }
     }

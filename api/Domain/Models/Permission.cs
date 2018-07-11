@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace Domain.Models
 {
     [Flags]
-    public enum Permissions : long
+    public enum Permission : long
     {
         None = 0L,
         View = Get,

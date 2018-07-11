@@ -47,7 +47,7 @@ namespace Infrastructure.NoSQL
         {
             return (await _context.Where<Todo>(new List<ScanCondition>
                 {
-                    new ScanCondition(HashKeyConstants.DEFAULT, ScanOperator.Equal, id),
+                    new ScanCondition(HashKeyConstants.Default, ScanOperator.Equal, id),
                     new ScanCondition(nameof(Todo.Tags), ScanOperator.Contains, tagId)
                 }))
                 .FirstOrDefault();

@@ -41,13 +41,13 @@ namespace Infrastructure.NoSQL
         public static async Task<IEnumerable<T>> Where<T>(this IDynamoDBContext context, string id)
             where T : class
         {
-            return await context.Where<T>(new ScanCondition(HashKeyConstants.DEFAULT, ScanOperator.Equal, id));
+            return await context.Where<T>(new ScanCondition(HashKeyConstants.Default, ScanOperator.Equal, id));
         }
 
         public static async Task<T> WhereById<T>(this IDynamoDBContext context, string id)
             where T : class
         {
-            return await context.FirstOrDefault<T>(HashKeyConstants.DEFAULT, id);
+            return await context.FirstOrDefault<T>(HashKeyConstants.Default, id);
         }
 
         public static async Task<IEnumerable<T>> WhereByIds<T>(this IDynamoDBContext context, List<string> ids = null)
@@ -55,7 +55,7 @@ namespace Infrastructure.NoSQL
         {
             return ids.IsNull()
                 ? new List<T>()
-                : await context.Where<T>(new ScanCondition(HashKeyConstants.DEFAULT, ScanOperator.In, ids.Distinct().ToArray()));
+                : await context.Where<T>(new ScanCondition(HashKeyConstants.Default, ScanOperator.In, ids.Distinct().ToArray()));
         }
 
         public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, List<ScanCondition> scanConditions)
@@ -79,7 +79,7 @@ namespace Infrastructure.NoSQL
         public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, string id)
             where T : class
         {
-            return await context.SingleOrDefault<T>(HashKeyConstants.DEFAULT, id);
+            return await context.SingleOrDefault<T>(HashKeyConstants.Default, id);
         }
 
         public static async Task<T> FirstOrDefault<T>(this IDynamoDBContext context, ScanCondition scanCondition)
@@ -98,7 +98,7 @@ namespace Infrastructure.NoSQL
         public static async Task<T> FirstOrDefault<T>(this IDynamoDBContext context, string id)
             where T : class
         {
-            return await context.FirstOrDefault<T>(HashKeyConstants.DEFAULT, id);
+            return await context.FirstOrDefault<T>(HashKeyConstants.Default, id);
         }
     }
 }
