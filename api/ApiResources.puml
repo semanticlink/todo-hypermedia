@@ -7,16 +7,17 @@ home : version
 home +--|> tenant : tenants
 home +--|> tag : tags
 home +-left-|> todoState : states
-home --|> user : me
+home ..|> user : me
+home +--|> user : users
 
 class tag as "tag"
 tag : name
-tag --|> todo : todos
+tag +--|> todo : todos
 
 class tenant as "tenant"  <<O, #00FF00) >>
 tenant : name
 tenant +--|> user : users
-tenant --|> todo : todos
+tenant +--|> todo : todos
 
 
 class todo as "todo"   <<I, #0000FF) >>

@@ -21,7 +21,7 @@ namespace Infrastructure.NoSQL
         public async Task<string> Create(
             string userId,
             string resourceId,
-            ResourceType resourceType,
+            RightType rightType,
             Permission permission)
         {
             var userRight = await Get(userId, resourceId);
@@ -39,7 +39,7 @@ namespace Infrastructure.NoSQL
                 UserId = userId,
                 ResourceId = resourceId,
                 Rights = permission,
-                Type = resourceType
+                Type = rightType
             };
 
             await _dbContext.SaveAsync(userRight);
@@ -48,10 +48,10 @@ namespace Infrastructure.NoSQL
         }
 
         public async Task<string> CreateInherit(
-            ResourceType inheritType,
+            RightType inheritType,
             string userId,
             string resourceId,
-            ResourceType resourceType,
+            RightType rightType,
             Permission permission)
         {
             var inheritRight = await GetInherit(userId, resourceId);
@@ -69,13 +69,22 @@ namespace Infrastructure.NoSQL
                 UserId = userId,
                 ResourceId = resourceId,
                 Rights = permission,
-                Type = resourceType,
+                Type = rightType,
                 InheritType = inheritType
             };
 
             await _dbContext.SaveAsync(inheritRight);
 
             return id;
+        }
+
+        public async Task CreateRights(
+            string userId, 
+            string resourceId, 
+            IDictionary<RightType, Permission> granted,
+            InheritForm resource = null)
+        {
+            
         }
 
         public async void Update(string userId, string resourceId, Permission permission)
@@ -107,5 +116,35 @@ namespace Infrastructure.NoSQL
                 new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId)
             });
         }
+    }
+
+    public class InheritForm
+    {
+        /// <summary>
+        ///     The specific right type for the resource. Note: there can be multiple of these per resourceId
+        /// </summary>
+        public RightType Type { get; set; }
+        
+        /// <summary>
+        ///     The id (ie database) of resource (eg tenant, user, todo, tag, comment
+        /// </summary>
+        public string ResourceId { get; set; }
+        
+        /// <summary>
+        ///     The  inherit type on the resource to apply to this resource type
+        /// </summary>
+        /// <example>
+        ///    InheritTypes = new []
+        ///     {
+        ///         RightType.Todo
+        ///         RightType.Comment
+        ///     }
+        /// </example>
+        public IEnumerable<RightType> InheritedTypes { get; set; }
+        
+        /// <summary>
+        ///     The inherit rights to copy from the resource to the new resource
+        /// </summary>
+        // public IEnumerable<RightType> CopyInheritTypes { get; set; }
     }
 }
