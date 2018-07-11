@@ -4,9 +4,9 @@ Todo network of data resource types:
 
 class home as "Home/Root of the API" <<H, #00FF00) >>
 home : version
-home --|> tenant : tenants
-home --|> tag : tags
-home --|> todoState : states
+home +--|> tenant : tenants
+home +--|> tag : tags
+home +-left-|> todoState : states
 home --|> user : me
 
 class tag as "tag"
@@ -15,17 +15,16 @@ tag --|> todo : todos
 
 class tenant as "tenant"  <<O, #00FF00) >>
 tenant : name
-tenant --|> user : users
+tenant +--|> user : users
 tenant --|> todo : todos
 
 
 class todo as "todo"   <<I, #0000FF) >>
 todo : many
 todo : state
-todo --|> todoState
-todo --|> comment : comments
-todo --|> tag : tags
-todo --> todo : todos
+todo +--|> todoState
+todo +--|> comment : comments
+todo +--|> tag : tags
 
 class comment as "comment"
 comment : many
@@ -42,8 +41,8 @@ note top
   the system 
 end note
 user : name
-user --|> tenant : tenant
-user --|> todo : todos
+user +--|> tenant : tenant
+user +--|> todo : todos
 
 
 '
