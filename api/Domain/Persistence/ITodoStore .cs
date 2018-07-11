@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Persistence
 {
@@ -32,7 +31,7 @@ namespace Domain.Persistence
         Task<IEnumerable<Todo>> GetAll();
 
         /// <summary>
-        ///     Retrieve a full set of todos by <see cref="IdentityUser"/>
+        ///     Retrieve a full set of todos by <see cref="User"/>
         /// </summary>
         Task<IEnumerable<Todo>> GetByUser();
 

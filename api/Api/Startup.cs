@@ -1,15 +1,11 @@
-﻿using System.Security.Claims;
-using Amazon.DynamoDBv2;
+﻿using Amazon.DynamoDBv2;
 using Api.Web;
 using App;
 using Domain.Models;
-using Infrastructure.mySql;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Hosting;using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,16 +28,6 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddDbContext<ApplicationIdentityDbContext>()
-                .AddIdentity<IdentityUser, IdentityRole>(options =>
-                {
-                    // cross-reference to use the userId used in the JWT
-                    // see https://github.com/aspnet/Security/issues/1043
-                    options.ClaimsIdentity.UserIdClaimType = ClaimTypes.NameIdentifier;
-                })
-                .AddEntityFrameworkStores<ApplicationIdentityDbContext>()
-                .AddDefaultTokenProviders();
 
             services
                 // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
@@ -66,7 +52,7 @@ namespace Api
                     options.DefaultPolicy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
                         .AddAuthenticationSchemes( /*JwtBearerDefaults.AuthenticationScheme, */
-                            App.AuthenticatorDefaults.ExternalAuthenticationSchemeName)
+                            AuthenticatorDefaults.ExternalAuthenticationSchemeName)
                         .Build();
                 })
                 .AddMvcCore(options =>
@@ -160,8 +146,7 @@ namespace Api
 
         public void Configure(
             IApplicationBuilder app,
-            ILoggerFactory loggerFactory,
-            ApplicationIdentityDbContext db)
+            ILoggerFactory loggerFactory)
         {
             /**
              * Note: this block MUST be before app.UseMvc();
@@ -218,9 +203,7 @@ namespace Api
                 .UseMvc()
 
                 // requires a dynamoDb instance - see readme for setup in docker
-                .MigrateDynamoDb()
-                // requires a mysql instance - see readme for setup in docker
-                .MigrateIdentityDb(db);
+                .MigrateDynamoDb();
         }
     }
 

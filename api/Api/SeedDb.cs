@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 namespace Api
 {
     /// <summary>
-    ///     All code around <see cref="DbInitializer" needs to be in <see cref="Program.Main"/> to avoid
+    ///     All code around seeding <see cref="InitialiseDynamoDb"/> needs to be in called from <see cref="Program.Main"/> to avoid
     ///     problems with migrations
     /// </summary>
     public static class SeedDb

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.DataModel;
-using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Models
 {
@@ -15,7 +14,7 @@ namespace Domain.Models
         public string Description { get; set; }
         
         /// <summary>
-        ///     All user ids with access to this tenant. The current implementation uses the <see cref="UserManager{TUser}"/>
+        ///     All user ids with access to this tenant.
         ///     for the provision of users.
         /// </summary>
         public List<string> User { get; set; }

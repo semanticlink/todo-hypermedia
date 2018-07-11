@@ -3,11 +3,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using Domain.Models;
-using Infrastructure.mySql;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using App;
@@ -165,16 +163,6 @@ namespace Api.Web
             return services;
         }
 
-        /// <summary>
-        ///     A wrapper around ensuring the identity (mysql/entity) is upgraded correctly
-        /// </summary>
-        public static IApplicationBuilder MigrateIdentityDb(
-            this IApplicationBuilder app,
-            ApplicationIdentityDbContext db)
-        {
-            db.Database.EnsureCreated();
-            return app;
-        }
     }
 
     /// <summary>
