@@ -13,6 +13,7 @@ namespace Domain.Persistence
         /// </summary>
         /// <param name="todo"></param>
         Task<string> Create(TodoCreateData todo);
+        Task<string> Create(string userId, string contextId, Permission contextRights, TodoCreateData todo);
 
         /// <summary>
         ///     Retrieve a <see cref="Todo"/> based on its id
@@ -69,5 +70,10 @@ namespace Domain.Persistence
         /// <param name="tagId"><see cref="Tag.Id"/> of the tag to be searched across all todos</param>
         Task<IEnumerable<Todo>> GetByTag(string tagId);
 
+        Task<string> Create(
+            string todoCollectionId /* in this case is a userId */,
+            TodoCreateData data,
+            Permission callerRights,
+            IDictionary<RightType, Permission> callerCollectionRights);
     }
 }

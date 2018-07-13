@@ -7,35 +7,20 @@ using Xunit;
 
 namespace IntegrationTests
 {
-    public abstract class BaseProvider : IDisposable
-    {
-        
-        protected readonly DynamoDbServerTestUtils.DisposableDatabase DbProvider;
-
-        public BaseProvider()
-        {
-            DbProvider = DynamoDbServerTestUtils.CreateDatabase();
-        }
-
-        public void Dispose()
-        {
-            DbProvider.Dispose();
-        }
-    }
     /// <summary>
     ///     NOTE TO SELF: this test could be refactored to get the setup/teardown as a base class for other tests
     /// </summary>
-    public class TenantProviderTests : BaseProvider
+    public class TenantTestProviderTests : BaseTestProvider
     {
+        private readonly Func<DynamoDbServerTestUtils.DisposableDatabase, Task<TenantStore>> MakeStore =
+            async dbProvider =>
+            {
+                await TableNameConstants
+                    .Tenant
+                    .CreateTable(dbProvider.Client);
 
-        private readonly Func<DynamoDbServerTestUtils.DisposableDatabase, Task<TenantStore>> MakeStore = async dbProvider =>
-        {
-            await TableNameConstants
-                .Tenant
-                .CreateTable(dbProvider.Client);
-
-            return new TenantStore(dbProvider.Context);
-        };
+                return new TenantStore(dbProvider.Context);
+            };
 
         private readonly Func<TenantStore, Task<string>> Create = async store =>
         {

@@ -6,16 +6,16 @@ using Xunit;
 
 namespace IntegrationTests
 {
-    public class UserRightsStoreTests : BaseProvider
+    public class UserRightStoreTests : BaseTestProvider
     {
-        private readonly Func<DynamoDbServerTestUtils.DisposableDatabase, Task<UserRightsStore>> MakeStore =
+        private readonly Func<DynamoDbServerTestUtils.DisposableDatabase, Task<UserRightStore>> MakeStore =
             async dbProvider =>
             {
                 await TableNameConstants
                     .UserRight
                     .CreateTable(dbProvider.Client);
 
-                return new UserRightsStore(dbProvider.Context);
+                return new UserRightStore(dbProvider.Context);
             };
 
         [Fact]
@@ -26,9 +26,9 @@ namespace IntegrationTests
             var userId = IdGenerator.New();
             var resourceId = IdGenerator.New();
 
-            var id = await store.Create(userId, resourceId, RightType.Todo, Permission.Get);
+            var id = await store.SetRight(userId, resourceId, RightType.Todo, Permission.Get);
 
-            var userRights = await store.Get(userId, resourceId);
+            var userRights = await store.Get(userId, resourceId, RightType.Todo);
             Assert.NotNull(userRights);
 
             Assert.Equal(Permission.Get, userRights.Rights);
@@ -48,8 +48,8 @@ namespace IntegrationTests
             // seed the top level tenant resource
             var resourceId = IdGenerator.New();
 
-            await store.CreateInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant, Permission.FullCreatorOwner);
-            await store.CreateInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant, Permission.FullCreatorOwner);
+            await store.SetInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant, Permission.FullCreatorOwner);
+            await store.SetInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant, Permission.FullCreatorOwner);
         }
     }
 }

@@ -6,8 +6,8 @@ class home as "Home/Root of the API" <<H, #00FF00) >>
 home : version
 home +--|> tenant : tenants
 home +--|> tag : tags
-home +-left-|> todoState : states
-home ..|> user : me
+home #-left-|> todoState : states
+home .--|> user : me
 home +--|> user : users
 
 class tag as "tag"
@@ -23,7 +23,7 @@ tenant +--|> todo : todos
 class todo as "todo"   <<I, #0000FF) >>
 todo : many
 todo : state
-todo +--|> todoState
+todo #--|> todoState
 todo +--|> comment : comments
 todo +--|> tag : tags
 

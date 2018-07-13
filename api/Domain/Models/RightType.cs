@@ -40,7 +40,7 @@ namespace Domain.Models
         Tenant = 300,
 
         [Description("Users")] TenantUserCollection = 301,
-        [Description("Todos")] TenantTodoCollection = 301,
+        [Description("Todos")] TenantTodoCollection = 302,
 
         //////////////////////////////////////////////////////////////////////
         // 
@@ -51,8 +51,7 @@ namespace Domain.Models
         Todo = 400,
 
         [Description("Tags")] TodoTagCollection = 401,
-        [Description("Comments")] TodoCommentCollection = 401,
-
+        [Description("Comments")] TodoCommentCollection = 402,
         //////////////////////////////////////////////////////////////////////
         // 
         //  Tag

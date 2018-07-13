@@ -6,17 +6,29 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
+using NLog;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
     public class TodoStore : ITodoStore
     {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        
         private readonly IDynamoDBContext _context;
+        private readonly UserRightStore _userRightStore;
+        private readonly string _userId;
 
-        public TodoStore(IDynamoDBContext context, ITagStore tagStore)
+        public TodoStore(IDynamoDBContext context, string userId)
+            : this(context, new UserRightStore(context), userId)
+        {
+        }
+
+        public TodoStore(IDynamoDBContext context, UserRightStore userRightStore, string userId)
         {
             _context = context;
+            _userRightStore = userRightStore;
+            _userId = userId;
         }
 
         public async Task<string> Create(TodoCreateData todo)
@@ -36,6 +48,38 @@ namespace Infrastructure.NoSQL
             await _context.SaveAsync(create);
 
             return id;
+        }
+
+        public Task<string> Create(string userId, string contextId, Permission contextRights, TodoCreateData todo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<string> Create(
+            string todoCollectionId /* in this case is a userId */,
+            TodoCreateData data,
+            Permission callerRights,
+            IDictionary<RightType, Permission> callerCollectionRights)
+        {
+            var todoId = await Create(data);
+
+            await _userRightStore.CreateRights(
+                _userId,
+                todoId,
+                RightType.Todo.MakeCreateRights(callerRights, callerCollectionRights),
+                new InheritForm
+                {
+                    Type = RightType.UserTodoCollection,
+                    ResourceId = todoCollectionId,
+                    InheritedTypes = new List<RightType>
+                    {
+                        RightType.Todo,
+                        RightType.TodoCommentCollection,
+                        RightType.TodoTagCollection
+                    }
+                });
+
+            return todoId;
         }
 
         public async Task<Todo> Get(string id)
