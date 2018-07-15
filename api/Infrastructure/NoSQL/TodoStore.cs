@@ -16,19 +16,19 @@ namespace Infrastructure.NoSQL
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         
         private readonly IDynamoDBContext _context;
-        private readonly UserRightStore _userRightStore;
+        private readonly IUserRightStore _userRightStore;
         private readonly string _userId;
 
-        public TodoStore(IDynamoDBContext context, string userId)
-            : this(context, new UserRightStore(context), userId)
+        public TodoStore(IDynamoDBContext context, User user)
+            : this(context, new UserRightStore(context), user)
         {
         }
 
-        public TodoStore(IDynamoDBContext context, UserRightStore userRightStore, string userId)
+        public TodoStore(IDynamoDBContext context, IUserRightStore userRightStore, User user)
         {
             _context = context;
             _userRightStore = userRightStore;
-            _userId = userId;
+            _userId = user.Id;
         }
 
         public async Task<string> Create(TodoCreateData todo)

@@ -22,6 +22,8 @@ namespace IntegrationTests
             MakeStores =
                 async (dbProvider, userId) =>
                 {
+                    var user = new User{ Id = userId};
+                    
                     await TableNameConstants
                         .UserRight
                         .CreateTable(dbProvider.Client);
@@ -35,7 +37,7 @@ namespace IntegrationTests
                     var userRightStore = new UserRightStore(dbProvider.Context);
                     return new Tuple<UserRightStore, TodoStore>(
                         userRightStore,
-                        new TodoStore(dbProvider.Context, userRightStore, userId)
+                        new TodoStore(dbProvider.Context, userRightStore, user)
                     );
                 };
 

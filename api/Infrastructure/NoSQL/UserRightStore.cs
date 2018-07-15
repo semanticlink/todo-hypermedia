@@ -3,12 +3,13 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
+using Domain.Persistence;
 using NLog;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
-    public class UserRightStore
+    public class UserRightStore : IUserRightStore
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
@@ -207,35 +208,5 @@ namespace Infrastructure.NoSQL
                 new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId)
             });
         }
-    }
-
-    public class InheritForm
-    {
-        /// <summary>
-        ///     The specific right type for the resource. Note: there can be multiple of these per resourceId
-        /// </summary>
-        public RightType Type { get; set; }
-
-        /// <summary>
-        ///     The id (ie database) of resource (eg tenant, user, todo, tag, comment
-        /// </summary>
-        public string ResourceId { get; set; }
-
-        /// <summary>
-        ///     The  inherit type on the resource to apply to this resource type
-        /// </summary>
-        /// <example>
-        ///    InheritTypes = new []
-        ///     {
-        ///         RightType.Todo
-        ///         RightType.Comment
-        ///     }
-        /// </example>
-        public IEnumerable<RightType> InheritedTypes { get; set; }
-
-        /// <summary>
-        ///     The inherit rights to copy from the resource to the new resource
-        /// </summary>
-        public IEnumerable<RightType> CopyInheritTypes { get; set; }
     }
 }

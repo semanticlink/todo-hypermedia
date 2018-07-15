@@ -10,6 +10,7 @@ using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Toolkit;
 
 namespace Api
 {
@@ -24,17 +25,36 @@ namespace Api
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                try
+                {
+                    logger.LogInformation("[Seed] service user");
+                    Task.Run(() => services.SeedServiceUser()).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "An error occurred while seeding the service user.");
+                }
+                finally
+                {
+                    logger.LogDebug("[Seed] service user complete");
+                }
+
                 try
                 {
                     if (hostingEnvironment.IsDevelopment())
                     {
-                        services.SeedTestData().ConfigureAwait(false);
+                        logger.LogInformation("[Seed] test data");
+                        Task.Run(() => services.SeedTestData()).GetAwaiter().GetResult();
                     }
                 }
                 catch (Exception ex)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occurred while seeding the database.");
+                    logger.LogError(ex, "An error occurred while seeding the test data.");
+                }
+                finally
+                {
+                    logger.LogDebug("[Seed] test data complete");
                 }
             }
 
@@ -42,9 +62,65 @@ namespace Api
         }
 
         /// <summary>
+        ///     Ensures there is a service user with root of trust
+        /// </summary>
+        public static async Task SeedServiceUser(this IServiceProvider services)
+        {
+            /**
+             * Get registered services before going off. Avoids loosing the IServiceProvider
+             */
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            var userStore = services.GetRequiredService<IUserStore>();
+            var rightStore = services.GetRequiredService<IUserRightStore>();
+
+            var client = services.GetRequiredService<IAmazonDynamoDB>();
+
+            logger.LogInformation("[Seed] Service user");
+
+            await Task.WhenAll(
+                TableNameConstants
+                    .AllTables
+                    .Select(table => table.WaitForActiveTable(client)));
+
+            //////////////////////////
+            // Seed the root
+            // =============
+            //
+            // Register a service account using our own scheme "service|id"
+            //
+
+            var knownRootId = "service|root01";
+            var knownHomeResourceId = "0000000000000000000000000";
+            string rootId = "";
+
+            try
+            {
+                var rootUser = await userStore.GetByExternalId(knownRootId);
+                rootId = rootUser.IsNull()
+                    ? await userStore.Create(knownRootId, "root@rewire.nz", "Service Account")
+                    : rootUser.Id;
+                logger.LogInformation("[Seed] service user {0}", rootId);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "");
+            }
+
+            await rightStore.CreateRights(
+                rootId,
+                knownHomeResourceId,
+                new Dictionary<RightType, Permission>
+                {
+                    {RightType.Root, Permission.ControlAccess | Permission.CreatorOwner},
+                    {RightType.RootTenantCollection, Permission.ControlAccess | Permission.CreatorOwner},
+                    {RightType.RootUserCollection, Permission.ControlAccess | Permission.CreatorOwner},
+                });
+        }
+
+        /// <summary>
         ///     Creates a tenant, user on the tenant and some todos with tags
         /// </summary>
-        public static async Task<IServiceProvider> SeedTestData(this IServiceProvider services)
+        public static async Task SeedTestData(this IServiceProvider services)
         {
             /**
              * Get registered services before going off. Avoids loosing the IServiceProvider
@@ -84,7 +160,7 @@ namespace Api
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                logger.LogError(e, "");
             }
 
             //////////////////////////
@@ -110,7 +186,7 @@ namespace Api
                 }
                 else
                 {
-                    Console.WriteLine(e);
+                    logger.LogError(e, "");
                 }
             }
             finally
@@ -147,7 +223,7 @@ namespace Api
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                logger.LogError(e, "");
             }
 
             //////////////////////////
@@ -173,10 +249,8 @@ namespace Api
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                logger.LogError(e, "");
             }
-
-            return services;
         }
     }
 }

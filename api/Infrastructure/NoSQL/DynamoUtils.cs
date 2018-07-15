@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using NLog;
 
 namespace Infrastructure.NoSQL
 {
     public static class DynamoUtils
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+        
         public static async Task WaitForActiveTable(this string userTableName, IAmazonDynamoDB client)
         {
             bool active;
@@ -21,11 +24,11 @@ namespace Infrastructure.NoSQL
                     active = false;
                 }
 
-                Console.WriteLine($"Waiting for table {userTableName} to become active...");
-                await Task.Delay(TimeSpan.FromSeconds(5));
+                Log.Debug($"Waiting for table {userTableName} to become active...");
+                await Task.Delay(TimeSpan.FromSeconds(1));
             } while (!active);
 
-            Console.WriteLine($"Table {userTableName} active");
+            Log.Debug($"Table {userTableName} active");
         }
 
         public static async Task<IAmazonDynamoDB> CreateTable(
@@ -59,18 +62,18 @@ namespace Infrastructure.NoSQL
                     WriteCapacityUnits = writeCapacityUnits
                 }
             );
-            Console.WriteLine($"Building table: {TableName}");
+            Log.Debug($"Building table: {TableName}");
             try
             {
                 var result = await client.CreateTableAsync(request);
-                Console.WriteLine($"Table created: {TableName}");
+                Log.Debug($"Table created: {TableName}");
             }
             catch (ResourceInUseException)
             {
                 // Table already created, just describe it
-                Console.WriteLine($"Table already exists: {TableName}");
+                Log.Debug($"Table already exists: {TableName}");
                 var result = await client.DescribeTableAsync(TableName);
-                Console.WriteLine($"Using: {result.Table.TableName} ");
+                Log.Debug($"Using: {result.Table.TableName} ");
             }
 
             return client;
