@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Domain;
 using Domain.Models;
 using Domain.Persistence;
 using Toolkit;
@@ -12,10 +13,12 @@ namespace Infrastructure.NoSQL
     public class UserStore : IUserStore
     {
         private readonly IDynamoDBContext _context;
+        private readonly IIdGenerator _idGenerator;
 
-        public UserStore(IDynamoDBContext context)
+        public UserStore(IDynamoDBContext context, IIdGenerator idGenerator)
         {
             _context = context;
+            _idGenerator = idGenerator;
         }
 
         public async Task<string> Create(string externalId, string email, string name)
@@ -28,7 +31,7 @@ namespace Infrastructure.NoSQL
 
             var create = new User
             {
-                Id = IdGenerator.New(),
+                Id = _idGenerator.New(),
                 ExternalIds = new List<string> {externalId},
                 Email = email,
                 Name = name,

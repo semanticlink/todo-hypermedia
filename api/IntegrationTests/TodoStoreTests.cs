@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Domain.Models;
 using Domain.Persistence;
-using Infrastructure.NoSQL;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,7 +17,7 @@ namespace IntegrationTests
         [Fact]
         public async Task LoadTodo()
         {
-            var userId = IdGenerator.New();
+            var userId =  NewId();
             Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
             var todoStore = Get<ITodoStore>();
 
@@ -35,7 +34,7 @@ namespace IntegrationTests
         [Fact]
         public async Task Tagging()
         {
-            var userId = IdGenerator.New();
+            var userId = NewId();
             Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
             var todoStore = Get<ITodoStore>();
             var tagStore = Get<ITagStore>();

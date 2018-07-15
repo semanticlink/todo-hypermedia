@@ -5,7 +5,6 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
 using Domain.Persistence;
-using Infrastructure.NoSQL;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
@@ -32,14 +31,14 @@ namespace IntegrationTests
             //   - todo collection context
             //   - todo (that we want to created)
 
-            var userId = IdGenerator.New();
-            
+            var userId = NewId();
+
             Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
 
             var userRightStore = Get<IUserRightStore>();
             var todoStore = Get<ITodoStore>();
 
-            var contextResourceId = IdGenerator.New();
+            var contextResourceId = NewId();
 
             var createData = new TodoCreateData
             {

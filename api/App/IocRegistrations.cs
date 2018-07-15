@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Domain;
 using Domain.Persistence;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
@@ -11,14 +12,26 @@ namespace App
 {
     public static class IocRegistrations
     {
-        public static IServiceCollection RegisterIoc(this IServiceCollection services, IHostingEnvironment env)
+        /// <summary>
+        ///     All the services that are required for the Api to run. This is a wrapper bundling all the
+        ///     services so that the bundling is in the same file as the groupings of registrations. 
+        /// </summary>
+        /// <remarks>
+        ///     Test libraries will replicate this bundling for themselves picking and choosing as needed.
+        /// </remarks>
+        public static IServiceCollection RegisterApiIoc(this IServiceCollection services, IHostingEnvironment env)
         {
             return services
                 .RegisterInfrastructure(env.IsDevelopment())
-                .RegisterServices()
+                .RegisterApiServices()
                 .RegisterRespositories();
         }
 
+        /// <summary>
+        ///     Register the infrastructure/integration points for the system (eg databases, mail)
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="isDevelopment">Set to true to point at the locally deployed database</param>
         public static IServiceCollection RegisterInfrastructure(
             this IServiceCollection services,
             bool isDevelopment)
@@ -34,10 +47,22 @@ namespace App
                 : new AmazonDynamoDBClient());
             services.AddSingleton<IDynamoDBContext, DynamoDBContext>();
 
+            /**
+             * Register an Id generator for use through repositories (and tests)
+             */
+            services.AddSingleton<IIdGenerator, IdGenerator>();
+
             return services;
         }
 
-        public static IServiceCollection RegisterServices(this IServiceCollection services)
+        /// <summary>
+        ///     These services should only be registered in the context of a server because they require the
+        ///     <see cref="HttpContext"/>.
+        /// </summary>
+        /// <remarks>
+        ///    Test libraries will need to create each of these registrations for themselves.
+        /// </remarks>
+        public static IServiceCollection RegisterApiServices(this IServiceCollection services)
         {
             /**
              * Register up the user off the context of the Bearer --> Identity (external) --> User (internal)
@@ -53,6 +78,12 @@ namespace App
             return services;
         }
 
+        /// <summary>
+        ///     Register all the persistence layer services (eg repositories/stores)
+        /// </summary>
+        /// <remarks>
+        ///    Most of these services will *also* require other services that are not registered in here (eg id generators, time, currency)
+        /// </remarks>
         public static IServiceCollection RegisterRespositories(this IServiceCollection services)
         {
             /**

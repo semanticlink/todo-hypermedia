@@ -65,11 +65,11 @@
     import axios from 'axios';
     import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
     import { makeButtonOnLinkifyLinkRels } from "../filters/makeButtonOnLinkifyLinkRels";
-    import { link, SemanticLink } from 'semanticLink';
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
     import { copyToClipboard, saveToFile } from "../lib/raw-helpers";
+    import { get, _delete, LinkedRepresentation, CollectionRepresentation, getUri } from 'semantic-link';
 
 
     export default {
@@ -123,7 +123,7 @@
              */
             getForm(rel) {
                 const vm = this;
-                link.get(this.representation, rel)
+                get(this.representation, rel)
                     .then(response => {
                         vm.formRepresentation = response.data;
                     });
@@ -140,7 +140,7 @@
              */
             tryDelete(rel) {
 
-                return link.delete(this.representation, /^self$/)
+                return _delete(this.representation, /^self$/)
                     .then(/** @type {AxiosResponse|Error} */response => {
 
                         // appropriate repsonses from a deleted resource
@@ -153,7 +153,7 @@
                             }
 
                             // check that it has in fact been deleted
-                            return link.get(this.representation, /^self$/)
+                            return get(this.representation, /^self$/)
                             // it is an error if it succeeds
                                 .then(() => this.$notify({
                                     type: 'error',
@@ -163,7 +163,7 @@
                                     // success if it isn't found or no content
                                     if (response.status === 404 || response.status === 204) {
 
-                                        const uri = SemanticLink.getUri(this.representation, /up/) || '/';
+                                        const uri = getUri(this.representation, /up/) || '/';
 
                                         this.$notify({
                                             type: 'success',

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Domain;
 using Domain.Models;
 using Domain.Persistence;
 using NLog;
@@ -17,23 +18,20 @@ namespace Infrastructure.NoSQL
         
         private readonly IDynamoDBContext _context;
         private readonly IUserRightStore _userRightStore;
+        private readonly IIdGenerator _idGenerator;
         private readonly string _userId;
 
-        public TodoStore(IDynamoDBContext context, User user)
-            : this(context, new UserRightStore(context), user)
-        {
-        }
-
-        public TodoStore(IDynamoDBContext context, IUserRightStore userRightStore, User user)
+        public TodoStore(IDynamoDBContext context, IUserRightStore userRightStore, User user, IIdGenerator idGenerator)
         {
             _context = context;
             _userRightStore = userRightStore;
+            _idGenerator = idGenerator;
             _userId = user.Id;
         }
 
         public async Task<string> Create(TodoCreateData todo)
         {
-            var id = IdGenerator.New();
+            var id = _idGenerator.New();
             var create = new Todo
             {
                 Id = id,

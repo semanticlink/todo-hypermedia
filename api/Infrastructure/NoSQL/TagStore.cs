@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
+using Domain;
 using Domain.Models;
 using Domain.Persistence;
 using Toolkit;
@@ -12,10 +13,12 @@ namespace Infrastructure.NoSQL
     public class TagStore : ITagStore
     {
         private readonly IDynamoDBContext _context;
+        private readonly IIdGenerator _idGenerator;
 
-        public TagStore(IDynamoDBContext context)
+        public TagStore(IDynamoDBContext context, IIdGenerator idGenerator)
         {
             _context = context;
+            _idGenerator = idGenerator;
         }
 
         public async Task<string> Create(TagCreateData createData)
@@ -33,7 +36,7 @@ namespace Infrastructure.NoSQL
             var now = DateTime.UtcNow;
             var create = new Tag
             {
-                Id = IdGenerator.New(),
+                Id = _idGenerator.New(),
                 Name = createData.Name,
                 // initialise the counter (note: adding a tag to the global set is not the same adding to a todo)
                 CreatedAt = now,

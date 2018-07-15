@@ -62,12 +62,13 @@
 
 <script>
     import { mapApiToUiType } from '../lib/form-type-mappings';
-    import { link, SemanticLink } from "semanticLink";
     import { Datetime } from 'vue-datetime';
     import { DateTime as LuxonDateTime } from 'luxon'
     // You need a specific loader for CSS files
     import 'vue-datetime/dist/vue-datetime.css'
     import FormService from "../lib/FormService";
+    import { filter, getUri } from 'semantic-link';
+
 
     export default {
         name: "Form",
@@ -170,7 +171,7 @@
              */
             submitTitle() {
                 // KLUDGE: only support one/first submit link rel d
-                const [link, ..._] = SemanticLink.filter(this.formRepresentation, /^submit$/);
+                const [link] = filter(this.formRepresentation, /^submit$/);
                 return (link || {}).title || 'Submit';
             }
         },
@@ -199,7 +200,7 @@
                             // scope it here otherwise SemanticLink looks to loose scope (??) in the setTimeout
                             const returnUri = response.status === 201
                                 ? response.headers.location
-                                : SemanticLink.getUri(links, rel);
+                                : getUri(links, rel);
 
                             setTimeout(() => {
                                 window.location = returnUri;

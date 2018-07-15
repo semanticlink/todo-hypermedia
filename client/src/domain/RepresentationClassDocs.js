@@ -2,6 +2,8 @@
  * This is a documentation file of the client-side artifact representations
  */
 
+import { LinkedRepresentation, CollectionRepresentation} from 'semantic-link';
+
 /**
  * @class ApiRepresentation
  * @extends LinkedRepresentation

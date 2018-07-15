@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using App;
+using Domain;
 using Domain.Models;
 using Infrastructure.NoSQL;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,10 +69,15 @@ namespace IntegrationTests
             return ServiceProvider.GetService<T>();
         }
 
-        protected void Register(Action<ServiceCollection> action)
+        protected void Register(Action<ServiceCollection> iocRegistration)
         {
-            action(_services);
+            iocRegistration(_services);
             ServiceProvider = _services.BuildServiceProvider();
+        }
+
+        protected string NewId()
+        {
+            return ServiceProvider.GetService<IIdGenerator>().New();
         }
 
         protected IDynamoDBContext Context => ServiceProvider.GetService<IDynamoDBContext>();

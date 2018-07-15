@@ -1,6 +1,7 @@
-import { SemanticLink, link, _ } from 'semanticLink';
+import { _ } from 'semanticLink';
 import axios from 'axios';
 import { getAuthenticationUri, getBearerLinkRelation } from '../lib/http-interceptors';
+import { filter, matches, post, put, get } from 'semantic-link';
 
 /**
  * A form has the job to POST to a collection or PUT to an item (this is by convention).
@@ -51,7 +52,7 @@ export default class FormService {
      * @return {boolean}
      */
     static hasSubmitLinkRel(form) {
-        return SemanticLink.matches(form, /^submit$/);
+        return matches(form, /^submit$/);
     }
 
     /**
@@ -70,11 +71,11 @@ export default class FormService {
          * @return {string}
          **/
         function verb(form) {
-            const [weblink, ..._] = SemanticLink.filter(form, /^submit$/);
+            const [weblink] = filter(form, /^submit$/);
             if (weblink) {
-                return (weblink || {}).method || 'post';
+                return /*(weblink || {}).method ||*/ post;
             } else {
-                return 'put';
+                return put;
             }
         }
 
@@ -92,7 +93,7 @@ export default class FormService {
         const putOrPost = verb(form);
         const obj = pickFieldsFromForm(data, form);
 
-        return link[putOrPost](links, rel, 'application/json', obj);
+        return putOrPost(links, rel, 'application/json', obj);
     }
 
     /**
@@ -105,9 +106,9 @@ export default class FormService {
      */
     static loadFormFrom401BearerChallenge(error) {
         return axios.get(getAuthenticationUri(error))
-            .then(response => link.get(response.data, getBearerLinkRelation(error)))
+            .then(response => get(response.data, getBearerLinkRelation(error)))
             .then(authenticateCollection => {
-                return link.get(authenticateCollection.data, /create-form/)
+                return get(authenticateCollection.data, /create-form/)
                     .then(authenticateLoginRepresentation => {
                         return [
                             authenticateLoginRepresentation.data,

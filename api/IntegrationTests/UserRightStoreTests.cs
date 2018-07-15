@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Domain.Models;
 using Domain.Persistence;
-using Infrastructure.NoSQL;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,8 +17,8 @@ namespace IntegrationTests
         {
             var store = Get<IUserRightStore>();
 
-            var userId = IdGenerator.New();
-            var resourceId = IdGenerator.New();
+            var userId = NewId();
+            var resourceId = NewId();
 
             var id = await store.SetRight(userId, resourceId, RightType.Todo, Permission.Get);
 
@@ -37,11 +36,11 @@ namespace IntegrationTests
             var store = Get<IUserRightStore>();
 
             // seed the tenant owner
-            var ownerId = IdGenerator.New();
-            var tenantUserId = IdGenerator.New();
+            var ownerId = NewId();
+            var tenantUserId = NewId();
 
             // seed the top level tenant resource
-            var resourceId = IdGenerator.New();
+            var resourceId =  NewId();
 
             await store.SetInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant,
                 Permission.FullCreatorOwner);

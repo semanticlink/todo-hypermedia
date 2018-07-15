@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Domain;
 using Domain.Models;
 using Domain.Persistence;
 using NLog;
@@ -14,10 +15,12 @@ namespace Infrastructure.NoSQL
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
         private readonly IDynamoDBContext _dbContext;
+        private readonly IIdGenerator _idGenerator;
 
-        public UserRightStore(IDynamoDBContext dbContext)
+        public UserRightStore(IDynamoDBContext dbContext, IIdGenerator idGenerator)
         {
             _dbContext = dbContext;
+            _idGenerator = idGenerator;
         }
 
         public async Task<string> SetRight(
@@ -34,7 +37,7 @@ namespace Infrastructure.NoSQL
                 return userRight.Id;
             }
 
-            var id = IdGenerator.New();
+            var id = _idGenerator.New();
 
             userRight = new UserRight
             {
@@ -67,7 +70,7 @@ namespace Infrastructure.NoSQL
                 return inheritRight.Id;
             }
 
-            var id = IdGenerator.New();
+            var id = _idGenerator.New();
 
             inheritRight = new UserInheritRight
             {

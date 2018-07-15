@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Domain;
 using Domain.Models;
 using Domain.Persistence;
 using Toolkit;
@@ -13,10 +14,12 @@ namespace Infrastructure.NoSQL
     public class TenantStore : ITenantStore
     {
         private readonly IDynamoDBContext _context;
+        private readonly IIdGenerator _idGenerator;
 
-        public TenantStore(IDynamoDBContext context)
+        public TenantStore(IDynamoDBContext context, IIdGenerator idGenerator)
         {
             _context = context;
+            _idGenerator = idGenerator;
         }
 
         public async Task<string> Create(TenantCreateData tenant)
@@ -27,7 +30,7 @@ namespace Infrastructure.NoSQL
             
             var create = new Tenant
             {
-                Id = IdGenerator.New(),
+                Id = _idGenerator.New(),
                 Name = tenant.Name,
                 Code = tenant.Code,
                 Description = tenant.Description,
