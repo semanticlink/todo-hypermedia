@@ -1,86 +1,66 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Domain.Models;
+using Domain.Persistence;
 using Infrastructure.NoSQL;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    public class TodoStoreTests
+    public class TodoStoreTests : BaseTestProvider
     {
+        public TodoStoreTests(ITestOutputHelper outputHelper) : base(outputHelper)
+        {
+        }
+
         [Fact]
         public async Task LoadTodo()
         {
-            using (var dbProvider = DynamoDbServerTestUtils.CreateDatabase())
-            {
-                await TableNameConstants
-                    .Todo
-                    .CreateTable(dbProvider.Client);
-                await TableNameConstants
-                    .Tag
-                    .CreateTable(dbProvider.Client);
-                await TableNameConstants
-                    .UserRight
-                    .CreateTable(dbProvider.Client);
-                await TableNameConstants
-                    .UserInheritRight
-                    .CreateTable(dbProvider.Client);
-                await TableNameConstants
-                    .User
-                    .CreateTable(dbProvider.Client);
+            var userId = IdGenerator.New();
+            Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
+            var todoStore = Get<ITodoStore>();
 
-                var user = new User();
 
-                var todoStore = new TodoStore(dbProvider.Context, new UserRightStore(dbProvider.Context), user);
+            var id = await todoStore.Create(new TodoCreateData {Name = "baba"});
 
-                var id = await todoStore.Create(new TodoCreateData {Name = "baba"});
+            var todo = await todoStore.Get(id);
 
-                var todo = await todoStore.Get(id);
+            Assert.Equal("baba", todo.Name);
 
-                Assert.Equal("baba", todo.Name);
-
-                await todoStore.Delete(id);
-            }
+            await todoStore.Delete(id);
         }
 
         [Fact]
         public async Task Tagging()
         {
-            using (var dbProvider = DynamoDbServerTestUtils.CreateDatabase())
-            {
-                await TableNameConstants
-                    .Todo
-                    .CreateTable(dbProvider.Client);
-                await TableNameConstants
-                    .Tag
-                    .CreateTable(dbProvider.Client);
-
-                var tagStore = new TagStore(dbProvider.Context);
-                var user = new User();
-
-                var todoStore = new TodoStore(dbProvider.Context, new UserRightStore(dbProvider.Context), user);
-
-                var s = await Task
-                    .WhenAll(new[] {"Work", "Play"}
-                        .Select(async tag => await tagStore.Create(new TagCreateData {Name = tag})));
-
-                var tagIds = s
-                    .Where(result => result != null)
-                    .ToList();
+            var userId = IdGenerator.New();
+            Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
+            var todoStore = Get<ITodoStore>();
+            var tagStore = Get<ITagStore>();
 
 
-                var id = await todoStore.Create(new TodoCreateData {Name = "Todo with tags", Tags = tagIds});
+            var s = await Task
+                .WhenAll(new[] {"Work", "Play"}
+                    .Select(async tag => await tagStore.Create(new TagCreateData {Name = tag})));
 
-                var todo = await todoStore.Get(id);
+            var tagIds = s
+                .Where(result => result != null)
+                .ToList();
 
-                Assert.Equal("Todo with tags", todo.Name);
 
-                tagIds.ForEach(tag => Assert.Contains(tag, todo.Tags));
+            var id = await todoStore.Create(new TodoCreateData {Name = "Todo with tags", Tags = tagIds});
 
-                await Task.WhenAll(tagIds.Select(tag => tagStore.Delete(tag)));
+            var todo = await todoStore.Get(id);
 
-                await todoStore.Delete(id);
-            }
+            Assert.Equal("Todo with tags", todo.Name);
+
+            tagIds.ForEach(tag => Assert.Contains(tag, todo.Tags));
+
+            await Task.WhenAll(tagIds.Select(tag => tagStore.Delete(tag)));
+
+            await todoStore.Delete(id);
         }
     }
 }

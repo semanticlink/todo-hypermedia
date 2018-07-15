@@ -1,27 +1,22 @@
-using System;
 using System.Threading.Tasks;
 using Domain.Models;
+using Domain.Persistence;
 using Infrastructure.NoSQL;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
     public class UserRightStoreTests : BaseTestProvider
     {
-        private readonly Func<DynamoDbServerTestUtils.DisposableDatabase, Task<UserRightStore>> MakeStore =
-            async dbProvider =>
-            {
-                await TableNameConstants
-                    .UserRight
-                    .CreateTable(dbProvider.Client);
-
-                return new UserRightStore(dbProvider.Context);
-            };
+        public UserRightStoreTests(ITestOutputHelper output) : base(output)
+        {
+        }
 
         [Fact]
         public async Task LoadUserRight()
         {
-            var store = await MakeStore(DbProvider);
+            var store = Get<IUserRightStore>();
 
             var userId = IdGenerator.New();
             var resourceId = IdGenerator.New();
@@ -33,23 +28,25 @@ namespace IntegrationTests
 
             Assert.Equal(Permission.Get, userRights.Rights);
             Assert.Equal(RightType.Todo, userRights.Type);
-            await DbProvider.Context.DeleteAsync<UserRight>(id);
+            await Context.DeleteAsync<UserRight>(id);
         }
 
         [Fact]
         public async Task CreateUserRightWithNoInheritance()
         {
-            var store = await MakeStore(DbProvider);
+            var store = Get<IUserRightStore>();
 
             // seed the tenant owner
             var ownerId = IdGenerator.New();
             var tenantUserId = IdGenerator.New();
-            
+
             // seed the top level tenant resource
             var resourceId = IdGenerator.New();
 
-            await store.SetInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant, Permission.FullCreatorOwner);
-            await store.SetInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant, Permission.FullCreatorOwner);
+            await store.SetInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant,
+                Permission.FullCreatorOwner);
+            await store.SetInherit(RightType.Tenant, ownerId, resourceId, RightType.Tenant,
+                Permission.FullCreatorOwner);
         }
     }
 }

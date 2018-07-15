@@ -1,11 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
+using Domain.Persistence;
 using Infrastructure.NoSQL;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,30 +17,6 @@ namespace IntegrationTests
         public TodoUserRightsTests(ITestOutputHelper output) : base(output)
         {
         }
-
-        private readonly Func<DynamoDbServerTestUtils.DisposableDatabase, string, Task<Tuple<UserRightStore, TodoStore>>
-            >
-            MakeStores =
-                async (dbProvider, userId) =>
-                {
-                    var user = new User{ Id = userId};
-                    
-                    await TableNameConstants
-                        .UserRight
-                        .CreateTable(dbProvider.Client);
-                    await TableNameConstants
-                        .Todo
-                        .CreateTable(dbProvider.Client);
-                    await TableNameConstants
-                        .Tag
-                        .CreateTable(dbProvider.Client);
-
-                    var userRightStore = new UserRightStore(dbProvider.Context);
-                    return new Tuple<UserRightStore, TodoStore>(
-                        userRightStore,
-                        new TodoStore(dbProvider.Context, userRightStore, user)
-                    );
-                };
 
         [Theory]
         [InlineData(Permission.Get, Permission.Get, Permission.Post, false)]
@@ -56,11 +33,11 @@ namespace IntegrationTests
             //   - todo (that we want to created)
 
             var userId = IdGenerator.New();
+            
+            Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
 
-            var stores = await MakeStores(DbProvider, userId);
-            var userRightStore = stores.Item1;
-            var todoStore = stores.Item2;
-
+            var userRightStore = Get<IUserRightStore>();
+            var todoStore = Get<ITodoStore>();
 
             var contextResourceId = IdGenerator.New();
 
@@ -85,12 +62,12 @@ namespace IntegrationTests
             // Results
             //  - find number of user rights and inherited rights
             //  - then, would the user be granted access?
-            var userRights = await DbProvider.Context.ScanAsync<UserRight>(new List<ScanCondition>
+            var userRights = await Context.ScanAsync<UserRight>(new List<ScanCondition>
                 {
                     new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId)
                 })
                 .GetRemainingAsync();
-            var userInheritRights = await DbProvider.Context.ScanAsync<UserInheritRight>(new List<ScanCondition>
+            var userInheritRights = await Context.ScanAsync<UserInheritRight>(new List<ScanCondition>
                 {
                     new ScanCondition(nameof(UserInheritRight.UserId), ScanOperator.Equal, userId)
                 })
@@ -104,10 +81,10 @@ namespace IntegrationTests
             Assert.Equal(allow, resourceRights.Allow(requiredPermission));
 
             // Clean up
-            await Task.WhenAll(userRights.Select(right => DbProvider.Context.DeleteAsync<UserRight>(right.Id)));
+            await Task.WhenAll(userRights.Select(right => Context.DeleteAsync<UserRight>(right.Id)));
             await Task.WhenAll(userInheritRights.Select(right =>
-                DbProvider.Context.DeleteAsync<UserInheritRight>(right.Id)));
-            await DbProvider.Context.DeleteAsync<Todo>(todoId);
+                Context.DeleteAsync<UserInheritRight>(right.Id)));
+            await Context.DeleteAsync<Todo>(todoId);
         }
     }
 }

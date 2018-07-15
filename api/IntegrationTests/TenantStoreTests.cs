@@ -2,27 +2,19 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Models;
-using Infrastructure.NoSQL;
+using Domain.Persistence;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace IntegrationTests
 {
-    /// <summary>
-    ///     NOTE TO SELF: this test could be refactored to get the setup/teardown as a base class for other tests
-    /// </summary>
     public class TenantTestProviderTests : BaseTestProvider
     {
-        private readonly Func<DynamoDbServerTestUtils.DisposableDatabase, Task<TenantStore>> MakeStore =
-            async dbProvider =>
-            {
-                await TableNameConstants
-                    .Tenant
-                    .CreateTable(dbProvider.Client);
+        public TenantTestProviderTests(ITestOutputHelper output) : base(output)
+        {
+        }
 
-                return new TenantStore(dbProvider.Context);
-            };
-
-        private readonly Func<TenantStore, Task<string>> Create = async store =>
+        private readonly Func<ITenantStore, Task<string>> Create = async store =>
         {
             var tenantCreateData = new TenantCreateData
             {
@@ -36,7 +28,7 @@ namespace IntegrationTests
         [Fact]
         public async Task LoadTenant()
         {
-            var tenantStore = await MakeStore(DbProvider);
+            var tenantStore = Get<ITenantStore>();
             var id = await Create(tenantStore);
             var tenant = await tenantStore.Get(id);
 
@@ -44,13 +36,13 @@ namespace IntegrationTests
             Assert.Equal("baba", tenant.Name);
             Assert.Equal("new one", tenant.Description);
 
-            await DbProvider.Context.DeleteAsync<Tenant>(id);
+            await Context.DeleteAsync<Tenant>(id);
         }
 
         [Fact]
         public async Task UserRemoveUser()
         {
-            var tenantStore = await MakeStore(DbProvider);
+            var tenantStore = Get<ITenantStore>();
             var id = await Create(tenantStore);
             var tenant = await tenantStore.Get(id);
 
@@ -68,7 +60,7 @@ namespace IntegrationTests
             tenant = await tenantStore.Get(id);
             Assert.DoesNotContain(userId, tenant.User ?? new List<string>());
 
-            await DbProvider.Context.DeleteAsync<Tenant>(id);
+            await Context.DeleteAsync<Tenant>(id);
         }
     }
 }
