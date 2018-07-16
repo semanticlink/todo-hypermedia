@@ -6,24 +6,41 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Domain;
 using Domain.Models;
 using Domain.Persistence;
+using Domain.Representation;
+using NLog;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
     public class UserStore : IUserStore
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
         private readonly IDynamoDBContext _context;
         private readonly IIdGenerator _idGenerator;
+        private readonly User _user;
 
-        public UserStore(IDynamoDBContext context, IIdGenerator idGenerator)
+        public UserStore(IDynamoDBContext context, IIdGenerator idGenerator, User user)
         {
             _context = context;
             _idGenerator = idGenerator;
+            _user = user;
         }
 
-        public async Task<string> Create(string externalId, string email, string name)
+        public async Task<string> Create(string identityId, UserCreateDataRepresentation data)
         {
-            (await GetByExternalId(externalId))
+            return await CreateByUser(_user, identityId, data);
+        }
+
+        /// <summary>
+        ///     This method should only be external called when using the a trusted user through trusted code
+        ///     because it overrides the injected user from the context.
+        /// </summary>
+        /// <remarks>
+        ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
+        /// </remarks>
+        public async Task<string> CreateByUser(User user, string identityId, UserCreateDataRepresentation data)
+        {
+            (await GetByExternalId(identityId))
                 .ThrowInvalidDataExceptionIfNotNull("User already created");
 
             // KLUDGE: both need to be injected
@@ -32,12 +49,15 @@ namespace Infrastructure.NoSQL
             var create = new User
             {
                 Id = _idGenerator.New(),
-                ExternalIds = new List<string> {externalId},
-                Email = email,
-                Name = name,
+                ExternalIds = new List<string> {identityId},
+                Email = data.Email,
+                Name = data.Name,
+                CreatedBy = user.Id,
                 CreatedAt = now,
                 UpdatedAt = now
             };
+
+            Log.TraceFormat("New user {0} created by user {1}", create.Id, user.Id);
 
             await _context.SaveAsync(create);
 
@@ -75,6 +95,8 @@ namespace Infrastructure.NoSQL
 
             updater(user);
             user.Id = id;
+            user.UpdateBy = _user.Id;
+            user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveAsync(user);
         }

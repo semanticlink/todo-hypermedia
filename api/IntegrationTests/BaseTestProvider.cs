@@ -75,6 +75,19 @@ namespace IntegrationTests
             ServiceProvider = _services.BuildServiceProvider();
         }
 
+        /// <summary>
+        ///     Register a new user to be injected and get the id for use in the tests.
+        /// </summary>
+        /// <remarks>
+        ///    This emulates the http context of an authenticated user.
+        /// </remarks>
+        protected string RegisterUser()
+        {
+            var userId = NewId();
+            Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
+            return userId;
+        }
+
         protected string NewId()
         {
             return ServiceProvider.GetService<IIdGenerator>().New();

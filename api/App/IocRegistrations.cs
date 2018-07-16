@@ -2,6 +2,7 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Domain;
+using Domain.Models;
 using Domain.Persistence;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
@@ -70,7 +71,8 @@ namespace App
             // see https://github.com/aspnet/Hosting/issues/793 (TODO: clarify)
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddScoped<UserResolverService, UserResolverService>();
-            services.AddScoped(context => context.GetService<UserResolverService>().GetUser());
+            services.AddScoped<User>(context => context.GetService<UserResolverService>().GetUser());
+//            services.AddScoped<User>(context => new User());
 
             // Version from the assmembly (displayed on home resource)
             services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);

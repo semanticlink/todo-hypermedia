@@ -93,7 +93,7 @@ namespace Api.Controllers
             var externalId = User.GetExternalId();
             var user = await _userStore.GetByExternalId(externalId);
             var userId = user.IsNull()
-                ? await _userStore.Create(externalId, model.Email, model.Name)
+                ? await _userStore.Create(externalId, model)
                 : user.Id;
 
             await _tenantStore.AddUser(id, userId);

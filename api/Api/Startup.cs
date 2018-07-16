@@ -1,8 +1,5 @@
-﻿using Amazon.DynamoDBv2;
-using Api.Web;
+﻿using Api.Web;
 using App;
-using Domain.Models;
-using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;using Microsoft.AspNetCore.Mvc.Formatters;
@@ -204,20 +201,6 @@ namespace Api
 
                 // requires a dynamoDb instance - see readme for setup in docker
                 .MigrateDynamoDb();
-        }
-    }
-
-    public static class MigrateDynamoDbExtensions
-    {
-        public static IApplicationBuilder MigrateDynamoDb(this IApplicationBuilder app)
-        {
-            var client = app.ApplicationServices.GetService<IAmazonDynamoDB>();
-
-            TableNameConstants
-                .AllTables
-                .ForEach(table => table.CreateTable(client).ConfigureAwait(false));
-
-            return app;
         }
     }
 }

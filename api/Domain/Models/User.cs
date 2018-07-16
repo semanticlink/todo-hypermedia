@@ -18,15 +18,17 @@ namespace Domain.Models
         ///     The email address of the user registered in external systems
         /// </summary>
         public string Email { get; set; }
-        
+
         /// <summary>
         ///     The name/title the user wants to see on the screen at first instance. It is likely
         ///     that this will at first be the email address of the user.
         /// </summary>
         public string Name { get; set; }
-        
 
+
+        public string CreatedBy { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string UpdateBy { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
 }

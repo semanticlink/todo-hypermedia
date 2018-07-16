@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
+using App;
 using Domain.Models;
 using Domain.Persistence;
+using Domain.Representation;
 using Domain.Representation.Enum;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
@@ -12,40 +14,27 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Toolkit;
 
-namespace Api
+namespace Api.Web
 {
     /// <summary>
-    ///     All code around seeding <see cref="InitialiseDynamoDb"/> needs to be in called from <see cref="Program.Main"/> to avoid
+    ///     All code around seeding <see cref="DynamoDbSeedTestData"/> needs to be in called from <see cref="Program.Main"/> to avoid
     ///     problems with migrations
     /// </summary>
-    public static class SeedDb
+    public static class DynamoDbSeedTestDataExtensions
     {
-        public static IWebHost InitialiseDynamoDb(this IWebHost host, IHostingEnvironment hostingEnvironment)
+        public static IWebHost DynamoDbSeedTestData(this IWebHost host, IHostingEnvironment hostingEnvironment)
         {
+            // we have added 'Scoped' services, this will return the root scope with them attached
             using (var scope = host.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 var logger = services.GetRequiredService<ILogger<Program>>();
                 try
                 {
-                    logger.LogInformation("[Seed] service user");
-                    Task.Run(() => services.SeedServiceUser()).GetAwaiter().GetResult();
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "An error occurred while seeding the service user.");
-                }
-                finally
-                {
-                    logger.LogDebug("[Seed] service user complete");
-                }
-
-                try
-                {
                     if (hostingEnvironment.IsDevelopment())
                     {
                         logger.LogInformation("[Seed] test data");
-                        Task.Run(() => services.SeedTestData()).GetAwaiter().GetResult();
+                        Task.Run(() => services.SeedData()).GetAwaiter().GetResult();
                     }
                 }
                 catch (Exception ex)
@@ -62,65 +51,9 @@ namespace Api
         }
 
         /// <summary>
-        ///     Ensures there is a service user with root of trust
-        /// </summary>
-        public static async Task SeedServiceUser(this IServiceProvider services)
-        {
-            /**
-             * Get registered services before going off. Avoids loosing the IServiceProvider
-             */
-            var logger = services.GetRequiredService<ILogger<Program>>();
-            var userStore = services.GetRequiredService<IUserStore>();
-            var rightStore = services.GetRequiredService<IUserRightStore>();
-
-            var client = services.GetRequiredService<IAmazonDynamoDB>();
-
-            logger.LogInformation("[Seed] Service user");
-
-            await Task.WhenAll(
-                TableNameConstants
-                    .AllTables
-                    .Select(table => table.WaitForActiveTable(client)));
-
-            //////////////////////////
-            // Seed the root
-            // =============
-            //
-            // Register a service account using our own scheme "service|id"
-            //
-
-            var knownRootId = "service|root01";
-            var knownHomeResourceId = "0000000000000000000000000";
-            string rootId = "";
-
-            try
-            {
-                var rootUser = await userStore.GetByExternalId(knownRootId);
-                rootId = rootUser.IsNull()
-                    ? await userStore.Create(knownRootId, "root@rewire.nz", "Service Account")
-                    : rootUser.Id;
-                logger.LogInformation("[Seed] service user {0}", rootId);
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "");
-            }
-
-            await rightStore.CreateRights(
-                rootId,
-                knownHomeResourceId,
-                new Dictionary<RightType, Permission>
-                {
-                    {RightType.Root, Permission.ControlAccess | Permission.CreatorOwner},
-                    {RightType.RootTenantCollection, Permission.ControlAccess | Permission.CreatorOwner},
-                    {RightType.RootUserCollection, Permission.ControlAccess | Permission.CreatorOwner},
-                });
-        }
-
-        /// <summary>
         ///     Creates a tenant, user on the tenant and some todos with tags
         /// </summary>
-        public static async Task SeedTestData(this IServiceProvider services)
+        private static async Task SeedData(this IServiceProvider services)
         {
             /**
              * Get registered services before going off. Avoids loosing the IServiceProvider
@@ -133,15 +66,10 @@ namespace Api
 
 
             var client = services.GetRequiredService<IAmazonDynamoDB>();
+            await client.WaitForAllTables();
 
-            logger.LogInformation("[Seed] DynamoDb tables");
 
-            await Task.WhenAll(
-                TableNameConstants
-                    .AllTables
-                    .Select(table => table.WaitForActiveTable(client)));
-
-            logger.LogInformation("[Seed] data");
+            logger.LogInformation("[Seed] sample data");
 
             //////////////////////////
             // Seed a tenant
@@ -173,10 +101,20 @@ namespace Api
             // KLUDGE: taken from a precreated user and then decoded JWT through https://jwt.io
             // grab it from the Authorization header in a request
             var knownAuth0Id = "auth0|5b32b696a8c12d3b9a32b138";
+
+            var userData = new UserCreateDataRepresentation
+            {
+                Email = "test@rewire.nz",
+                Name = "test"
+            };
+
             string userId = "";
             try
             {
-                userId = await userStore.Create(knownAuth0Id, "test@rewire.nz", "test");
+                var rootUser = await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier)
+                    .ThrowObjectNotFoundExceptionIfNull("Trusted root user has not been created");
+                
+                userId = await userStore.CreateByUser(rootUser, knownAuth0Id, userData);
             }
             catch (Exception e)
             {
@@ -187,6 +125,7 @@ namespace Api
                 else
                 {
                     logger.LogError(e, "");
+                    throw;
                 }
             }
             finally

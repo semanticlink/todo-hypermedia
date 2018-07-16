@@ -73,7 +73,7 @@ namespace IntegrationTests
                 .GetRemainingAsync();
 
             Assert.Equal(2, userRights.Count);
-            Assert.Equal(0, userInheritRights.Count);
+            Assert.Empty(userInheritRights);
 
             // Access?
             var resourceRights = await userRightStore.Get(userId, todoId, RightType.Todo);

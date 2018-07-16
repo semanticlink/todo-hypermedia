@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Api.Web;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore;
 
 namespace Api
@@ -26,6 +27,6 @@ namespace Api
                 .UseStartup<Startup>()
                 .Build()
                 // KLUDGE: seed dev data (given that lambda is used in production over kestrel
-                .InitialiseDynamoDb(HostingEnvironment);
+                .DynamoDbSeedTestData(HostingEnvironment);
     }
 }
