@@ -17,7 +17,8 @@ namespace Api.Web
         ///    Add Identity for authenticn. Note as of Auth 2.0, all types needed are regsitered
         ///    under AddAuthentication.
         ///</para>
-        /// <para>        ///  At this stage:
+        /// <para>
+        ///  At this stage:
         ///    - use JWT (bearer) tokens
         ///    Currently, it is authenticated or not (no roles or claims)
         /// </para>
@@ -143,20 +144,6 @@ namespace Api.Web
                         }
                     };
                 });
-/*
-
-            // see https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
-            // allows profiles on [Authorize]
-            services.AddAuthorization(options =>
-            {
-                // eg [Authorize("profile")]
-                options.AddPolicy("profile", policy =>
-                    policy.Requirements.Add(new HasScopeRequirement("profile", domain)));
-            });
-
-            // register the scope authorization handler
-            services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
-*/
 
             return services;
         }

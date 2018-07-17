@@ -86,7 +86,10 @@ namespace Api
 
                     // Content-negotitation output types
                     options.OutputFormatters.Add(new HtmlFormMediaFormatter());
-//                    options.OutputFormatters.Add(new UriListOutputFormatter());
+/*
+                    // add in when support is required
+                    options.OutputFormatters.Add(new UriListOutputFormatter());
+*/
 
                     options.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
                 })
@@ -169,7 +172,6 @@ namespace Api
              */
             loggerFactory.AddConsole();
 
-
             if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -178,24 +180,6 @@ namespace Api
             {
                 app.UseExceptionHandler("/error");
             }
-
-/*// TODO: remove this as it has been supercede by .UseHttpCacheHeaders
-            /**
-             * Vary headers are needed so that the back and forward buttons work ie, that we don't
-             * get cache poisioning—in this case the back button would return the json representation
-             * than the html representation.
-             *
-             * see https://docs.microsoft.com/en-us/aspnet/core/performance/caching/middleware?view=aspnetcore-2.1
-             *
-             * Note: this is a backup strategy for .AddHttpCacheHeaders
-             * 
-             #1#
-            app.Use(async (context, next) =>
-            {
-                context.Response.Headers[HeaderNames.Vary] = new[] {"Accept", "Accept-Encoding"};
-
-                await next();
-            });*/
 
             /**
              * Handler for error pages to return content negotiated pages. For example, 401 can now
