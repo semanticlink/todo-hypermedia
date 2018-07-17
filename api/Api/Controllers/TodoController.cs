@@ -4,7 +4,6 @@ using System.Security;
 using System.Threading.Tasks;
 using Api.Web;
 using App;
-using App.Authorisation;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Models;

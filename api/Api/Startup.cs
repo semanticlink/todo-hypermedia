@@ -94,7 +94,8 @@ namespace Api
                 .AddXmlDataContractSerializerFormatters();
 
             services
-                .RegisterApiIoc(HostingEnvironment)
+                .RegisterAppIoc(HostingEnvironment)
+                .RegisterApiIoC()
                 /**
                  *  Add http cache headers. 
                  *

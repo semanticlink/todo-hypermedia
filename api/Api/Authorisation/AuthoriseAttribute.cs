@@ -1,7 +1,7 @@
 ﻿using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 
-namespace App.Authorisation
+namespace Api.Authorisation
 {
     /// <summary>
     ///     Base class that enforces the policy name (a serialised string) as required by <see cref="IAuthorizationPolicyProvider"/>

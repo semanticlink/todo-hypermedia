@@ -1,7 +1,7 @@
 ﻿using System;
 using Domain.Models;
 
-namespace App.Authorisation
+namespace Api.Authorisation
 {
     public class PolicyName
     {

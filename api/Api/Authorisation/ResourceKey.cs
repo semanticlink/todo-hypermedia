@@ -1,4 +1,6 @@
-﻿namespace App.Authorisation
+﻿using App;
+
+namespace Api.Authorisation
 {
     /// <summary>
     ///     Constants for route params in Uris. These are used to be able to pick out of the RouteData.

@@ -1,11 +1,12 @@
 ﻿using System.Threading.Tasks;
+using App;
 using Domain.Models;
 using Domain.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Toolkit;
 
-namespace App.Authorisation
+namespace Api.Authorisation
 {
     /// <summary>
     ///     Looks inside the scope of the JSON Web Token Authorization Header

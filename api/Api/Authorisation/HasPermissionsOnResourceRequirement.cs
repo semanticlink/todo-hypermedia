@@ -1,7 +1,7 @@
 ﻿using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 
-namespace App.Authorisation
+namespace Api.Authorisation
 {
     /// <summary>
     ///     This requirement checks if the user with claim issued by your Auth0 tenant is present and if they have

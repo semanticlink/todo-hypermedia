@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using App;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
-namespace App.Authorisation
+namespace Api.Authorisation
 {
     /// <summary>
     /// <para>
