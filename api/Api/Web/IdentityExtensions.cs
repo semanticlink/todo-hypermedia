@@ -42,12 +42,12 @@ namespace Api.Web
 
             services
                 .AddAuthentication(
-                    AuthenticationOptions =>
+                    authenticationOptions =>
                     {
                         /**
                          * Authenticate using AuthenticationOptions.DefaultAuthenticateScheme to set httpContext.User
                          */
-                        AuthenticationOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        authenticationOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                         ;
                         /**
                          * The default scheme to use with [Authorize] attributed methods.
@@ -55,14 +55,14 @@ namespace Api.Web
                          * NOTE: if you can't get a Context.User, it is because you don't have an [Authorize] attribute
                          *       that loads up the User onto the context.
                          */
-                        AuthenticationOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                        authenticationOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                         /**
                          * The global overriding default when any of above and others are no set. Thereotically,
                          * this is not needed because the two above are set.
                          *
                          * Others that could be set see AuthenticationOptions
                          */
-                        AuthenticationOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                        authenticationOptions.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                     }
                 )
                 .AddJwtBearer(AuthenticatorDefaults.ExternalAuthenticationSchemeName, options =>
