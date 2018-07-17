@@ -143,9 +143,9 @@ namespace Infrastructure.NoSQL
                 new ScanCondition(nameof(User.ExternalIds), ScanOperator.Contains, externalId));
         }
 
-        public async Task<bool> IsRegistered(string externalId)
+        public async Task<bool> IsRegistered(string id)
         {
-            return (await GetByExternalId(externalId)).IsNotNull();
+            return (await Get(id)).IsNotNull();
         }
 
         public async Task<IEnumerable<User>> GetAll()

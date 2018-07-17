@@ -39,9 +39,8 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<IActionResult> Me()
         {
-            return (await _userStore.GetByExternalId(User.GetExternalId()))
-                .ThrowObjectNotFoundExceptionIfNull("User does not exist")
-                .Id
+            return User
+                .GetIdentityId()
                 .MakeUserUri(Url)
                 .MakeRedirect();
         }
@@ -52,7 +51,7 @@ namespace Api.Controllers
         public async Task<UserRepresentation> Get(string id)
         {
             var domain = _configuration.GetSection(Auth0Configuration.SectionName).Get<Auth0Configuration>().Domain;
-            
+
             return (await _userStore.Get(id))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
 /*

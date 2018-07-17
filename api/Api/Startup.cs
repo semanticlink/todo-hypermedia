@@ -1,5 +1,6 @@
 ﻿using Api.Web;
 using App;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -36,28 +37,28 @@ namespace Api
                 .AddJsonMergePatch();
 
             services
-                .AddAuthenticationWithJwtToken(Configuration);
-
-                /**
-                 * DO NOT set authorisation aspects in the startup. See IocRegistration
-                 *
-                 * This is addeded via Custom Policy Authorization Policies. This avoid loading policies/requirements manually and can
-                 * be attributed a little more readably and auditably.
-                 * 
-                 * see https://docs.microsoft.com/en-us/aspnet/core/security/authorization/iauthorizationpolicyprovider?view=aspnetcore-2.1
-                 *
-                 * Note: custom policies override the default policy
-                 * 
-                 * Below is what you might tempted to do (but instead look in App.Authorization):
-
+                .AddAuthenticationWithJwtToken(Configuration)
                 .AddAuthorization(options =>
                 {
+                    // this is required for [Authorize] and [AllowAnonymous]. If we only used our custom policy
+                    // attributes we wouldn't
                     options.DefaultPolicy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes( /*JwtBearerDefaults.AuthenticationScheme, #1#
-                            AuthenticatorDefaults.ExternalAuthenticationSchemeName)
+                        // add our scheme here (instead of JwtBearerDefaults.AuthenticationScheme)
+                        .AddAuthenticationSchemes(AuthenticatorDefaults.ExternalAuthenticationSchemeName)
                         .Build();
-
+                    /**
+                     * DO NOT set policies here. See IocRegistration
+                     *
+                     * This is addeded via Custom Policy Authorization Policies. This avoid loading policies/requirements manually and can
+                     * be attributed a little more readably and auditably.
+                     * 
+                     * see https://docs.microsoft.com/en-us/aspnet/core/security/authorization/iauthorizationpolicyprovider?view=aspnetcore-2.1
+                     *
+                     * Note: custom policies override the default policy
+                     * 
+                     * Below is what you might tempted to do (but instead look in App.Authorization):
+    
                     options.AddPolicy(
                         PolicyName.RootUserCollection,
                         policy =>
@@ -67,9 +68,9 @@ namespace Api
                             policy.RequireAuthenticatedUser();
                             policy.AuthenticationSchemes.Add(AuthenticatorDefaults.ExternalAuthenticationSchemeName);
                         });
-                })
-                */
-            
+                    */
+                });
+
             services.AddMvcCore(options =>
                 {
                     options.RespectBrowserAcceptHeader = true;

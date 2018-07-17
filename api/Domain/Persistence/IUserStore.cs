@@ -38,7 +38,7 @@ namespace Domain.Persistence
             IDictionary<RightType, Permission> callerCollectionRights);
         Task<User> Get(string id);
         Task<User> GetByExternalId(string externalId);
-        Task<bool> IsRegistered(string externalId);
+        Task<bool> IsRegistered(string id);
         Task<IEnumerable<User>> GetAll();
         Task Update(string id, Action<User> updater);
         Task Delete(string id);

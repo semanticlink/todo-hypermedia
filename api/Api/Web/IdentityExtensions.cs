@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Domain.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using App;
+using Toolkit;
 
 namespace Api.Web
 {
@@ -34,7 +37,6 @@ namespace Api.Web
             // see https://github.com/aspnet/Security/issues/1043
             // see https://dev.to/coolgoose/setting-up-jwt-and-identity-authorizationauthentication-in-asp-net-core-4l45
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
-
 
             var auth0 = configuration.GetSection(Auth0Configuration.SectionName).Get<Auth0Configuration>();
 
@@ -141,12 +143,35 @@ namespace Api.Web
                             }
 
                             return Task.CompletedTask;
+                        },
+
+                        /**
+                         * Once a token has been validated (above) then add the user to the claims.
+                         *
+                         * The design is that matching the internal id requires a database request and will be
+                         * required once per request. It is then cached and used through any actions.
+                         *
+                         * Checking Id:
+                         *
+                         *  User.Claims.FindFirst(c => c.Type == UserIdClaimKey).Value
+                         */
+                        OnTokenValidated = async context =>
+                        {
+                            // we need to hand in the context Principal at this point as it has not yet 
+                            // been loaded on the IHttpContextAssessor required for the UserResolverService
+                            var user = await context.HttpContext.RequestServices
+                                .GetRequiredService<UserResolverService>()
+                                .GetPrincipleUserAsync(context.Principal);
+
+                            if (!user.Id.IsNullOrWhitespace())
+                            {
+                                context.Principal.AddIdentityIdToClaims(user.Id);
+                            }
                         }
                     };
                 });
 
             return services;
         }
-
     }
 }

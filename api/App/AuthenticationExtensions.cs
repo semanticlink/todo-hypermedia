@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Domain.Models;
 using NLog;
 using Toolkit;
 
@@ -10,8 +12,26 @@ namespace App
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
+        private const string UserIdClaimKey = "userId";
+
         /// <summary>
-        /// Retrieves the user Id from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Sub"/>).
+        ///     Add a <see cref="User.Id"/> onto the claim as a <see cref="JwtRegisteredClaimNames.Jti"/>
+        /// </summary>
+        /// <seealso cref="GetIdentityId"/>
+        public static void AddIdentityIdToClaims(this ClaimsPrincipal user, string userId)
+        {
+            // Add the user id to the claim 
+            var claims = new List<Claim>
+            {
+                new Claim(UserIdClaimKey, userId)
+            };
+            var appIdentity = new ClaimsIdentity(claims);
+
+            user.AddIdentity(appIdentity);
+        }
+
+        /// <summary>
+        /// Retrieves the user Id from the <see cref="User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Sub"/>).
         /// </summary>
         public static string GetExternalId(this ClaimsPrincipal user)
         {
@@ -19,7 +39,7 @@ namespace App
         }
 
         /// <summary>
-        /// Retrieves the user name (email) from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Email"/>).
+        /// Retrieves the user name (email) from the <see cref="User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Email"/>).
         /// </summary>
         public static string GetName(this ClaimsPrincipal user)
         {
@@ -27,11 +47,11 @@ namespace App
         }
 
         /// <summary>
-        /// Retrieves the user Identity Id from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Jti"/>).
+        /// Retrieves the user Identity Id from the <see cref="User"/> from the claim via <see cref="UserIdClaimKey"/>.
         /// </summary>
         public static string GetIdentityId(this ClaimsPrincipal user)
         {
-            return user.Value(JwtRegisteredClaimNames.Jti);
+            return user.Value(UserIdClaimKey);
         }
 
         private static string Value(this ClaimsPrincipal user, string type)

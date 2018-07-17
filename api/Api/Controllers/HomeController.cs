@@ -100,7 +100,7 @@ namespace Api.Controllers
                     //
                     : User != null && User.Identity.IsAuthenticated
                         // If the user is authenticated, then return all tenants that the user has access to.
-                        ? await _tenantStore.GetTenantsForUser(User.GetExternalId())
+                        ? await _tenantStore.GetTenantsForUser(User.GetIdentityId())
 
                         // The user is not authenticated and there is no query, so the caller gets no tenants.
                         : new Tenant[] { })

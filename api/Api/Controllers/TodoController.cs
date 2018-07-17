@@ -40,12 +40,10 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<TodoRepresentation> GetById(string id)
         {
-            var user = await _userStore.GetByExternalId(User.GetExternalId());
-
             return (await _todoStore
                     .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(user.Id, Url);
+                .ToRepresentation(User.GetIdentityId(), Url);
         }
 
         [HttpPost]

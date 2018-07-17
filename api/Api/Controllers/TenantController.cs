@@ -60,9 +60,7 @@ namespace Api.Controllers
         [HttpCacheValidation(AddNoCache = true)]
         public async Task<FeedRepresentation> GetUsers(string id)
         {
-            return (await _userStore.IsRegistered(User.GetExternalId())
-                    ? await _tenantStore.GetUsersByTenant(id)
-                    : new List<string>())
+            return (await _tenantStore.GetUsersByTenant(id))
                 .ToRepresentation(id, Url);
         }
 
