@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security;
 using System.Threading.Tasks;
+using Api.Authorisation;
 using Api.Web;
 using App;
 using App.RepresentationExtensions;
@@ -21,7 +21,6 @@ namespace Api.Controllers
 {
     /// <see cref="UserController.GetUserTodos"/> for the todo collection as they are parented on a user
     [Route("todo")]
-    [Authorize]
     public class TodoController : Controller
     {
         private readonly ITagStore _tagStore;
@@ -38,6 +37,7 @@ namespace Api.Controllers
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [AuthoriseTodo(Permission.Get)]
         public async Task<TodoRepresentation> GetById(string id)
         {
             return (await _todoStore
@@ -47,6 +47,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
+        [AuthoriseUserTodoCollection(Permission.Post)] // HINKY
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation todo)
         {
             return (await _todoStore.Create(todo
@@ -57,6 +58,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
+        [AuthoriseTodo(Permission.Put)]
         public async Task<IActionResult> Update(string id, [FromBody] TodoRepresentation item)
         {
             await _todoStore.Update(id,
@@ -76,6 +78,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet("form/edit", Name = TodoUriFactory.EditFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AuthoriseForm]
         public FormRepresentation GetEditForm()
         {
             return Url.ToTodoEditFormRepresentation();
@@ -83,12 +86,14 @@ namespace Api.Controllers
 
         [HttpGet("form/create", Name = TodoUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AuthoriseForm]
         public CreateFormRepresentation GetCreateForm()
         {
             return Url.ToTodoCreateFormRepresentation();
         }
 
         [HttpDelete("{id}", Name = TodoUriFactory.TodoRouteName)]
+        [AuthoriseTodo(Permission.Delete)]
         public async Task<IActionResult> Delete(string id)
         {
             await _todoStore.Delete(id);
@@ -107,6 +112,7 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [Authorise(RightType.TodoTagCollection, Permission.Get)]
         public async Task<FeedRepresentation> GetTodoTags(string id)
         {
             var todo = await _todoStore.Get(id);
@@ -164,6 +170,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPatch("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes("application/json-patch+json")]
+        [Authorise(RightType.TodoTagCollection, Permission.Patch)]
         public async Task<IActionResult> PatchTagCollection(
             string id,
             [FromBody] JsonPatchDocument<PatchFeedRepresentation> patch)
@@ -215,6 +222,7 @@ namespace Api.Controllers
         /// <param name="uriList">A todo tag uri (not a global tag uri)</param>
         [HttpPut("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes("text/uri-list")]
+        [Authorise(RightType.TodoTagCollection, Permission.Put)]
         public async Task<IActionResult> PutTagCollection(string id, [FromBody] string[] uriList)
         {
             // check that global tags exist in the todo set sent through as a uriList
@@ -237,6 +245,7 @@ namespace Api.Controllers
         ///     Include a global tag onto a todo
         /// </summary>
         [HttpPost("{id}/tag/", Name = TagUriFactory.TodoTagCreateRouteName)]
+        [Authorise(RightType.TodoTagCollection, Permission.Post)]
         public async Task<CreatedResult> CreateTag([FromBody] TagCreateDataRepresentation tag, string id)
         {
             var tagId = await _tagStore.Create(tag
@@ -255,7 +264,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet("{id}/tag/form/create", Name = TagUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
-        [AllowAnonymous]
+        [AuthoriseForm]
         public CreateFormRepresentation GetCreateForm(string id)
         {
             return id.ToTagCreateFormRepresentation(Url);
@@ -270,6 +279,7 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [Authorise(RightType.Tag, Permission.Get)]  // HINKY: this might be a todotag
         public async Task<TagRepresentation> Get(string id, string tagId)
         {
             (await _todoStore.GetByIdAndTag(id, tagId))
@@ -285,6 +295,7 @@ namespace Api.Controllers
         ///     Remove a tag from a todo. This is not a delete. The tag still exists in the global collection of tags
         /// </summary>
         [HttpDelete("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
+        [Authorise(RightType.TodoTagCollection, Permission.Patch)]
         public async Task<IActionResult> DeleteTag(string id, string tagId)
         {
             await _todoStore.DeleteTag(id, tagId);

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Api.Authorisation
 {
     /// <summary>
-    ///     Base class that enforces the policy name (a serialised string) as required by <see cref="IAuthorizationPolicyProvider"/>
+    ///     Generic class that enforces the policy name (a serialised string) as required by <see cref="IAuthorizationPolicyProvider"/>
     /// </summary>
     /// <remarks>
     ///    The <see cref="AuthoriseAttribute.Policy"/> is a string that we encode/decode between the attribute and the policy creation
@@ -18,20 +18,43 @@ namespace Api.Authorisation
     ///      }
     ///  }
     /// </example>
-    public abstract class AuthoriseAttribute : AuthorizeAttribute
+    public class AuthoriseAttribute : AuthorizeAttribute
     {
-        protected AuthoriseAttribute(RightType type, Permission permission = Permission.None, string resourceKey = "id")
+        public AuthoriseAttribute(RightType type, Permission permission = Permission.None, string resourceKey = "id")
         {
             // here's the magic of a delimited string
             Policy = PolicyName.Make(type, permission, resourceKey).Serialise();
         }
     }
 
-    public class AuthorizeRootUserCollectionAttribute : AuthoriseAttribute
+    public class AuthoriseRootUserCollectionAttribute : AuthoriseAttribute
     {
-        public AuthorizeRootUserCollectionAttribute(Permission permission)
+        public AuthoriseRootUserCollectionAttribute(Permission permission)
             : base(RightType.RootUserCollection, permission, ResourceKey.Root)
         {
         }
+    }
+
+    public class AuthoriseTodoAttribute : AuthoriseAttribute
+    {
+        public AuthoriseTodoAttribute(Permission permission)
+            : base(RightType.Todo, permission)
+        {
+        }
+    }
+
+    public class AuthoriseUserTodoCollectionAttribute : AuthoriseAttribute
+    {
+        public AuthoriseUserTodoCollectionAttribute(Permission permission)
+            : base(RightType.UserTodoCollection, permission)
+        {
+        }
+    }
+
+    /// <summary>
+    ///     Wrapper around Authorize so that we can audit forms that they just need authentication
+    /// </summary>
+    public class AuthoriseFormAttribute : AuthorizeAttribute
+    {
     }
 }
