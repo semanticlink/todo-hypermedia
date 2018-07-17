@@ -51,8 +51,11 @@ namespace App.Authorisation
             // see https://stackoverflow.com/questions/48386853/asp-net-core-identity-authorization-using-parameter-for-team-membership
             if (context.Resource is AuthorizationFilterContext authContext)
             {
-                // you can grab the id of the resource based on the keyname in the route
-                var resourceId = authContext.RouteData.Values[requirement.ResourceKeyInUri]?.ToString();
+                // you can grab the id of the resource based on the keyname in the route, or if it is root use the known resource id
+                var resourceId = requirement.ResourceKeyInUri != ResourceKey.Root
+                    ? authContext.RouteData.Values[requirement.ResourceKeyInUri]?.ToString()
+                    : TrustDefaults.KnownHomeResourceId;
+                
                 var user = await _userResolverService.GetUserAsync();
 
                 // if there is no authenticated user return onto other handlers/requirements

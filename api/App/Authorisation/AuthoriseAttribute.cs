@@ -29,8 +29,8 @@ namespace App.Authorisation
 
     public class AuthorizeRootUserCollectionAttribute : AuthoriseAttribute
     {
-        public AuthorizeRootUserCollectionAttribute(Permission permission, string resourceKey)
-            : base(RightType.RootUserCollection, permission, resourceKey)
+        public AuthorizeRootUserCollectionAttribute(Permission permission)
+            : base(RightType.RootUserCollection, permission, ResourceKey.Root)
         {
         }
     }

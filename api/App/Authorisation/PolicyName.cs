@@ -7,15 +7,16 @@ namespace App.Authorisation
     {
         public RightType Type { get; set; }
         public Permission Access { get; set; }
-        public string ResourceKey { get; set; } = "id";
+        public string ResourceKey { get; set; } = Authorisation.ResourceKey.Id;
 
         public string Serialise()
         {
             return $"{Type}:{Access}:{ResourceKey}";
-        }
+        } 
 
         public static PolicyName Deserialise(string encodedPolicy)
         {
+            // KLUDGE
             var str = encodedPolicy.Split(':');
             var access = Enum.Parse(typeof(Permission), str[1]);
             var type = Enum.Parse(typeof(RightType), str[0]);

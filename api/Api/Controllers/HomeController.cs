@@ -152,7 +152,7 @@ namespace Api.Controllers
         [HttpGet("user/", Name = HomeUriFactory.UsersRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [AuthorizeRootUserCollection(Permission.Get, "/")]
+        [AuthorizeRootUserCollection(Permission.Get)]
         public async Task<IActionResult> GetUsers()
         {
             return NoContent();
