@@ -14,7 +14,7 @@ namespace MicroTests
         [InlineData("delete not allowed on get/post", Permission.Get | Permission.Post, Permission.Delete, false)]
         public void AllowCheck(string test, Permission allocatedRights, Permission requiredRights, bool allow)
         {
-            Assert.Equal(allow, new UserRight {Rights = allocatedRights}.Allow(requiredRights));
+            Assert.Equal(allow, new UserRight {Rights = allocatedRights}.isAllowed(requiredRights));
         }
     }
 }

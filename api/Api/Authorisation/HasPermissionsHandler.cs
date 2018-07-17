@@ -4,74 +4,74 @@ using Domain.Models;
 using Domain.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
+using NLog;
 using Toolkit;
 
 namespace Api.Authorisation
 {
     /// <summary>
-    ///     Looks inside the scope of the JSON Web Token Authorization Header
-    /// <example>
-    ///
-    ///     Payload (data) of the JWT:
-    ///     
-    ///     <code>
-    ///     {
-    ///         "iss": "https://rewire-sample.au.auth0.com/",
-    ///         "sub": "auth0|5b32b696a8c12d3b9a32b138",
-    ///         "aud": [
-    ///             "todo-rest-test",
-    ///             "https://rewire-sample.au.auth0.com/userinfo"
-    ///         ],
-    ///         "iat": 1530411996,
-    ///         "exp": 1530419196,
-    ///         "azp": "3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8",
-    ///         "scope": "openid profile"
-    ///     }
-    ///     </code>
-    /// </example>
+    ///     Permissions will get the internal id from the claims set via authentication and then look for the
+    ///     <see cref="UserRight"/> based on the resource id (from the RouteData param specified in the
+    ///     <see cref="AuthoriseAttribute"/> and matched against the <see cref="Permission"/> also see
+    ///     on the <see cref="AuthoriseAttribute"/>.
     /// </summary>
-    /// <remarks>
-    ///    code from https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
-    /// </remarks>
     public class HasPermissionsHandler : AuthorizationHandler<HasPermissionsOnResourceRequirement>
     {
-        private readonly IUserRightStore _userRightStore;
-        private readonly UserResolverService _userResolverService;
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
-        public HasPermissionsHandler(IUserRightStore userRightStore, UserResolverService userResolverService)
+        private readonly IUserRightStore _userRightStore;
+
+        public HasPermissionsHandler(IUserRightStore userRightStore)
         {
             _userRightStore = userRightStore;
-            _userResolverService = userResolverService;
         }
 
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             HasPermissionsOnResourceRequirement requirement)
         {
-            // pattern matching is cool. if you can't do this, use context.Resource as AuthorizationFilterContext before and check for not null
-            // see https://stackoverflow.com/questions/48386853/asp-net-core-identity-authorization-using-parameter-for-team-membership
+            // drop through the handler to continue through to others
+            // on the way, if the user is found and has allowed access set the Succeeded
+            // there is no explicit failure so that other handlers can also have their say
             if (context.Resource is AuthorizationFilterContext authContext)
             {
-                // you can grab the id of the resource based on the keyname in the route, or if it is root use the known resource id
+                // you can grab the id of the resource based on the keyname in the route, or if it
+                // is root use the known resource id
                 var resourceId = requirement.ResourceKeyInUri != ResourceKey.Root
                     ? authContext.RouteData.Values[requirement.ResourceKeyInUri]?.ToString()
                     : TrustDefaults.KnownHomeResourceId;
-                
-                var user = await _userResolverService.GetUserAsync();
+
+                // get the user Id from the claims that already setup
+                var userId = authContext.HttpContext.User.GetIdentityId();
 
                 // if there is no authenticated user return onto other handlers/requirements
-                if (user.Id.IsNullOrWhitespace() || resourceId == null)
+                if (!userId.IsNullOrWhitespace() && resourceId != null)
                 {
-                    return;
+                    var rights = await _userRightStore.Get(userId, resourceId, requirement.Type);
+
+                    // does the user have the access rights?
+                    if (rights.IsNotNull() && rights.isAllowed(requirement.Access))
+                    {
+                        // yup, set for later use in the pipeline
+                        context.Succeed(requirement);
+                    }
+                    else
+                    {
+                        Log.Trace(
+                            "User {0} does not have permission {1} on resource {2}",
+                            userId,
+                            requirement.Access,
+                            resourceId);
+                    }
                 }
-
-                var rights = await _userRightStore.Get(user.Id, resourceId, requirement.Type);
-
-                // does the user have the rights
-                if (rights.IsNotNull() && rights.Allow(requirement.Access))
+                else
                 {
-                    context.Succeed(requirement);
+                    Log.DebugFormat("Requirement could not be matched to external user on resource '{0}'", resourceId);
                 }
+            }
+            else
+            {
+                Log.Error("Authorisation could not proceed as the context could not be loaded");
             }
         }
     }

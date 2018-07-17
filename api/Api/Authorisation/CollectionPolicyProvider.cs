@@ -83,7 +83,9 @@ namespace Api.Authorisation
 
             // now we can hand in the requirements from the attribute into the policy which what we really want to do
             policy.AddRequirements(
-                new HasPermissionsOnResourceRequirement(requirementDetails.Type, requirementDetails.Access,
+                new HasPermissionsOnResourceRequirement(
+                    requirementDetails.Type,
+                    requirementDetails.Access,
                     requirementDetails.ResourceKey));
 
             return Task.FromResult(policy.Build());

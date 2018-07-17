@@ -77,7 +77,7 @@ namespace IntegrationTests
 
             // Access?
             var resourceRights = await userRightStore.Get(userId, todoId, RightType.Todo);
-            Assert.Equal(allow, resourceRights.Allow(requiredPermission));
+            Assert.Equal(allow, resourceRights.isAllowed(requiredPermission));
 
             // Clean up
             await Task.WhenAll(userRights.Select(right => Context.DeleteAsync<UserRight>(right.Id)));
