@@ -28,18 +28,27 @@ namespace App
         }
 
         /// <summary>
-        ///     Looks up a user by their external Ids. 
+        ///    This looks inside the current <see cref="HttpContext.User"/> that is resolved as a <see cref="ClaimsPrincipal"/>
+        ///    and grabs the external <see cref="Claim"/> Id and resolves that to the internal <see cref="User"/>.
         /// </summary>
-        /// <remarks>
-        ///    This code is assumed to be running only only a trusted code/account
-        /// </remarks>
-        private async Task<User> GetByExternalId(string externalId)
+        public async Task<User> GetUserAsync()
         {
-            externalId
-                .ThrowInvalidDataExceptionIfNullOrWhiteSpace("External Id must be set");
+            if (_context.HttpContext == null)
+            {
+                return new User();
+            }
+            
+            var externalId = _context.HttpContext.User.GetExternalId();
 
-            return await _dbContext.FirstOrDefault<User>(
-                new ScanCondition(nameof(User.ExternalIds), ScanOperator.Contains, externalId));
+            if (externalId.IsNullOrWhitespace())
+            {
+                // no user current authenticated
+                return new User();
+            }
+
+            // check for registered user
+            return await _dbContext
+                .FirstOrDefault<User>(new ScanCondition(nameof(User.ExternalIds), ScanOperator.Contains, externalId));
         }
 
         /// <summary>
@@ -48,17 +57,7 @@ namespace App
         /// </summary>
         public User GetUser()
         {
-            return _context.HttpContext != null
-                ? GetByExternalId(
-                        _context.HttpContext
-                            .User
-                            .ThrowObjectNotFoundExceptionIfNull("User not found")
-                            .GetExternalId()
-                            .ThrowObjectNotFoundExceptionIfNull("User not found"))
-                    .GetAwaiter()
-                    .GetResult()
-                    .ThrowObjectNotFoundExceptionIfNull("User not found")
-                : new User();
+            return GetUserAsync().GetAwaiter().GetResult();
         }
     }
 }

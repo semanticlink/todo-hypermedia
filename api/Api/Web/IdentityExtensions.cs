@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Threading.Tasks;
 using Domain.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using App;
@@ -163,77 +161,5 @@ namespace Api.Web
             return services;
         }
 
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <remarks>
-    ///    code from https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
-    /// </remarks>
-    public class HasScopeRequirement : IAuthorizationRequirement
-    {
-        public string Issuer { get; }
-        public string Scope { get; }
-
-        public HasScopeRequirement(string scope, string issuer)
-        {
-            Scope = scope ?? throw new ArgumentNullException(nameof(scope));
-            Issuer = issuer ?? throw new ArgumentNullException(nameof(issuer));
-        }
-    }
-
-    /// <summary>    ///     Looks inside the scope of the JSON Web Token Authorization Header
-    /// <example>
-    ///
-    ///     Payload (data) of the JWT:
-    ///     
-    ///     <code>
-    ///     {
-    ///         "iss": "https://rewire-sample.au.auth0.com/",
-    ///         "sub": "auth0|5b32b696a8c12d3b9a32b138",
-    ///         "aud": [
-    ///             "todo-rest-test",
-    ///             "https://rewire-sample.au.auth0.com/userinfo"
-    ///         ],
-    ///         "iat": 1530411996,
-    ///         "exp": 1530419196,
-    ///         "azp": "3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8",
-    ///         "scope": "openid profile read:todo"
-    ///     }
-    ///     </code>
-    /// </example>
-    /// </summary>
-    /// <remarks>
-    ///    code from https://auth0.com/docs/quickstart/backend/aspnet-core-webapi/01-authorization#configure-the-sample-project
-    /// </remarks>
-    public class HasScopeHandler : AuthorizationHandler<HasScopeRequirement>
-    {
-        private const string Scope = "scope";
-
-        protected override Task HandleRequirementAsync(
-            AuthorizationHandlerContext context,
-            HasScopeRequirement requirement)
-        {
-            // If user does not have the scope claim, get out of here
-            if (!context.User.HasClaim(c => c.Type == Scope && c.Issuer == requirement.Issuer))
-            {
-                return Task.CompletedTask;
-            }
-
-            // Split the scopes string into an array
-            var scopes = context.User
-                .FindFirst(c => c.Type == Scope && c.Issuer == requirement.Issuer)
-                .Value
-                .Split(' ');
-
-            // Succeed if the scope array contains the required scope
-            if (scopes.Any(s => s == requirement.Scope))
-            {
-                context.Succeed(requirement);
-            }
-
-            return Task.CompletedTask;
-        }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Api.Web;
 using App;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +25,6 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-
             services
                 // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
                 .AddMvc(options => options.RespectBrowserAcceptHeader = true) // default: false
@@ -37,22 +36,41 @@ namespace Api
                 .AddJsonMergePatch();
 
             services
-                .AddAuthenticationWithJwtToken(Configuration)
+                .AddAuthenticationWithJwtToken(Configuration);
+
                 /**
-                 * Set multiple bearer tokens. This pairs with .AddAuthententication to expose
-                 * multiple www-authenticate headers on a 401
+                 * DO NOT set authorisation aspects in the startup. See IocRegistration
                  *
-                 * see https://stackoverflow.com/questions/49694383/use-multiple-jwt-bearer-authentication
-                 */
+                 * This is addeded via Custom Policy Authorization Policies. This avoid loading policies/requirements manually and can
+                 * be attributed a little more readably and auditably.
+                 * 
+                 * see https://docs.microsoft.com/en-us/aspnet/core/security/authorization/iauthorizationpolicyprovider?view=aspnetcore-2.1
+                 *
+                 * Note: custom policies override the default policy
+                 * 
+                 * Below is what you might tempted to do (but instead look in App.Authorization):
+
                 .AddAuthorization(options =>
                 {
                     options.DefaultPolicy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes( /*JwtBearerDefaults.AuthenticationScheme, */
+                        .AddAuthenticationSchemes( /*JwtBearerDefaults.AuthenticationScheme, #1#
                             AuthenticatorDefaults.ExternalAuthenticationSchemeName)
                         .Build();
+
+                    options.AddPolicy(
+                        PolicyName.RootUserCollection,
+                        policy =>
+                        {
+                            policy.Requirements.Add(new HasPermissionsOnResourceRequirement(
+                                RightType.RootUserCollection, Permission.FullControl));
+                            policy.RequireAuthenticatedUser();
+                            policy.AuthenticationSchemes.Add(AuthenticatorDefaults.ExternalAuthenticationSchemeName);
+                        });
                 })
-                .AddMvcCore(options =>
+                */
+            
+            services.AddMvcCore(options =>
                 {
                     options.RespectBrowserAcceptHeader = true;
                     options.ReturnHttpNotAcceptable = true;
@@ -200,7 +218,8 @@ namespace Api
                 .UseMvc()
 
                 // requires a dynamoDb instance - see readme for setup in docker
-                .MigrateDynamoDb();
+                .MigrateDynamoDb()
+                .DynamoDbSeedTestData(HostingEnvironment);
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Api.Web;
 using App;
+using App.Authorisation;
 using App.RepresentationExtensions;
 using App.UriFactory;
 using Domain.Models;
@@ -19,7 +20,7 @@ using Toolkit.Representation.LinkedRepresentation;
 namespace Api.Controllers
 {
     [Route("")]
-    [AllowAnonymous]
+    //[AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly Version _version;
@@ -131,6 +132,30 @@ namespace Api.Controllers
         {
             return new TenantRepresentation()
                 .ToTenantSearchFormRepresentation(Url);
+        }
+
+        ///////////////////////////////////////////////////////////////
+        //
+        //  The collection of user resource
+        //  =================================
+        //
+
+        /// <summary>
+        ///     This is a logical resource which represents all users
+        /// </summary>
+        /// <remarks>
+        ///     If the user is an administrator we could disclose the list of
+        ///     all tenants. However for normal users we could disclose their
+        ///     single tenant in the collection. For anonymous user the list **must**
+        ///     be empty.
+        /// </remarks>
+        [HttpGet("user/", Name = HomeUriFactory.UsersRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
+        [AuthorizeRootUserCollection(Permission.Get, "/")]
+        public async Task<IActionResult> GetUsers()
+        {
+            return NoContent();
         }
     }
 }

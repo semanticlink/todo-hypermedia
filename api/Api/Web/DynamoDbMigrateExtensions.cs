@@ -109,20 +109,21 @@ namespace Api.Web
 
             var rootUser = await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier);
             var rootId = rootUser.IsNull()
-                ? await userStore.Create(TrustDefaults.KnownRootIdentifier, rootUserCreateData)
-                : rootUser.Id;
-            logger.LogInformation("[Seed] service user {0}", rootId);
-
-            await services.GetRequiredService<IUserRightStore>()
-                .CreateRights(
-                    rootId,
+                ? await userStore.CreateByUser(
+                    new User {Id = "provisioning"},
                     TrustDefaults.KnownHomeResourceId,
+                    TrustDefaults.KnownRootIdentifier,
+                    rootUserCreateData,
+                    Permission.ControlAccess | Permission.Get,
                     new Dictionary<RightType, Permission>
                     {
-                        {RightType.Root, Permission.ControlAccess | Permission.CreatorOwner},
-                        {RightType.RootTenantCollection, Permission.ControlAccess | Permission.CreatorOwner},
-                        {RightType.RootUserCollection, Permission.ControlAccess | Permission.CreatorOwner},
-                    });
+                        {RightType.Root, Permission.ControlAccess | Permission.Get},
+                        {RightType.RootTenantCollection, Permission.ControlAccess | Permission.Get},
+                        {RightType.RootUserCollection, Permission.FullControl},
+                    })
+                : rootUser.Id;
+
+            logger.LogInformation("[Seed] service user {0}", rootId);
         }
     }
 }

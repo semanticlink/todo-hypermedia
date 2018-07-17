@@ -22,6 +22,20 @@ namespace Domain.Persistence
         /// <param name="identityId">Id provided from third-party (or indeed identifier from internal) eg 'auth0|xxxxx' or 'service|xxxx'</param>
         /// <param name="data">The new user to be created</param>
         Task<string> CreateByUser(User user, string identityId, UserCreateDataRepresentation data);
+        /// <summary>
+        ///     This method should only be external called when using the a trusted user through trusted code
+        ///     because it overrides the injected user from the context.
+        /// </summary>
+        /// <remarks>
+        ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
+        /// </remarks>
+        Task<string> CreateByUser(
+            User user,
+            string homeCollectionId,
+            string identityId,
+            UserCreateDataRepresentation data,
+            Permission callerRights,
+            IDictionary<RightType, Permission> callerCollectionRights);
         Task<User> Get(string id);
         Task<User> GetByExternalId(string externalId);
         Task<bool> IsRegistered(string externalId);

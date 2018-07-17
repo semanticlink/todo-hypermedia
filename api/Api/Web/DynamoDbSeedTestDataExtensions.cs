@@ -9,6 +9,7 @@ using Domain.Persistence;
 using Domain.Representation;
 using Domain.Representation.Enum;
 using Infrastructure.NoSQL;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -22,10 +23,26 @@ namespace Api.Web
     /// </summary>
     public static class DynamoDbSeedTestDataExtensions
     {
+        public static IApplicationBuilder DynamoDbSeedTestData(
+            this IApplicationBuilder app,
+            IHostingEnvironment hostingEnvironment)
+        {
+            app.ApplicationServices.DynamoDbSeedTestData(hostingEnvironment);
+            return app;
+        }
+
         public static IWebHost DynamoDbSeedTestData(this IWebHost host, IHostingEnvironment hostingEnvironment)
         {
+            host.Services.DynamoDbSeedTestData(hostingEnvironment);
+            return host;
+        }
+
+        private static void DynamoDbSeedTestData(
+            this IServiceProvider app,
+            IHostingEnvironment hostingEnvironment)
+        {
             // we have added 'Scoped' services, this will return the root scope with them attached
-            using (var scope = host.Services.CreateScope())
+            using (var scope = app.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 var logger = services.GetRequiredService<ILogger<Program>>();
@@ -46,8 +63,6 @@ namespace Api.Web
                     logger.LogDebug("[Seed] test data complete");
                 }
             }
-
-            return host;
         }
 
         /// <summary>
@@ -113,7 +128,7 @@ namespace Api.Web
             {
                 var rootUser = await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier)
                     .ThrowObjectNotFoundExceptionIfNull("Trusted root user has not been created");
-                
+
                 userId = await userStore.CreateByUser(rootUser, knownAuth0Id, userData);
             }
             catch (Exception e)

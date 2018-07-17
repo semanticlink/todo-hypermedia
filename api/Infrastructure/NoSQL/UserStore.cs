@@ -12,18 +12,21 @@ using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
+
     public class UserStore : IUserStore
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
         private readonly IDynamoDBContext _context;
         private readonly IIdGenerator _idGenerator;
         private readonly User _user;
+        private readonly IUserRightStore _userRightStore;
 
-        public UserStore(IDynamoDBContext context, IIdGenerator idGenerator, User user)
+        public UserStore(IDynamoDBContext context, IIdGenerator idGenerator, User user, IUserRightStore userRightStore)
         {
             _context = context;
             _idGenerator = idGenerator;
             _user = user;
+            _userRightStore = userRightStore;
         }
 
         public async Task<string> Create(string identityId, UserCreateDataRepresentation data)
@@ -40,10 +43,14 @@ namespace Infrastructure.NoSQL
         /// </remarks>
         public async Task<string> CreateByUser(User user, string identityId, UserCreateDataRepresentation data)
         {
+            user.ThrowArgumentExceptionIfNull("User doing the creating is not specified");
+            data.ThrowArgumentExceptionIfNull("No email and name");
+            
             (await GetByExternalId(identityId))
                 .ThrowInvalidDataExceptionIfNotNull("User already created");
 
             // KLUDGE: both need to be injected
+
             var now = DateTime.UtcNow;
 
             var create = new User
@@ -62,6 +69,64 @@ namespace Infrastructure.NoSQL
             await _context.SaveAsync(create);
 
             return create.Id;
+        }
+
+        /// <summary>
+        ///     This method should only be external called when using the a trusted user through trusted code
+        ///     because it overrides the injected user from the context.
+        /// </summary>
+        /// <remarks>
+        ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
+        /// </remarks>
+        public async Task<string> CreateByUser(
+            User user,
+            string homeCollectionId,
+            string identityId,
+            UserCreateDataRepresentation data,
+            Permission callerRights,
+            IDictionary<RightType, Permission> callerCollectionRights)
+        {
+            user.ThrowArgumentExceptionIfNull("Need a user to do the creating");
+            
+            (await GetByExternalId(identityId))
+                .ThrowInvalidDataExceptionIfNotNull("User already created");
+
+            // KLUDGE: both need to be injected
+            var now = DateTime.UtcNow;
+
+            var newUser = new User
+            {
+                Id = _idGenerator.New(),
+                ExternalIds = new List<string> {identityId},
+                Email = data.Email,
+                Name = data.Name,
+                CreatedBy = user.Id,
+                CreatedAt = now,
+                UpdatedAt = now
+            };
+
+            Log.TraceFormat("New user {0} created by user {1}", newUser.Id, user.Id);
+
+            await _context.SaveAsync(newUser);
+
+            await _userRightStore.CreateRights(
+                newUser.Id,
+                newUser.Id,
+                RightType.User.MakeCreateRights(callerRights, callerCollectionRights),
+                new InheritForm
+                {
+                    Type = RightType.RootUserCollection,
+                    ResourceId = homeCollectionId,
+                    InheritedTypes = new List<RightType>
+                    {
+                        RightType.User,
+                        RightType.UserTenantCollection,
+                        RightType.UserTodoCollection
+                    }
+                });
+
+
+            return newUser.Id;
         }
 
         public async Task<User> Get(string id)

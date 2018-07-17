@@ -1,11 +1,15 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using NLog;
+using Toolkit;
 
 namespace App
 {
     public static class AuthenticationExtensions
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// Retrieves the user Id from the <see cref="ControllerBase.User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Sub"/>).
         /// </summary>
@@ -48,9 +52,11 @@ namespace App
                  *  see https://github.com/aspnet/Security/issues/1310
                  *
                  */
-                throw new NullReferenceException(
-                    $"Ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed or type '{type}' is not available as a claim",
-                    e);
+                Log.DebugExceptionFormat(
+                    e,
+                    $"Ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed or type '{type}' is not available as a claim"
+                );
+                return string.Empty;
             }
         }
     }

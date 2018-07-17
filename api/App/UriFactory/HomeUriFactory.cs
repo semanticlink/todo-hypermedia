@@ -12,6 +12,11 @@ namespace App.UriFactory
         /// </summary>
         public const string TenantsRouteName = "HomeTenants";
 
+        /// <summary>
+        ///     A logical resource that is the collection of all users
+        /// </summary>
+        public const string UsersRouteName = "HomeUsers";
+
         public const string HomeTenantSearchRouteName = "HomeTenantSearch";
         public const string HomeTenantSearchFormRouteName = "HomeTenantSearchForm";
 
@@ -61,6 +66,18 @@ namespace App.UriFactory
         public static string MakeHomeTenantsSearchFormUri(this IUrlHelper url)
         {
             return url.Link(HomeTenantSearchFormRouteName, new { });
+        }
+
+        /// <summary>
+        ///     A collection resource for the list of users.
+        /// </summary>
+        /// <remarks>
+        ///     From a disclosure point-of-view this list is not presented via the API to
+        ///     non-administrators.
+        /// </remarks>
+        public static string MakeHomeUsersUri(this IUrlHelper url)
+        {
+            return url.Link(UsersRouteName, new { });
         }
     }
 }
