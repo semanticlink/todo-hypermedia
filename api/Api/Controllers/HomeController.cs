@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
@@ -13,7 +12,6 @@ using Domain.Representation;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Toolkit;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
@@ -21,25 +19,17 @@ using Toolkit.Representation.LinkedRepresentation;
 namespace Api.Controllers
 {
     [Route("")]
-    //[AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly Version _version;
         private readonly ITenantStore _tenantStore;
         private readonly IUserStore _userStore;
-        private readonly IConfiguration _configuration;
 
-        public HomeController(
-            Version version,
-            ITenantStore tenantStore,
-            IUserStore userStore,
-            IConfiguration configuration
-        )
+        public HomeController(Version version, ITenantStore tenantStore, IUserStore userStore)
         {
             _version = version;
             _tenantStore = tenantStore;
             _userStore = userStore;
-            _configuration = configuration;
         }
 
         [HttpGet("", Name = HomeUriFactory.SelfRouteName)]
