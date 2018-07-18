@@ -18,7 +18,7 @@ namespace Domain.Models
 
         [Description("Tenants")] RootTenantCollection = 101,
         [Description("Users")] RootUserCollection = 102,
-        [Description("Tags")] RootTagCollection = 102,
+        [Description("Tags")] RootTagCollection = 103,
 
         //////////////////////////////////////////////////////////////////////
         // 

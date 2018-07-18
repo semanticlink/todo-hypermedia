@@ -26,7 +26,7 @@ namespace Domain.Persistence
             InheritForm resource = null);
 
         void Update(string userId, string resourceId, RightType rightType, Permission permission);
-        Task<UserRight> Get(string userId, string resourceId, RightType rightType);
+        Task<UserRight> Get(string userId, string resourceId, RightType type);
         Task<IEnumerable<UserRight>> Get(string userId, string resourceId);
         Task RemoveRight(string userId, string resourceId, RightType type);
     }

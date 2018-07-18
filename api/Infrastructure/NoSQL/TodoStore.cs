@@ -15,7 +15,7 @@ namespace Infrastructure.NoSQL
     public class TodoStore : ITodoStore
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        
+
         private readonly IDynamoDBContext _context;
         private readonly IUserRightStore _userRightStore;
         private readonly IIdGenerator _idGenerator;
@@ -29,46 +29,46 @@ namespace Infrastructure.NoSQL
             _userId = user.Id;
         }
 
-        public async Task<string> Create(TodoCreateData todo)
+        public async Task<string> Create(TodoCreateData data)
         {
-            var id = _idGenerator.New();
-            var create = new Todo
+            var todo = new Todo
             {
-                Id = id,
-                Name = todo.Name,
-                State = todo.State,
-                Due = todo.Due,
+                Id = _idGenerator.New(),
+                Name = data.Name,
+                State = data.State,
+                Due = data.Due,
+                CreatedBy = _userId,
                 CreatedAt = DateTime.UtcNow,
                 // TODO: validation/cross checking of tag references
-                Tags = todo.Tags
+                Tags = data.Tags
             };
 
-            await _context.SaveAsync(create);
+            await _context.SaveAsync(todo);
 
-            return id;
-        }
+            Log.DebugFormat("New todo {0} by user {1}", todo.Id, _userId);
 
-        public Task<string> Create(string userId, string contextId, Permission contextRights, TodoCreateData todo)
-        {
-            throw new NotImplementedException();
+            return todo.Id;
         }
 
         public async Task<string> Create(
-            string todoCollectionId /* in this case is a userId */,
+            string contextResourceId,
             TodoCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
         {
             var todoId = await Create(data);
 
+            // create a security hole, if the user isn't injected then make the creator the parent resource
+            // which in this case is a user.
+            // KLUDGE : take out. This is only here because of seed data
             await _userRightStore.CreateRights(
-                _userId,
+                !_userId.IsNullOrWhitespace() ? _userId : contextResourceId,
                 todoId,
                 RightType.Todo.MakeCreateRights(callerRights, callerCollectionRights),
                 new InheritForm
                 {
                     Type = RightType.UserTodoCollection,
-                    ResourceId = todoCollectionId,
+                    ResourceId = contextResourceId,
                     InheritedTypes = new List<RightType>
                     {
                         RightType.Todo,
@@ -76,9 +76,9 @@ namespace Infrastructure.NoSQL
                         RightType.TodoTagCollection
                     }
                 });
-
             return todoId;
         }
+
 
         public async Task<Todo> Get(string id)
         {

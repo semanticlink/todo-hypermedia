@@ -36,6 +36,7 @@ namespace Domain.Models
 
         [DynamoDBVersion] public int? VersionNumber { get; set; }
 
+        public string CreatedBy { get; set; }
         public DateTime UpdatedAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }

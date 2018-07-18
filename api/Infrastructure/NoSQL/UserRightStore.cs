@@ -171,9 +171,9 @@ namespace Infrastructure.NoSQL
             await _dbContext.SaveAsync(userRight);
         }
 
-        public async Task<UserRight> Get(string userId, string resourceId, RightType rightType)
+        public async Task<UserRight> Get(string userId, string resourceId, RightType type)
         {
-            return await Get<UserRight>(userId, resourceId, rightType);
+            return await Get<UserRight>(userId, resourceId, type);
         }
 
         public async Task<IEnumerable<UserRight>> Get(string userId, string resourceId)
@@ -215,13 +215,13 @@ namespace Infrastructure.NoSQL
             return await Get<UserInheritRight>(userId, resourceId, inheritType);
         }
 
-        private async Task<T> Get<T>(string userId, string resourceId, RightType rightType) where T : class
+        private async Task<T> Get<T>(string userId, string resourceId, RightType type) where T : class
         {
             return await _dbContext.SingleOrDefault<T>(new List<ScanCondition>
             {
                 new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId),
                 new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId),
-                new ScanCondition(nameof(UserRight.Type), ScanOperator.Equal, rightType)
+                new ScanCondition(nameof(UserRight.Type), ScanOperator.Equal, type)
             });
         }
 

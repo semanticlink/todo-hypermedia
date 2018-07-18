@@ -50,7 +50,7 @@ namespace Api.Authorisation
                     var rights = await _userRightStore.Get(userId, resourceId, requirement.Type);
 
                     // does the user have the access rights?
-                    if (rights.IsNotNull() && rights.isAllowed(requirement.Access))
+                    if (rights.IsNotNull() && rights.IsAllowed(requirement.Access))
                     {
                         // yup, set for later use in the pipeline
                         context.Succeed(requirement);

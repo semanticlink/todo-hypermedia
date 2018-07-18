@@ -85,7 +85,7 @@ namespace Api.Web
 
 
             logger.LogInformation("[Seed] sample data");
-            
+
             //////////////////////////
             // Authentication
             // ==============
@@ -95,14 +95,14 @@ namespace Api.Web
             // grab it from the Authorization header in a request
             var knownAuth0Id = "auth0|5b32b696a8c12d3b9a32b138";
 
- 
+
             //////////////////////////
             // Seed a user
             // =============
             //
             // Assume a known Auth0 (test) user, register a user and then link to tenant
             //
- 
+
             var userData = new UserCreateDataRepresentation
             {
                 Email = "test@rewire.nz",
@@ -119,7 +119,16 @@ namespace Api.Web
                     knownAuth0Id,
                     userData,
                     Permission.FullControl,
-                    new Dictionary<RightType, Permission>()
+                    new Dictionary<RightType, Permission>
+                    {
+                        {RightType.TenantUserCollection, Permission.FullControl},
+                        {RightType.RootUserCollection, Permission.Get},
+                        {RightType.RootTagCollection, Permission.Get | Permission.Post},
+                        {RightType.UserTodoCollection, Permission.FullControl},
+                        {RightType.TagTodoCollection, Permission.FullControl},
+                        {RightType.TodoCommentCollection, Permission.FullControl},
+                        {RightType.TodoTagCollection, Permission.FullControl},
+                    }
                 );
             }
             catch (Exception e)
@@ -139,7 +148,7 @@ namespace Api.Web
                 logger.LogInformation($"[Seed] user '{userId}'");
             }
 
-                       
+
             //////////////////////////
             // Seed a tenant
             // =============
@@ -160,10 +169,13 @@ namespace Api.Web
                     knownAuth0Id,
                     tenantCreateData,
                     Permission.FullControl,
-                    new Dictionary<RightType, Permission>());
+                    new Dictionary<RightType, Permission>
+                    {
+                        {RightType.RootTenantCollection, Permission.Get},
+                        {RightType.RootUserCollection, Permission.FullControl},
+                    });
 
                 logger.LogInformation($"[Seed] created tenant '{tenantId}'");
-
             }
             catch (Exception e)
             {
@@ -216,19 +228,34 @@ namespace Api.Web
 
             try
             {
-                await todoStore.Create(new TodoCreateData {Name = "One Todo"});
-                await todoStore.Create(new TodoCreateData
+                var createTodoDatas = new List<TodoCreateData>
                 {
-                    Name = "Two Todo (tag)",
-                    Tags = new List<string> {tagIds.First()},
-                    State = TodoState.Complete
-                });
-                await todoStore.Create(new TodoCreateData
-                {
-                    Name = "Three Todo (tagged)",
-                    Tags = tagIds
-                });
-                logger.LogInformation($"[Seed] todos");
+                    new TodoCreateData {Name = "One Todo"},
+                    new TodoCreateData
+                    {
+                        Name = "Two Todo (tag)",
+                        Tags = new List<string> {tagIds.First()},
+                        State = TodoState.Complete
+                    },
+                    new TodoCreateData
+                    {
+                        Name = "Three Todo (tagged)",
+                        Tags = tagIds
+                    }
+                };
+
+                var ids = await Task.WhenAll(createTodoDatas
+                    .Select(data => todoStore.Create(
+                        userId,
+                        data,
+                        Permission.FullControl,
+                        new Dictionary<RightType, Permission>
+                        {
+                            {RightType.UserTodoCollection, Permission.FullControl}
+                        })));
+
+
+                logger.LogInformation($"[Seed] todos: [{0}]", ids.Aggregate((a, b) => a + "," + b).ToString());
             }
             catch (Exception e)
             {

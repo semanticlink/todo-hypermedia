@@ -11,9 +11,15 @@ namespace Domain.Persistence
         ///     Create a new <see cref="Todo"/>. Any <see cref="Todo.Tags"/> have each <see cref="Tag.Count"/> incremented on the
         ///     global collection.
         /// </summary>
-        /// <param name="todo"></param>
-        Task<string> Create(TodoCreateData todo);
-        Task<string> Create(string userId, string contextId, Permission contextRights, TodoCreateData todo);
+        /// <param name="data"></param>
+        [Obsolete]
+        Task<string> Create(TodoCreateData data);
+
+        Task<string> Create(
+            string contextResourceId,
+            TodoCreateData data,
+            Permission callerRights,
+            IDictionary<RightType, Permission> callerCollectionRights);
 
         /// <summary>
         ///     Retrieve a <see cref="Todo"/> based on its id
@@ -24,7 +30,7 @@ namespace Domain.Persistence
         ///     Retrieve a <see cref="Todo"/> based on its id and the presence of a tag.
         /// </summary>
         Task<Todo> GetByIdAndTag(string id, string tagId);
-        
+
         /// <summary>
         ///     Retrieve a full set of tags (ie the global collection) regardless of <see cref="Tenant"/>
         /// </summary>
@@ -69,11 +75,5 @@ namespace Domain.Persistence
         /// </summary>
         /// <param name="tagId"><see cref="Tag.Id"/> of the tag to be searched across all todos</param>
         Task<IEnumerable<Todo>> GetByTag(string tagId);
-
-        Task<string> Create(
-            string todoCollectionId /* in this case is a userId */,
-            TodoCreateData data,
-            Permission callerRights,
-            IDictionary<RightType, Permission> callerCollectionRights);
     }
 }

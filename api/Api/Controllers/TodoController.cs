@@ -48,11 +48,19 @@ namespace Api.Controllers
 
         [HttpPost]
         [AuthoriseUserTodoCollection(Permission.Post)] // HINKY
-        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation todo)
+        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data)
         {
-            return (await _todoStore.Create(todo
-                    .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
-                    .FromRepresentation(Url)))
+            return (await _todoStore.Create(
+                    User.GetIdentityId(),
+                    data
+                        .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
+                        .FromRepresentation(Url),
+                    Permission.FullControl,
+                    new Dictionary<RightType, Permission>
+                    {
+                        {RightType.UserTodoCollection, Permission.FullControl}
+                    }
+                ))
                 .MakeTodoUri(Url)
                 .MakeCreated();
         }
@@ -279,7 +287,7 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [Authorise(RightType.Tag, Permission.Get)]  // HINKY: this might be a todotag
+        [Authorise(RightType.Tag, Permission.Get)] // HINKY: this might be a todotag
         public async Task<TagRepresentation> Get(string id, string tagId)
         {
             (await _todoStore.GetByIdAndTag(id, tagId))

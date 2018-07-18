@@ -172,7 +172,16 @@ namespace Api.Controllers
                     User.GetExternalId(),
                     data,
                     Permission.FullControl,
-                    new Dictionary<RightType, Permission>()
+                    new Dictionary<RightType, Permission>
+                    {
+                        {RightType.TenantUserCollection, Permission.FullControl},
+                        {RightType.RootUserCollection, Permission.Get},
+                        {RightType.RootTagCollection, Permission.Get | Permission.Post},
+                        {RightType.UserTodoCollection, Permission.FullControl},
+                        {RightType.TagTodoCollection, Permission.FullControl},
+                        {RightType.TodoCommentCollection, Permission.FullControl},
+                        {RightType.TodoTagCollection, Permission.FullControl},
+                    }
                 ))
                 .MakeUserUri(Url)
                 .MakeCreated();
