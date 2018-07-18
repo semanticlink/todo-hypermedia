@@ -94,7 +94,7 @@ namespace Api.Controllers
                 ? await _userStore.Create(externalId, model)
                 : user.Id;
 
-            await _tenantStore.AddUser(id, userId);
+            await _tenantStore.IncludeUser(id, userId);
 
             // now, we have the identity user, link this into the new user
             return userId

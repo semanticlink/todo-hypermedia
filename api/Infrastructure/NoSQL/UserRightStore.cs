@@ -48,7 +48,11 @@ namespace Infrastructure.NoSQL
                 Type = type
             };
 
-            Log.TraceFormat("Add right: user {0} to [{1:G},{2}] => rights {3:X} ({3:G})", userId, type, resourceId,
+            Log.TraceFormat(
+                "Add right: user {0} to [{1:G},{2}] => rights {3:X} ({3:G})",
+                userId,
+                type,
+                resourceId,
                 permission);
 
             await _dbContext.SaveAsync(userRight);
@@ -177,7 +181,25 @@ namespace Infrastructure.NoSQL
             return await Get<UserRight>(userId, resourceId);
         }
 
-        private async Task<IEnumerable<UserInheritRight>> GetInheritRights(RightType resourceType, string resourceId,
+        public async Task RemoveRight(string userId, string resourceId, RightType type)
+        {
+            await _dbContext.DeleteAsync<UserRight>(new List<ScanCondition>
+            {
+                new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId),
+                new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId),
+                new ScanCondition(nameof(UserRight.Type), ScanOperator.Equal, type),
+            });
+
+            Log.TraceFormat(
+                "Remove right: user {0} to [{1:G},{2}]",
+                userId,
+                type,
+                resourceId);
+        }
+
+        private async Task<IEnumerable<UserInheritRight>> GetInheritRights(
+            RightType resourceType,
+            string resourceId,
             RightType inheritType)
         {
             return await _dbContext.Where<UserInheritRight>(new List<ScanCondition>

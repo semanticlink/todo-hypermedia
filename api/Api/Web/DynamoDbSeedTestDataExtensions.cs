@@ -85,38 +85,24 @@ namespace Api.Web
 
 
             logger.LogInformation("[Seed] sample data");
-
+            
             //////////////////////////
-            // Seed a tenant
-            // =============
-            //
-            string tenantId = "";
-            try
-            {
-                tenantId = await tenantStore.Create(new TenantCreateData
-                {
-                    Code = "rewire.example.nz",
-                    Name = "Rewire NZ",
-                    Description = "A sample tenant (company/organisation)"
-                });
-                logger.LogInformation($"[Seed] tenant '{tenantId}'");
-            }
-            catch (Exception e)
-            {
-                logger.LogError(e, "");
-            }
-
-            //////////////////////////
-            // Seed a user
-            // =============
-            //
-            // Assume a known Auth0 (test) user, register a user and then link to tenant
+            // Authentication
+            // ==============
             //
 
             // KLUDGE: taken from a precreated user and then decoded JWT through https://jwt.io
             // grab it from the Authorization header in a request
             var knownAuth0Id = "auth0|5b32b696a8c12d3b9a32b138";
 
+ 
+            //////////////////////////
+            // Seed a user
+            // =============
+            //
+            // Assume a known Auth0 (test) user, register a user and then link to tenant
+            //
+ 
             var userData = new UserCreateDataRepresentation
             {
                 Email = "test@rewire.nz",
@@ -153,10 +139,48 @@ namespace Api.Web
                 logger.LogInformation($"[Seed] user '{userId}'");
             }
 
-
+                       
+            //////////////////////////
+            // Seed a tenant
+            // =============
+            //
+            string tenantId = "";
             try
             {
-                await tenantStore.AddUser(tenantId, userId);
+                var tenantCreateData = new TenantCreateData
+                {
+                    Code = "rewire.example.nz",
+                    Name = "Rewire NZ",
+                    Description = "A sample tenant (company/organisation)"
+                };
+
+                tenantId = await tenantStore.Create(
+                    TrustDefaults.KnownRootIdentifier,
+                    TrustDefaults.KnownHomeResourceId,
+                    knownAuth0Id,
+                    tenantCreateData,
+                    Permission.FullControl,
+                    new Dictionary<RightType, Permission>());
+
+                logger.LogInformation($"[Seed] created tenant '{tenantId}'");
+
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "");
+            }
+
+            //////////////////////////
+            // Add uesr to tenant
+            // ==================
+            //
+            try
+            {
+                await tenantStore.IncludeUser(
+                    tenantId,
+                    userId,
+                    Permission.Get);
+
                 logger.LogInformation($"[Seed] registered user against tenant '{tenantId}'");
             }
             catch (Exception e)

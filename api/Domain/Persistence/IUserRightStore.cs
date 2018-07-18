@@ -28,5 +28,6 @@ namespace Domain.Persistence
         void Update(string userId, string resourceId, RightType rightType, Permission permission);
         Task<UserRight> Get(string userId, string resourceId, RightType rightType);
         Task<IEnumerable<UserRight>> Get(string userId, string resourceId);
+        Task RemoveRight(string userId, string resourceId, RightType type);
     }
 }

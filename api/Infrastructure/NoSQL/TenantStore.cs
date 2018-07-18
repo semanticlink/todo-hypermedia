@@ -7,40 +7,76 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Domain;
 using Domain.Models;
 using Domain.Persistence;
+using NLog;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
     public class TenantStore : ITenantStore
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
         private readonly IDynamoDBContext _context;
         private readonly IIdGenerator _idGenerator;
+        private readonly IUserRightStore _userRightStore;
 
-        public TenantStore(IDynamoDBContext context, IIdGenerator idGenerator)
+        public TenantStore(IDynamoDBContext context, IIdGenerator idGenerator, IUserRightStore userRightStore)
         {
             _context = context;
             _idGenerator = idGenerator;
+            _userRightStore = userRightStore;
         }
 
-        public async Task<string> Create(TenantCreateData tenant)
+        public async Task<string> Create(string creatorId, TenantCreateData data)
         {
-            tenant.Code.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Code cannot be empty");
+            data.Code.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Code cannot be empty");
 
             var now = DateTime.UtcNow;
-            
-            var create = new Tenant
+
+            var tenant = new Tenant
             {
                 Id = _idGenerator.New(),
-                Name = tenant.Name,
-                Code = tenant.Code,
-                Description = tenant.Description,
+                Name = data.Name,
+                Code = data.Code,
+                Description = data.Description,
+                CreatedBy = creatorId,
                 CreatedAt = now,
                 UpdatedAt = now
             };
 
-            await _context.SaveAsync(create);
+            await _context.SaveAsync(tenant);
 
-            return create.Id;
+            Log.TraceFormat("New tenant {0} created by user {1}", tenant.Id, creatorId);
+
+            return tenant.Id;
+        }
+
+        public async Task<string> Create(
+            string creatorId,
+            string resourceId,
+            string userExternalId,
+            TenantCreateData data,
+            Permission callerRights,
+            IDictionary<RightType, Permission> callerCollectionRights)
+        {
+            var tenantId = await Create(creatorId, data);
+
+            await _userRightStore.CreateRights(
+                tenantId,
+                tenantId,
+                RightType.User.MakeCreateRights(callerRights, callerCollectionRights),
+                new InheritForm
+                {
+                    Type = RightType.RootUserCollection,
+                    ResourceId = resourceId,
+                    InheritedTypes = new List<RightType>
+                    {
+                        RightType.Tenant,
+                        RightType.TenantTodoCollection,
+                        RightType.TenantUserCollection
+                    }
+                });
+            
+            return tenantId;
         }
 
         public async Task<Tenant> Get(string id)
@@ -60,13 +96,13 @@ namespace Infrastructure.NoSQL
 
         public async Task<IEnumerable<string>> GetUsersByTenant(string id)
         {
-            var usersByTenant = (await  Get(id)).User;
+            var usersByTenant = (await Get(id)).User;
             return !usersByTenant.IsNullOrEmpty()
                 ? usersByTenant
                 : new List<string>();
         }
 
-        public async Task AddUser(string id, string userId)
+        public async Task IncludeUser(string id, string userId)
         {
             await Update(id, tenant =>
             {
@@ -82,6 +118,13 @@ namespace Infrastructure.NoSQL
             });
         }
 
+        public async Task IncludeUser(string id, string userId, Permission callerRights)
+        {
+            await IncludeUser(id, userId);
+
+            await _userRightStore.SetRight(userId, id, RightType.Tenant, callerRights);
+        }
+
         public async Task RemoveUser(string id, string userId)
         {
             await Update(id, tenant =>
@@ -91,6 +134,8 @@ namespace Infrastructure.NoSQL
                     tenant.User.Remove(userId);
                 }
             });
+
+            await _userRightStore.RemoveRight(userId, id, RightType.Tenant);
         }
 
         private async Task Update(string id, Action<Tenant> updater)

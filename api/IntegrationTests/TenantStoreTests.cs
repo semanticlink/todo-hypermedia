@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using App;
 using Domain.Models;
 using Domain.Persistence;
 using Xunit;
@@ -22,7 +23,7 @@ namespace IntegrationTests
                 Name = "baba",
                 Description = "new one"
             };
-            return await store.Create(tenantCreateData);
+            return await store.Create(TrustDefaults.ProvisioningId, tenantCreateData);
         };
 
         [Fact]
@@ -51,7 +52,7 @@ namespace IntegrationTests
 
             // add a user
             var userId = Guid.NewGuid().ToString();
-            await tenantStore.AddUser(id, userId);
+            await tenantStore.IncludeUser(id, userId);
             tenant = await tenantStore.Get(id);
             Assert.Contains(userId, tenant.User);
 
