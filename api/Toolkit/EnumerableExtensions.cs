@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NLog.Filters;
 
 namespace Toolkit
 {
@@ -11,12 +10,31 @@ namespace Toolkit
 
     public static class EnumerableExtensions
     {
+        /// <summary>
+        ///     Similar to string.Join(',') and where every item is quoted
+        /// </summary>
+        /// <example>
+        /// [1,2,3] => '1', '2', '3'
+        /// <code>
+        ///    ids.ToQuotedCsvString(id => id)
+        /// </code>
+        /// </example>
         public static string ToQuotedCsvString<T>(
             this IEnumerable<T> items)
         {
             return items.ToString(string.Empty, string.Empty, ", ", s => $"'{s}'");
         }
 
+        /// <summary>
+        ///     Similar to string.Join(',') but with a little more.
+        /// </summary>
+        /// <example>
+        /// [1,2,3] => 1, 2, 3
+        /// <code>
+        ///    ids.ToCsvString(id => id)
+        /// </code>
+        /// </example>
+        /// <seealso cref="ToCsvString{T}(System.Collections.IEnumerable,Toolkit.ToString{T})"/>
         public static string ToCsvString<T>(
             this IEnumerable<T> items,
             ToString<T> formatter)
@@ -24,6 +42,19 @@ namespace Toolkit
             return items.ToString(string.Empty, string.Empty, ", ", formatter);
         }
 
+        /// <summary>
+        ///     Similar to string.Join(',') but with a little more.
+        /// </summary>
+        /// <example>
+        /// psuedo code list of objects:
+        /// 
+        ///     [ {name:1}, {name:2}, {name:3} ] => 1, 2, 3
+        ///
+        /// <code>
+        ///    models.ToCsvString&lt;T&gt;(m => m.name)
+        /// </code>
+        /// </example>
+        /// <seealso cref="ToCsvString{T}(System.Collections.Generic.IEnumerable{T},Toolkit.ToString{T})"/>
         public static string ToCsvString<T>(
             this IEnumerable items,
             ToString<T> formatter)
