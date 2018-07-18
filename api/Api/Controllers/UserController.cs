@@ -31,7 +31,7 @@ namespace Api.Controllers
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
         [AuthoriseRedirect]
-        public async Task<IActionResult> Me()
+        public IActionResult Me()
         {
             return User
                 .GetIdentityId()
