@@ -32,11 +32,28 @@ namespace Infrastructure.NoSQL
 
         public static async Task WaitForActiveTable(this string userTableName, IAmazonDynamoDB client)
         {
+            int count = 0;
             bool active;
             do
             {
                 active = true;
-                var response = await client.DescribeTableAsync(new DescribeTableRequest {TableName = userTableName});
+                DescribeTableResponse response;
+                try
+                {
+                    response = await client.DescribeTableAsync(new DescribeTableRequest {TableName = userTableName});
+                }
+                catch (ResourceNotFoundException e)
+                {
+                    Console.WriteLine("Waiting for Dynamo to be available");
+                    count++;
+                    if (count > 5)
+                    {
+                        throw;
+                    }
+
+                    return;
+                }
+
                 if (!Equals(response.Table.TableStatus, TableStatus.ACTIVE) ||
                     !response.Table.GlobalSecondaryIndexes.TrueForAll(g => Equals(g.IndexStatus, IndexStatus.ACTIVE)))
                 {

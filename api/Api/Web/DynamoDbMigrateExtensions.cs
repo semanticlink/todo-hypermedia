@@ -109,8 +109,8 @@ namespace Api.Web
 
             var rootUser = await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier);
             var rootId = rootUser.IsNull()
-                ? await userStore.CreateByUser(
-                    new User {Id = "provisioning"},
+                ? await userStore.Create(
+                    TrustDefaults.ProvisioningId,
                     TrustDefaults.KnownHomeResourceId,
                     TrustDefaults.KnownRootIdentifier,
                     rootUserCreateData,

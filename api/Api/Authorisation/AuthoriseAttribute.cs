@@ -51,10 +51,25 @@ namespace Api.Authorisation
         }
     }
 
+    public class AuthoriseUserAttribute : AuthoriseAttribute
+    {
+        public AuthoriseUserAttribute(Permission permission)
+            : base(RightType.User, permission)
+        {
+        }
+    }
+
     /// <summary>
     ///     Wrapper around Authorize so that we can audit forms that they just need authentication
     /// </summary>
     public class AuthoriseFormAttribute : AuthorizeAttribute
+    {
+    }
+
+    /// <summary>
+    ///     Wrapper around Authorize so that we can audit forms that they just need authentication
+    /// </summary>
+    public class AuthoriseRedirectAttribute : AuthorizeAttribute
     {
     }
 }

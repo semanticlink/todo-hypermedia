@@ -31,7 +31,7 @@ namespace Infrastructure.NoSQL
 
         public async Task<string> Create(string identityId, UserCreateDataRepresentation data)
         {
-            return await CreateByUser(_user, identityId, data);
+            return await Create(_user, identityId, data);
         }
 
         /// <summary>
@@ -41,9 +41,9 @@ namespace Infrastructure.NoSQL
         /// <remarks>
         ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
         /// </remarks>
-        public async Task<string> CreateByUser(User user, string identityId, UserCreateDataRepresentation data)
+        public async Task<string> Create(User creator, string identityId, UserCreateDataRepresentation data)
         {
-            user.ThrowArgumentExceptionIfNull("User doing the creating is not specified");
+            creator.ThrowArgumentExceptionIfNull("User doing the creating is not specified");
             data.ThrowArgumentExceptionIfNull("No email and name");
             
             (await GetByExternalId(identityId))
@@ -59,12 +59,12 @@ namespace Infrastructure.NoSQL
                 ExternalIds = new List<string> {identityId},
                 Email = data.Email,
                 Name = data.Name,
-                CreatedBy = user.Id,
+                CreatedBy = creator.Id,
                 CreatedAt = now,
                 UpdatedAt = now
             };
 
-            Log.TraceFormat("New user {0} created by user {1}", create.Id, user.Id);
+            Log.TraceFormat("New user {0} created by user {1}", create.Id, creator.Id);
 
             await _context.SaveAsync(create);
 
@@ -78,17 +78,17 @@ namespace Infrastructure.NoSQL
         /// <remarks>
         ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
         /// </remarks>
-        public async Task<string> CreateByUser(
-            User user,
-            string homeCollectionId,
-            string identityId,
+        public async Task<string> Create(
+            string creatorId,
+            string resourceId,
+            string userExternalId,
             UserCreateDataRepresentation data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
         {
-            user.ThrowArgumentExceptionIfNull("Need a user to do the creating");
+            creatorId.ThrowArgumentExceptionIfNull("Need a user to do the creating");
             
-            (await GetByExternalId(identityId))
+            (await GetByExternalId(userExternalId))
                 .ThrowInvalidDataExceptionIfNotNull("User already created");
 
             // KLUDGE: both need to be injected
@@ -97,15 +97,15 @@ namespace Infrastructure.NoSQL
             var newUser = new User
             {
                 Id = _idGenerator.New(),
-                ExternalIds = new List<string> {identityId},
+                ExternalIds = new List<string> {userExternalId},
                 Email = data.Email,
                 Name = data.Name,
-                CreatedBy = user.Id,
+                CreatedBy = creatorId,
                 CreatedAt = now,
                 UpdatedAt = now
             };
 
-            Log.TraceFormat("New user {0} created by user {1}", newUser.Id, user.Id);
+            Log.TraceFormat("New user {0} created by user {1}", newUser.Id, creatorId);
 
             await _context.SaveAsync(newUser);
 
@@ -116,7 +116,7 @@ namespace Infrastructure.NoSQL
                 new InheritForm
                 {
                     Type = RightType.RootUserCollection,
-                    ResourceId = homeCollectionId,
+                    ResourceId = resourceId,
                     InheritedTypes = new List<RightType>
                     {
                         RightType.User,

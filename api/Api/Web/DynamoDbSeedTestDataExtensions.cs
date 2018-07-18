@@ -126,10 +126,15 @@ namespace Api.Web
             string userId = "";
             try
             {
-                var rootUser = await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier)
-                    .ThrowObjectNotFoundExceptionIfNull("Trusted root user has not been created");
-
-                userId = await userStore.CreateByUser(rootUser, knownAuth0Id, userData);
+                // TODO: this should be through the API front door
+                userId = await userStore.Create(
+                    TrustDefaults.KnownRootIdentifier,
+                    TrustDefaults.KnownHomeResourceId,
+                    knownAuth0Id,
+                    userData,
+                    Permission.FullControl,
+                    new Dictionary<RightType, Permission>()
+                );
             }
             catch (Exception e)
             {

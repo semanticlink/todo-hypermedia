@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Authorisation;
@@ -25,16 +26,19 @@ namespace Api.Controllers
     {
         private readonly Version _version;
         private readonly ITenantStore _tenantStore;
+        private readonly IUserStore _userStore;
         private readonly IConfiguration _configuration;
 
         public HomeController(
             Version version,
             ITenantStore tenantStore,
+            IUserStore userStore,
             IConfiguration configuration
         )
         {
             _version = version;
             _tenantStore = tenantStore;
+            _userStore = userStore;
             _configuration = configuration;
         }
 
@@ -156,6 +160,22 @@ namespace Api.Controllers
         public async Task<IActionResult> GetUsers()
         {
             return NoContent();
+        }
+
+        [HttpPost("user/", Name = HomeUriFactory.UsersRouteName)]
+        [AuthoriseRootUserCollection(Permission.Post)]
+        public async Task<IActionResult> RegisterUser([FromBody] UserCreateDataRepresentation data)
+        {
+            return (await _userStore.Create(
+                    TrustDefaults.KnownRootIdentifier,
+                    TrustDefaults.KnownHomeResourceId,
+                    User.GetExternalId(),
+                    data,
+                    Permission.FullControl,
+                    new Dictionary<RightType, Permission>()
+                ))
+                .MakeUserUri(Url)
+                .MakeCreated();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Api.Authorisation;
 using Api.Web;
 using App;
 using App.RepresentationExtensions;
@@ -6,37 +7,30 @@ using App.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
 using Marvin.Cache.Headers;
-using Microsoft.Extensions.Configuration;
 
 namespace Api.Controllers
 {
     [Route("user")]
-    [Authorize]
     public class UserController : Controller
     {
         private readonly IUserStore _userStore;
         private readonly ITodoStore _todoStore;
-        private readonly IConfiguration _configuration;
 
-        public UserController(
-            IUserStore userStore,
-            ITodoStore todoStore,
-            IConfiguration configuration)
+        public UserController(IUserStore userStore, ITodoStore todoStore)
         {
             _userStore = userStore;
             _todoStore = todoStore;
-            _configuration = configuration;
         }
 
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [AuthoriseRedirect]
         public async Task<IActionResult> Me()
         {
             return User
@@ -48,17 +42,12 @@ namespace Api.Controllers
         [HttpGet("{id}", Name = UserUriFactory.UserRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [AuthoriseUser(Permission.Get)]
         public async Task<UserRepresentation> Get(string id)
         {
-            var domain = _configuration.GetSection(Auth0Configuration.SectionName).Get<Auth0Configuration>().Domain;
-
-            return (await _userStore.Get(id))
+            return (await _userStore
+                    .Get(User.GetIdentityId()))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
-/*
- TODO: authorisation-write this check that the authenticated user matches the requested user
-                .ThrowAccessDeniedExceptionIf(user =>
-                    user.ExternalIds.Contains(User.GetExternalId()), $"User '{id}' does not match")
-*/
                 .ToRepresentation(Url);
         }
 
@@ -68,19 +57,20 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet("form/edit", Name = UserUriFactory.EditFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AuthoriseForm]
         public FormRepresentation GetEditForm()
         {
             return Url.ToUserEditFormRepresentation();
         }
 
         [HttpPut("{id}")]
+        [AuthoriseUser(Permission.Put)]
         public async Task<IActionResult> UpdateUser([FromBody] UserEditData model, string id)
         {
             await _userStore.Update(id, user =>
             {
                 user.Email = model.Email;
                 user.Name = model.Name;
-                // TODO user.ExternalIds
             });
             return NoContent();
         }
@@ -96,6 +86,7 @@ namespace Api.Controllers
         [HttpGet("{id}/todo", Name = UserUriFactory.UserTodoCollectionName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [AuthoriseUserTodoCollection(Permission.Get)]
         public async Task<FeedRepresentation> GetUserTodos(string id)
         {
             return (await _todoStore

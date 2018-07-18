@@ -5,6 +5,7 @@ namespace App.UriFactory
     public static class UserUriFactory
     {
         public const string UserRouteName = "UserRouteName";
+        public const string UserCollectionRouteName = "UserRouteName";
         public const string UserMeName = "UserMeName";
         public const string CreateFormRouteName = "UserCreateForm";
         public const string RegisterCreateFormRouteName = "RegisterCreateFormRouteName";
