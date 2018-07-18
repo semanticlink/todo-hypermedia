@@ -47,7 +47,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        [AuthoriseUserTodoCollection(Permission.Post)] // HINKY
+        [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.Root)] // HINKY
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data)
         {
             return (await _todoStore.Create(
@@ -56,10 +56,7 @@ namespace Api.Controllers
                         .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
                         .FromRepresentation(Url),
                     Permission.FullControl,
-                    new Dictionary<RightType, Permission>
-                    {
-                        {RightType.UserTodoCollection, Permission.FullControl}
-                    }
+                    CallerCollectionRights.Todo
                 ))
                 .MakeTodoUri(Url)
                 .MakeCreated();
@@ -256,13 +253,12 @@ namespace Api.Controllers
         [Authorise(RightType.TodoTagCollection, Permission.Post)]
         public async Task<CreatedResult> CreateTag([FromBody] TagCreateDataRepresentation tag, string id)
         {
-            var tagId = await _tagStore.Create(tag
-                .ThrowInvalidDataExceptionIfNull("Invalid tag create data")
-                .FromRepresentation());
-
-            await _todoStore.AddTag(id, tagId);
-
-            return tagId
+            return (await _tagStore.Create(
+                    User.GetIdentityId(),
+                    TrustDefaults.KnownHomeResourceId,
+                    tag.ThrowInvalidDataExceptionIfNull("Invalid tag create data").FromRepresentation(),
+                    Permission.Get,
+                    CallerCollectionRights.Tag))
                 .MakeTodoTagUri(id, Url)
                 .MakeCreated();
         }
@@ -287,7 +283,7 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [Authorise(RightType.Tag, Permission.Get)] // HINKY: this might be a todotag
+        [Authorise(RightType.Tag, Permission.Get, "tagId")] // HINKY: this might be a todotag
         public async Task<TagRepresentation> Get(string id, string tagId)
         {
             (await _todoStore.GetByIdAndTag(id, tagId))
@@ -303,7 +299,7 @@ namespace Api.Controllers
         ///     Remove a tag from a todo. This is not a delete. The tag still exists in the global collection of tags
         /// </summary>
         [HttpDelete("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
-        [Authorise(RightType.TodoTagCollection, Permission.Patch)]
+        [Authorise(RightType.TodoTagCollection, Permission.Patch, "tagId")]
         public async Task<IActionResult> DeleteTag(string id, string tagId)
         {
             await _todoStore.DeleteTag(id, tagId);

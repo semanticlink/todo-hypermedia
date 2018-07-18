@@ -1,16 +1,16 @@
 ﻿using System.Threading.Tasks;
+using Api.Authorisation;
 using App.RepresentationExtensions;
+using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
 {
     [Route("tag")]
-    [Authorize]
     public class TagController : Controller
     {
         private readonly ITagStore _tagStore;
@@ -29,6 +29,7 @@ namespace Api.Controllers
         [HttpGet("", Name = TagUriFactory.AllTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [Authorise(RightType.RootTagCollection, Permission.Get)]
         public async Task<FeedRepresentation> GetAllTags()
         {
             return (await _tagStore
@@ -39,6 +40,7 @@ namespace Api.Controllers
         [HttpGet("{id}", Name = TagUriFactory.TagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [Authorise(RightType.Tag, Permission.Get)]
         public async Task<TagRepresentation> Get(string id)
         {
             return (await _tagStore
@@ -49,6 +51,7 @@ namespace Api.Controllers
         [HttpGet("{id}/todo", Name = TagUriFactory.TagTodoCollectionRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [Authorise(RightType.TagTodoCollection, Permission.Get)]
         public async Task<FeedRepresentation> GetTagTodoCollection(string id)
         {
             return (await _todoStore

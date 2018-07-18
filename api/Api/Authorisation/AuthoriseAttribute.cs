@@ -20,7 +20,8 @@ namespace Api.Authorisation
     /// </example>
     public class AuthoriseAttribute : AuthorizeAttribute
     {
-        public AuthoriseAttribute(RightType type, Permission permission = Permission.None, string resourceKey = "id")
+        public AuthoriseAttribute(RightType type, Permission permission = Permission.None,
+            string resourceKey = ResourceKey.Id)
         {
             // here's the magic of a delimited string
             Policy = PolicyName.Make(type, permission, resourceKey).Serialise();
@@ -45,8 +46,8 @@ namespace Api.Authorisation
 
     public class AuthoriseUserTodoCollectionAttribute : AuthoriseAttribute
     {
-        public AuthoriseUserTodoCollectionAttribute(Permission permission)
-            : base(RightType.UserTodoCollection, permission)
+        public AuthoriseUserTodoCollectionAttribute(Permission permission, string resourceKey = ResourceKey.Id)
+            : base(RightType.UserTodoCollection, permission, resourceKey)
         {
         }
     }

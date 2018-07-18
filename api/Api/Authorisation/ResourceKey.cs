@@ -17,11 +17,16 @@ namespace Api.Authorisation
         ///     The 'id' route param
         /// </summary>
         public const string Id = "id";
-        
+
         /// <summary>
         ///     Top level collections. Hence they won't have a resource Id to get. But we already know what it is.
         /// </summary>
         /// <seealso cref="TrustDefaults.KnownHomeResourceId"/>
         public const string Root = "/";
+
+        /// <summary>
+        ///     User level collections. Hence they won't have a resource Id to get. So we need to pick up the current user.
+        /// </summary>
+        public const string User = "userId";
     }
 }

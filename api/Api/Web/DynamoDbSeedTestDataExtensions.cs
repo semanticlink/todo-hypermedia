@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
+using Api.Authorisation;
 using App;
 using Domain.Models;
 using Domain.Persistence;
@@ -71,7 +72,7 @@ namespace Api.Web
         private static async Task SeedData(this IServiceProvider services)
         {
             /**
-             * Get registered services before going off. Avoids loosing the IServiceProvider
+             * Get registered services.
              */
             var logger = services.GetRequiredService<ILogger<Program>>();
             var tenantStore = services.GetRequiredService<ITenantStore>();
@@ -80,6 +81,7 @@ namespace Api.Web
             var todoStore = services.GetRequiredService<ITodoStore>();
 
 
+            // ensure the database is up and tables are created
             var client = services.GetRequiredService<IAmazonDynamoDB>();
             await client.WaitForAllTables();
 
@@ -119,16 +121,7 @@ namespace Api.Web
                     knownAuth0Id,
                     userData,
                     Permission.FullControl,
-                    new Dictionary<RightType, Permission>
-                    {
-                        {RightType.TenantUserCollection, Permission.FullControl},
-                        {RightType.RootUserCollection, Permission.Get},
-                        {RightType.RootTagCollection, Permission.Get | Permission.Post},
-                        {RightType.UserTodoCollection, Permission.FullControl},
-                        {RightType.TagTodoCollection, Permission.FullControl},
-                        {RightType.TodoCommentCollection, Permission.FullControl},
-                        {RightType.TodoTagCollection, Permission.FullControl},
-                    }
+                    CallerCollectionRights.User
                 );
             }
             catch (Exception e)
@@ -169,11 +162,7 @@ namespace Api.Web
                     knownAuth0Id,
                     tenantCreateData,
                     Permission.FullControl,
-                    new Dictionary<RightType, Permission>
-                    {
-                        {RightType.RootTenantCollection, Permission.Get},
-                        {RightType.RootUserCollection, Permission.FullControl},
-                    });
+                    CallerCollectionRights.Tenant);
 
                 logger.LogInformation($"[Seed] created tenant '{tenantId}'");
             }
@@ -209,12 +198,18 @@ namespace Api.Web
             List<string> tagIds = new List<string>();
             try
             {
-                tagIds = (await Task
-                        .WhenAll(new[] {"Work", "Personal", "Grocery List"}
-                            .Select(tag => tagStore.Create(new TagCreateData {Name = tag}))))
+                tagIds = (await Task.WhenAll(
+                        new[] {"Work", "Personal", "Grocery List"}
+                            .Select(tag => tagStore.Create(
+                                userId,
+                                TrustDefaults.KnownHomeResourceId,
+                                new TagCreateData {Name = tag},
+                                Permission.Get,
+                                CallerCollectionRights.Tag)
+                            )))
                     .Where(result => result != null)
                     .ToList();
-                logger.LogInformation($"[Seed] tags");
+                logger.LogInformation($"[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
             }
             catch (Exception e)
             {
@@ -249,13 +244,10 @@ namespace Api.Web
                         userId,
                         data,
                         Permission.FullControl,
-                        new Dictionary<RightType, Permission>
-                        {
-                            {RightType.UserTodoCollection, Permission.FullControl}
-                        })));
+                        CallerCollectionRights.Todo)));
 
 
-                logger.LogInformation($"[Seed] todos: [{0}]", ids.Aggregate((a, b) => a + "," + b).ToString());
+                logger.LogInformation($"[Seed] todos: [{0}]", ids.ToCsvString(id => id));
             }
             catch (Exception e)
             {

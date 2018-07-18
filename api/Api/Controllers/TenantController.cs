@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Api.Authorisation;
 using Api.Web;
 using App;
 using App.RepresentationExtensions;
@@ -66,7 +66,7 @@ namespace Api.Controllers
 
         [HttpGet("{id}/form/user/create", Name = UserUriFactory.RegisterCreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
-        [AllowAnonymous]
+        [AuthoriseForm]
         public async Task<CreateFormRepresentation> RegisterUserCreateForm(string id)
         {
             return (await _tenantStore.Get(id))
