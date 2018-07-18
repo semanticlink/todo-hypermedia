@@ -4,9 +4,9 @@ using System.ComponentModel;
 namespace Domain.Models
 {
     [Flags]
-    public enum Permission : long
+    public enum Permission : uint
     {
-        None = 0L,
+        None = 0,
         View = Get,
         CreatorOwner = Creator | Owner,
         FullControl = AllAccess | ControlAccess,
@@ -18,15 +18,15 @@ namespace Domain.Models
         ///   Get content from the object
         /// </summary>
         [Description("Access to read the resource")]
-        Get = 1L << 0,
+        Get = 1 << 0,
 
-        Put = 1L << 1,
-        Post = 1L << 2,
+        Put = 1 << 1,
+        Post = 1 << 2,
 
         /// <summary>
         ///   Delete the resource or part of the resource
         /// </summary>
-        Delete = 1L << 3,
+        Delete = 1 << 3,
         
         /// <summary>
         ///   Patch the resource
@@ -39,7 +39,7 @@ namespace Domain.Models
         /// <summary>
         ///   The right to get authorisation permissions
         /// </summary>
-        GetPermissions = 1L << 16,
+        GetPermissions = 1 << 16,
 
         /// <summary>
         ///   The right to put authorisation permissions
@@ -47,32 +47,32 @@ namespace Domain.Models
         /// <remarks>
         ///   Logically all objects have permissions, so there is no post action.
         /// </remarks>
-        PutPermissions = 1L << 17,
+        PutPermissions = 1 << 17,
 
         /// <summary>
         ///   The right to set inheritable authorisation permissions
         /// </summary>
         /// <seealso cref="UserInheritRight"/>
-        GetInheritPermissions = 1L << 18,
+        GetInheritPermissions = 1 << 18,
 
         /// <summary>
         ///   The right to put inheritable authorisation permissions
         /// </summary>
         /// <seealso cref="UserInheritRight"/>
-        PutInheritPermissions = 1L << 19,
+        PutInheritPermissions = 1 << 19,
 
         /// <summary>
         ///   A flag to indicate that this right was granted by inheritance
         ///   when the resource was created. When a right is explicitly set
         ///   this flag will be cleared.
         /// </summary>
-        Inherited = 1L << 24,
+        Inherited = 1 << 24,
 
         /// <summary>
         ///   An owner of an object can delegate rights to another
         ///   party, without having to have rights to grant to them.
         /// </summary>
-        Owner = 1L << 30,
-        Creator = 1L << 31,
+        Owner = 1 << 29,
+        Creator = 1 << 30,
     }
 }
