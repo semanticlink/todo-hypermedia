@@ -60,6 +60,23 @@ namespace Api.Authorisation
         }
     }
 
+
+    public class AuthoriseTagAttribute : AuthoriseAttribute
+    {
+        public AuthoriseTagAttribute(Permission permission, string resourceKey = ResourceKey.Id)
+            : base(RightType.TodoTagCollection, permission, resourceKey)
+        {
+        }
+    }
+
+    public class AuthoriseTodoTagCollectionAttribute : AuthoriseAttribute
+    {
+        public AuthoriseTodoTagCollectionAttribute(Permission permission, string resourceKey = ResourceKey.Id)
+            : base(RightType.TodoTagCollection, permission, resourceKey)
+        {
+        }
+    }
+
     /// <summary>
     ///     Wrapper around Authorize so that we can audit forms that they just need authentication
     /// </summary>

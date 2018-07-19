@@ -47,7 +47,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.Root)] // HINKY
+        [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data)
         {
             return (await _todoStore.Create(
@@ -117,7 +117,7 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [Authorise(RightType.TodoTagCollection, Permission.Get)]
+        [AuthoriseTodoTagCollection(Permission.Get)]
         public async Task<FeedRepresentation> GetTodoTags(string id)
         {
             var todo = await _todoStore.Get(id);
@@ -175,7 +175,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpPatch("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes("application/json-patch+json")]
-        [Authorise(RightType.TodoTagCollection, Permission.Patch)]
+        [AuthoriseTodoTagCollection(Permission.Patch)]
         public async Task<IActionResult> PatchTagCollection(
             string id,
             [FromBody] JsonPatchDocument<PatchFeedRepresentation> patch)
@@ -227,7 +227,7 @@ namespace Api.Controllers
         /// <param name="uriList">A todo tag uri (not a global tag uri)</param>
         [HttpPut("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes("text/uri-list")]
-        [Authorise(RightType.TodoTagCollection, Permission.Put)]
+        [AuthoriseTodoTagCollection(Permission.Put)]
         public async Task<IActionResult> PutTagCollection(string id, [FromBody] string[] uriList)
         {
             // check that global tags exist in the todo set sent through as a uriList
@@ -250,7 +250,7 @@ namespace Api.Controllers
         ///     Include a global tag onto a todo
         /// </summary>
         [HttpPost("{id}/tag/", Name = TagUriFactory.TodoTagCreateRouteName)]
-        [Authorise(RightType.TodoTagCollection, Permission.Post)]
+        [AuthoriseTodoTagCollection(Permission.Post)]
         public async Task<CreatedResult> CreateTag([FromBody] TagCreateDataRepresentation tag, string id)
         {
             return (await _tagStore.Create(
@@ -283,7 +283,8 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [Authorise(RightType.Tag, Permission.Get, "tagId")] // HINKY: this might be a todotag
+        [AuthoriseTodo(Permission.Get)]
+        [AuthoriseTag(Permission.Get, "tagId")] // HINKY: this might be a todotag
         public async Task<TagRepresentation> Get(string id, string tagId)
         {
             (await _todoStore.GetByIdAndTag(id, tagId))
@@ -299,7 +300,7 @@ namespace Api.Controllers
         ///     Remove a tag from a todo. This is not a delete. The tag still exists in the global collection of tags
         /// </summary>
         [HttpDelete("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
-        [Authorise(RightType.TodoTagCollection, Permission.Patch, "tagId")]
+        [AuthoriseTodoTagCollection(Permission.Patch, "tagId")]
         public async Task<IActionResult> DeleteTag(string id, string tagId)
         {
             await _todoStore.DeleteTag(id, tagId);

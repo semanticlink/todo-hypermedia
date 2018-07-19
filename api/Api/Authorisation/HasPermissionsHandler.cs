@@ -26,6 +26,33 @@ namespace Api.Authorisation
             _userRightStore = userRightStore;
         }
 
+        /// <summary>
+        ///     Switch out the resource id based on the <see cref="ResourceKey"/> set in the
+        ///     <see cref="AuthoriseAttribute"/> (or derived type).
+        /// </summary>
+        /// <remarks>
+        /// There are two specicial values: <see cref="ResourceKey.Root"/> and <see cref="ResourceKey.User"/> which
+        /// return values not contained in the Uri of the request that need to be substituted. Otherwise, get from the
+        /// Uri (ie RouteData based on a key)
+        /// </remarks>
+        private string ResourceId(string resourceKeyInUri, AuthorizationFilterContext authContext)
+        {
+            switch (resourceKeyInUri)
+            {
+                case ResourceKey.Root:
+                    return TrustDefaults.KnownHomeResourceId;
+                case ResourceKey.User:
+                    return authContext.HttpContext.User.GetIdentityId();
+                /*
+                 * Pick up all other route params including:
+                 * 
+                 * case ResourceKey.Id:
+                 */
+                default:
+                    return authContext.RouteData.Values[resourceKeyInUri]?.ToString();
+            }
+        }
+
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             HasPermissionsOnResourceRequirement requirement)
@@ -37,9 +64,7 @@ namespace Api.Authorisation
             {
                 // you can grab the id of the resource based on the keyname in the route, or if it
                 // is root use the known resource id
-                var resourceId = requirement.ResourceKeyInUri != ResourceKey.Root
-                    ? authContext.RouteData.Values[requirement.ResourceKeyInUri]?.ToString()
-                    : TrustDefaults.KnownHomeResourceId;
+                var resourceId = ResourceId(requirement.ResourceKeyInUri, authContext);
 
                 // get the user Id from the claims that already setup
                 var userId = authContext.HttpContext.User.GetIdentityId();
@@ -50,7 +75,7 @@ namespace Api.Authorisation
                     var rights = await _userRightStore.Get(userId, resourceId, requirement.Type);
 
                     // does the user have the access rights?
-                    if (rights.IsNotNull() && rights.IsAllowed(requirement.Access))
+                    if (rights.IsAllowed(requirement.Access))
                     {
                         // yup, set for later use in the pipeline
                         context.Succeed(requirement);
