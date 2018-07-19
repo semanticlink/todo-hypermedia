@@ -4,11 +4,12 @@ using Api.Web;
 using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
+using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using Toolkit;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
@@ -16,9 +17,9 @@ using Toolkit.Representation.LinkedRepresentation;
 namespace Api.Controllers
 {
     [Route("tenant")]
-    [Authorize]
     public class TenantController : Controller
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
         private readonly ITenantStore _tenantStore;
         private readonly IUserStore _userStore;
 
@@ -32,13 +33,13 @@ namespace Api.Controllers
         ///   The basic information about a tenant. 
         /// </summary>
         /// <remarks>
-        ///    There is a small level of disclosure here because we want to be able to allow anonymous users
+        ///    There is a small level of disclosure here because we want authenticated users
         ///     to find this tenant and then be able to register against it.
         /// </remarks>
         [HttpGet("{id}", Name = TenantUriFactory.SelfRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [AllowAnonymous]
+        [Authorise(RightType.Tenant, Permission.Get)]
         public async Task<TenantRepresentation> Get(string id)
         {
             return (await _tenantStore
@@ -58,6 +59,7 @@ namespace Api.Controllers
         [HttpGet("{id}/user/", Name = TenantUriFactory.TenantUsersRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
+        [AuthoriseTenantUserCollection(Permission.Get)]
         public async Task<FeedRepresentation> GetUsers(string id)
         {
             return (await _tenantStore.GetUsersByTenant(id))
@@ -76,30 +78,51 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Create a user on a tenant. Creating a user requires that the incoming request is authenticated
-        ///     because we use external id as a foreign key on the user.  
+        ///     Create a user (if doesn't exist) and register for a tenant. 
         /// </summary>
-        /// <remarks>
-        ///    A user is already authenticated and thus merely created 
-        /// </remarks>
-        [HttpPost("{id}/user")]
-        public async Task<object> RegisterUser([FromBody] UserCreateDataRepresentation model, string id)
+        [HttpPost("{id}/user/")]
+        [AuthoriseTenantUserCollection(Permission.Post)]
+        public async Task<IActionResult> RegisterUser([FromBody] UserCreateDataRepresentation data, string id)
         {
             (await _tenantStore.Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("Invalid tenant");
 
-            var externalId = User.GetExternalId();
-            var user = await _userStore.GetByExternalId(externalId);
-            var userId = user.IsNull()
-                ? await _userStore.Create(externalId, model)
-                : user.Id;
+            var user = await _userStore.GetByExternalId(data.ExternalId);
 
-            await _tenantStore.IncludeUser(id, userId);
+            // Create the user if it doesn't already exist
+            if (user.IsNull() || user.Id.IsNullOrWhitespace())
+            {
+                // make the user
+                var userId = await _userStore.Create(
+                    User.GetIdentityId(),
+                    id,
+                    data.FromRepresentation(),
+                    Permission.FullControl,
+                    CallerCollectionRights.User);
 
-            // now, we have the identity user, link this into the new user
-            return userId
+                // and stick it on the tenant
+                await _tenantStore.IncludeUser(id, userId, Permission.Get, CallerCollectionRights.Tenant);
+
+                Log.DebugFormat("New user {0} registered on tenant {1}", userId, id);
+
+                // now, we have the identity user, link this into the new user
+                return userId
+                    .MakeUserUri(Url)
+                    .MakeCreated();
+            }
+
+            // 409 if already on the tenant
+            (await _tenantStore.IsRegisteredOnTenant(id, user.Id))
+                .ThrowInvalidOperationExceptionIf(exists => exists, "User already exists on tenant");
+
+            // 202 if now included
+            await _tenantStore.IncludeUser(id, user.Id, Permission.Get, CallerCollectionRights.Tenant);
+
+            Log.DebugFormat("Registered existing user {0} on tenant {1}", user.Id, id);
+
+            return user.Id
                 .MakeUserUri(Url)
-                .MakeCreated();
+                .MakeAccepted();
         }
     }
 }

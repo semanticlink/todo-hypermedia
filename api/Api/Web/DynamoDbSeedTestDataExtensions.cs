@@ -7,13 +7,14 @@ using Api.Authorisation;
 using App;
 using Domain.Models;
 using Domain.Persistence;
-using Domain.Representation;
 using Domain.Representation.Enum;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NLog.Fluent;
 using Toolkit;
 
 namespace Api.Web
@@ -93,8 +94,8 @@ namespace Api.Web
             // ==============
             //
 
-            // KLUDGE: taken from a precreated user and then decoded JWT through https://jwt.io
-            // grab it from the Authorization header in a request
+            // A precreated user (in third-party system) [or decoded JWT through https://jwt.io
+            // grab it from the Authorization header in a request]
             var knownAuth0Id = "auth0|5b32b696a8c12d3b9a32b138";
 
 
@@ -105,10 +106,11 @@ namespace Api.Web
             // Assume a known Auth0 (test) user, register a user and then link to tenant
             //
 
-            var userData = new UserCreateDataRepresentation
+            var userData = new UserCreateData
             {
                 Email = "test@rewire.nz",
-                Name = "test"
+                Name = "test",
+                ExternalId = "auth0|5b32b696a8c12d3b9a32b138"
             };
 
             string userId = "";
@@ -118,23 +120,14 @@ namespace Api.Web
                 userId = await userStore.Create(
                     TrustDefaults.KnownRootIdentifier,
                     TrustDefaults.KnownHomeResourceId,
-                    knownAuth0Id,
                     userData,
                     Permission.FullControl,
                     CallerCollectionRights.User
                 );
             }
-            catch (Exception e)
+            catch (InvalidOperationException e)
             {
-                if (e.Message.Equals("User already created"))
-                {
-                    userId = (await userStore.GetByExternalId(knownAuth0Id)).Id;
-                }
-                else
-                {
-                    logger.LogError(e, "");
-                    throw;
-                }
+                userId = (await userStore.GetByExternalId(knownAuth0Id)).Id;
             }
             finally
             {
@@ -146,41 +139,41 @@ namespace Api.Web
             // Seed a tenant
             // =============
             //
+            var tenantCreateData = new TenantCreateData
+            {
+                Code = "rewire.example.nz",
+                Name = "Rewire NZ",
+                Description = "A sample tenant (company/organisation)"
+            };
             string tenantId = "";
             try
             {
-                var tenantCreateData = new TenantCreateData
-                {
-                    Code = "rewire.example.nz",
-                    Name = "Rewire NZ",
-                    Description = "A sample tenant (company/organisation)"
-                };
-
                 tenantId = await tenantStore.Create(
                     TrustDefaults.KnownRootIdentifier,
                     TrustDefaults.KnownHomeResourceId,
-                    knownAuth0Id,
                     tenantCreateData,
                     Permission.FullControl,
                     CallerCollectionRights.Tenant);
 
                 logger.LogInformation($"[Seed] created tenant '{tenantId}'");
             }
-            catch (Exception e)
+            catch (InvalidOperationException e)
             {
-                logger.LogError(e, "");
+                logger.LogDebug("Tenant alredy exists");
+
+                tenantId = (await tenantStore.GetByCode(tenantCreateData.Code)).Id;
             }
 
             //////////////////////////
-            // Add uesr to tenant
+            // Add user to tenant
             // ==================
             //
             try
             {
-                await tenantStore.IncludeUser(
-                    tenantId,
-                    userId,
-                    Permission.Get);
+                if (!await tenantStore.IsRegisteredOnTenant(tenantId, userId))
+                {
+                    await tenantStore.IncludeUser(tenantId, userId, Permission.Get, CallerCollectionRights.Tenant);
+                }
 
                 logger.LogInformation($"[Seed] registered user against tenant '{tenantId}'");
             }
@@ -209,7 +202,7 @@ namespace Api.Web
                             )))
                     .Where(result => result != null)
                     .ToList();
-                logger.LogInformation($"[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
+                logger.LogInformation("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
             }
             catch (Exception e)
             {
@@ -247,7 +240,7 @@ namespace Api.Web
                         CallerCollectionRights.Todo)));
 
 
-                logger.LogInformation($"[Seed] todos: [{0}]", ids.ToCsvString(id => id));
+                logger.LogInformation("[Seed] todos: [{0}]", ids.ToCsvString(id => id));
             }
             catch (Exception e)
             {

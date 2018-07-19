@@ -36,6 +36,14 @@ namespace Api.Authorisation
         }
     }
 
+    public class AuthoriseTenantUserCollectionAttribute : AuthoriseAttribute
+    {
+        public AuthoriseTenantUserCollectionAttribute(Permission permission)
+            : base(RightType.TenantUserCollection, permission)
+        {
+        }
+    }
+
     public class AuthoriseTodoAttribute : AuthoriseAttribute
     {
         public AuthoriseTodoAttribute(Permission permission)

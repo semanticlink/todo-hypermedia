@@ -18,7 +18,9 @@ namespace App.RepresentationExtensions
         /// <summary>
         ///     Feed reperesentation of todos parented on a user
         /// </summary>
-        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Todo> todos, string userId,
+        public static FeedRepresentation ToFeedRepresentation(
+            this IEnumerable<Todo> todos,
+            string userId,
             IUrlHelper url)
         {
             return new FeedRepresentation

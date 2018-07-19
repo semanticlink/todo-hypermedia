@@ -30,6 +30,11 @@ namespace Infrastructure.NoSQL
         {
             data.Code.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Code cannot be empty");
 
+            (await GetByCode(data.Code))
+                .ThrowInvalidOperationExceptionIf(
+                    t => t.IsNotNull() && !t.Id.IsNullOrWhitespace(),
+                    $"Tenant with code '{data.Code}' aleady exists");
+
             var now = DateTime.UtcNow;
 
             var tenant = new Tenant
@@ -53,7 +58,6 @@ namespace Infrastructure.NoSQL
         public async Task<string> Create(
             string creatorId,
             string resourceId,
-            string userExternalId,
             TenantCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
@@ -61,7 +65,7 @@ namespace Infrastructure.NoSQL
             var tenantId = await Create(creatorId, data);
 
             await _userRightStore.CreateRights(
-                tenantId,
+                creatorId,
                 tenantId,
                 RightType.User.MakeCreateRights(callerRights, callerCollectionRights),
                 new InheritForm
@@ -75,7 +79,7 @@ namespace Infrastructure.NoSQL
                         RightType.TenantUserCollection
                     }
                 });
-            
+
             return tenantId;
         }
 
@@ -102,6 +106,20 @@ namespace Infrastructure.NoSQL
                 : new List<string>();
         }
 
+        public async Task<bool> IsRegisteredOnTenant(string id, string userId)
+        {
+            id.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Id cannot be empty");
+            userId.ThrowInvalidDataExceptionIfNullOrWhiteSpace("User id cannot be empty");
+            
+            return (await _context.Where<Tenant>(new List<ScanCondition>
+                {
+                    new ScanCondition(nameof(Tenant.Id), ScanOperator.Equal, id),
+                    new ScanCondition(nameof(Tenant.User), ScanOperator.Contains, userId),
+                }))
+                .ToList()
+                .Any();
+        }
+
         public async Task IncludeUser(string id, string userId)
         {
             await Update(id, tenant =>
@@ -118,11 +136,18 @@ namespace Infrastructure.NoSQL
             });
         }
 
-        public async Task IncludeUser(string id, string userId, Permission callerRights)
+        public async Task IncludeUser(
+            string id,
+            string userId,
+            Permission callerRights,
+            IDictionary<RightType, Permission> callerCollectionRights)
         {
             await IncludeUser(id, userId);
 
-            await _userRightStore.SetRight(userId, id, RightType.Tenant, callerRights);
+            await _userRightStore.CreateRights(
+                userId,
+                id,
+                RightType.Tenant.MakeCreateRights(callerRights, callerCollectionRights));
         }
 
         public async Task RemoveUser(string id, string userId)

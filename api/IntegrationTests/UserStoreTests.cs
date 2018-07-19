@@ -1,8 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
+using Api.Authorisation;
+using App;
 using Domain.Models;
 using Domain.Persistence;
-using Domain.Representation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,13 +22,20 @@ namespace IntegrationTests
             var userStore = Get<IUserStore>();
 
             var identityId = "auth0|349874545";
-            var externalUser = new UserCreateDataRepresentation
+            var data = new UserCreateData
             {
                 Name = "fred",
-                Email = ""
+                Email = "",
+                ExternalId = identityId
             };
 
-            var id = await userStore.Create(identityId, externalUser);
+            var id = await userStore.Create(
+                TrustDefaults.KnownRootIdentifier,
+                TrustDefaults.KnownHomeResourceId,
+                data,
+                Permission.FullControl,
+                CallerCollectionRights.User
+            );
 
             var user = await userStore.Get(id);
 

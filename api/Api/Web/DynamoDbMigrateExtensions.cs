@@ -99,7 +99,7 @@ namespace Api.Web
             //
 
             // TODO: get from configuration
-            var rootUserCreateData = new UserCreateDataRepresentation
+            var rootUserCreateData = new UserCreateData
             {
                 Name = "Service Account",
                 Email = "root@rewire.nz"
@@ -108,11 +108,13 @@ namespace Api.Web
             var userStore = services.GetRequiredService<IUserStore>();
 
             var rootUser = await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier);
-            var rootId = rootUser.IsNull()
-                ? await userStore.Create(
+            var rootId = TrustDefaults.KnownRootIdentifier;
+
+            if (rootUser != null && rootUser.Id.IsNullOrWhitespace())
+            {
+                rootId = await userStore.Create(
                     TrustDefaults.ProvisioningId,
                     TrustDefaults.KnownHomeResourceId,
-                    TrustDefaults.KnownRootIdentifier,
                     rootUserCreateData,
                     Permission.ControlAccess | Permission.Get,
                     new Dictionary<RightType, Permission>
@@ -120,8 +122,8 @@ namespace Api.Web
                         {RightType.Root, Permission.ControlAccess | Permission.Get},
                         {RightType.RootTenantCollection, Permission.ControlAccess | Permission.Get},
                         {RightType.RootUserCollection, Permission.FullControl},
-                    })
-                : rootUser.Id;
+                    });
+            }
 
             logger.LogInformation("[Seed] service user {0}", rootId);
         }

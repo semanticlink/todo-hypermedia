@@ -12,7 +12,6 @@ using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
-
     public class UserStore : IUserStore
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
@@ -29,11 +28,6 @@ namespace Infrastructure.NoSQL
             _userRightStore = userRightStore;
         }
 
-        public async Task<string> Create(string identityId, UserCreateDataRepresentation data)
-        {
-            return await Create(_user, identityId, data);
-        }
-
         /// <summary>
         ///     This method should only be external called when using the a trusted user through trusted code
         ///     because it overrides the injected user from the context.
@@ -41,55 +35,16 @@ namespace Infrastructure.NoSQL
         /// <remarks>
         ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
         /// </remarks>
-        public async Task<string> Create(User creator, string identityId, UserCreateDataRepresentation data)
-        {
-            creator.ThrowArgumentExceptionIfNull("User doing the creating is not specified");
-            data.ThrowArgumentExceptionIfNull("No email and name");
-            
-            (await GetByExternalId(identityId))
-                .ThrowInvalidDataExceptionIfNotNull("User already created");
-
-            // KLUDGE: both need to be injected
-
-            var now = DateTime.UtcNow;
-
-            var create = new User
-            {
-                Id = _idGenerator.New(),
-                ExternalIds = new List<string> {identityId},
-                Email = data.Email,
-                Name = data.Name,
-                CreatedBy = creator.Id,
-                CreatedAt = now,
-                UpdatedAt = now
-            };
-
-            Log.TraceFormat("New user {0} created by user {1}", create.Id, creator.Id);
-
-            await _context.SaveAsync(create);
-
-            return create.Id;
-        }
-
-        /// <summary>
-        ///     This method should only be external called when using the a trusted user through trusted code
-        ///     because it overrides the injected user from the context.
-        /// </summary>
-        /// <remarks>
-        ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
-        /// </remarks>
-        public async Task<string> Create(
-            string creatorId,
+        public async Task<string> Create(string creatorId,
             string resourceId,
-            string userExternalId,
-            UserCreateDataRepresentation data,
+            UserCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
         {
             creatorId.ThrowArgumentExceptionIfNull("Need a user to do the creating");
-            
-            (await GetByExternalId(userExternalId))
-                .ThrowInvalidDataExceptionIfNotNull("User already created");
+
+            (await GetByExternalId(data.ExternalId))
+                .ThrowInvalidOperationExceptionIfNotNull("User already created");
 
             // KLUDGE: both need to be injected
             var now = DateTime.UtcNow;
@@ -97,7 +52,7 @@ namespace Infrastructure.NoSQL
             var newUser = new User
             {
                 Id = _idGenerator.New(),
-                ExternalIds = new List<string> {userExternalId},
+                ExternalIds = new List<string> {data.ExternalId},
                 Email = data.Email,
                 Name = data.Name,
                 CreatedBy = creatorId,

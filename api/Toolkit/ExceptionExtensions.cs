@@ -9,7 +9,6 @@ namespace Toolkit
 {
     public static class ExceptionExtensions
     {
- 
         [NotNull]
         public static T ThrowArgumentExceptionIfNull<T>(this T anObject, string argumentName, string message = null)
             where T : class
@@ -82,7 +81,6 @@ namespace Toolkit
         {
             return ThrowInvalidDataExceptionIf(anObject, o => o == null, message);
         }
-
 
 
         [NotNull]
@@ -197,8 +195,30 @@ namespace Toolkit
 
             return anObject;
         }
-        
-        
+
+        [NotNull]
+        public static T ThrowInvalidOperationExceptionIf<T>(this T anObject, Func<T, bool> predicate, string message)
+        {
+            if (predicate(anObject))
+            {
+                throw new InvalidOperationException(message);
+            }
+
+            return anObject;
+        }
+
+        [NotNull]
+        public static T ThrowInvalidOperationExceptionIfNotNull<T>(this T anObject, string message)
+        {
+            return ThrowInvalidOperationExceptionIf(anObject, o => o != null, message);
+        }
+
+        [NotNull]
+        public static T ThrowInvalidOperationExceptionIfNull<T>(this T anObject, string message)
+        {
+            return ThrowInvalidOperationExceptionIf(anObject, o => o == null, message);
+        }
+
         [NotNull]
         public static T ThrowConfigurationErrorsExceptionIfNull<T>(this T anObject, Func<string> message)
         {
@@ -246,6 +266,5 @@ namespace Toolkit
 
             return anObject;
         }
-
     }
 }

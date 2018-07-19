@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace Domain.Representation
 {
@@ -15,5 +16,9 @@ namespace Domain.Representation
 
         [DataMember(Name = "name", Order = 50, EmitDefaultValue = false)]
         public string Name { get; set; }
+
+        [DataMember(Name = "externalId", Order = 50, EmitDefaultValue = false)]
+        [Description("External system id (eg 'auth0|xxxxxxx')")]
+        public string ExternalId { get; set; }
     }
 }

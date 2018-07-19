@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using App.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
@@ -12,63 +11,10 @@ using Toolkit.Representation.LinkedRepresentation;
 
 namespace App.RepresentationExtensions
 {
-    /// <summary>
-    ///     A class to be able to read the Auth0 Id format and take in the the domain and spit out something
-    ///     semi sensible
-    /// <example>
-    ///    auth0|5b32b696a8c12d3b9a32b138
-    ///    rel = auth0
-    ///    uri = https://somesubdomain.auth0.com/5b32b696a8c12d3b9a32b138
-    ///    title = externalId
-    /// </example> 
-    /// </summary>
-    /// 
-    public class Auth0Id
-    {
-        private const char Delimiter = '|';
-        private const string Rel = CustomLinkRelation.Authenticator;
-
-        private string Id { get; set; }
-        private string Title { get; set; }
-
-        /// <summary>
-        ///     Very simple parser on bar delimited
-        /// </summary>
-        /// <param name="id"></param>
-        private void Parse(string id)
-        {
-            var provider = id.Split(Delimiter);
-
-            if (provider.Length == 2)
-            {
-                Id = provider.Last();
-                Title = provider.First();
-            }
-            else
-            {
-                // TODO logging
-                // we don't have a format we recognise
-            }
-        }
-
-        public WebLink MakeWebLink(string id, IUrlHelper url)
-        {
-            Parse(id);
-            return Id.MakeUserAuthenticator(Title, url).MakeWebLink(Rel, Title);
-        }
-
-        public WebLink[] MakeWebLinks(List<string> ids, IUrlHelper url)
-        {
-            return ids
-                .Select(id => MakeWebLink(id, url))
-                .ToArray();
-        }
-    }
-
-
     public static class UserRepresentationExtensions
     {
-        public static UserRepresentation ToRepresentation(this User user,
+        public static UserRepresentation ToRepresentation(
+            this User user,
             IUrlHelper url)
         {
             return new UserRepresentation
@@ -101,7 +47,8 @@ namespace App.RepresentationExtensions
         ///     modify instances on the resource
         /// </summary>
         /// <seealso cref = "UserCreateDataRepresentation" />
-        public static CreateFormRepresentation ToRegisterUserCreateFormRepresentation(this string tenantId,
+        public static CreateFormRepresentation ToRegisterUserCreateFormRepresentation(
+            this string tenantId,
             IUrlHelper url)
         {
             return new CreateFormRepresentation
@@ -129,13 +76,19 @@ namespace App.RepresentationExtensions
                 {
                     Name = "email",
                     Description = "The email address of the user",
-                    Required = false
+                    Required = true
                 },
                 new TextInputFormItemRepresentation
                 {
                     Name = "name",
                     Description = "The name of the user to be shown on the screen",
-                    Required = false
+                    Required = true
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "externalId",
+                    Description = "The third-party id fo the user (eg 'auth0|xxxxx')",
+                    Required = true
                 },
             };
         }
@@ -183,6 +136,19 @@ namespace App.RepresentationExtensions
                     Multiple = true,
                     Required = false,
                 }
+            };
+        }
+
+        public static UserCreateData FromRepresentation(this UserCreateDataRepresentation data)
+        {
+            return new UserCreateData
+            {
+                Name = data.Name
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires a name"),
+                Email = data.Email
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires an email"),
+                ExternalId = data.ExternalId
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires an external id"),
             };
         }
     }

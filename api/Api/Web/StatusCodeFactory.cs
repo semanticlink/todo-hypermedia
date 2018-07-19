@@ -31,5 +31,12 @@ namespace Api.Web
                 StatusCodes.Status408RequestTimeout,
                 message);
         }
+
+        public static StatusCodeAndReasonResult MakeAccepted(this string message)
+        {
+            return new StatusCodeAndReasonResult(
+                StatusCodes.Status202Accepted,
+                message);
+        }
     }
 }

@@ -15,11 +15,9 @@ namespace Infrastructure.NoSQL
             List<ScanCondition> scanCondition)
             where T : class
         {
-            var enumerable = await context
+            return await context
                 .ScanAsync<T>(scanCondition.IsNull() ? new List<ScanCondition>() : scanCondition)
                 .GetRemainingAsync();
-            
-            return enumerable;
         }
 
         public static async Task<IEnumerable<T>> Where<T>(

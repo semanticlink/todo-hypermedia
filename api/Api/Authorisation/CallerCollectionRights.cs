@@ -18,7 +18,7 @@ namespace Api.Authorisation
             {RightType.RootUserCollection, Permission.Get},
             {RightType.RootTagCollection, Permission.Get | Permission.Post},
             {RightType.UserTodoCollection, Permission.FullControl},
-            {RightType.TenantUserCollection, Permission.FullControl},
+            {RightType.TenantUserCollection, Permission.Get | Permission.Post},
             {RightType.TodoCommentCollection, Permission.FullControl},
             {RightType.TodoTagCollection, Permission.FullControl},
             {RightType.TagTodoCollection, Permission.FullControl},
@@ -28,6 +28,7 @@ namespace Api.Authorisation
         {
             {RightType.RootTenantCollection, Permission.Get},
             {RightType.RootUserCollection, Permission.FullControl},
+            {RightType.TenantUserCollection, Permission.Get | Permission.Post},
         };
 
         public static readonly IDictionary<RightType, Permission> Todo = new Dictionary<RightType, Permission>

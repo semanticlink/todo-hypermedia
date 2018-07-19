@@ -159,8 +159,7 @@ namespace Api.Controllers
             return (await _userStore.Create(
                     TrustDefaults.KnownRootIdentifier,
                     TrustDefaults.KnownHomeResourceId,
-                    User.GetExternalId(),
-                    data,
+                    data.FromRepresentation(),
                     Permission.FullControl,
                     CallerCollectionRights.User
                 ))
