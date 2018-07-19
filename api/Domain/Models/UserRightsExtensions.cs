@@ -5,8 +5,14 @@ namespace Domain.Models
 {
     public static class UserRightsExtensions
     {
+        
         public static bool IsAllowed(this UserRight userRight, Permission permission)
         {
+            if (userRight == null)
+            {
+                return false;
+            }
+            
             var tryParse = Enum.TryParse<Permission>(userRight.Rights.ToString(), out var userPerms);
             return tryParse && userPerms.HasFlag(permission);
         }
