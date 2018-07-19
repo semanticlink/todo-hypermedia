@@ -39,6 +39,7 @@ namespace Api.Authorisation
 
         public static readonly IDictionary<RightType, Permission> Tag = new Dictionary<RightType, Permission>
         {
+            {RightType.TodoTagCollection, Permission.Get | Permission.Patch},
             {RightType.TagTodoCollection, Permission.Get | Permission.Patch},
         };
 

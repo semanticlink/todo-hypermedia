@@ -112,6 +112,8 @@ namespace Infrastructure.NoSQL
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
 
+            var originalTags = new List<string>(todo.Tags); // clone tags to compare with later
+
             updater(todo);
 
             // no messing with the ID allowed
@@ -119,12 +121,20 @@ namespace Infrastructure.NoSQL
             // no messing with the update time allowed
             todo.UpdatedAt = DateTime.UtcNow;
 
+            var intersect = originalTags.Intersect(todo.Tags).ToList();
+            var toAdd = todo.Tags.Except(intersect).ToList();
+            var toRemove = originalTags.Except(intersect).ToList();
+
             // if tags have been removed, it looks like you can't hand
             // though an empty list but rather need to null it.
             // TODO: check this is true
             todo.Tags = !todo.Tags.IsNullOrEmpty() ? todo.Tags : null;
 
             await _context.SaveAsync(todo);
+
+            // deal with changed tags user rights
+            toAdd.ForEach(addRight => _userRightStore.SetRight(_userId, id, RightType.Tag, Permission.Get));
+            toRemove.ForEach(removeRight => _userRightStore.RemoveRight(_userId, id, RightType.Tag));
         }
 
         /// <summary>

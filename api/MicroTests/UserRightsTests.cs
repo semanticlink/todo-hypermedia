@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Domain.Models;
 using Xunit;
 
@@ -16,5 +19,42 @@ namespace MicroTests
         {
             Assert.Equal(allow, new UserRight {Rights = allocatedRights}.IsAllowed(requiredRights));
         }
+    }
+
+    public class DiffTest
+    {
+        [Theory]
+        [ClassData(typeof(ListData))]
+        public void Bla(string desc, IList<int> left, IList<int> right, IList<int> add, IList<int> remove)
+        {
+            var intersect = left.Intersect(right).ToList();
+            var toAdd = right.Except(intersect).ToList();
+            var toRemove = left.Except(intersect).ToList();
+
+            Assert.Equal(add, toAdd);
+            Assert.Equal(remove, toRemove);
+        }
+    }
+
+    public class ListData : IEnumerable<object[]>
+    {
+        public IEnumerator<object[]> GetEnumerator()
+        {
+            yield return
+                new object[] {"same", new List<int> {1}, new List<int> {1}, new List<int> { }, new List<int> { }};
+            yield return
+                new object[] {"add one", new List<int> {1}, new List<int> {1, 2}, new List<int> {2}, new List<int> { }};
+            yield return
+                new object[]
+                    {"remove one", new List<int> {1, 2}, new List<int> {2}, new List<int> { }, new List<int> {1}};
+            yield return
+                new object[]
+                {
+                    "add and remove one", new List<int> {1, 2}, new List<int> {2, 3}, new List<int> {3},
+                    new List<int> {1}
+                };
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

@@ -247,18 +247,26 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Include a global tag onto a todo
+        ///     Include a global tag onto a todo.
         /// </summary>
+        /// <remarks>
+        ///    This is a two-step process. First add to the global collection (if it doesn't already exist)
+        ///     and then include in the todo.
+        /// </remarks>
         [HttpPost("{id}/tag/", Name = TagUriFactory.TodoTagCreateRouteName)]
         [AuthoriseTodoTagCollection(Permission.Post)]
         public async Task<CreatedResult> CreateTag([FromBody] TagCreateDataRepresentation tag, string id)
         {
-            return (await _tagStore.Create(
-                    User.GetIdentityId(),
-                    TrustDefaults.KnownHomeResourceId,
-                    tag.ThrowInvalidDataExceptionIfNull("Invalid tag create data").FromRepresentation(),
-                    Permission.Get,
-                    CallerCollectionRights.Tag))
+            var tagId = await _tagStore.Create(
+                User.GetIdentityId(),
+                TrustDefaults.KnownHomeResourceId,
+                tag.ThrowInvalidDataExceptionIfNull("Invalid tag create data").FromRepresentation(),
+                Permission.Get,
+                CallerCollectionRights.Tag);
+
+            await _todoStore.AddTag(id, tagId);
+
+            return tagId
                 .MakeTodoTagUri(id, Url)
                 .MakeCreated();
         }
@@ -284,7 +292,7 @@ namespace Api.Controllers
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
         [AuthoriseTodo(Permission.Get)]
-        [AuthoriseTag(Permission.Get, "tagId")] // HINKY: this might be a todotag
+        [AuthoriseTag(Permission.Get, "tagId")]
         public async Task<TagRepresentation> Get(string id, string tagId)
         {
             (await _todoStore.GetByIdAndTag(id, tagId))

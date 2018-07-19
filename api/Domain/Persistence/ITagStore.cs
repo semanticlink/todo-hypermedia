@@ -10,7 +10,8 @@ namespace Domain.Persistence
         [Obsolete]
         Task<string> Create(TagCreateData createData);
 
-        Task<string> Create(string creatorId,
+        Task<string> Create(
+            string creatorId,
             string contextResourceId,
             TagCreateData createData,
             Permission callerRights,

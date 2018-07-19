@@ -20,7 +20,9 @@ namespace Api.Authorisation
     /// </example>
     public class AuthoriseAttribute : AuthorizeAttribute
     {
-        public AuthoriseAttribute(RightType type, Permission permission = Permission.None,
+        public AuthoriseAttribute(
+            RightType type, 
+            Permission permission = Permission.None,
             string resourceKey = ResourceKey.Id)
         {
             // here's the magic of a delimited string
