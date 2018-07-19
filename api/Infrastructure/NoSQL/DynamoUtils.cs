@@ -13,7 +13,6 @@ namespace Infrastructure.NoSQL
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
-
         public static async Task WaitForAllTables(this IAmazonDynamoDB client)
         {
             await Task.WhenAll(
@@ -42,9 +41,9 @@ namespace Infrastructure.NoSQL
                 {
                     response = await client.DescribeTableAsync(new DescribeTableRequest {TableName = userTableName});
                 }
-                catch (ResourceNotFoundException e)
+                catch (ResourceNotFoundException)
                 {
-                    Console.WriteLine("Waiting for Dynamo to be available");
+                    Log.Debug("Waiting for Dynamo to be available");
                     count++;
                     if (count > 5)
                     {
@@ -61,23 +60,21 @@ namespace Infrastructure.NoSQL
                 }
 
                 Log.Debug($"Waiting for table {userTableName} to become active...");
-                Console.WriteLine($"Waiting for table {userTableName} to become active...");
                 await Task.Delay(TimeSpan.FromSeconds(1));
             } while (!active);
 
             Log.Debug($"Table {userTableName} active");
-            Console.WriteLine($"Table {userTableName} active");
         }
 
         public static async Task<IAmazonDynamoDB> CreateTable(
-            this string TableName,
+            this string tableName,
             IAmazonDynamoDB client,
             string hashKey = "Id",
             long readCapacityUnits = 5,
             long writeCapacityUnits = 5)
         {
             var request = new CreateTableRequest(
-                tableName: TableName,
+                tableName: tableName,
                 keySchema: new List<KeySchemaElement>
                 {
                     new KeySchemaElement
@@ -100,20 +97,18 @@ namespace Infrastructure.NoSQL
                     WriteCapacityUnits = writeCapacityUnits
                 }
             );
-            Log.Debug($"Building table: {TableName}");
+            Log.Debug($"Building table: {tableName}");
             try
             {
-                var result = await client.CreateTableAsync(request);
-                Log.Debug($"Table created: {TableName}");
-                Console.WriteLine($"Table created: {TableName}");
+                await client.CreateTableAsync(request);
+                Log.Debug($"Table created: {tableName}");
             }
             catch (ResourceInUseException)
             {
                 // Table already created, just describe it
-                Log.Debug($"Table already exists: {TableName}");
-                var result = await client.DescribeTableAsync(TableName);
+                Log.Debug($"Table already exists: {tableName}");
+                var result = await client.DescribeTableAsync(tableName);
                 Log.Debug($"Using: {result.Table.TableName} ");
-                Console.WriteLine($"Using: {result.Table.TableName} ");
             }
 
             return client;

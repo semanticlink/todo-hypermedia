@@ -5,17 +5,18 @@ using Amazon.DynamoDBv2;
 using App;
 using Domain.Models;
 using Domain.Persistence;
-using Domain.Representation;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using NLog;
 using Toolkit;
 
 namespace Api.Web
 {
     public static class DynamoDbMigrateExtensions
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+
         public static IApplicationBuilder MigrateDynamoDb(this IApplicationBuilder app)
         {
             app.ApplicationServices
@@ -24,27 +25,25 @@ namespace Api.Web
             return app;
         }
 
-        private static IServiceProvider MigrateDynamoDb(this IServiceProvider services)
+        private static void MigrateDynamoDb(this IServiceProvider services)
         {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-
             try
             {
-                logger.LogInformation("[Seed] making database");
+                Log.Info("[Seed] making database");
                 Task.Run(() => { services.GetService<IAmazonDynamoDB>().CreateAllTables().GetAwaiter().GetResult(); });
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while seeding the database.");
+                Log.ErrorExceptionFormat(ex, "An error occurred while seeding the database.");
             }
             finally
             {
-                logger.LogDebug("[Seed] database create complete");
+                Log.Debug("[Seed] database create complete");
             }
 
             try
             {
-                logger.LogInformation("[Seed] service user");
+                Log.Info("[Seed] service user");
 
                 // we have added 'Scoped' services, this will return the root scope with them attached
                 using (var scopedProvider = services.CreateScope())
@@ -54,14 +53,12 @@ namespace Api.Web
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "An error occurred while seeding the service user.");
+                Log.ErrorExceptionFormat(ex, "An error occurred while seeding the service user.");
             }
             finally
             {
-                logger.LogDebug("[Seed] service user complete");
+                Log.Debug("[Seed] service user complete");
             }
-
-            return services;
         }
 
 
@@ -84,9 +81,7 @@ namespace Api.Web
         /// </summary>
         private static async Task SeedServiceUser(this IServiceProvider services)
         {
-            var logger = services.GetRequiredService<ILogger<Program>>();
-
-            logger.LogInformation("[Seed] Service user");
+            Log.Info("[Seed] Service user");
 
             // guard to check everything is up and running
             await services.GetRequiredService<IAmazonDynamoDB>().WaitForAllTables();
@@ -125,7 +120,7 @@ namespace Api.Web
                     });
             }
 
-            logger.LogInformation("[Seed] service user {0}", rootId);
+            Log.Info("[Seed] service user {0}", rootId);
         }
     }
 }

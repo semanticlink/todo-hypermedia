@@ -168,11 +168,7 @@ namespace Api
             IApplicationBuilder app,
             ILoggerFactory loggerFactory)
         {
-            /**
-             * Note: this block MUST be before app.UseMvc();
-             */
-            loggerFactory.AddConsole();
-
+ 
             if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

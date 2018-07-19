@@ -68,7 +68,6 @@ namespace Api.Web
                         }
                         catch
                         {
-                            Console.WriteLine("Cannot write property '{0}' on {1}", entry.Key, modelType.Name);
                             Log.Info("Cannot write property '{0}' on {1}", entry.Key, modelType.Name);
                         }
                     }

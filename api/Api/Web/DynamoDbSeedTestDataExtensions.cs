@@ -11,10 +11,8 @@ using Domain.Representation.Enum;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog.Fluent;
+using NLog;
 using Toolkit;
 
 namespace Api.Web
@@ -25,6 +23,8 @@ namespace Api.Web
     /// </summary>
     public static class DynamoDbSeedTestDataExtensions
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+
         public static IApplicationBuilder DynamoDbSeedTestData(
             this IApplicationBuilder app,
             IHostingEnvironment hostingEnvironment)
@@ -47,22 +47,21 @@ namespace Api.Web
             using (var scope = app.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var logger = services.GetRequiredService<ILogger<Program>>();
                 try
                 {
                     if (hostingEnvironment.IsDevelopment())
                     {
-                        logger.LogInformation("[Seed] test data");
+                        Log.Info("[Seed] test data");
                         Task.Run(() => services.SeedData()).GetAwaiter().GetResult();
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "An error occurred while seeding the test data.");
+                    Log.ErrorExceptionFormat(ex, "An error occurred while seeding the test data.");
                 }
                 finally
                 {
-                    logger.LogDebug("[Seed] test data complete");
+                    Log.Debug("[Seed] test data complete");
                 }
             }
         }
@@ -75,7 +74,6 @@ namespace Api.Web
             /**
              * Get registered services.
              */
-            var logger = services.GetRequiredService<ILogger<Program>>();
             var tenantStore = services.GetRequiredService<ITenantStore>();
             var userStore = services.GetRequiredService<IUserStore>();
             var tagStore = services.GetRequiredService<ITagStore>();
@@ -87,7 +85,7 @@ namespace Api.Web
             await client.WaitForAllTables();
 
 
-            logger.LogInformation("[Seed] sample data");
+            Log.Info("[Seed] sample data");
 
             //////////////////////////
             // Authentication
@@ -131,7 +129,7 @@ namespace Api.Web
             }
             finally
             {
-                logger.LogInformation($"[Seed] user '{userId}'");
+                Log.Info($"[Seed] user '{userId}'");
             }
 
 
@@ -155,11 +153,11 @@ namespace Api.Web
                     Permission.FullControl,
                     CallerCollectionRights.Tenant);
 
-                logger.LogInformation($"[Seed] created tenant '{tenantId}'");
+                Log.Info($"[Seed] created tenant '{tenantId}'");
             }
             catch (InvalidOperationException e)
             {
-                logger.LogDebug("Tenant alredy exists");
+                Log.Debug("Tenant alredy exists");
 
                 tenantId = (await tenantStore.GetByCode(tenantCreateData.Code)).Id;
             }
@@ -175,11 +173,11 @@ namespace Api.Web
                     await tenantStore.IncludeUser(tenantId, userId, Permission.Get, CallerCollectionRights.Tenant);
                 }
 
-                logger.LogInformation($"[Seed] registered user against tenant '{tenantId}'");
+                Log.Info($"[Seed] registered user against tenant '{tenantId}'");
             }
             catch (Exception e)
             {
-                logger.LogError(e.ToString());
+                Log.ErrorExceptionFormat(e, "");
             }
 
             //////////////////////////
@@ -202,11 +200,11 @@ namespace Api.Web
                             )))
                     .Where(result => result != null)
                     .ToList();
-                logger.LogInformation("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
+                Log.InfoFormat("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
             }
             catch (Exception e)
             {
-                logger.LogError(e, "");
+                Log.ErrorExceptionFormat(e, "Error creating global tags");
             }
 
             //////////////////////////
@@ -240,11 +238,11 @@ namespace Api.Web
                         CallerCollectionRights.Todo)));
 
 
-                logger.LogInformation("[Seed] todos: [{0}]", ids.ToCsvString(id => id));
+                Log.InfoFormat("[Seed] todos: [{0}]", ids.ToCsvString(id => id));
             }
             catch (Exception e)
             {
-                logger.LogError(e, "");
+                Log.ErrorExceptionFormat(e, "Error creating tooos");
             }
         }
     }
