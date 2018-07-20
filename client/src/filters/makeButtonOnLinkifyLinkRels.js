@@ -13,19 +13,42 @@ import Vue from 'vue';
  *  rel: create-form
  *
  *  <pre data-v-4a356f1e="">{
-     *    <span class="key">"links":</span> [
-     *        {
-     *            <span class="key">"rel":</span> <span class="string">"create-form"</span>,
-     *            <span class="key">"href":</span> <span class="string">"<a href="http://localhost:5000/todo/form/create" class="linkified">http://localhost:5000/todo/form/create</a>"</span>
-     *        }
-     *    ],
-     *  </pre>
+ *    <span class="key">"links":</span> [
+ *        {
+ *            <span class="key">"rel":</span> <span class="string">"create-form"</span>,
+ *            <span class="key">"href":</span> <span class="string">"<a href="https://api.example.com/todo/form/create" class="linkified">https://api.example.com/todo/form/create</a>"</span>
+ *        }
+ *    ],
+ *  </pre>
+ *
+ * @example
+ *
+ *  rel: edit-form (with patch)
+ *
+ *  <pre data-v-4a356f1e="">{
+ *    <span class="key">"links":</span> [
+ *        {
+ *            <span class="key">"rel":</span> <span class="string">"edit-form"</span>,
+ *            <span class="key">"href":</span> <span class="string">"<a href="https://api.example.com/todo/json-patch/create" class="linkified">https://api.example.com/todo/json-patch/create</a>"</span>
+ *            <span class="key">"type":</span> <span class="string">"application/json-patch+json"</span>
+ *        }
+ *    ],
+ *  </pre>
  * @param {string|RegExp} rel
- * @param {HTMLElement} el - parent scope to search
- * @returns {HTMLElement[]}
+ * @param {string} type media type
+ * @param {Element} el - parent scope to search
+ * @returns {Element[]}
  */
-const findLinkRel = (rel, el = document) => {
-    return [...el.querySelectorAll('span.string')]        // <span class="string">"create-form"</span>,
+const findLinkRel = (rel, type, el = document) => {
+
+    // look for all elements of space and class string (these have the link rels)
+    // <span class="string">"create-form"</span>,
+    return [...el.querySelectorAll('span.string')]
+    // make sure it is a 'rel' sibling (ie in the links section)
+    // ie <span class="key">"rel":</span>
+        .filter(div => div.previousElementSibling.innerHTML.includes('rel'))
+        // look for the text inside for the value of the link rel
+        // eg <span class="string">"create-form"</span>,
         .filter(div => {
             if (typeof rel === 'string') {
                 return div.innerText.includes(rel);
@@ -33,8 +56,58 @@ const findLinkRel = (rel, el = document) => {
                 return rel.test(div.innerText);
             }
         })
-        .map(div => div.nextElementSibling.nextElementSibling); // move forward two spans <span class="string">"<a href="http...
+        // filter on type (or absence of type)
+        //   <span class="string">"application/json-patch+json"</span>
+        .filter(div => (type == null)
+            // no type needs to ensure that there is also no type on the screen as well
+            ? findElWithTypeKey(div) == null || !findElWithTypeKey(div).innerHTML.includes('type')
+            // if there is a type, match against the given one
+            : findElWithMediaType(div).innerHTML.includes(type)
+        )
+        // move forward two spans to find the Uri
+        // <span class="string"><a href="https://api.example.com/todo/form/create" class="linkified">https://api.exa
+        .map(div => findElWithHrefUri(div));
 };
+
+/**
+ * Relative to the rel value (eg edit-form), find element of the type key element. Used to see
+ * if the type is specified.
+ *
+ *    <span class="key">"rel":</span> <span class="string">"edit-form"</span>,  <-- start here
+ *    <span class="key">"href":</span> <span class="string">"<a href="https://api.example.com/todo/json-patch/create" class="linkified">https://api.example.com/todo/json-patch/create</a>"</span>
+ *    <span class="key">"type":</span> <span class="string">"application/json-patch+json"</span>
+ *
+ * @param {Element} el
+ * @returns {Element | null}
+ */
+const findElWithTypeKey = el => el.nextElementSibling.nextElementSibling.nextElementSibling;
+
+/**
+ * Relative to the rel value (eg edit-form), find element of the media value element. Used to match
+ * on the specified type.
+ *
+ *    <span class="key">"rel":</span> <span class="string">"edit-form"</span>,  <-- start here
+ *    <span class="key">"href":</span> <span class="string">"<a href="https://api.example.com/todo/json-patch/create" class="linkified">https://api.example.com/todo/json-patch/create</a>"</span>
+ *    <span class="key">"type":</span> <span class="string">"application/json-patch+json"</span>
+ *
+ *
+ * @param {Element} el
+ * @returns {Element | null}
+ */
+const findElWithMediaType = el => el.nextElementSibling.nextElementSibling.nextElementSibling.nextElementSibling;
+
+/**
+ * Relative to the rel value (eg edit-form), find element of the href-key value element.
+ *
+ *    <span class="key">"rel":</span> <span class="string">"edit-form"</span>,  <-- start here
+ *    <span class="key">"href":</span> <span class="string">"<a href="https://api.example.com/todo/json-patch/create" class="linkified">https://api.example.com/todo/json-patch/create</a>"</span>
+ *    <span class="key">"type":</span> <span class="string">"application/json-patch+json"</span>
+ *
+ *
+ * @param {Element} el
+ * @returns {Element | null}
+ */
+const findElWithHrefUri = el => el.nextElementSibling.nextElementSibling;
 
 /**
  * Mount a new button onto the linkify html. The button will be added before the first child.
@@ -47,10 +120,10 @@ const findLinkRel = (rel, el = document) => {
  *
  *      <button type="button" class="btn btn-secondary btn-sm">Add</button>
  *       "
- *       <a href="http://localhost:5000/todo/form/create" class="linkified">http://localhost:5000/todo/form/create</a>
+ *       <a href="https://api.example.com/todo/form/create" class="linkified">https://api.example.com/todo/form/create</a>
  *       "
- * @param {HTMLElement} el span element that contains the <a> anchor of the href
- * @param {{title, rel, onClick}} propsData Vue properties of the component
+ * @param {Element} el span element that contains the <a> anchor of the href
+ * @param {{?title:string, ?rel:string, ?type:string, ?onClick:Function}} propsData Vue properties of the component
  */
 const addButtonToHref = (el, propsData = {}) => {
 
@@ -58,14 +131,16 @@ const addButtonToHref = (el, propsData = {}) => {
     // https://stackoverflow.com/questions/35927664/how-to-add-dynamic-components-partials-in-vue-js
     // https://css-tricks.com/creating-vue-js-component-instances-programmatically/
     const Btn = Vue.extend({
-        template: '<b-button size="sm" variant="secondary" @click="onClick(rel)">{{title}}</b-button>',
+        template: '<b-button size="sm" variant="secondary" @click="onClick(rel,type)">{{title}}</b-button>',
         props: {
             title: {default: 'Edit'},
             onClick: {
-                type: Function, default: () => {
+                type: Function,
+                default: () => {
                 }
             },
-            rel: {default: 'edit-form'}
+            rel: {default: 'edit-form'},
+            type: {default: null}
         }
     });
 
@@ -78,9 +153,16 @@ const addButtonToHref = (el, propsData = {}) => {
  *  Add an action button on the linkify link relations html structure
  *
  * @param {string|RegExp} rel link relation to add button onto (eg self, create-form, edit-form)
+ * @param {?string} type media type
  * @param {{title:string, onClick:function(rel)}} propsData Vue properties of the component
  */
-const makeButtonOnLinkifyLinkRels = (rel, propsData) =>
-    findLinkRel(rel).forEach(el => addButtonToHref(el, {...rel, ...propsData}));
+const makeButtonOnLinkifyLinkRels = (rel, type, propsData) => {
+    // parameters if type wasn't specified
+    if (propsData == null) {
+        propsData = type;
+        type = null;
+    }
+    return findLinkRel(rel, type).forEach(el => addButtonToHref(el, {rel, type, ...propsData}));
+};
 
 export {makeButtonOnLinkifyLinkRels};

@@ -63,13 +63,13 @@
 <script>
 
     import axios from 'axios';
-    import { linkifyToSelf } from '../filters/linkifyWithClientRouting';
-    import { makeButtonOnLinkifyLinkRels } from "../filters/makeButtonOnLinkifyLinkRels";
+    import {linkifyToSelf} from '../filters/linkifyWithClientRouting';
+    import {makeButtonOnLinkifyLinkRels} from "../filters/makeButtonOnLinkifyLinkRels";
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
-    import { copyToClipboard, saveToFile } from "../lib/raw-helpers";
-    import { get, _delete, LinkedRepresentation, CollectionRepresentation, getUri } from 'semantic-link';
+    import {copyToClipboard, saveToFile} from "../lib/raw-helpers";
+    import {get, _delete, LinkedRepresentation, CollectionRepresentation, getUri} from 'semantic-link';
 
 
     export default {
@@ -120,12 +120,12 @@
             /**
              * On a button click of an action, GET the form so that it can be rendered
              * @param {string} rel link relation
+             * @param {?string} type media type
              */
-            getForm(rel) {
-                const vm = this;
-                get(this.representation, rel)
-                    .then(response => {
-                        vm.formRepresentation = response.data;
+            getForm(rel, type) {
+                get(this.representation, rel, type)
+                    .then(/** @type {AxiosResponse} */response => {
+                        this.formRepresentation = response.data;
                     });
             },
             /**
@@ -217,10 +217,26 @@
                              * Match tightly on the value being the link relation. This includes the quotation
                              * marks '"' but the element must only contain that.
                              */
-                            makeButtonOnLinkifyLinkRels(/^"edit-form"$/, {onClick: this.getForm, title: 'Edit'});
-                            makeButtonOnLinkifyLinkRels(/^"create-form"$/, {onClick: this.getForm, title: 'Add'});
-                            makeButtonOnLinkifyLinkRels(/^"search"$/, {onClick: this.getForm, title: 'Search'});
-                            makeButtonOnLinkifyLinkRels(/^"self"$/, {onClick: this.tryDelete, title: 'Delete'});
+                            makeButtonOnLinkifyLinkRels("edit-form", {onClick: this.getForm, title: 'Edit'});
+                            makeButtonOnLinkifyLinkRels("create-form", {onClick: this.getForm, title: 'Add'});
+                            makeButtonOnLinkifyLinkRels("search", {onClick: this.getForm, title: 'Search'});
+                            makeButtonOnLinkifyLinkRels("self", {onClick: this.tryDelete, title: 'Delete'});
+
+                            makeButtonOnLinkifyLinkRels(
+                                "edit-form",
+                                "application/json-patch+json",
+                                {
+                                    onClick: this.getForm,
+                                    title: 'Put'
+                                });
+
+                            makeButtonOnLinkifyLinkRels(
+                                "edit-form",
+                                "text/uri-list",
+                                {
+                                    onClick: this.getForm,
+                                    title: 'Patch'
+                                });
                         });
 
                         this.resetForm();
