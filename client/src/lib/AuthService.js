@@ -221,11 +221,12 @@ export default class AuthService {
      * Adds a timer to renew the login
      */
     scheduleRenewal() {
-        const expiresAt = AuthService.tokenExpiresAt;
-        const delay = expiresAt - Date.now();
+        const service = this;
+        //TODO: deal with this as a sliding window
+        const delay = AuthService.tokenExpiresAt - Date.now();
         if (delay > 0) {
             tokenRenewalTimeout = setTimeout(function () {
-                this.renewToken();
+                service.renewToken();
             }, delay);
         }
     }
