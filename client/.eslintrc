@@ -10,7 +10,7 @@
   ],
   "parserOptions": {
     "ecmaFeatures": {
-      "experimentalObjectRestSpread": true,\
+      "experimentalObjectRestSpread": true
     },
     "sourceType": "module"
   },
@@ -33,7 +33,7 @@
     ],
     "linebreak-style": [
       "warn",
-      "windows"
+      "unix"
     ],
     "quotes": [
       "error",
