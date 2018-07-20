@@ -6,7 +6,7 @@ import Vue from 'vue';
  *
  * TODO: opps, scope the HTMLElement rather than on document
  * TODO: there are bugs in this. It needs to be scoped to links and not items
- * TODO: rel probably needs to be better scoped by regex too - there are false matches (eg search)
+ * TODO: [check: fixed] rel probably needs to be better scoped by regex too - there are false matches (eg search)
  *
  * @example
  *
@@ -20,13 +20,19 @@ import Vue from 'vue';
      *        }
      *    ],
      *  </pre>
- * @param {string} rel
+ * @param {string|RegExp} rel
  * @param {HTMLElement} el - parent scope to search
  * @returns {HTMLElement[]}
  */
 const findLinkRel = (rel, el = document) => {
     return [...el.querySelectorAll('span.string')]        // <span class="string">"create-form"</span>,
-        .filter(div => div.innerText.includes(rel))
+        .filter(div => {
+            if (typeof rel === 'string') {
+                return div.innerText.includes(rel);
+            } else if (rel instanceof RegExp) {
+                return rel.test(div.innerText);
+            }
+        })
         .map(div => div.nextElementSibling.nextElementSibling); // move forward two spans <span class="string">"<a href="http...
 };
 
@@ -71,7 +77,7 @@ const addButtonToHref = (el, propsData = {}) => {
 /**
  *  Add an action button on the linkify link relations html structure
  *
- * @param {string} rel link relation to add button onto (eg self, create-form, edit-form)
+ * @param {string|RegExp} rel link relation to add button onto (eg self, create-form, edit-form)
  * @param {{title:string, onClick:function(rel)}} propsData Vue properties of the component
  */
 const makeButtonOnLinkifyLinkRels = (rel, propsData) =>

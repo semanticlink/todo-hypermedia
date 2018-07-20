@@ -211,10 +211,16 @@
                         this.requestHeaders = response.config.headers;
 
                         this.$nextTick(() => {
-                            makeButtonOnLinkifyLinkRels('edit-form', {onClick: this.getForm, title: 'Edit'});
-                            makeButtonOnLinkifyLinkRels('create-form', {onClick: this.getForm, title: 'Add'});
-                            makeButtonOnLinkifyLinkRels('search', {onClick: this.getForm, title: 'Search'});
-                            makeButtonOnLinkifyLinkRels('self', {onClick: this.tryDelete, title: 'Delete'});
+
+                            /**
+                             *
+                             * Match tightly on the value being the link relation. This includes the quotation
+                             * marks '"' but the element must only contain that.
+                             */
+                            makeButtonOnLinkifyLinkRels(/^"edit-form"$/, {onClick: this.getForm, title: 'Edit'});
+                            makeButtonOnLinkifyLinkRels(/^"create-form"$/, {onClick: this.getForm, title: 'Add'});
+                            makeButtonOnLinkifyLinkRels(/^"search"$/, {onClick: this.getForm, title: 'Search'});
+                            makeButtonOnLinkifyLinkRels(/^"self"$/, {onClick: this.tryDelete, title: 'Delete'});
                         });
 
                         this.resetForm();
