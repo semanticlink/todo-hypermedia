@@ -75,6 +75,6 @@ const addButtonToHref = (el, propsData = {}) => {
  * @param {{title:string, onClick:function(rel)}} propsData Vue properties of the component
  */
 const makeButtonOnLinkifyLinkRels = (rel, propsData) =>
-    findLinkRel(rel).forEach(el => addButtonToHref(el, Object.assign({}, {rel}, propsData)));
+    findLinkRel(rel).forEach(el => addButtonToHref(el, {...rel, ...propsData}));
 
-export { makeButtonOnLinkifyLinkRels };
+export {makeButtonOnLinkifyLinkRels};
