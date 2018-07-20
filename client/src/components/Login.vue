@@ -81,7 +81,7 @@
                             /** @type {Auth0ConfigurationRepresentation} */
                             const cfg = configuration.data;
 
-                            if (false && renewToken(error)){
+                            if (renewToken(error)){
 
                                 log.info('Renewing token');
 

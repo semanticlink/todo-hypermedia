@@ -9,6 +9,7 @@
 <script>
     import EventBus, { loginConfirmed } from '../lib/util/EventBus';
     import AuthService from '../lib/AuthService';
+    import { clearJsonWebTokenOnHeaders } from "../lib/http-interceptors";
 
     /**
      * Logout:
@@ -32,7 +33,8 @@
                 this.authenticated = AuthService.isAuthenticated;
             },
             submit() {
-                AuthService.clearSession();
+                AuthService.logout();
+                clearJsonWebTokenOnHeaders();
                 this.authenticated = false;
             }
 

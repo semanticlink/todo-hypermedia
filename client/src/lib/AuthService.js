@@ -114,10 +114,15 @@ const KEY = {
      */
     EXPIRES_AT: 'expires_at',
     /**
-     * Client configuration is the serialised {@link AuthConfigurationRepresentation}
+     * Client configuration is the serialised {@link Auth0ConfigurationRepresentation}
      */
     CLIENT_CONFIGURATION: 'clientConfig'
 };
+
+/**
+ *
+ */
+let tokenRenewalTimeout;
 
 export default class AuthService {
 
@@ -187,25 +192,43 @@ export default class AuthService {
     }
 
     /**
-     * Renew the access token
+     * Emulates a logout by deleting token information. Currently, there is no repudiation of token anywhere.
      */
-    renewToken(){
-        new Error('Not implemented');
-
-   /*     this.auth0.renewAuth({
-            audience: AUTH_CONFIG.audience,
-            redirectUri: AUTH_CONFIG.silentCallbackURL,
-            usePostMessage: true
-        }, (err, result) => {
-            if (err) {
-                //alert(`Could not get a new token using silent authentication (${err.error}).`);
-            } else {
-                //alert(`Successfully renewed auth!`);
-                this.setSession(result);
-            }
-        });*/
+    static logout() {
+        AuthService.clearSession();
+        clearTimeout(tokenRenewalTimeout);
     }
 
+    /**
+     * Renew the access token
+     */
+    renewToken() {
+        this.auth0.checkSession(
+            {
+                //audience: AuthService.clientConfiguration.audience
+            },
+            (err, authResult) => {
+                if (err) {
+                    log.warn(`Could not get a new token using silent authentication (${err.error}).`);
+                } else {
+                    log.info('Successfully renewed auth!');
+                    AuthService.setSession(authResult);
+                }
+            });
+    }
+
+    /**
+     * Adds a timer to renew the login
+     */
+    scheduleRenewal() {
+        const expiresAt = AuthService.tokenExpiresAt;
+        const delay = expiresAt - Date.now();
+        if (delay > 0) {
+            tokenRenewalTimeout = setTimeout(function () {
+                this.renewToken();
+            }, delay);
+        }
+    }
 
     /**
      * Auto closes the popup window upon return from auth0

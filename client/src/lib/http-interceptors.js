@@ -123,6 +123,24 @@ export const setJsonWebTokenOnHeaders = (token) => {
 };
 
 /**
+ * Clears the bearer token in the headers for this axios instance (part of logging out process)
+ */
+export const clearJsonWebTokenOnHeaders = () => {
+
+    log.info('Authentication: clearing access token');
+
+    axios.interceptors.request.use(
+        config => {
+            delete config.withCredentials;
+            delete config.headers[AUTHORIZATION_HEADER];
+            return config;
+        },
+        err => Promise.reject(err));
+    return Promise.resolve();
+
+};
+
+/**
  * Name of the WWW-Authenticate header
  * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate
  * @type {string}
