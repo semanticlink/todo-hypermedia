@@ -5,6 +5,8 @@ public static class TagUriFactory
 {
     public const string AllTagsRouteName = "AllTagsRouteName";
     public const string TodoTagsRouteName = "TodosTagsRouteName";
+    public const string CreateFormUriListRouteName = "TagsCreateUriListRouteName";
+    public const string EditFormJsonPatchRouteName = "EditFormJsonPatchRouteName";
     public const string CreateFormRouteName = "TagsCreateRouteName";
     public const string TodoTagRouteName = "TodoTagRouteName";
     public const string TagRouteName = "TagRouteName";
@@ -35,6 +37,16 @@ public static class TagUriFactory
     public static string MakeTagCreateFormUri(this string id, IUrlHelper url)
     {
         return url.Link(CreateFormRouteName, new {id = id});
+    }
+
+    public static string MakeTagCreateFormUriListUri(this string id, IUrlHelper url)
+    {
+        return url.Link(CreateFormUriListRouteName, new {id = id});
+    }
+
+    public static string MakeTagEditFormJsonPatchUri(this string id, IUrlHelper url)
+    {
+        return url.Link(EditFormJsonPatchRouteName, new {id = id});
     }
 
     public static string MakeCreateTagUri(this IUrlHelper url)

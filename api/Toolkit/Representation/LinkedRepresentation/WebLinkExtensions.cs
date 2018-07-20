@@ -1,12 +1,12 @@
 ﻿using System;
 using JetBrains.Annotations;
+using Toolkit.LinkRelations;
 
 namespace Toolkit.Representation.LinkedRepresentation
 {
     /// <summary>
     /// </summary>
     /// <seealso cref = "IanaLinkRelation" />
-    /// <seealso cref = "CustomLinkRelation" />
     public static class WebLinkExtensions
     {
         public static WebLink MakeWebLink(
@@ -14,7 +14,8 @@ namespace Toolkit.Representation.LinkedRepresentation
             [ValueProvider("Domain.ApiRepresentaion.Relations.IanaLinkRelation")]
             [ValueProvider("Domain.ApiRepresentaion.Relations.CustomLinkRelation")]
             string linkRelation,
-            string title = null)
+            string title = null,
+            string type = null)
         {
 
             return !string.IsNullOrWhiteSpace(url)
@@ -22,7 +23,8 @@ namespace Toolkit.Representation.LinkedRepresentation
                 {
                     Title = title,
                     Rel = linkRelation,
-                    HRef = url
+                    HRef = url,
+                    Type = type
                 }
                 : null;
         }

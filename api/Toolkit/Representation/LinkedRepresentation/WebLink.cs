@@ -32,5 +32,15 @@ namespace Toolkit.Representation.LinkedRepresentation
         /// </summary>
         [DataMember(Name = "title", Order = 30, EmitDefaultValue = false)]
         public string Title { get; set; }
+ 
+        /// <summary>
+        ///     The "type" parameter, when present, is a hint indicating what the
+        ///     media type of the result of dereferencing the link should be.  Note
+        ///     that this is only a hint; for example, it does not override the
+        ///     Content-Type header of a HTTP response obtained by actually following
+        ///     the link.
+        /// </summary>
+        [DataMember(Name = "type", Order = 40, EmitDefaultValue = false)]
+        public string Type { get; set; }
     }
 }

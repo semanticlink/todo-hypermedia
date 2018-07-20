@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Toolkit;
 using Toolkit.Representation.LinkedRepresentation;
 using Microsoft.Extensions.Logging;
+using MediaType = Toolkit.MediaType;
 
 namespace Api.Web
 {
@@ -18,7 +19,7 @@ namespace Api.Web
     public class UriListInputFormatter : IInputFormatter
     {
 //        private static readonly ILog Log = LogManager.GetLogger(typeof(JpegFormatter));
-        private readonly string UriListMediaType = "text/uri-list";
+        private readonly string UriListMediaType = MediaType.UriList;
 
 
         public bool CanRead(InputFormatterContext context)
@@ -60,7 +61,7 @@ namespace Api.Web
 
     public class UriListOutputFormatter : IOutputFormatter
     {
-        private readonly string UriListMediaType = "text/uri-list";
+        private readonly string UriListMediaType = MediaType.UriList;
 
         public bool CanWriteResult(OutputFormatterCanWriteContext context)
         {

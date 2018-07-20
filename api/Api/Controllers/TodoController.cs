@@ -174,7 +174,7 @@ namespace Api.Controllers
         ///     <li>good examples http://benfoster.io/blog/aspnet-core-json-patch-partial-api-updates</li>
         /// </remarks>
         [HttpPatch("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
-        [Consumes("application/json-patch+json")]
+        [Consumes(MediaType.JsonPatch)]
         [AuthoriseTodoTagCollection(Permission.Patch)]
         public async Task<IActionResult> PatchTagCollection(
             string id,
@@ -211,22 +211,13 @@ namespace Api.Controllers
         ///    Then updates the Tags list to the provided uri-list.
         /// </para>
         /// <para>
-        ///    THere is a need to translate between the global tag collection and references to them on todo as tag collections
+        ///    There is a need to translate between the global tag collection and references to them on todo as tag collections
         /// </para>
         /// </remarks>
-        /// <example>
-        ///    I<para>Incoming uri-list:</para>
-        ///     <code>
-        ///         # a todo tag on todo/345
-        ///         https://example.com/345/tag/45
-        ///         # another (necessarily on the same todo)
-        ///         https://example.com/345/tag/454
-        ///     </code>
-        /// </example>
         /// <param name="id">Todo</param>
         /// <param name="uriList">A todo tag uri (not a global tag uri)</param>
         [HttpPut("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
-        [Consumes("text/uri-list")]
+        [Consumes(MediaType.UriList)]
         [AuthoriseTodoTagCollection(Permission.Put)]
         public async Task<IActionResult> PutTagCollection(string id, [FromBody] string[] uriList)
         {
@@ -280,6 +271,28 @@ namespace Api.Controllers
         public CreateFormRepresentation GetCreateForm(string id)
         {
             return id.ToTagCreateFormRepresentation(Url);
+        }
+
+        /// <summary>
+        ///     Tag form for <see cref="MediaType.UriList"/>
+        /// </summary>
+        [HttpGet("{id}/tag/uri-list/create", Name = TagUriFactory.CreateFormUriListRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AuthoriseForm]
+        public CreateFormRepresentation GetCreateFormUriList(string id)
+        {
+            return id.ToTagCreateFormUriRepresentation(Url);
+        }
+
+        /// <summary>
+        ///     Tag form for <see cref="MediaType.JsonPatch"/>
+        /// </summary>
+        [HttpGet("{id}/tag/json-patch/create", Name = TagUriFactory.EditFormJsonPatchRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AuthoriseForm]
+        public EditFormRepresentation GetEditFormJsonPatch(string id)
+        {
+            return id.ToTagEditFormJsonPatchUri(Url);
         }
 
         /// <summary>
