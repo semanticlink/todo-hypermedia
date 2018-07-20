@@ -17,7 +17,7 @@ namespace Toolkit.Representation.Forms
         [DataMember(Name = "required", EmitDefaultValue = false, Order = 50)]
         public bool Required { get; set; }
 
-        [DataMember(Name = "description", EmitDefaultValue = false, Order = 500)]
+        [DataMember(Name = "description", EmitDefaultValue = false, Order = 70)]
         public string Description { get; set; }
 
         /// <summary>

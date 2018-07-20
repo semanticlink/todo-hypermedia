@@ -6,10 +6,12 @@ namespace Toolkit.Representation.Forms
     [DataContract(Name = "text-input-form-item")]
     public class TextInputFormItemRepresentation : FormItemRepresentation
     {
-        public TextInputFormItemRepresentation()
+        /// <summary>
+        ///     Allow different browswer <see cref="FormType"/> to be passed through.
+        /// </summary>
+        public TextInputFormItemRepresentation(string type = FormType.Text)
         {
-            Type = FormType.Text;
+            Type = type;
         }
-
     }
 }

@@ -279,9 +279,9 @@ namespace Api.Controllers
         [HttpGet("{id}/tag/uri-list/create", Name = TagUriFactory.CreateFormUriListRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
-        public CreateFormRepresentation GetCreateFormUriList(string id)
+        public EditFormRepresentation GetCreateFormUriList(string id)
         {
-            return id.ToTagCreateFormUriRepresentation(Url);
+            return id.ToTagEditFormUriRepresentation(Url);
         }
 
         /// <summary>

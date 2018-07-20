@@ -39,7 +39,7 @@ public static class TagUriFactory
         return url.Link(CreateFormRouteName, new {id = id});
     }
 
-    public static string MakeTagCreateFormUriListUri(this string id, IUrlHelper url)
+    public static string MakeTagEditFormUriListUri(this string id, IUrlHelper url)
     {
         return url.Link(CreateFormUriListRouteName, new {id = id});
     }
