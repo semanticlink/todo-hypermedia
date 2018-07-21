@@ -46,7 +46,7 @@ const findLinkRel = (rel, type, el = document) => {
     return [...el.querySelectorAll('span.string')]
     // make sure it is a 'rel' sibling (ie in the links section)
     // ie <span class="key">"rel":</span>
-        .filter(div => div.previousElementSibling.innerHTML.includes('rel'))
+        .filter(div => div.previousElementSibling && div.previousElementSibling.innerHTML.includes('rel'))
         // look for the text inside for the value of the link rel
         // eg <span class="string">"create-form"</span>,
         .filter(div => {
