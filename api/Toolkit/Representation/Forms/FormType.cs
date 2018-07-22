@@ -3,7 +3,8 @@
     /// <summary>
     /// <para>
     ///    Values in representations need to be created and updated via form types. These change depending
-    ///     on the client.
+    ///     on the client. Each type relates to the input element represents a typed data field, usually with
+    ///     a form control to allow the user to edit the data.
     /// </para>
     /// <para>
     ///    Also, not all types are rendered natively on browsers eg <see cref="Group"/>, <see cref="Collection"/>, <see cref="Enum"/>
@@ -13,7 +14,9 @@
     ///    Browsers tend now to implement more types eg see https://bootstrap-vue.js.org/docs/components/form-input
     ///      types: [ 'text', 'password', 'email', 'number', 'url', 'tel', 'date', `time`, 'range', 'color' ]
     /// </para>
-    /// 
+    /// <para>
+    ///     see html spec https://www.w3.org/TR/html5/single-page.html#the-input-element
+    /// </para>
     /// <para>
     ///     Caveats with input types:
     /// </para>
@@ -31,21 +34,91 @@
     {
         ///////////////////////////
         // 
-        // Input form types 
+        // Input form types
+        // ================
         //
+        //  see https://www.w3.org/TR/html5/single-page.html#the-input-element
+        //
+        
+        /// <summary>
+        ///     Text with no line breaks
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#text-typetext-state-and-search-state-typesearch
+        /// </remarks>
         public const string Text = "http://types/text";
+        /// <summary>
+        ///     Text with no line breaks (sensitive information)
+        /// </summary>
+        /// <remarks>
+        ///    see html spec 
+        /// </remarks>
         public const string Password = "http://types/text/password";
+        /// <summary>
+        ///     An e-mail address or list of e-mail addresses
+        /// </summary>
+        /// <remarks>
+        ///    see html spec 
+        /// </remarks>
         public const string Email = "http://types/text/email";
+        /// <summary>
+        ///     Text with no line breaks
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-telephone
+        /// </remarks>
         public const string Tel = "http://types/text/tel";
 
+        /// <summary>
+        ///     An absolute URL
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-url
+        /// </remarks>
         public const string Uri = "http://types/text/uri";
 
+        /// <summary>
+        ///     A date and time (year, month, day) with timezone offset
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-date 
+        /// </remarks>
         public const string Date = "http://types/date";
+        /// <summary>
+        ///     A date and time (year, month, day, hour, minute, second, fraction of a second) with timezone offset
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-localdatetime
+        /// </remarks>
         public const string DateTime = "http://types/datetime";
+        /// <summary>
+        ///     A time (hour, minute, seconds, fractional seconds) with time zone
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-time
+        /// </remarks>
         public const string Time = "http://types/time";
 
+        /// <summary>
+        ///     A numerical value
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-number
+        /// </remarks>
         public const string Number = "http://types/number";
+        /// <summary>
+        ///     A numerical value, with the extra semantic that the exact value is not important
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-range 
+        /// </remarks>
         public const string Range = "http://types/range";
+        /// <summary>
+        ///     An sRGB color with 8-bit red, green, and blue components
+        /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-number 
+        /// </remarks>
         public const string Color = "http://types/color";
         
         /// <summary>
@@ -68,8 +141,11 @@
         public const string Select = "http://types/select";
 
         /// <summary>
-        ///     One-or-more selection
+        ///     One-or-more selection froma predefined list
         /// </summary>
+        /// <remarks>
+        ///    see https://www.w3.org/TR/html5/single-page.html#element-statedef-input-checkbox
+        /// </remarks>
         public const string Check = "http://types/check";
 
         ///////////////////////////
@@ -77,6 +153,12 @@
         // Groupings
         //
 
+        /// <summary>
+        ///     
+        /// </summary>
+        /// <remarks>
+        ///    Similar to an html fieldset
+        /// </remarks>
         public const string Group = "http://types/group";
 
         /// <summary>
