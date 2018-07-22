@@ -6,12 +6,12 @@
           class="btn btn-xs btn-success glyphicon glyphicon-plus"
           role="button">
     </span>
-</template>
+</template>x
 
 <script>
 
-    import { log } from 'logger';
-    import { dragend, dragenter, dragleave, dragover, drop } from '../lib/util/dragAndDropModel';
+    import {log} from 'logger';
+    import {dragend, dragenter, dragleave, dragover, drop} from '../lib/util/dragAndDropModel';
 
     export default {
         name: 'droppable-model',
@@ -21,23 +21,35 @@
              */
             context: {
                 type: Object,
-                default: () => { return {};}
+                default: () => {
+                    return {};
+                }
             },
             /**
              * Callback after the dropped model is loaded and then can be acted on (eg updated)
              */
             dropped: {
                 type: Function,
-                default: () => () => {}
+                default: () => () => {
+                }
+            },
+            /**
+             * Pick the type of media to return
+             * @example 'application/json'
+             * @example 'text/uri-list'
+             * @example 'text/plain'
+             * @example 'DownloadUrl'
+             */
+            mediaType: {
+                type: String
             }
-
         },
         methods: {
             drop: function (event) {
-                return drop(event, representation => {
-                    log.debug(representation);
-                    this.dropped(representation, this.context);
-                });
+                return drop(
+                    event,
+                    representation => this.dropped(representation, this.context),
+                    this.mediaType);
             },
             dragover,
             dragenter,

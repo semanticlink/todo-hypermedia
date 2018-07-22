@@ -1,10 +1,12 @@
 <template>
-    <span draggable="true" @dragstart="dragstart" @dragend="dragend">{{ msg || '' }}</span>
+    <span draggable="true" @dragstart="dragstart" @dragend="dragend">
+        <slot>{msg}</slot>
+    </span>
 </template>
 
 <script>
 
-    import { dragend, dragstart } from '../lib/util/dragAndDropModel';
+    import {dragend, dragstart} from '../lib/util/dragAndDropModel';
 
     export default {
         name: 'draggable-model',

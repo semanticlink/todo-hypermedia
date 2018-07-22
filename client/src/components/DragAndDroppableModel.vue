@@ -5,17 +5,20 @@
               @dragover="dragover"
               @dragenter="dragenter"
               @dragleave="dragleave"
-              @dragend="dragend"
-              class="btn btn-xs btn-success glyphicon glyphicon-import"
-              role="button">
+              @dragend="dragend">
+                <slot>
+                        <span class="btn btn-xs btn-success glyphicon glyphicon-import"
+                              role="button">
+
+                        </span>
+                </slot>
         </span>
 </template>
 
 <script>
 
-    import { dragend, dragenter, dragleave, dragover, dragstart, drop } from '../lib/util/dragAndDropModel';
-    import { SemanticLink } from 'semanticLink';
-    import { log } from 'logger';
+    import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/util/dragAndDropModel';
+    import {log} from 'logger';
 
     export default {
         name: 'drag-and-droppable-model',
@@ -43,17 +46,27 @@
                 type: Function,
                 default: () => () => {
                 }
+            },
+            /**
+             * Pick the type of media to return
+             * @example 'application/json'
+             * @example 'text/uri-list'
+             * @example 'text/plain'
+             * @example 'DownloadUrl'
+             */
+            mediaType: {
+                type: String
             }
         },
         methods: {
-            drop: function (event) {
-                return drop(event, document => {
-                    log.debug(`[Dropped] document: ${SemanticLink.tryGetUri(document, /self/)}`);
-                    this.dropped(document, this.context);
-                });
+            drop(event) {
+                return drop(
+                    event,
+                    document => this.dropped(document, this.context),
+                    this.mediaType);
             },
-            dragstart: function (event) {
-                return dragstart(event, this.model);
+            dragstart(event) {
+                return dragstart(event, this.model, this.mediaType);
             },
             dragover,
             dragenter,

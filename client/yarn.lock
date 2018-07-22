@@ -6167,9 +6167,9 @@ selfsigned@^1.9.1:
   dependencies:
     node-forge "0.7.5"
 
-semantic-link@^0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/semantic-link/-/semantic-link-0.0.4.tgz#8abf94485c2b3f46865254103f2b42720e1c5775"
+semantic-link@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/semantic-link/-/semantic-link-0.0.8.tgz#b05814c44bc69ff1cc1a94c812325a64bb66148a"
   dependencies:
     axios "^0.18.0"
 

@@ -19,13 +19,20 @@ namespace Infrastructure.NoSQL
         private readonly IDynamoDBContext _context;
         private readonly IUserRightStore _userRightStore;
         private readonly IIdGenerator _idGenerator;
+        private readonly ITagStore _tagStore;
         private readonly string _userId;
 
-        public TodoStore(IDynamoDBContext context, IUserRightStore userRightStore, User user, IIdGenerator idGenerator)
+        public TodoStore(
+            IDynamoDBContext context,
+            IUserRightStore userRightStore,
+            User user,
+            IIdGenerator idGenerator,
+            ITagStore tagStore)
         {
             _context = context;
             _userRightStore = userRightStore;
             _idGenerator = idGenerator;
+            _tagStore = tagStore;
             _userId = user.Id;
         }
 
@@ -116,14 +123,28 @@ namespace Infrastructure.NoSQL
 
             updater(todo);
 
-            // no messing with the ID allowed
-            todo.Id = id;
-            // no messing with the update time allowed
-            todo.UpdatedAt = DateTime.UtcNow;
+            // ** TODO: should be on tagStore, but for now, check sets
+            var newSet = todo.Tags.Distinct().ToList();
+            var existingSet = (await _tagStore.Get(newSet)).Select(tag => tag.Id).ToList();
+
+            (existingSet.Count == newSet.Count && newSet.Intersect(existingSet).Count() == existingSet.Count)
+                .ThrowInvalidDataExceptionIf(x => false,
+                    "Some tags do not exist in the global set and must be created first");
 
             var intersect = originalTags.Intersect(todo.Tags).ToList();
             var toAdd = todo.Tags.Except(intersect).ToList();
             var toRemove = originalTags.Except(intersect).ToList();
+
+            // deal with changed tags user rights
+            toAdd.ForEach(addRight => _userRightStore.SetRight(_userId, id, RightType.Tag, Permission.Get));
+            toRemove.ForEach(removeRight => _userRightStore.RemoveRight(_userId, id, RightType.Tag));
+
+            // ** end of should be in tagStore
+            
+            // no messing with the ID allowed
+            todo.Id = id;
+            // no messing with the update time allowed
+            todo.UpdatedAt = DateTime.UtcNow;
 
             // if tags have been removed, it looks like you can't hand
             // though an empty list but rather need to null it.
@@ -132,9 +153,6 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(todo);
 
-            // deal with changed tags user rights
-            toAdd.ForEach(addRight => _userRightStore.SetRight(_userId, id, RightType.Tag, Permission.Get));
-            toRemove.ForEach(removeRight => _userRightStore.RemoveRight(_userId, id, RightType.Tag));
         }
 
         /// <summary>
@@ -159,6 +177,7 @@ namespace Infrastructure.NoSQL
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
 
+            // todo remove right and and remove tag rights
 
             await _context.DeleteAsync(todo);
         }

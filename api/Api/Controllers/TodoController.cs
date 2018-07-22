@@ -222,17 +222,14 @@ namespace Api.Controllers
         public async Task<IActionResult> PutTagCollection(string id, [FromBody] string[] uriList)
         {
             // check that global tags exist in the todo set sent through as a uriList
-            (await _tagStore.Get(uriList.ToList()))
-                // translate the global tag into a todo tag so that is equatable with an incoming uri
-                // NOTE: currently build up the uri rather than strip out the id later on comparison
-                //       one side effect of this is tht it guarantess that all incoming tags are parented on this todo
-                .Select(tag => tag.Id.MakeTodoTagUri(id, Url))
-                // now check that the urlList exists as a candidate
-                .All(uri => uriList.Any(ul => ul == uri))
-                .ThrowInvalidDataExceptionIf(x => x.Equals(false),
-                    "Some tags do not exist in the global set and must be created first");
-
-            await _todoStore.Update(id, todo => { todo.Tags = uriList.ToList(); });
+            var tagIds = uriList.ToTags(new List<RouteAndParam>
+                {
+                    new RouteAndParam {Route = TagUriFactory.TodoTagRouteName, Param = "tagId"},
+                    new RouteAndParam {Route = TagUriFactory.TagRouteName, Param = "id"},
+                },
+                HttpContext);
+            
+            await _todoStore.Update(id, todo => { todo.Tags = tagIds; });
 
             return NoContent();
         }

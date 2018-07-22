@@ -18,7 +18,7 @@ namespace Domain.Persistence
             IDictionary<RightType, Permission> collectionCallerRights);
 
         Task<Tag> Get(string id);
-        Task<IEnumerable<Tag>> Get(List<string> id);
+        Task<IEnumerable<Tag>> Get(IList<string> id);
         Task<IEnumerable<Tag>> GetAll();
         Task Delete(string id);
     }

@@ -12,7 +12,7 @@ namespace Infrastructure.NoSQL
     {
         public static async Task<IEnumerable<T>> Where<T>(
             this IDynamoDBContext context,
-            List<ScanCondition> scanCondition)
+            IList<ScanCondition> scanCondition)
             where T : class
         {
             return await context
@@ -48,7 +48,7 @@ namespace Infrastructure.NoSQL
             return await context.FirstOrDefault<T>(HashKeyConstants.Default, id);
         }
 
-        public static async Task<IEnumerable<T>> WhereByIds<T>(this IDynamoDBContext context, List<string> ids = null)
+        public static async Task<IEnumerable<T>> WhereByIds<T>(this IDynamoDBContext context, IList<string> ids = null)
             where T : class
         {
             return ids.IsNull()
@@ -56,7 +56,7 @@ namespace Infrastructure.NoSQL
                 : await context.Where<T>(new ScanCondition(HashKeyConstants.Default, ScanOperator.In, ids.Distinct().ToArray()));
         }
 
-        public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, List<ScanCondition> scanConditions)
+        public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, IList<ScanCondition> scanConditions)
             where T : class
         {
             return (await context.Where<T>(scanConditions)).SingleOrDefault();

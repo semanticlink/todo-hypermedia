@@ -1,4 +1,4 @@
-import { _, log } from 'semanticLink';
+import {_, log} from 'semanticLink';
 
 /**
  * Grok the extension of a file name
@@ -13,29 +13,34 @@ const getFileExtension = (file) => file.name.replace(/.*\.([a-zA-Z]+)$/, '$1');
  *  * File (application/json) - first file only
  *
  * @param {DataTransfer} transfer - drag event
+ * @param {string} mediaType
  * @returns {Promise.<LinkedRepresentation|Object>}
  */
-const createModel = (transfer) => {
+const createModel = (transfer, mediaType) => {
 
     return new Promise((resolve, reject) => {
 
-        _(transfer.items).each(item => {
-            log.debug(`Item: kind '${item.kind}' type '${item.type}'`);
-        });
+        log.debug(`[Drop] media type: ['${mediaType}']`);
 
-        if (_(transfer.types).contains('application/json')) {
-            log.info('Populating model');
-            return resolve(JSON.parse(transfer.getData('Text')));
-        } else if (_(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')) {
+        Object.entries(transfer.items).forEach(
+            ([key, item]) => log.debug(`[Drag] item: kind '${item.kind}' type '${item.type}'`)
+        );
+
+        if (mediaType === 'application/json' && [...transfer.types].includes('application/json')) {
+
+            log.debug('[Drop] found: application/json');
+
+            return resolve(transfer.getData('application/json'));
+
+        } else if (mediaType === 'text/uri-list' && _(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')) {
+
+            log.debug('[Drop] found: text/uri-list');
 
             let uriItem = _(transfer.items).find(item => item.kind === 'string' && item.type === 'text/uri-list');
+
+
             uriItem.getAsString(str => {
-
-                if (str.split('\r\n').length > 1) {
-                    // TODO: when needed process this as text/uri-list, see http://amundsen.com/hypermedia/urilist/
-                    log.error('Arrgggh, text/uri-list needs to be implemented');
-                }
-
+                log.debug(`[Drop] result: ${str}`);
                 return resolve(str);
             });
 
@@ -44,7 +49,7 @@ const createModel = (transfer) => {
             // currently we are only going to take one file
             // TODO: multiple dropped files
             const file = _(transfer.files).first();
-            log.info('File: "' + file.name + '" of type ' + file.type);
+            log.debug('File: "' + file.name + '" of type ' + file.type);
 
             const extension = getFileExtension(file);
             // TODO: wider set of mime types
@@ -52,7 +57,7 @@ const createModel = (transfer) => {
 
                 const reader = new FileReader();
                 reader.onload = function (evt) {
-                    log.info('Data loaded');
+                    log.debug('[Drop] data loaded');
                     try {
                         return resolve(JSON.parse(evt.target.result));
                     } catch (err) {
@@ -66,17 +71,17 @@ const createModel = (transfer) => {
                 log.error();
                 return reject('Unknown file type');
             }
-        } else if (_(transfer.types).contains('text/plain')) {
+        } else if (mediaType === 'text/plain' && _(transfer.types).contains('text/plain')) {
             //
             //  After all the content types and file have been processed, have a few guesses
             //  at what the content is. If it has come from an editor then JSON could be
             //  represented as text. Try parsing it as JSON and proceed if that works.
             //
-            log.info('Trying text as JSON');
+            log.debug('[Drop] trying text as JSON');
             try {
                 return resolve(JSON.parse(transfer.getData('Text')));
             } catch (e) {
-                log.error('Error parsing text as JSON');
+                log.error('[Drop] error parsing text as JSON');
                 if (e instanceof SyntaxError) {
                     return reject('The content is not valid JSON');
                 }
@@ -85,7 +90,7 @@ const createModel = (transfer) => {
                 }
             }
         } else {
-            log.error('Drop content is an unsupported file/content type');
+            log.error(`[Drop] content is an unsupported file/content type: '${mediaType}'`);
             return reject('Unsupported drop type(s)');
         }
 
@@ -113,8 +118,14 @@ const DEFAULT_FILE_NAME = 'Unnamed';
  * @param {DataTransfer} dataTransfer
  * @param {function(key:string, value:string):string|undefined=} replacerStrategy JSON.stringify replacer function
  *         see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+ * @param {?string|string[]} mediaType media types to be included in the {@link DataTransfer} object on drag
  */
-const dragLogic = (model, dataTransfer, replacerStrategy) => {
+const dragLogic = (model, dataTransfer, replacerStrategy, mediaType) => {
+
+    mediaType = mediaType || ['application/json', 'text/plain', 'DownloadUrl', 'text/uri-list'];
+    mediaType = [mediaType];
+
+    log.debug(`[Drop] using media types: [${mediaType.join(',')}]`);
 
     const canonicalJson = JSON.stringify(model, null, 1);
 
@@ -133,14 +144,38 @@ const dragLogic = (model, dataTransfer, replacerStrategy) => {
     dataTransfer.effectAllowed = 'copy';
     dataTransfer.dropEffect = 'copy';
 
-    // encode the prettyJson so that carriage returns are not lost
-    // http://stackoverflow.com/questions/332872/encode-url-in-javascript
-    dataTransfer.setData(
-        'DownloadURL',
-        'application/json:' + filename + ':data:application/json,' + encodeURI(prettyJson)
-    );
-    dataTransfer.setData('text/plain', prettyJson);
-    dataTransfer.setData('application/json', canonicalJson);
+    if (mediaType.includes('application/json')) {
+        dataTransfer.setData('application/json', canonicalJson);
+        log.debug('[Drop] set data application/json');
+    }
+
+    if (mediaType.includes('DownloadUrl')) {
+        // encode the prettyJson so that carriage returns are not lost
+        // http://stackoverflow.com/questions/332872/encode-url-in-javascript
+        // 'DownloadURL' is chrome specific (I think) see https://www.html5rocks.com/en/tutorials/casestudies/box_dnd_download/
+        dataTransfer.setData(
+            'DownloadURL',
+            'application/json:' + filename + ':data:application/json,' + encodeURI(prettyJson)
+        );
+        log.debug('[Drop] set data DownloadURL');
+    }
+
+    if (mediaType.includes('text/plain')) {
+        dataTransfer.setData('text/plain', prettyJson);
+        log.debug('[Drop] set data text/plain');
+    }
+
+    if (mediaType.includes('text/uri-list')) {
+        /**
+         * Making a uri-list is a subset of the rfc.
+         *
+         * DO NOT include any comments. It breaks the {@link DataTransfer} object
+         */
+        dataTransfer.setData('text/uri-list', makeUriList(model));
+        log.debug('[Drop] set data text/uri-list');
+    }
+
+
 };
 
 /**
@@ -176,21 +211,22 @@ const defaultReplacer = event => {
  *  On drag start, load the in-memory model ready to dropped (onto file system) or another element
  * @param {DragEvent} event
  * @param {LinkedRepresentation|Object} model
+ * @param {?string|string[]} mediaType types to be attached to the event on drag
  * @return {boolean}
  */
-export function dragstart (event, model) {
+export function dragstart(event, model, mediaType) {
     event = event.originalEvent || event;
 
     // Check whether the element is draggable, since dragstart might be triggered on a child.
-    if (event.srcElement.draggable === 'false') {
+    if ((event.srcElement || event.originalTarget).draggable === 'false') {
         return true;
     }
 
-    log.info('Start drag');
+    log.info('[Drag] start');
 
-    dragLogic(model, event.dataTransfer, defaultReplacer(event));
+    dragLogic(model, event.dataTransfer, defaultReplacer(event), mediaType);
 
-    event.srcElement.classList.add('drag');
+    (event.srcElement || event.originalTarget).classList.add('drag');
 
     event.stopPropagation();
 }
@@ -200,8 +236,8 @@ export function dragstart (event, model) {
  * @param {DragEvent} event
  * @return {boolean}
  */
-export function dragend (event) {
-    log.debug('drag out - end ');
+export function dragend(event) {
+    log.debug('[Drag] out - end ');
     event.target.classList.remove('drag');
     event.stopPropagation();
 }
@@ -211,8 +247,8 @@ export function dragend (event) {
  * @param {DragEvent} event
  * @return {boolean}
  */
-export function dragover (event) {
-    log.debug('drag in - over');
+export function dragover(event) {
+    log.debug('[Drag] in - over');
     event = event.originalEvent || event;
 
     event.dataTransfer.dropEffect = 'copy';
@@ -230,8 +266,8 @@ export function dragover (event) {
  * @param {DragEvent} event
  * @return {boolean}
  */
-export function dragenter (event) {
-    log.debug('drag in - enter');
+export function dragenter(event) {
+    log.debug('[Drag] in - enter');
     event = event.originalEvent || event;
 
     event.target.classList.add('over');
@@ -243,8 +279,8 @@ export function dragenter (event) {
  * @param {DragEvent} event
  * @return {boolean}
  */
-export function dragleave (event) {
-    log.debug('drag in - leave');
+export function dragleave(event) {
+    log.debug('[Drag] in - leave');
     event = event.originalEvent || event;
 
     event.target.classList.remove('over');
@@ -260,10 +296,14 @@ export function dragleave (event) {
  *
  * @param {DragEvent} event
  * @param {function(LinkedRepresentation)}cb callback function process the model
+ * @param {string?} mediaType='application/json' media type to be returned
  * @return {boolean}
  */
-export function drop (event, cb) {
-    log.debug('drag in - drop');
+export function drop(event, cb, mediaType) {
+
+    mediaType = mediaType || 'application/json';
+
+    log.debug('[Drag] in - drop');
     event = event.originalEvent || event;
 
     // Stops some browsers from redirecting.
@@ -277,9 +317,34 @@ export function drop (event, cb) {
 
     event.target.classList.remove('over');
 
-    createModel(event.dataTransfer)
+    createModel(event.dataTransfer, mediaType)
         .then(model => cb(model));
-    // .then(model => scope.drop()(model, scope.context));
 
     return false;
+}
+
+/**
+ * Make a uri-list formatted string without comments of the the collection items
+ * @param {CollectionRepresentation|string[]} representation
+ * @returns {string} uri-list formatted (without comments)
+ */
+export function makeUriList(representation) {
+
+    const arr = representation.items
+        ? representation.items.map(({id}) => id)
+        : representation || [];
+
+    return arr.join('\n');
+}
+
+
+/**
+ *
+ * @param {string} uriList
+ * @returns {string[]}
+ */
+export function fromUriList(uriList) {
+    const list = uriList.split('\n');
+    return list.filter(uri => !uri.startsWith('#'));
+
 }

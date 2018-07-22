@@ -7,17 +7,24 @@
 
                 <b-container fluid class="m-3 pr-3">
 
+
                     <Form :representation="representation"
                           :formRepresentation="formRepresentation"
                           :on-cancel="onClose"
                           v-if="formRepresentation"/>
 
+
                     <div v-show="!formRepresentation">
                         <b-button size="sm" @click="copyToClipboard">Copy</b-button>
                         <b-button size="sm" @click="saveToFile">Save</b-button>
+                        <drag-droppable-collection
+                                v-if="isLoaded"
+                                :representation="representation">
+                        </drag-droppable-collection>
                         <br/>
                         <pre v-html="htmlRepresentation"/>
                     </div>
+
 
                 </b-container>
 
@@ -71,12 +78,14 @@
     import {copyToClipboard, saveToFile} from "../lib/raw-helpers";
     import {get, _delete, LinkedRepresentation, CollectionRepresentation, getUri} from 'semantic-link';
 
+    import DragDroppableCollection from './DragDroppableCollection.vue';
+
 
     export default {
         props: {
             apiUri: {type: String},
         },
-        components: {Logout, Headers, Form},
+        components: {Logout, Headers, Form, DragDroppableCollection},
         data() {
             return {
                 /**
@@ -115,6 +124,11 @@
         },
         created() {
             return this.getRepresentation();
+        },
+        computed: {
+            isLoaded() {
+                return this.representation != null;
+            }
         },
         methods: {
             /**
@@ -206,7 +220,7 @@
                 return axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}})
                     .then(/** @type {AxiosResponse} */response => {
                         this.responseHeaders = response.headers;
-                        this.representation = (response.data);
+                        this.representation = response.data;
                         this.htmlRepresentation = linkifyToSelf(response.data);
                         this.requestHeaders = response.config.headers;
 
