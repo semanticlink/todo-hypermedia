@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using App;
+using Infrastructure;
 using Toolkit;
 
 namespace Api.Web
@@ -160,7 +161,7 @@ namespace Api.Web
                             // we need to hand in the context Principal at this point as it has not yet 
                             // been loaded on the IHttpContextAssessor required for the UserResolverService
                             var user = await context.HttpContext.RequestServices
-                                .GetRequiredService<UserResolverService>()
+                                .GetRequiredService<IUserResolverService>()
                                 .GetPrincipleUserAsync(context.Principal);
 
                             if (!user.Id.IsNullOrWhitespace())

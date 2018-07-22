@@ -65,7 +65,7 @@ namespace Infrastructure.NoSQL
             return await _context.FirstOrDefault<Tag>(id);
         }
 
-        public async Task<IEnumerable<Tag>> Get(IList<string> ids)
+        public async Task<IEnumerable<Tag>> Get(List<string> ids)
         {
             return ids.IsNullOrEmpty()
                 ? new List<Tag>()

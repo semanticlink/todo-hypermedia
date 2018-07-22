@@ -7,12 +7,6 @@ using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Web
 {
-    public class RouteAndParam
-    {
-        public string Param { get; set; } = "id";
-        public string Route { get; set; }
-    }
-
     public static class PatchRepresentationExtensions
     {
         public static PatchFeedRepresentation FromFeedRepresentation(this FeedRepresentation feed)

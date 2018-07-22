@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Domain.Models;
+using Infrastructure;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Http;
 using Toolkit;
@@ -16,7 +17,7 @@ namespace App
     ///     This code reproduces some of the <see cref="UserStore.GetByExternalId"/> to avoid circular dependencies
     ///     when the user is injected into it.
     /// </remarks>
-    public class UserResolverService
+    public class UserResolverService : IUserResolverService
     {
         private readonly IHttpContextAccessor _context;
         private readonly IDynamoDBContext _dbContext;

@@ -183,7 +183,12 @@ namespace Infrastructure.NoSQL
 
         public async Task RemoveRight(string userId, string resourceId, RightType type)
         {
-            await _dbContext.DeleteAsync<UserRight>(new List<ScanCondition>
+            userId.ThrowInvalidDataExceptionIfNull("User cannot be empty");
+            resourceId.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Resource id must be valid");
+
+            // KLUDGE: not sure how to do this with one query.
+
+            await _dbContext.Delete<UserRight>(new List<ScanCondition>
             {
                 new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId),
                 new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId),
@@ -194,6 +199,23 @@ namespace Infrastructure.NoSQL
                 "Remove right: user {0} to [{1:G},{2}]",
                 userId,
                 type,
+                resourceId);
+        }
+
+        public async Task RemoveRight(string userId, string resourceId)
+        {
+            userId.ThrowInvalidDataExceptionIfNull("User cannot be empty");
+            resourceId.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Resource id must be valid");
+
+            await _dbContext.Delete<UserRight>(new List<ScanCondition>
+            {
+                new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId),
+                new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId),
+            });
+
+            Log.TraceFormat(
+                "Remove right: user {0} to [{1:G}, ALL]",
+                userId,
                 resourceId);
         }
 

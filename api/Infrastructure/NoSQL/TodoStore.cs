@@ -123,24 +123,8 @@ namespace Infrastructure.NoSQL
 
             updater(todo);
 
-            // ** TODO: should be on tagStore, but for now, check sets
-            var newSet = todo.Tags.Distinct().ToList();
-            var existingSet = (await _tagStore.Get(newSet)).Select(tag => tag.Id).ToList();
+            await SetRightsForTodoTag(id, originalTags, todo.Tags);
 
-            (existingSet.Count == newSet.Count && newSet.Intersect(existingSet).Count() == existingSet.Count)
-                .ThrowInvalidDataExceptionIf(x => false,
-                    "Some tags do not exist in the global set and must be created first");
-
-            var intersect = originalTags.Intersect(todo.Tags).ToList();
-            var toAdd = todo.Tags.Except(intersect).ToList();
-            var toRemove = originalTags.Except(intersect).ToList();
-
-            // deal with changed tags user rights
-            toAdd.ForEach(addRight => _userRightStore.SetRight(_userId, id, RightType.Tag, Permission.Get));
-            toRemove.ForEach(removeRight => _userRightStore.RemoveRight(_userId, id, RightType.Tag));
-
-            // ** end of should be in tagStore
-            
             // no messing with the ID allowed
             todo.Id = id;
             // no messing with the update time allowed
@@ -152,8 +136,37 @@ namespace Infrastructure.NoSQL
             todo.Tags = !todo.Tags.IsNullOrEmpty() ? todo.Tags : null;
 
             await _context.SaveAsync(todo);
-
         }
+
+        private async Task SetRightsForTodoTag(string todoId, IList<string> origIds, IList<string> newIds)
+        {
+            var newSet = newIds.Distinct().ToList();
+            var existingSet = (await _tagStore.Get(newSet)).Select(tag => tag.Id).ToList();
+
+            (existingSet.Count == newSet.Count && newSet.Intersect(existingSet).Count() == existingSet.Count)
+                .ThrowInvalidDataExceptionIf(x => false,
+                    "Some tags do not exist in the global set and must be created first");
+
+            var intersect = origIds.Intersect(newIds).ToList();
+            var toAdd = newIds.Except(intersect).ToList();
+            var toRemove = origIds.Except(intersect).ToList();
+
+            // deal with changed tags user rights
+            await Task.WhenAll(toAdd
+                .Select(SetRightForTag)
+                .Concat(toRemove.Select(RemoveRightForTag)));
+        }
+
+        private async Task SetRightForTag(string tagId)
+        {
+            await _userRightStore.SetRight(_userId, tagId, RightType.Tag, Permission.Get);
+        }
+
+        private async Task RemoveRightForTag(string tagId)
+        {
+            await _userRightStore.RemoveRight(_userId, tagId, RightType.Tag);
+        }
+
 
         /// <summary>
         ///     Add tags to the todo. You are not able to add duplicates.
@@ -177,7 +190,8 @@ namespace Infrastructure.NoSQL
             var todo = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            // todo remove right and and remove tag rights
+            await Task.WhenAll(todo.Tags.Select(RemoveRightForTag));
+            await _userRightStore.RemoveRight(_userId, id);
 
             await _context.DeleteAsync(todo);
         }

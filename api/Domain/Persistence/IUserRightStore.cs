@@ -29,5 +29,6 @@ namespace Domain.Persistence
         Task<UserRight> Get(string userId, string resourceId, RightType type);
         Task<IEnumerable<UserRight>> Get(string userId, string resourceId);
         Task RemoveRight(string userId, string resourceId, RightType type);
+        Task RemoveRight(string userId, string resourceId);
     }
 }

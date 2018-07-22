@@ -53,10 +53,12 @@ namespace Infrastructure.NoSQL
         {
             return ids.IsNull()
                 ? new List<T>()
-                : await context.Where<T>(new ScanCondition(HashKeyConstants.Default, ScanOperator.In, ids.Distinct().ToArray()));
+                : await context.Where<T>(new ScanCondition(HashKeyConstants.Default, ScanOperator.In,
+                    ids.Distinct().ToArray()));
         }
 
-        public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context, IList<ScanCondition> scanConditions)
+        public static async Task<T> SingleOrDefault<T>(this IDynamoDBContext context,
+            IList<ScanCondition> scanConditions)
             where T : class
         {
             return (await context.Where<T>(scanConditions)).SingleOrDefault();
@@ -97,6 +99,18 @@ namespace Infrastructure.NoSQL
             where T : class
         {
             return await context.FirstOrDefault<T>(HashKeyConstants.Default, id);
+        }
+
+        public static async Task<IEnumerable<T>> Delete<T>(
+            this IDynamoDBContext context,
+            List<ScanCondition> scanConditions)
+            where T : class
+        {
+            // TODO: learn about batch write that can take deletes
+            // until then get the list to delete and then delete individually
+            var ids = (await context.Where<T>(scanConditions)).ToList();
+            await Task.WhenAll(ids.Select(id => context.DeleteAsync(id)));
+            return ids;
         }
     }
 }

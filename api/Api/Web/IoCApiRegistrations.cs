@@ -2,6 +2,7 @@
 using Api.Authorisation;
 using App;
 using Domain.Models;
+using Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,8 +25,8 @@ namespace Api.Web
              */
             // see https://github.com/aspnet/Hosting/issues/793 (TODO: clarify)
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<UserResolverService, UserResolverService>();
-            services.AddSingleton<User>(context => context.GetService<UserResolverService>().GetUser());
+            services.AddSingleton<IUserResolverService, UserResolverService>();
+            services.AddScoped<User>(context => context.GetService<IUserResolverService>().GetUser());
 
             // Version from the assmembly (displayed on home resource)
             services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);
