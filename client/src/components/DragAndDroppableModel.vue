@@ -18,7 +18,6 @@
 <script>
 
     import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/util/dragAndDropModel';
-    import {log} from 'logger';
 
     export default {
         name: 'drag-and-droppable-model',
@@ -75,7 +74,3 @@
         }
     };
 </script>
-
-<style scoped>
-
-</style>

@@ -6,7 +6,8 @@
             media-type="text/uri-list"
             :dropped="addAsPut"
     >
-        <b-button size="sm" variant="primary">Put uri-list</b-button>
+        <b-button size="sm" variant="success" v-b-tooltip.hover.html.right
+                  title="Drag a uri to create (via PUT)">+</b-button>
     </drag-and-droppable-model>
 
     <drag-and-droppable-model
@@ -15,7 +16,8 @@
             media-type="text/uri-list"
             :dropped="addAsPatch"
     >
-        <b-button size="sm" variant="primary">Patch</b-button>
+        <b-button size="sm" variant="success" v-b-tooltip.hover.html.right
+                  title="Drag a uri to create (via PATCH)">+</b-button>
     </drag-and-droppable-model>
 </span>
 </template>
@@ -23,8 +25,9 @@
 <script>
 
     import DragAndDroppableModel from './DragAndDroppableModel.vue';
+    import DroppableModel from './DraggableModel.vue';
 
-    import {matches, get, put, getUri, link} from 'semantic-link';
+    import {matches, get, put, patch} from 'semantic-link';
     import {log} from 'logger';
     import {fromUriList, makeUriList} from "../lib/util/dragAndDropModel";
 
@@ -32,7 +35,7 @@
 
     export default {
         name: 'drag-droppable-collection',
-        components: {DragAndDroppableModel},
+        components: {DroppableModel, DragAndDroppableModel},
         props: {
             /**
              * Collection or item representation.
@@ -93,11 +96,11 @@
                 // add to the collection
                 fromUriList(document).forEach(uri => newCollection.items.push({id: uri}));
 
-                const patch = compare(this.representation, newCollection);
+                const jsonPatchDocument = compare(this.representation, newCollection);
 
                 get(this.representation, 'edit-form', 'application/json-patch+json')
                     .then(response => {
-                        return link(response.data, 'submit', 'application/json-patch+json', 'PATCH', patch /*JSON.stringify(patch)*/);
+                        return patch(response.data, 'submit', 'application/json-patch+json', jsonPatchDocument);
                     })
                     .then(response => {
                         this.$notify({

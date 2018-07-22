@@ -18,6 +18,16 @@
             model: {
                 type: Object,
                 required: true
+            },
+            /**
+             * Pick the type of media to return
+             * @example 'application/json'
+             * @example 'text/uri-list'
+             * @example 'text/plain'
+             * @example 'DownloadUrl'
+             */
+            mediaType: {
+                type: String
             }
         },
         methods: {

@@ -1,16 +1,22 @@
 <template>
-    <span @drop="drop"
-          @dragover="dragover"
-          @dragenter="dragenter"
-          @dragleave="dragleave"
-          class="btn btn-xs btn-success glyphicon glyphicon-plus"
-          role="button">
+    <span
+            @drop="drop"
+            @dragstart="dragstart"
+            @dragover="dragover"
+            @dragenter="dragenter"
+            @dragleave="dragleave"
+            @dragend="dragend">
+    >
+        <slot>
+            <span class="btn btn-xs btn-success glyphicon glyphicon-import"
+                  role="button">
+            </span>
+        </slot>
     </span>
 </template>x
 
 <script>
 
-    import {log} from 'logger';
     import {dragend, dragenter, dragleave, dragover, drop} from '../lib/util/dragAndDropModel';
 
     export default {
@@ -19,11 +25,9 @@
             /**
              * In-memory {@link LinkedRepresentation} that a dropped in the context of another {@link LinkedRepresentation}
              */
-            context: {
+            model: {
                 type: Object,
-                default: () => {
-                    return {};
-                }
+                required: true
             },
             /**
              * Callback after the dropped model is loaded and then can be acted on (eg updated)
@@ -48,7 +52,7 @@
             drop: function (event) {
                 return drop(
                     event,
-                    representation => this.dropped(representation, this.context),
+                    representation => this.dropped(representation, this.model),
                     this.mediaType);
             },
             dragover,
@@ -58,7 +62,3 @@
         }
     };
 </script>
-
-<style scoped>
-
-</style>

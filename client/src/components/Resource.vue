@@ -236,6 +236,7 @@
                             makeButtonOnLinkifyLinkRels("search", {onClick: this.getForm, title: 'Search'});
                             makeButtonOnLinkifyLinkRels("self", {onClick: this.tryDelete, title: 'Delete'});
 
+/*
                             makeButtonOnLinkifyLinkRels(
                                 "edit-form",
                                 "application/json-patch+json",
@@ -251,6 +252,7 @@
                                     onClick: this.getForm,
                                     title: 'Patch'
                                 });
+*/
                         });
 
                         this.resetForm();
