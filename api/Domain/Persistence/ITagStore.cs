@@ -7,11 +7,11 @@ namespace Domain.Persistence
 {
     public interface ITagStore
     {
-        [Obsolete]
+        [Obsolete("Use create with permission setting")]
         Task<string> Create(TagCreateData createData);
 
         Task<string> Create(
-            string creatorId,
+            string ownerId,
             string contextResourceId,
             TagCreateData createData,
             Permission callerRights,
@@ -20,6 +20,8 @@ namespace Domain.Persistence
         Task<Tag> Get(string id);
         Task<IEnumerable<Tag>> Get(List<string> id);
         Task<IEnumerable<Tag>> GetAll();
+        
+        [Obsolete("Tags are immutable-test classes must delete directly on context")]
         Task Delete(string id);
     }
 }

@@ -160,7 +160,7 @@ namespace Api.Controllers
                     TrustDefaults.KnownRootIdentifier,
                     TrustDefaults.KnownHomeResourceId,
                     data.FromRepresentation(),
-                    Permission.FullControl,
+                    Permission.FullControl | Permission.Owner,
                     CallerCollectionRights.User
                 ))
                 .MakeUserUri(Url)

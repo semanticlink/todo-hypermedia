@@ -17,23 +17,23 @@ namespace Infrastructure.NoSQL
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         private readonly IDynamoDBContext _context;
-        private readonly IUserRightStore _userRightStore;
+        private readonly string _creatorId;
         private readonly IIdGenerator _idGenerator;
         private readonly ITagStore _tagStore;
-        private readonly string _userId;
+        private readonly IUserRightStore _userRightStore;
 
         public TodoStore(
+            User creator,
             IDynamoDBContext context,
-            IUserRightStore userRightStore,
-            User user,
             IIdGenerator idGenerator,
+            IUserRightStore userRightStore,
             ITagStore tagStore)
         {
             _context = context;
             _userRightStore = userRightStore;
             _idGenerator = idGenerator;
             _tagStore = tagStore;
-            _userId = user.Id;
+            _creatorId = creator.Id;
         }
 
         public async Task<string> Create(TodoCreateData data)
@@ -44,7 +44,7 @@ namespace Infrastructure.NoSQL
                 Name = data.Name,
                 State = data.State,
                 Due = data.Due,
-                CreatedBy = _userId,
+                CreatedBy = _creatorId,
                 CreatedAt = DateTime.UtcNow,
                 // TODO: validation/cross checking of tag references
                 Tags = data.Tags
@@ -52,7 +52,7 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(todo);
 
-            Log.DebugFormat("New todo {0} by user {1}", todo.Id, _userId);
+            Log.DebugFormat("New todo {0} by user {1}", todo.Id, _creatorId);
 
             return todo.Id;
         }
@@ -69,7 +69,7 @@ namespace Infrastructure.NoSQL
             // which in this case is a user.
             // KLUDGE : take out. This is only here because of seed data
             await _userRightStore.CreateRights(
-                !_userId.IsNullOrWhitespace() ? _userId : contextResourceId,
+                !_creatorId.IsNullOrWhitespace() ? _creatorId : contextResourceId,
                 todoId,
                 RightType.Todo.MakeCreateRights(callerRights, callerCollectionRights),
                 new InheritForm
@@ -138,6 +138,46 @@ namespace Infrastructure.NoSQL
             await _context.SaveAsync(todo);
         }
 
+
+        /// <summary>
+        ///     Add tags to the todo. You are not able to add duplicates.
+        /// </summary>
+        public async Task AddTag(string id, string tagId, Action<string> add = null)
+        {
+            await Update(id, todo =>
+            {
+                todo.Tags = todo.Tags ?? new List<string>();
+
+                // do not allow duplicates
+                if (!todo.Tags.Contains(tagId)) todo.Tags.Add(tagId);
+            });
+        }
+
+        public async Task Delete(string id)
+        {
+            var todo = await Get(id)
+                .ThrowObjectNotFoundExceptionIfNull();
+
+            if (todo.Tags.IsNotNull())
+            {
+                await Task.WhenAll(todo.Tags.Select(RemoveRightForTag));
+            }
+
+            await _userRightStore.RemoveRight(_creatorId, id);
+
+            await _context.DeleteAsync(todo);
+        }
+
+        public async Task DeleteTag(string id, string tagId, Action<string> remove = null)
+        {
+            await Update(id, todo => todo.Tags?.RemoveAll(tag => tag == tagId));
+        }
+
+        public async Task<IEnumerable<Todo>> GetByTag(string tagId)
+        {
+            return await _context.Where<Todo>(new ScanCondition(nameof(Todo.Tags), ScanOperator.Contains, tagId));
+        }
+
         private async Task SetRightsForTodoTag(string todoId, IList<string> origIds, IList<string> newIds)
         {
             var newSet = newIds.Distinct().ToList();
@@ -159,51 +199,12 @@ namespace Infrastructure.NoSQL
 
         private async Task SetRightForTag(string tagId)
         {
-            await _userRightStore.SetRight(_userId, tagId, RightType.Tag, Permission.Get);
+            await _userRightStore.SetRight(_creatorId, tagId, RightType.Tag, Permission.Get);
         }
 
         private async Task RemoveRightForTag(string tagId)
         {
-            await _userRightStore.RemoveRight(_userId, tagId, RightType.Tag);
-        }
-
-
-        /// <summary>
-        ///     Add tags to the todo. You are not able to add duplicates.
-        /// </summary>
-        public async Task AddTag(string id, string tagId, Action<string> add = null)
-        {
-            await Update(id, todo =>
-            {
-                todo.Tags = todo.Tags ?? new List<string>();
-
-                // do not allow duplicates
-                if (!todo.Tags.Contains(tagId))
-                {
-                    todo.Tags.Add(tagId);
-                }
-            });
-        }
-
-        public async Task Delete(string id)
-        {
-            var todo = await Get(id)
-                .ThrowObjectNotFoundExceptionIfNull();
-
-            await Task.WhenAll(todo.Tags.Select(RemoveRightForTag));
-            await _userRightStore.RemoveRight(_userId, id);
-
-            await _context.DeleteAsync(todo);
-        }
-
-        public async Task DeleteTag(string id, string tagId, Action<string> remove = null)
-        {
-            await Update(id, todo => todo.Tags?.RemoveAll(tag => tag == tagId));
-        }
-
-        public async Task<IEnumerable<Todo>> GetByTag(string tagId)
-        {
-            return await _context.Where<Todo>(new ScanCondition(nameof(Todo.Tags), ScanOperator.Contains, tagId));
+            await _userRightStore.RemoveRight(_creatorId, tagId, RightType.Tag);
         }
     }
 }

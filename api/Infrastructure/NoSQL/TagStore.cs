@@ -20,30 +20,29 @@ namespace Infrastructure.NoSQL
         private readonly string _userId;
         private readonly IUserRightStore _userRightStore;
 
-        public TagStore(IDynamoDBContext context, IIdGenerator idGenerator, IUserRightStore userRightStore, User user)
+        public TagStore(
+            User creator,
+            IDynamoDBContext context,
+            IIdGenerator idGenerator,
+            IUserRightStore userRightStore)
         {
             _context = context;
             _idGenerator = idGenerator;
             _userRightStore = userRightStore;
-            _userId = user.Id;
-        }
-
-        public async Task<string> Create(TagCreateData createData)
-        {
-            return await Create(_userId, createData);
+            _userId = creator.Id;
         }
 
         public async Task<string> Create(
-            string creatorId,
+            string ownerId,
             string contextResourceId,
             TagCreateData createData,
             Permission callerRights,
             IDictionary<RightType, Permission> collectionCallerRights)
         {
-            var tagId = await Create(creatorId, createData);
+            var tagId = await Create(createData);
 
             await _userRightStore.CreateRights(
-                creatorId,
+                ownerId,
                 tagId,
                 RightType.Tag.MakeCreateRights(callerRights, collectionCallerRights),
                 new InheritForm
@@ -59,6 +58,30 @@ namespace Infrastructure.NoSQL
             return tagId;
         }
 
+        public async Task<string> Create(TagCreateData data)
+        {
+            var tags = await _context.Where<Tag>(nameof(Tag.Name), data.Name);
+
+            var tag = tags.FirstOrDefault();
+
+            // only create a new tag, if it doesn't already exist
+            if (tag != null && !tag.Id.IsNullOrWhitespace()) return tag.Id;
+
+            var create = new Tag
+            {
+                Id = _idGenerator.New(),
+                Name = data.Name,
+                CreatedBy = _userId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.SaveAsync(create);
+
+            Log.DebugFormat("New tag {0} created by user {1}", create.Id, _userId);
+
+            return create.Id;
+        }
+
 
         public async Task<Tag> Get(string id)
         {
@@ -72,6 +95,11 @@ namespace Infrastructure.NoSQL
                 : await _context.WhereByIds<Tag>(ids);
         }
 
+        public async Task<IEnumerable<Tag>> GetAll()
+        {
+            return await _context.Where<Tag>();
+        }
+
         public async Task Delete(string id)
         {
             var tag = await Get(id)
@@ -80,37 +108,6 @@ namespace Infrastructure.NoSQL
             await _context.DeleteAsync(tag);
         }
 
-        public async Task<IEnumerable<Tag>> GetAll()
-        {
-            return await _context.Where<Tag>();
-        }
-
-        private async Task<string> Create(string creatorId, TagCreateData data)
-        {
-            var tags = await _context.Where<Tag>(nameof(Tag.Name), data.Name);
-
-            var tag = tags.FirstOrDefault();
-
-            // only create a new tag, if it doesn't already exist
-            if (tag != null && !tag.Id.IsNullOrWhitespace())
-            {
-                return tag.Id;
-            }
-
-            var create = new Tag
-            {
-                Id = _idGenerator.New(),
-                Name = data.Name,
-                CreatedBy = creatorId,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _context.SaveAsync(create);
-
-            Log.DebugFormat("New tag {0} created by user {1}", create.Id, _userId);
-
-            return create.Id;
-        }
 
         private async Task Update(string title, Action<Tag> updater)
         {

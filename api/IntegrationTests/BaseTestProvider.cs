@@ -33,9 +33,13 @@ namespace IntegrationTests
                     .RegisterInfrastructure( /* isDevelopment) */true)
                     .RegisterRespositories();
             });
+            
+            UserId = RegisterUser();
 
             Startup();
         }
+
+        protected string UserId { get; private set; }
 
         protected BaseTestProvider(ITestOutputHelper output) : this()
         {
@@ -81,7 +85,7 @@ namespace IntegrationTests
         /// <remarks>
         ///    This emulates the http context of an authenticated user.
         /// </remarks>
-        protected string RegisterUser()
+        private string RegisterUser()
         {
             var userId = NewId();
             Register(services => { services.AddTransient(ctx => new User {Id = userId}); });

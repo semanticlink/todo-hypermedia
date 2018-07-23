@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Domain;
 using Domain.Models;
 using Domain.Persistence;
-using Domain.Representation;
 using NLog;
 using Toolkit;
 
@@ -16,37 +16,47 @@ namespace Infrastructure.NoSQL
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
         private readonly IDynamoDBContext _context;
+        private readonly User _creator;
         private readonly IIdGenerator _idGenerator;
-        private readonly User _user;
         private readonly IUserRightStore _userRightStore;
 
-        public UserStore(IDynamoDBContext context, IIdGenerator idGenerator, User user, IUserRightStore userRightStore)
+        public UserStore(
+            User creator,
+            IDynamoDBContext context,
+            IIdGenerator idGenerator,
+            IUserRightStore userRightStore)
         {
+            _creator = creator;
             _context = context;
             _idGenerator = idGenerator;
-            _user = user;
             _userRightStore = userRightStore;
         }
 
         /// <summary>
-        ///     This method should only be external called when using the a trusted user through trusted code
-        ///     because it overrides the injected user from the context.
+        ///     <para>
+        ///         This method should only be external called when using the a trusted user through trusted code
+        ///         because it overrides the injected user from the context.
+        ///     </para>
+        ///     <para>
+        ///         If the user already exists, it just return that <see cref="User.Id" />.
+        ///     </para>
         /// </summary>
         /// <remarks>
-        ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
+        ///     KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User" />
         /// </remarks>
-        public async Task<string> Create(string creatorId,
+        /// <returns>Id of the new or existing user</returns>
+        public async Task<string> Create(
+            string ownerId,
             string resourceId,
             UserCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
         {
-            creatorId.ThrowArgumentExceptionIfNull("Need a user to do the creating");
+            ownerId.ThrowArgumentExceptionIfNull("Need a user to do the creating");
 
-            (await GetByExternalId(data.ExternalId))
-                .ThrowInvalidOperationExceptionIfNotNull("User already created");
+            if (await GetByExternalId(data.ExternalId) is User existingUser) return existingUser.Id;
 
-            // KLUDGE: both need to be injected
+            // KLUDGE: needs to be injected
             var now = DateTime.UtcNow;
 
             var newUser = new User
@@ -55,31 +65,45 @@ namespace Infrastructure.NoSQL
                 ExternalIds = new List<string> {data.ExternalId},
                 Email = data.Email,
                 Name = data.Name,
-                CreatedBy = creatorId,
+                CreatedBy = _creator.Id,
                 CreatedAt = now,
                 UpdatedAt = now
             };
 
-            Log.TraceFormat("New user {0} created by user {1}", newUser.Id, creatorId);
+            Log.TraceFormat("New user {0} created by user {1}", newUser.Id, ownerId);
 
             await _context.SaveAsync(newUser);
 
-            await _userRightStore.CreateRights(
-                newUser.Id,
-                newUser.Id,
-                RightType.User.MakeCreateRights(callerRights, callerCollectionRights),
-                new InheritForm
-                {
-                    Type = RightType.RootUserCollection,
-                    ResourceId = resourceId,
-                    InheritedTypes = new List<RightType>
-                    {
-                        RightType.User,
-                        RightType.UserTenantCollection,
-                        RightType.UserTodoCollection
-                    }
-                });
-
+            // create rights for new user and also the owner (if the owner if different)
+            await Task.WhenAll(
+                new List<string> {newUser.Id, ownerId}
+                    .Distinct()
+                    .Select(id => _userRightStore.CreateRights(
+                        id,
+                        newUser.Id,
+                        RightType.User.MakeCreateRights(callerRights, callerCollectionRights),
+                        new InheritForm
+                        {
+                            Type = RightType.RootUserCollection,
+                            ResourceId = resourceId,
+                            InheritedTypes = new List<RightType>
+                            {
+                                RightType.User,
+                                RightType.UserTenantCollection,
+                                RightType.UserTodoCollection
+                            },
+                            CopyInheritTypes = new List<RightType>
+                            {
+                                RightType.Todo,
+                                RightType.TodoTagCollection,
+                                RightType.TodoCommentCollection,
+                                //
+                                RightType.Tag,
+                                RightType.TodoTagCollection,
+                                //
+                                RightType.Comment
+                            }
+                        })));
 
             return newUser.Id;
         }
@@ -115,7 +139,7 @@ namespace Infrastructure.NoSQL
 
             updater(user);
             user.Id = id;
-            user.UpdateBy = _user.Id;
+            user.UpdateBy = _creator.Id;
             user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveAsync(user);
@@ -125,6 +149,8 @@ namespace Infrastructure.NoSQL
         {
             var user = await Get(id)
                 .ThrowObjectNotFoundExceptionIfNull();
+
+            // TODO: delete all rights
 
             await _context.DeleteAsync(user);
         }

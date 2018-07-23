@@ -17,8 +17,7 @@ namespace IntegrationTests
         [Fact]
         public async Task LoadTodo()
         {
-            var userId =  NewId();
-            Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
+
             var todoStore = Get<ITodoStore>();
 
 
@@ -34,8 +33,7 @@ namespace IntegrationTests
         [Fact]
         public async Task Tagging()
         {
-            var userId = NewId();
-            Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
+
             var todoStore = Get<ITodoStore>();
             var tagStore = Get<ITagStore>();
 

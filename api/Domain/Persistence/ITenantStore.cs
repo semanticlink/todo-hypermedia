@@ -8,9 +8,9 @@ namespace Domain.Persistence
     public interface ITenantStore
     {
         [Obsolete]
-        Task<string> Create(string creatorId, TenantCreateData data);
+        Task<string> Create(TenantCreateData data);
 
-        Task<string> Create(string creatorId,
+        Task<string> Create(string ownerid,
             string resourceId,
             TenantCreateData data,
             Permission callerRights,

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.IO;
+using Amazon.DynamoDBv2;
+using Amazon.Runtime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NLog;
 using Toolkit;
 
@@ -59,7 +62,7 @@ namespace Api.Web
                 //
                 // TODO: 
                 // TODO: Some usages of this exception relate to the server having 
-                // TODO: invalid ata, and some being due to the request having invalid 
+                // TODO: invalid data, and some being due to the request having invalid 
                 // TODO: data. All usages of this request should be investigated and fixed. 
                 // TODO:
                 // 409
@@ -69,6 +72,17 @@ namespace Api.Web
                     context.HttpContext.Request.Method,
                     context.HttpContext.Request.Path);
                 context.Result = ex.Message.MakeConflictResult();
+            }
+            else if (ex is AmazonServiceException)
+            {
+                var dbException = ex as AmazonServiceException;
+                
+                Log.ErrorExceptionFormat(
+                    ex,
+                    "DynamoDb exception not handled: {0} {1}, '{2}'",
+                    dbException.ErrorCode,
+                    dbException.ErrorType,
+                    dbException.Message );
             }
             else if (ex is SqlException)
             {

@@ -58,6 +58,10 @@ namespace Domain.Models
         //  ===
         //
 
+        /// <summary>
+        ///     A tag is a shared resource and as such at the moment
+        ///     it is open to everyone, so no perms are set
+        /// </summary>
         Tag = 500,
 
         [Description("Todos")] TagTodoCollection = 501,

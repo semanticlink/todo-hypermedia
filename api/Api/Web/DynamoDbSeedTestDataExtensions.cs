@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Api.Authorisation;
 using App;
+using Domain;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation.Enum;
@@ -46,23 +48,12 @@ namespace Api.Web
             // we have added 'Scoped' services, this will return the root scope with them attached
             using (var scope = app.CreateScope())
             {
-                var services = scope.ServiceProvider;
-                try
+                if (hostingEnvironment.IsDevelopment())
                 {
-                    if (hostingEnvironment.IsDevelopment())
-                    {
-                        Log.Info("[Seed] test data");
-                        Task.Run(() => services.SeedData()).GetAwaiter().GetResult();
-                    }
+                    Task.Run(() => scope.ServiceProvider.SeedData()).GetAwaiter().GetResult();
                 }
-                catch (Exception ex)
-                {
-                    Log.ErrorExceptionFormat(ex, "An error occurred while seeding the test data.");
-                }
-                finally
-                {
-                    Log.Debug("[Seed] test data complete");
-                }
+
+                Log.Debug("[Seed] test data complete");
             }
         }
 
@@ -74,18 +65,29 @@ namespace Api.Web
             /**
              * Get registered services.
              */
-            var tenantStore = services.GetRequiredService<ITenantStore>();
-            var userStore = services.GetRequiredService<IUserStore>();
-            var tagStore = services.GetRequiredService<ITagStore>();
-            var todoStore = services.GetRequiredService<ITodoStore>();
+            var context = services.GetRequiredService<IDynamoDBContext>();
+            var idGenerator = services.GetRequiredService<IIdGenerator>();
+            var userRightsStore = services.GetRequiredService<IUserRightStore>();
+
+            /**
+             * Setup the provisioning user
+             */
+            var provisioningUser = new User {Id = TrustDefaults.ProvisioningId};
+
+            /**
+             * Hand make up these because we want to inject the user with the provisioning user
+             */
+            var tenantStore = new TenantStore(provisioningUser, context, idGenerator, userRightsStore);
+            var userStore = new UserStore(provisioningUser, context, idGenerator, userRightsStore);
+            var tagStore = new TagStore(provisioningUser, context, idGenerator, userRightsStore);
+            var todoStore = new TodoStore(provisioningUser, context, idGenerator, userRightsStore, tagStore);
 
 
             // ensure the database is up and tables are created
-            var client = services.GetRequiredService<IAmazonDynamoDB>();
-            await client.WaitForAllTables();
+            await services.GetRequiredService<IAmazonDynamoDB>().WaitForAllTables();
 
 
-            Log.Info("[Seed] sample data");
+            Log.Info("[Seed] create sample data");
 
             //////////////////////////
             // Authentication
@@ -108,77 +110,55 @@ namespace Api.Web
             {
                 Email = "test@rewire.nz",
                 Name = "test",
-                ExternalId = "auth0|5b32b696a8c12d3b9a32b138"
+                ExternalId = knownAuth0Id
             };
 
-            string userId = "";
-            try
-            {
-                // TODO: this should be through the API front door
-                userId = await userStore.Create(
-                    TrustDefaults.KnownRootIdentifier,
-                    TrustDefaults.KnownHomeResourceId,
-                    userData,
-                    Permission.FullControl,
-                    CallerCollectionRights.User
-                );
-            }
-            catch (InvalidOperationException e)
-            {
-                userId = (await userStore.GetByExternalId(knownAuth0Id)).Id;
-            }
-            finally
-            {
-                Log.Info($"[Seed] user '{userId}'");
-            }
+            Log.Info($"[Seed] user {userData.Email}");
+
+            var userId = await userStore.Create(
+                TrustDefaults.KnownRootIdentifier,
+                TrustDefaults.KnownHomeResourceId,
+                userData,
+                Permission.FullControl | Permission.Owner,
+                CallerCollectionRights.User);
 
 
             //////////////////////////
             // Seed a tenant
             // =============
             //
+
             var tenantCreateData = new TenantCreateData
             {
                 Code = "rewire.example.nz",
                 Name = "Rewire NZ",
                 Description = "A sample tenant (company/organisation)"
             };
-            string tenantId = "";
-            try
-            {
-                tenantId = await tenantStore.Create(
-                    TrustDefaults.KnownRootIdentifier,
-                    TrustDefaults.KnownHomeResourceId,
-                    tenantCreateData,
-                    Permission.FullControl,
-                    CallerCollectionRights.Tenant);
 
-                Log.Info($"[Seed] created tenant '{tenantId}'");
-            }
-            catch (InvalidOperationException e)
-            {
-                Log.Debug("Tenant alredy exists");
+            Log.Info($"[Seed] tenant '{tenantCreateData.Code}'");
 
-                tenantId = (await tenantStore.GetByCode(tenantCreateData.Code)).Id;
-            }
+            var tenantId = await tenantStore.Create(
+                TrustDefaults.KnownRootIdentifier,
+                TrustDefaults.KnownHomeResourceId,
+                tenantCreateData,
+                Permission.FullControl | Permission.Owner,
+                CallerCollectionRights.Tenant);
+
 
             //////////////////////////
             // Add user to tenant
             // ==================
             //
-            try
+            if (!await tenantStore.IsRegisteredOnTenant(tenantId, userId))
             {
-                if (!await tenantStore.IsRegisteredOnTenant(tenantId, userId))
-                {
-                    await tenantStore.IncludeUser(tenantId, userId, Permission.Get, CallerCollectionRights.Tenant);
-                }
+                await tenantStore.IncludeUser(
+                    tenantId,
+                    userId,
+                    Permission.Get | Permission.Owner,
+                    CallerCollectionRights.Tenant);
+            }
 
-                Log.Info($"[Seed] registered user against tenant '{tenantId}'");
-            }
-            catch (Exception e)
-            {
-                Log.ErrorExceptionFormat(e, "");
-            }
+            Log.Info($"[Seed] registered user '{userData.Email}' against tenant '{tenantCreateData.Code}'");
 
             //////////////////////////
             // Seed global tags
@@ -186,64 +166,50 @@ namespace Api.Web
             //
             // create some global tags
             //
-            List<string> tagIds = new List<string>();
-            try
-            {
-                tagIds = (await Task.WhenAll(
-                        new[] {"Work", "Personal", "Grocery List"}
-                            .Select(tag => tagStore.Create(
-                                userId,
-                                TrustDefaults.KnownHomeResourceId,
-                                new TagCreateData {Name = tag},
-                                Permission.Get,
-                                CallerCollectionRights.Tag)
-                            )))
-                    .Where(result => result != null)
-                    .ToList();
-                Log.InfoFormat("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
-            }
-            catch (Exception e)
-            {
-                Log.ErrorExceptionFormat(e, "Error creating global tags");
-            }
+            var tagIds = (await Task.WhenAll(
+                    new[] {"Work", "Personal", "Grocery List"}
+                        .Select(tag => tagStore.Create(
+                            userId,
+                            TrustDefaults.KnownHomeResourceId,
+                            new TagCreateData {Name = tag},
+                            Permission.Get,
+                            CallerCollectionRights.Tag)
+                        )))
+                .Where(result => result != null)
+                .ToList();
+
+            Log.InfoFormat("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
 
             //////////////////////////
             // Seed some todos
             // =============
             //
 
-            try
+            var createTodoDatas = new List<TodoCreateData>
             {
-                var createTodoDatas = new List<TodoCreateData>
+                new TodoCreateData {Name = "One Todo"},
+                new TodoCreateData
                 {
-                    new TodoCreateData {Name = "One Todo"},
-                    new TodoCreateData
-                    {
-                        Name = "Two Todo (tag)",
-                        Tags = new List<string> {tagIds.First()},
-                        State = TodoState.Complete
-                    },
-                    new TodoCreateData
-                    {
-                        Name = "Three Todo (tagged)",
-                        Tags = tagIds
-                    }
-                };
+                    Name = "Two Todo (tag)",
+                    Tags = new List<string> {tagIds.First()},
+                    State = TodoState.Complete
+                },
+                new TodoCreateData
+                {
+                    Name = "Three Todo (tagged)",
+                    Tags = tagIds
+                }
+            };
 
-                var ids = await Task.WhenAll(createTodoDatas
-                    .Select(data => todoStore.Create(
-                        userId,
-                        data,
-                        Permission.FullControl,
-                        CallerCollectionRights.Todo)));
+            var ids = await Task.WhenAll(createTodoDatas
+                .Select(data => todoStore.Create(
+                    userId,
+                    data,
+                    Permission.FullControl | Permission.Owner,
+                    CallerCollectionRights.Todo)));
 
 
-                Log.InfoFormat("[Seed] todos: [{0}]", ids.ToCsvString(id => id));
-            }
-            catch (Exception e)
-            {
-                Log.ErrorExceptionFormat(e, "Error creating tooos");
-            }
+            Log.InfoFormat("[Seed] todos: [{0}]", ids.ToCsvString(id => id));
         }
     }
 }

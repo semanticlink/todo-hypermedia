@@ -16,24 +16,31 @@ namespace Infrastructure.NoSQL
     {
         private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
         private readonly IDynamoDBContext _context;
+        private readonly User _creator;
         private readonly IIdGenerator _idGenerator;
         private readonly IUserRightStore _userRightStore;
 
-        public TenantStore(IDynamoDBContext context, IIdGenerator idGenerator, IUserRightStore userRightStore)
+        public TenantStore(
+            User creator,
+            IDynamoDBContext context,
+            IIdGenerator idGenerator,
+            IUserRightStore userRightStore)
         {
+            _creator = creator;
             _context = context;
             _idGenerator = idGenerator;
             _userRightStore = userRightStore;
         }
 
-        public async Task<string> Create(string creatorId, TenantCreateData data)
+        public async Task<string> Create(TenantCreateData data)
         {
             data.Code.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Code cannot be empty");
 
-            (await GetByCode(data.Code))
-                .ThrowInvalidOperationExceptionIf(
-                    t => t.IsNotNull() && !t.Id.IsNullOrWhitespace(),
-                    $"Tenant with code '{data.Code}' aleady exists");
+            if (await GetByCode(data.Code) is Tenant t)
+            {
+                Log.Debug($"Already exists tenant: '{t.Code}'");
+                return t.Id;
+            }
 
             var now = DateTime.UtcNow;
 
@@ -43,29 +50,29 @@ namespace Infrastructure.NoSQL
                 Name = data.Name,
                 Code = data.Code,
                 Description = data.Description,
-                CreatedBy = creatorId,
+                CreatedBy = _creator.Id,
                 CreatedAt = now,
                 UpdatedAt = now
             };
 
             await _context.SaveAsync(tenant);
 
-            Log.TraceFormat("New tenant {0} created by user {1}", tenant.Id, creatorId);
+            Log.TraceFormat("New tenant {0} created by user {1}", tenant.Id, _creator.Id);
 
             return tenant.Id;
         }
 
         public async Task<string> Create(
-            string creatorId,
+            string ownerid,
             string resourceId,
             TenantCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
         {
-            var tenantId = await Create(creatorId, data);
+            var tenantId = await Create(data);
 
             await _userRightStore.CreateRights(
-                creatorId,
+                ownerid,
                 tenantId,
                 RightType.User.MakeCreateRights(callerRights, callerCollectionRights),
                 new InheritForm
@@ -110,11 +117,11 @@ namespace Infrastructure.NoSQL
         {
             id.ThrowInvalidDataExceptionIfNullOrWhiteSpace("Id cannot be empty");
             userId.ThrowInvalidDataExceptionIfNullOrWhiteSpace("User id cannot be empty");
-            
+
             return (await _context.Where<Tenant>(new List<ScanCondition>
                 {
                     new ScanCondition(nameof(Tenant.Id), ScanOperator.Equal, id),
-                    new ScanCondition(nameof(Tenant.User), ScanOperator.Contains, userId),
+                    new ScanCondition(nameof(Tenant.User), ScanOperator.Contains, userId)
                 }))
                 .ToList()
                 .Any();
@@ -154,10 +161,7 @@ namespace Infrastructure.NoSQL
         {
             await Update(id, tenant =>
             {
-                if (tenant.User.IsNotNull())
-                {
-                    tenant.User.Remove(userId);
-                }
+                if (tenant.User.IsNotNull()) tenant.User.Remove(userId);
             });
 
             await _userRightStore.RemoveRight(userId, id, RightType.Tenant);

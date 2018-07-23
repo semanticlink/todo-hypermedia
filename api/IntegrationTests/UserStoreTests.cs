@@ -18,7 +18,6 @@ namespace IntegrationTests
         [Fact]
         public async Task LoadUser()
         {
-            RegisterUser();
             var userStore = Get<IUserStore>();
 
             var identityId = "auth0|349874545";

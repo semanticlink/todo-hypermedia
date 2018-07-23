@@ -31,11 +31,7 @@ namespace Infrastructure.NoSQL
         {
             var userRight = await Get(userId, resourceId, type);
 
-            if (userRight.IsNotNull())
-            {
-                // TODO: is this actually an update?
-                return userRight.Id;
-            }
+            if (userRight.IsNotNull()) return userRight.Id;
 
             var id = _idGenerator.New();
 
@@ -69,10 +65,7 @@ namespace Infrastructure.NoSQL
         {
             var inheritRight = await GetInherit(userId, resourceId, rightType);
 
-            if (inheritRight.IsNotNull())
-            {
-                return inheritRight.Id;
-            }
+            if (inheritRight.IsNotNull()) return inheritRight.Id;
 
             var id = _idGenerator.New();
 
@@ -100,10 +93,7 @@ namespace Infrastructure.NoSQL
             Log.DebugFormat("Creating rights on resource {0} for user {1}", resourceId, userId);
 
             // Add the new explicitly granted rights (for the user)
-            foreach (var right in granted)
-            {
-                await SetRight(userId, resourceId, right.Key, right.Value);
-            }
+            foreach (var right in granted) await SetRight(userId, resourceId, right.Key, right.Value);
 
             // now deal with the inherit rights (for all users)
             if (resource != null)
@@ -134,7 +124,6 @@ namespace Infrastructure.NoSQL
                 // CopyInheritTypes
 
                 if (resource.CopyInheritTypes != null)
-                {
                     foreach (var copyInheritType in resource.CopyInheritTypes)
                     {
                         var inheritRights = await GetInheritRights(resource.Type, resource.ResourceId, copyInheritType);
@@ -157,7 +146,6 @@ namespace Infrastructure.NoSQL
                                 right.Rights | Permission.None);
                         }
                     }
-                }
             }
         }
 
@@ -192,7 +180,7 @@ namespace Infrastructure.NoSQL
             {
                 new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId),
                 new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId),
-                new ScanCondition(nameof(UserRight.Type), ScanOperator.Equal, type),
+                new ScanCondition(nameof(UserRight.Type), ScanOperator.Equal, type)
             });
 
             Log.TraceFormat(
@@ -210,7 +198,7 @@ namespace Infrastructure.NoSQL
             await _dbContext.Delete<UserRight>(new List<ScanCondition>
             {
                 new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId),
-                new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId),
+                new ScanCondition(nameof(UserRight.ResourceId), ScanOperator.Equal, resourceId)
             });
 
             Log.TraceFormat(

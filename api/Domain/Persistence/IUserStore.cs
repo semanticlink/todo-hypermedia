@@ -14,13 +14,13 @@ namespace Domain.Persistence
         /// <remarks>
         ///    KLUDGE: this is easier than trying to reset the constructor inject of <see cref="User"/>
         /// </remarks>
-        /// <param name="creatorId">User id that is creating a user. This should be the root user</param>
+        /// <param name="ownerId">User id that is creating a user. This should be the root user</param>
         /// <param name="resourceId">Id of the resource to have user rights against</param>
         /// <param name="data">The new user to be created</param>
         /// <param name="callerRights"></param>
         /// <param name="callerCollectionRights"></param>
-        /// <returns></returns>
-        Task<string> Create(string creatorId,
+        Task<string> Create(
+            string ownerId,
             string resourceId,
             UserCreateData data,
             Permission callerRights,

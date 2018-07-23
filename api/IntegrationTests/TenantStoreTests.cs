@@ -23,7 +23,7 @@ namespace IntegrationTests
                 Name = "baba",
                 Description = "new one"
             };
-            return await store.Create(TrustDefaults.ProvisioningId, tenantCreateData);
+            return await store.Create(tenantCreateData);
         };
 
         [Fact]
