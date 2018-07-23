@@ -61,12 +61,12 @@ namespace IntegrationTests
             // Results
             //  - find number of user rights and inherited rights
             //  - then, would the user be granted access?
-            var userRights = await Context.ScanAsync<UserRight>(new List<ScanCondition>
+            var userRights = await Db.ScanAsync<UserRight>(new List<ScanCondition>
                 {
                     new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId)
                 })
                 .GetRemainingAsync();
-            var userInheritRights = await Context.ScanAsync<UserInheritRight>(new List<ScanCondition>
+            var userInheritRights = await Db.ScanAsync<UserInheritRight>(new List<ScanCondition>
                 {
                     new ScanCondition(nameof(UserInheritRight.UserId), ScanOperator.Equal, userId)
                 })
@@ -80,10 +80,10 @@ namespace IntegrationTests
             Assert.Equal(allow, resourceRights.IsAllowed(requiredPermission));
 
             // Clean up
-            await Task.WhenAll(userRights.Select(right => Context.DeleteAsync<UserRight>(right.Id)));
+            await Task.WhenAll(userRights.Select(right => Db.DeleteAsync<UserRight>(right.Id)));
             await Task.WhenAll(userInheritRights.Select(right =>
-                Context.DeleteAsync<UserInheritRight>(right.Id)));
-            await Context.DeleteAsync<Todo>(todoId);
+                Db.DeleteAsync<UserInheritRight>(right.Id)));
+            await Db.DeleteAsync<Todo>(todoId);
         }
     }
 }

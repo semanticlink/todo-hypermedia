@@ -58,7 +58,25 @@ namespace Infrastructure.NoSQL
             return tagId;
         }
 
-        public async Task<string> Create(TagCreateData data)
+
+        public async Task<Tag> Get(string id)
+        {
+            return await _context.FirstOrDefault<Tag>(id);
+        }
+
+        public async Task<IEnumerable<Tag>> Get(List<string> ids)
+        {
+            return ids.IsNullOrEmpty()
+                ? new List<Tag>()
+                : await _context.WhereByIds<Tag>(ids);
+        }
+
+        public async Task<IEnumerable<Tag>> GetAll()
+        {
+            return await _context.Where<Tag>();
+        }
+
+        private async Task<string> Create(TagCreateData data)
         {
             var tags = await _context.Where<Tag>(nameof(Tag.Name), data.Name);
 
@@ -80,24 +98,6 @@ namespace Infrastructure.NoSQL
             Log.DebugFormat("New tag {0} created by user {1}", create.Id, _userId);
 
             return create.Id;
-        }
-
-
-        public async Task<Tag> Get(string id)
-        {
-            return await _context.FirstOrDefault<Tag>(id);
-        }
-
-        public async Task<IEnumerable<Tag>> Get(List<string> ids)
-        {
-            return ids.IsNullOrEmpty()
-                ? new List<Tag>()
-                : await _context.WhereByIds<Tag>(ids);
-        }
-
-        public async Task<IEnumerable<Tag>> GetAll()
-        {
-            return await _context.Where<Tag>();
         }
 
         public async Task Delete(string id)

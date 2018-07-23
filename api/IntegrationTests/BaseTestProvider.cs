@@ -97,7 +97,7 @@ namespace IntegrationTests
             return ServiceProvider.GetService<IIdGenerator>().New();
         }
 
-        protected IDynamoDBContext Context => ServiceProvider.GetService<IDynamoDBContext>();
+        protected IDynamoDBContext Db => ServiceProvider.GetService<IDynamoDBContext>();
 
 
         public void Dispose()

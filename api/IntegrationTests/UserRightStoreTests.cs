@@ -27,7 +27,7 @@ namespace IntegrationTests
 
             Assert.Equal(Permission.Get, userRights.Rights);
             Assert.Equal(RightType.Todo, userRights.Type);
-            await Context.DeleteAsync<UserRight>(id);
+            await Db.DeleteAsync<UserRight>(id);
         }
 
         [Fact]

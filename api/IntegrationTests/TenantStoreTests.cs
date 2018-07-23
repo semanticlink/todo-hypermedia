@@ -37,7 +37,7 @@ namespace IntegrationTests
             Assert.Equal("baba", tenant.Name);
             Assert.Equal("new one", tenant.Description);
 
-            await Context.DeleteAsync<Tenant>(id);
+            await Db.DeleteAsync<Tenant>(id);
         }
 
         [Fact]
@@ -61,7 +61,7 @@ namespace IntegrationTests
             tenant = await tenantStore.Get(id);
             Assert.DoesNotContain(userId, tenant.User ?? new List<string>());
 
-            await Context.DeleteAsync<Tenant>(id);
+            await Db.DeleteAsync<Tenant>(id);
         }
     }
 }

@@ -17,13 +17,18 @@ namespace IntegrationTests
         {
             var tagStore = Get<ITagStore>();
 
-            var id = await tagStore.Create(new TagCreateData {Name = "working"});
+            var id = await tagStore.Create(
+                UserId,
+                NewId(),
+                new TagCreateData {Name = "working"},
+                Permission.AllAccess,
+                null);
 
             var tag = await tagStore.Get(id);
 
             Assert.Equal("working", tag.Name);
 
-            await tagStore.Delete(id);
+            await Db.DeleteAsync<Tag>(id);
         }
     }
 }

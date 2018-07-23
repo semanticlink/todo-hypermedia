@@ -17,7 +17,6 @@ namespace IntegrationTests
         [Fact]
         public async Task LoadTodo()
         {
-
             var todoStore = Get<ITodoStore>();
 
 
@@ -33,14 +32,18 @@ namespace IntegrationTests
         [Fact]
         public async Task Tagging()
         {
-
             var todoStore = Get<ITodoStore>();
             var tagStore = Get<ITagStore>();
 
 
             var s = await Task
                 .WhenAll(new[] {"Work", "Play"}
-                    .Select(async tag => await tagStore.Create(new TagCreateData {Name = tag})));
+                    .Select(async tag => await tagStore.Create(
+                        UserId,
+                        NewId(),
+                        new TagCreateData {Name = tag},
+                        Permission.AllAccess,
+                        null)));
 
             var tagIds = s
                 .Where(result => result != null)
@@ -55,7 +58,7 @@ namespace IntegrationTests
 
             tagIds.ForEach(tag => Assert.Contains(tag, todo.Tags));
 
-            await Task.WhenAll(tagIds.Select(tag => tagStore.Delete(tag)));
+            await Task.WhenAll(tagIds.Select(tag => Db.DeleteAsync<Tag>(tag)));
 
             await todoStore.Delete(id);
         }
