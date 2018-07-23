@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using App;
+using Api.Authorisation;
 using Domain.Models;
 using Domain.Persistence;
 using Xunit;
@@ -13,24 +13,27 @@ namespace IntegrationTests
     {
         public TenantTestProviderTests(ITestOutputHelper output) : base(output)
         {
-        }
-
-        private readonly Func<ITenantStore, Task<string>> Create = async store =>
-        {
-            var tenantCreateData = new TenantCreateData
+            _tenantCreateData = new TenantCreateData
             {
                 Code = "test.rewire.nz",
                 Name = "baba",
                 Description = "new one"
             };
-            return await store.Create(tenantCreateData);
-        };
+        }
+
+        private readonly TenantCreateData _tenantCreateData;
 
         [Fact]
         public async Task LoadTenant()
         {
             var tenantStore = Get<ITenantStore>();
-            var id = await Create(tenantStore);
+            var id = await tenantStore.Create(
+                UserId,
+                NewId(),
+                _tenantCreateData,
+                Permission.AllAccess,
+                CallerCollectionRights.Tenant);
+
             var tenant = await tenantStore.Get(id);
 
             Assert.Equal("test.rewire.nz", tenant.Code);
@@ -44,15 +47,22 @@ namespace IntegrationTests
         public async Task UserRemoveUser()
         {
             var tenantStore = Get<ITenantStore>();
-            var id = await Create(tenantStore);
+            var id = await tenantStore.Create(
+                UserId,
+                NewId(),
+                _tenantCreateData,
+                Permission.AllAccess,
+                CallerCollectionRights.Tenant);
+
             var tenant = await tenantStore.Get(id);
 
             // default is an empty list of users
             Assert.Empty(tenant.User ?? new List<string>());
 
             // add a user
-            var userId = Guid.NewGuid().ToString();
-            await tenantStore.IncludeUser(id, userId);
+            var userId = NewId();
+            await tenantStore.IncludeUser(id, userId, Permission.AllAccess, null);
+            
             tenant = await tenantStore.Get(id);
             Assert.Contains(userId, tenant.User);
 

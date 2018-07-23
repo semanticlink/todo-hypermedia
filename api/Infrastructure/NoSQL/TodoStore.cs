@@ -36,7 +36,7 @@ namespace Infrastructure.NoSQL
             _creatorId = creator.Id;
         }
 
-        public async Task<string> Create(TodoCreateData data)
+        private async Task<string> Create(TodoCreateData data)
         {
             var todo = new Todo
             {

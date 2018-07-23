@@ -7,14 +7,7 @@ namespace Domain.Persistence
 {
     public interface ITodoStore
     {
-        /// <summary>
-        ///     Create a new <see cref="Todo"/>. Any <see cref="Todo.Tags"/> have each <see cref="Tag.Count"/> incremented on the
-        ///     global collection.
-        /// </summary>
-        /// <param name="data"></param>
-        [Obsolete]
-        Task<string> Create(TodoCreateData data);
-
+ 
         Task<string> Create(
             string contextResourceId,
             TodoCreateData data,

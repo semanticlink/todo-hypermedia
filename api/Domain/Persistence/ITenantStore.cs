@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Models;
 
@@ -7,10 +6,8 @@ namespace Domain.Persistence
 {
     public interface ITenantStore
     {
-        [Obsolete]
-        Task<string> Create(TenantCreateData data);
-
-        Task<string> Create(string ownerid,
+        Task<string> Create(
+            string ownerId,
             string resourceId,
             TenantCreateData data,
             Permission callerRights,
@@ -28,19 +25,11 @@ namespace Domain.Persistence
         /// <param name="userId">User id</param>
         Task<bool> IsRegisteredOnTenant(string id, string userId);
 
-        /// <summary>
-        ///     Add a user to a tenant, if the tenant exists.
-        /// </summary>
-        /// <param name="id">Tenant to get the new user</param>
-        /// <param name="userId">User to be added</param>
-        /// <returns></returns>
-        [Obsolete]
-        Task IncludeUser(string id, string userId);
 
         /// <summary>
         ///     Add a user to a tenant, if the tenant exists.
         /// </summary>
-        /// <param name="id">Tenant to get the new user</param>
+        /// <param name="id">Tenant id</param>
         /// <param name="userId">User to be added</param>
         /// <param name="callerRights"></param>
         /// <param name="callerCollectionRights"></param>

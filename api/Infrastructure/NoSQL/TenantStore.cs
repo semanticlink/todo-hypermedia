@@ -63,7 +63,7 @@ namespace Infrastructure.NoSQL
         }
 
         public async Task<string> Create(
-            string ownerid,
+            string ownerId,
             string resourceId,
             TenantCreateData data,
             Permission callerRights,
@@ -72,7 +72,7 @@ namespace Infrastructure.NoSQL
             var tenantId = await Create(data);
 
             await _userRightStore.CreateRights(
-                ownerid,
+                ownerId,
                 tenantId,
                 RightType.User.MakeCreateRights(callerRights, callerCollectionRights),
                 new InheritForm
@@ -127,7 +127,7 @@ namespace Infrastructure.NoSQL
                 .Any();
         }
 
-        public async Task IncludeUser(string id, string userId)
+        private async Task IncludeUser(string id, string userId)
         {
             await Update(id, tenant =>
             {

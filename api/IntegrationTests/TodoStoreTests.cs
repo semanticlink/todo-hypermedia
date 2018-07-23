@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Api.Authorisation;
 using Domain.Models;
 using Domain.Persistence;
-using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,8 +19,11 @@ namespace IntegrationTests
         {
             var todoStore = Get<ITodoStore>();
 
-
-            var id = await todoStore.Create(new TodoCreateData {Name = "baba"});
+            var id = await todoStore.Create(
+                NewId(),
+                new TodoCreateData {Name = "baba"},
+                Permission.AllAccess,
+                CallerCollectionRights.Todo);
 
             var todo = await todoStore.Get(id);
 
@@ -35,22 +38,23 @@ namespace IntegrationTests
             var todoStore = Get<ITodoStore>();
             var tagStore = Get<ITagStore>();
 
-
-            var s = await Task
-                .WhenAll(new[] {"Work", "Play"}
-                    .Select(async tag => await tagStore.Create(
-                        UserId,
-                        NewId(),
-                        new TagCreateData {Name = tag},
-                        Permission.AllAccess,
-                        null)));
-
-            var tagIds = s
+            var tagIds = (await Task
+                    .WhenAll(new[] {"Work", "Play"}
+                        .Select(async tag => await tagStore.Create(
+                            UserId,
+                            NewId(),
+                            new TagCreateData {Name = tag},
+                            Permission.AllAccess,
+                            CallerCollectionRights.Tag))))
                 .Where(result => result != null)
                 .ToList();
 
 
-            var id = await todoStore.Create(new TodoCreateData {Name = "Todo with tags", Tags = tagIds});
+            var id = await todoStore.Create(
+                NewId(),
+                new TodoCreateData {Name = "Todo with tags", Tags = tagIds},
+                Permission.AllAccess,
+                CallerCollectionRights.Todo);
 
             var todo = await todoStore.Get(id);
 
@@ -58,9 +62,8 @@ namespace IntegrationTests
 
             tagIds.ForEach(tag => Assert.Contains(tag, todo.Tags));
 
-            await Task.WhenAll(tagIds.Select(tag => Db.DeleteAsync<Tag>(tag)));
-
             await todoStore.Delete(id);
+            await Task.WhenAll(tagIds.Select(tag => Db.DeleteAsync<Tag>(tag)));
         }
     }
 }
