@@ -209,11 +209,11 @@
                         }
 
                     })
-                    .catch(/** @type {AxiosResponse} */response => {
+                    .catch(/** @type {AxiosResponse|string} */response => {
                         if (this.onFailure) {
                             this.onFailure(response)
                         } else {
-                            this.$notify({text: response.statusText, type: 'error'});
+                            this.$notify({text: response.statusText || response, type: 'error'});
                         }
 
                     });

@@ -60,15 +60,16 @@ export default class FormService {
      * @param {*} data
      * @param {FormRepresentation}form
      * @param {CollectionRepresentation} collection
+     * @param {string} mediaType
      * @returns {Promise<AxiosResponse<any>>}
      */
-    static submitForm(data, form, collection) {
+    static submitForm(data, form, collection, mediaType) {
         /**
          * A form will POST if there is a submit link rel
          * A form will PUT if no submit
          * A form will override above if a method is specified
          * @param {FormRepresentation} form
-         * @return {string}
+         * @return {Function} semantic link function type
          **/
         function verb(form) {
             const [weblink] = filter(form, /^submit$/);
@@ -93,7 +94,7 @@ export default class FormService {
         const putOrPost = verb(form);
         const obj = pickFieldsFromForm(data, form);
 
-        return putOrPost(links, rel, 'application/json', obj);
+        return putOrPost(links, rel, mediaType, obj);
     }
 
     /**
