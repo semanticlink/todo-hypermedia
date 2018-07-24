@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTests", "Integra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroTests", "MicroTests\MicroTests.csproj", "{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcceptanceTests", "AcceptanceTests\AcceptanceTests.csproj", "{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,5 +56,9 @@ Global
 		{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24C2A422-5D53-4305-9C3D-DDF9C7A3ACC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
