@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
@@ -11,6 +12,7 @@ using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using Toolkit;
 
 namespace Api.Web
 {
@@ -74,11 +76,12 @@ namespace Api.Web
             /**
              * Hand make up these because we want to inject the user with the provisioning user
              */
+            var userRightStore = services.GetRequiredService<IUserRightStore>();
             var userStore = new UserStore(
                 new User {Id = TrustDefaults.ProvisioningId},
                 services.GetRequiredService<IDynamoDBContext>(),
                 services.GetRequiredService<IIdGenerator>(),
-                services.GetRequiredService<IUserRightStore>());
+                userRightStore);
 
 
             // TODO: get from configuration
@@ -89,19 +92,48 @@ namespace Api.Web
                 ExternalId = TrustDefaults.KnownRootIdentifier
             };
 
-            await userStore.Create(
-                rootUserCreateData.ExternalId,
-                TrustDefaults.KnownHomeResourceId,
-                rootUserCreateData,
-                Permission.ControlAccess | Permission.Get | Permission.Owner,
-                new Dictionary<RightType, Permission>
-                {
-                    {RightType.Root, Permission.ControlAccess | Permission.Get},
-                    {RightType.RootTenantCollection, Permission.ControlAccess | Permission.Get},
-                    {RightType.RootUserCollection, Permission.FullControl},
-                });
+            if ((await userStore.GetByExternalId(rootUserCreateData.ExternalId)).IsNull())
+            {
+                // creat a user with explicit rights
+                var rootId = await userStore.Create(
+                    null, // skyhook
+                    TrustDefaults.KnownHomeResourceId,
+                    rootUserCreateData,
+                    Permission.ControlAccess | Permission.Get | Permission.Owner,
+                    new Dictionary<RightType, Permission>
+                    {
+                        {RightType.Root, Permission.ControlAccess | Permission.Get},
+                        {RightType.RootTenantCollection, Permission.ControlAccess | Permission.Get},
+                        {RightType.RootUserCollection, Permission.FullControl},
+                    });
 
-            Log.Info("[Seed] service user '{0}'", rootUserCreateData.ExternalId);
+                // now set template rights for when new users 'RootUserCollection' are created on the root resource
+                var inheritRights = new Dictionary<RightType, Permission>
+                {
+                    {RightType.Todo, Permission.CreatorOwner},
+                    {RightType.TodoTagCollection, Permission.AllAccess},
+                    {RightType.TodoCommentCollection, Permission.AllAccess},
+                    //
+                    {RightType.Tag, Permission.Get},
+                    //
+                    {RightType.Comment, Permission.FullControl},
+                };
+
+                await Task.WhenAll(inheritRights.Select(right =>
+                    userRightStore.SetInherit(
+                        RightType.RootUserCollection,
+                        rootId,
+                        TrustDefaults.KnownHomeResourceId,
+                        right.Key,
+                        right.Value)
+                ));
+                
+                Log.Info("[Seed] service user '{0}'", rootUserCreateData.ExternalId);
+            }
+            else
+            {
+                Log.Info("[Seed] service user already exists");
+            }
         }
     }
 }

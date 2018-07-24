@@ -57,7 +57,7 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(tenant);
 
-            Log.TraceFormat("New tenant {0} created by user {1}", tenant.Id, _creator.Id);
+            Log.TraceFormat("New tenant {0} '{1}' created by user {1}", tenant.Id, tenant.Code, _creator.Id);
 
             return tenant.Id;
         }

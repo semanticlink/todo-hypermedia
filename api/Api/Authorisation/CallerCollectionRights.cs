@@ -9,18 +9,25 @@ namespace Api.Authorisation
     /// </summary>
     /// <remarks>
     ///    Currently, these are here because they are shared between <see cref="DynamoDbSeedTestDataExtensions"/> which
-    ///     seed test data and the controllers (where it should be exculsively).
+    ///     seed test data and the controllers (where it should be exclusively).
     /// </remarks>
     public static class CallerCollectionRights
     {
+        /// <summary>
+        ///     This template/profile for the creation of a user in the context of the root user
+        /// </summary>
         public static readonly IDictionary<RightType, Permission> User = new Dictionary<RightType, Permission>
         {
             {RightType.RootUserCollection, Permission.Get},
             {RightType.RootTagCollection, Permission.Get | Permission.Post},
+            //
             {RightType.UserTodoCollection, Permission.FullControl},
+            //
             {RightType.TenantUserCollection, Permission.Get | Permission.Post},
+            //
             {RightType.TodoCommentCollection, Permission.FullControl},
             {RightType.TodoTagCollection, Permission.FullControl},
+            //
             {RightType.TagTodoCollection, Permission.FullControl},
         };
 
@@ -28,6 +35,7 @@ namespace Api.Authorisation
         {
             {RightType.RootTenantCollection, Permission.Get},
             {RightType.RootUserCollection, Permission.FullControl},
+            //
             {RightType.TenantUserCollection, Permission.Get | Permission.Post},
         };
 
@@ -40,6 +48,7 @@ namespace Api.Authorisation
         public static readonly IDictionary<RightType, Permission> Tag = new Dictionary<RightType, Permission>
         {
             {RightType.TodoTagCollection, Permission.Get | Permission.Patch},
+            //
             {RightType.TagTodoCollection, Permission.Get | Permission.Patch},
         };
 

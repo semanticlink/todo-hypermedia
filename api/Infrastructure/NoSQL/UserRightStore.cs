@@ -78,6 +78,14 @@ namespace Infrastructure.NoSQL
                 Type = rightType,
                 InheritType = inheritType
             };
+            
+            Log.TraceFormat(
+                "Create inherit right: user {0} to [{1:G},{2}] => rights {3:X} ({3:G}) inhert [{4:G}]",
+                userId,
+                rightType,
+                resourceId,
+                permission,
+                inheritType);
 
             await _dbContext.SaveAsync(inheritRight);
 
@@ -122,7 +130,6 @@ namespace Infrastructure.NoSQL
                 }
 
                 // CopyInheritTypes
-
                 if (resource.CopyInheritTypes != null)
                     foreach (var copyInheritType in resource.CopyInheritTypes)
                     {
@@ -161,6 +168,9 @@ namespace Infrastructure.NoSQL
 
         public async Task<UserRight> Get(string userId, string resourceId, RightType type)
         {
+            userId.ThrowArgumentExceptionIfNull(nameof(userId), "Cannot be empty");
+            userId.ThrowArgumentExceptionIfNull(nameof(resourceId), "Cannot be empty");
+            
             return await Get<UserRight>(userId, resourceId, type);
         }
 

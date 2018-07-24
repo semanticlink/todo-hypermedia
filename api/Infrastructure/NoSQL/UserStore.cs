@@ -52,7 +52,6 @@ namespace Infrastructure.NoSQL
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
         {
-            ownerId.ThrowArgumentExceptionIfNull("Need a user to do the creating");
 
             if (await GetByExternalId(data.ExternalId) is User existingUser) return existingUser.Id;
 
@@ -70,13 +69,14 @@ namespace Infrastructure.NoSQL
                 UpdatedAt = now
             };
 
-            Log.TraceFormat("New user {0} created by user {1}", newUser.Id, ownerId);
+            Log.TraceFormat("New user {0} '{1}' created by user {1}", newUser.Id, newUser.Email, ownerId);
 
             await _context.SaveAsync(newUser);
 
             // create rights for new user and also the owner (if the owner if different)
             await Task.WhenAll(
                 new List<string> {newUser.Id, ownerId}
+                    .Where(x => !x.IsNullOrWhitespace())
                     .Distinct()
                     .Select(id => _userRightStore.CreateRights(
                         id,
@@ -99,7 +99,6 @@ namespace Infrastructure.NoSQL
                                 RightType.TodoCommentCollection,
                                 //
                                 RightType.Tag,
-                                RightType.TodoTagCollection,
                                 //
                                 RightType.Comment
                             }
