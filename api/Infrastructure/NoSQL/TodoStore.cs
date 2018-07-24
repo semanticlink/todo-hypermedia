@@ -52,12 +52,13 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(todo);
 
-            Log.DebugFormat("New todo {0} by user {1}", todo.Id, _creatorId);
+            Log.DebugFormat("New todo {0} for user {1} by user {1}", todo.Id, _creatorId);
 
             return todo.Id;
         }
 
         public async Task<string> Create(
+            string ownerId, 
             string contextResourceId,
             TodoCreateData data,
             Permission callerRights,
@@ -69,7 +70,7 @@ namespace Infrastructure.NoSQL
             // which in this case is a user.
             // KLUDGE : take out. This is only here because of seed data
             await _userRightStore.CreateRights(
-                !_creatorId.IsNullOrWhitespace() ? _creatorId : contextResourceId,
+                ownerId,
                 todoId,
                 RightType.Todo.MakeCreateRights(callerRights, callerCollectionRights),
                 new InheritForm

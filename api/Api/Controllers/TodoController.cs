@@ -50,8 +50,10 @@ namespace Api.Controllers
         [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data)
         {
+            var userId = User.GetIdentityId();
             return (await _todoStore.Create(
-                    User.GetIdentityId(),
+                    userId, 
+                    userId, // context is the userId
                     data
                         .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
                         .FromRepresentation(Url),

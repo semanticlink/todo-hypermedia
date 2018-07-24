@@ -8,8 +8,7 @@ namespace Domain.Persistence
     public interface ITodoStore
     {
  
-        Task<string> Create(
-            string contextResourceId,
+        Task<string> Create(string ownerId, string contextResourceId,
             TodoCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights);

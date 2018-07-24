@@ -69,7 +69,7 @@ namespace Infrastructure.NoSQL
                 UpdatedAt = now
             };
 
-            Log.TraceFormat("New user {0} '{1}' created by user {1}", newUser.Id, newUser.Email, ownerId);
+            Log.TraceFormat("New user {0} '{1}' created by user {2}", newUser.Id, newUser.Email, _creator.Id);
 
             await _context.SaveAsync(newUser);
 

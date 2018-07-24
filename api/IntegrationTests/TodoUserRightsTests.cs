@@ -31,9 +31,7 @@ namespace IntegrationTests
             //   - todo collection context
             //   - todo (that we want to created)
 
-            var userId = NewId();
-
-            Register(services => { services.AddTransient(ctx => new User {Id = userId}); });
+            Register(services => { services.AddTransient(ctx => new User {Id = UserId}); });
 
             var userRightStore = Get<IUserRightStore>();
             var todoStore = Get<ITodoStore>();
@@ -49,6 +47,7 @@ namespace IntegrationTests
             // Do the creation of a todo with the rights we want
             //
             var todoId = await todoStore.Create(
+                UserId,
                 contextResourceId,
                 createData,
                 explicitRights,
@@ -63,12 +62,12 @@ namespace IntegrationTests
             //  - then, would the user be granted access?
             var userRights = await Db.ScanAsync<UserRight>(new List<ScanCondition>
                 {
-                    new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, userId)
+                    new ScanCondition(nameof(UserRight.UserId), ScanOperator.Equal, UserId)
                 })
                 .GetRemainingAsync();
             var userInheritRights = await Db.ScanAsync<UserInheritRight>(new List<ScanCondition>
                 {
-                    new ScanCondition(nameof(UserInheritRight.UserId), ScanOperator.Equal, userId)
+                    new ScanCondition(nameof(UserInheritRight.UserId), ScanOperator.Equal, UserId)
                 })
                 .GetRemainingAsync();
 
@@ -76,11 +75,12 @@ namespace IntegrationTests
             Assert.Empty(userInheritRights);
 
             // Access?
-            var resourceRights = await userRightStore.Get(userId, todoId, RightType.Todo);
+            var resourceRights = await userRightStore.Get(UserId, todoId, RightType.Todo);
             Assert.Equal(allow, resourceRights.IsAllowed(requiredPermission));
 
             // Clean up
-            await Task.WhenAll(userRights.Select(right => Db.DeleteAsync<UserRight>(right.Id)));
+            await Task.WhenAll(userRights.Select(right => 
+                Db.DeleteAsync<UserRight>(right.Id)));
             await Task.WhenAll(userInheritRights.Select(right =>
                 Db.DeleteAsync<UserInheritRight>(right.Id)));
             await Db.DeleteAsync<Todo>(todoId);

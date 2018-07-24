@@ -211,6 +211,7 @@ namespace Api.Web
                 var ids = await Task.WhenAll(createTodoDatas
                     .Select(data => todoStore.Create(
                         userId,
+                        userId,
                         data,
                         Permission.FullControl | Permission.Owner,
                         CallerCollectionRights.Todo)));
