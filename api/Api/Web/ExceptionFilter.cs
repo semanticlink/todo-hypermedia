@@ -76,13 +76,20 @@ namespace Api.Web
             else if (ex is AmazonServiceException)
             {
                 var dbException = ex as AmazonServiceException;
-                
+
                 Log.ErrorExceptionFormat(
                     ex,
-                    "DynamoDb exception not handled: {0} {1}, '{2}'",
+                    "DynamoDb exception not handled: {0} {1}, [{2}] '{3}'",
                     dbException.ErrorCode,
                     dbException.ErrorType,
-                    dbException.Message );
+                    dbException.Message,
+                    dbException.StatusCode);
+            }
+            else if (ex is AmazonClientException)
+            {
+                var dbException = ex as AmazonClientException;
+
+                Log.ErrorExceptionFormat(ex, "DynamoDb internal exception not handled: '{0}'", dbException.Message);
             }
             else if (ex is SqlException)
             {

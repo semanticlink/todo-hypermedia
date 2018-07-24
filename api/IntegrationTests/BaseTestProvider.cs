@@ -17,11 +17,11 @@ namespace IntegrationTests
     public abstract class BaseTestProvider : IDisposable
     {
         protected static ILogger Log;
-        protected ServiceProvider ServiceProvider;
+        protected IServiceProvider ServiceProvider;
         private readonly ServiceCollection _services;
 
 
-        protected BaseTestProvider()
+        private BaseTestProvider()
         {
             // TODO: use Fixtures
 
@@ -102,7 +102,7 @@ namespace IntegrationTests
 
         public void Dispose()
         {
-            ServiceProvider.Dispose();
+            (ServiceProvider as ServiceProvider).Dispose();
             try
             {
                 Log.RemoveTestOutputHelper();
