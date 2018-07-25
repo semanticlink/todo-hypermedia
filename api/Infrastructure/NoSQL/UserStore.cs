@@ -52,7 +52,6 @@ namespace Infrastructure.NoSQL
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights)
         {
-
             if (await GetByExternalId(data.ExternalId) is User existingUser) return existingUser.Id;
 
             // KLUDGE: needs to be injected
@@ -133,7 +132,7 @@ namespace Infrastructure.NoSQL
 
         public async Task Update(string id, Action<User> updater)
         {
-            var user = await Get(id)
+            var user = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
             updater(user);
@@ -146,7 +145,7 @@ namespace Infrastructure.NoSQL
 
         public async Task Delete(string id)
         {
-            var user = await Get(id)
+            var user = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
             // TODO: delete all rights

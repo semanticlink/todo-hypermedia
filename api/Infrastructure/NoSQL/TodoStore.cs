@@ -58,7 +58,7 @@ namespace Infrastructure.NoSQL
         }
 
         public async Task<string> Create(
-            string ownerId, 
+            string ownerId,
             string contextResourceId,
             TodoCreateData data,
             Permission callerRights,
@@ -117,10 +117,12 @@ namespace Infrastructure.NoSQL
 
         public async Task Update(string id, Action<Todo> updater)
         {
-            var todo = await Get(id)
+            var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            var originalTags = new List<string>(todo.Tags); // clone tags to compare with later
+            var originalTags = todo.Tags.IsNullOrEmpty()
+                ? new List<string>()
+                : new List<string>(todo.Tags); // clone tags to compare with later
 
             updater(todo);
 
@@ -156,7 +158,7 @@ namespace Infrastructure.NoSQL
 
         public async Task Delete(string id)
         {
-            var todo = await Get(id)
+            var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
             if (todo.Tags.IsNotNull())
@@ -181,6 +183,9 @@ namespace Infrastructure.NoSQL
 
         private async Task SetRightsForTodoTag(string todoId, IList<string> origIds, IList<string> newIds)
         {
+            origIds = origIds ?? new List<string>();
+            newIds = newIds ?? new List<string>();
+
             var newSet = newIds.Distinct().ToList();
             var existingSet = (await _tagStore.Get(newSet)).Select(tag => tag.Id).ToList();
 

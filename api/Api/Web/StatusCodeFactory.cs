@@ -38,5 +38,12 @@ namespace Api.Web
                 StatusCodes.Status202Accepted,
                 message);
         }
+
+        public static StatusCodeAndReasonResult InternalServerError(this string message)
+        {
+            return new StatusCodeAndReasonResult(
+                StatusCodes.Status500InternalServerError,
+                message);
+        }
     }
 }

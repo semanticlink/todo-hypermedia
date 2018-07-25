@@ -102,7 +102,7 @@ namespace Infrastructure.NoSQL
 
         public async Task Delete(string id)
         {
-            var tag = await Get(id)
+            var tag = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
             await _context.DeleteAsync(tag);
@@ -111,7 +111,7 @@ namespace Infrastructure.NoSQL
 
         private async Task Update(string title, Action<Tag> updater)
         {
-            var tag = await Get(title)
+            var tag = (await Get(title))
                 .ThrowObjectNotFoundExceptionIfNull();
 
             updater(tag);

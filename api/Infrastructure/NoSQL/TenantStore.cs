@@ -169,7 +169,7 @@ namespace Infrastructure.NoSQL
 
         private async Task Update(string id, Action<Tenant> updater)
         {
-            var tenant = await Get(id)
+            var tenant = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
             // TODO: make Id, Created immutable

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
@@ -10,7 +9,6 @@ using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
@@ -46,7 +44,7 @@ namespace Api.Controllers
                 .ToRepresentation(User.GetIdentityId(), Url);
         }
 
-        [HttpPost]
+        [HttpPost(Name = TodoUriFactory.SelfRouteName)]
         [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data)
         {

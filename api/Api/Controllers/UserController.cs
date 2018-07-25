@@ -93,5 +93,23 @@ namespace Api.Controllers
                     .GetAll())
                 .ToFeedRepresentation(id, Url);
         }
+
+        [HttpPost("{id}/todo", Name = UserUriFactory.UserTodoCollectionName)]
+        [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
+        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data, string id)
+        {
+            var userId = User.GetIdentityId();
+            return (await _todoStore.Create(
+                    userId,
+                    userId, // context is the userId
+                    data
+                        .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
+                        .FromRepresentation(Url),
+                    Permission.FullControl,
+                    CallerCollectionRights.Todo
+                ))
+                .MakeTodoUri(Url)
+                .MakeCreated();
+        }
     }
 }
