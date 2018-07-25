@@ -61,7 +61,7 @@ namespace Api.Web
         /// <summary>
         ///     Creates a tenant, user on the tenant and some todos with tags
         /// </summary>
-        private static async Task SeedData(this IServiceProvider services)
+        public static async Task SeedData(this IServiceProvider services)
         {
             /**
              * Get registered services.

@@ -59,7 +59,7 @@ namespace Api.Web
         /// </list>
         /// </para>
         /// </summary>
-        private static async Task SeedServiceUser(this IServiceProvider services)
+        public static async Task SeedServiceUser(this IServiceProvider services)
         {
             Log.Info("[Seed] service user start");
 
