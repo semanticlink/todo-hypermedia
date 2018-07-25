@@ -10,7 +10,7 @@ import { TEXT } from '../lib/form-type-mappings';
 const getTenant = (apiResource, tenantUri) => {
     return nodMaker
         .getResource(apiResource)
-        .then(apiResource => nodMaker.getCollectionResource(apiResource, 'tenants', /tenants/))
+        .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
         .then(tenants => nodMaker.getCollectionResourceItemByUri(tenants, tenantUri));
 };
 
