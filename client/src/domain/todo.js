@@ -23,8 +23,8 @@ const getTenant = (apiResource, tenantUri) => {
 const getTodos = (apiResource, tenantUri) => {
     log.debug(`Looking for todos in tenant ${tenantUri}`);
 
-    return getTenant(apiResource, tenantUri)
-        .then(tenant => nodMaker.getNamedCollectionResourceAndItems(tenant, 'todos', /todos/));
+    return nodMaker.getSingletonResource(apiResource, 'me', /me/)
+        .then(me => nodMaker.getNamedCollectionResourceAndItems(me, 'todos', /todos/));
 };
 
 
@@ -42,9 +42,7 @@ const defaultTodo = todoResource => {
     return nodMaker
         .getResource(todoResource)
         .then(todoCollection => nodMaker.getSingletonResource(todoCollection, 'createForm', /create-form/))
-        .catch(() => {
-            log.error(`No create form for on '${SemanticLink.getUri(todoResource, /self/)}'`);
-        })
+        .catch(() => log.error(`No create form for on '${SemanticLink.getUri(todoResource, /self/)}'`))
         .then(form => {
             const obj = {};
 
@@ -58,9 +56,7 @@ const defaultTodo = todoResource => {
 
             return obj;
         })
-        .catch((err) => {
-            log.error(err);
-        });
+        .catch((err) => log.error(err));
 };
 
 export { getTenant, getTodos, defaultTodo };
