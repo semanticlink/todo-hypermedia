@@ -2,7 +2,6 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import {makeAbsolute, makeRelative, toSitePath} from './lib/util/UriMapping';
 import Home from './components/Home.vue';
-import SelectTenants from './components/SelectTenants.vue';
 import Todo from './components/Todo.vue';
 import {SemanticLink} from 'semanticLink';
 
@@ -94,12 +93,6 @@ let router = new VueRouter({
             path: '/',
             name: 'Home',
             component: Home,
-        },
-        {
-            path: makePath(clientPath.SelectTenants),
-            name: 'SelectTenants',
-            component: SelectTenants,
-            props: resolve
         },
         {
             path: makePath(clientPath.Todo),
