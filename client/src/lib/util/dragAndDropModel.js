@@ -31,7 +31,8 @@ const createModel = (transfer, mediaType) => {
 
             log.debug('[Drop] found: application/json');
 
-            return resolve(transfer.getData('application/json'));
+            const data = transfer.getData('application/json');
+            return resolve(JSON.parse(data));
 
         } else if (mediaType === 'text/uri-list' && _(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')) {
 
