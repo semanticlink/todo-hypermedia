@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import {makeAbsolute, makeRelative, toSitePath} from './lib/util/UriMapping';
-import Home from './components/Home.vue';
+import Home from './components/Tenant.vue';
 import Todo from './components/Todo.vue';
 import {SemanticLink} from 'semanticLink';
 
