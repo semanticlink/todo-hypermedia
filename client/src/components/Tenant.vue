@@ -5,12 +5,9 @@
         <div v-for="tenant in tenants.items" v-cloak>
 
             <drag-and-droppable-model
-                    :msg="tenant.name"
-                    :model="tenant"
-                    :context="$root.$api"
+                    :model="hydrateTenant"
                     media-type="application/json"
-                    :dropped="createOrUpdateTenantOnRoot"
-                    :dragStart="hydrateTenant">
+                    :dropped="createOrUpdateTenantOnRoot">
                 <b-button @click="gotoTenant(tenant)">{{ tenant.name }}</b-button>
             </drag-and-droppable-model>
         </div>
@@ -54,8 +51,11 @@
                     .then(apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tenants', /tenants/))
                     .then(tenants => {
                         if (tenants && _(tenants.items).isEmpty()) {
-                            log.info('No tenants found: redirect to search for tenant');
-                            redirectToSelectTenant();
+                            this.$notify({
+                                title: "You no longer have any organisation to belong to",
+                                type: 'info'
+                            });
+                            log.info('No tenants found');
                         }
                         this.tenants = tenants;
                     })
@@ -76,8 +76,9 @@
             gotoTenant(organisation) {
                 redirectToTenant(organisation);
             },
-            createOrUpdateTenantOnRoot(tenantDocument, rootRepresentation) {
-                nodSynchroniser.getResourceInNamedCollection(rootRepresentation, 'tenants', /tenants/, tenantDocument, [])
+            createOrUpdateTenantOnRoot(tenantDocument) {
+
+                nodSynchroniser.getResourceInNamedCollection(this.$root.$api, 'tenants', /tenants/, tenantDocument, [])
                     .then(resource => log.debug(resource))
                     .catch(err => {
                         this.$notify({

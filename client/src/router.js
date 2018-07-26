@@ -82,12 +82,11 @@ const makePrefix = clientPath => `/${clientPath}/a/`;
 const makePath = clientPath => `${makePrefix(clientPath)}:apiUri(.*)`;
 
 const clientPath = {
-    SelectTenants: 'tenants',
     Todo: 'todo',
     Resource: 'roam'
 };
 
-let router = new VueRouter({
+const router = new VueRouter({
     routes: [
         {
             path: '/',
@@ -103,13 +102,11 @@ let router = new VueRouter({
     ]
 });
 
-const redirect = (representation, path, query = {}) => router.push(Object.assign({}, {path: toSitePath(SemanticLink.getUri(representation, /self/), path)}, query));
+const redirect = (representation, path, query = {}) => router.push({...{path: toSitePath(SemanticLink.getUri(representation, /self/), path)}, ...query});
 
-const redirectToTenant = (tenantRepresentation, filter) => {
+export const redirectToTenant = (tenantRepresentation, filter) => {
     return redirect(tenantRepresentation, makePrefix(clientPath.Todo), filter);
 };
-
-const redirectToSelectTenant = () => router.push(toSitePath('', makePrefix(clientPath.SelectTenants)));
 
 /**
  * Takes in an api uri to be browsed and constructs a client-side relative path to be used in href attributes
@@ -122,7 +119,6 @@ const redirectToSelectTenant = () => router.push(toSitePath('', makePrefix(clien
  * @param {string} representationUri absolute uri of an api resource (eg http://localhost:5000/todo/1)
  * @returns {string} client-side fragment
  */
-const fragmentToRoam = representationUri => `#${toSitePath(makeRelative(representationUri), makePrefix(clientPath.Roam))}`;
+export const fragmentToRoam = representationUri => `#${toSitePath(makeRelative(representationUri), makePrefix(clientPath.Roam))}`;
 
-export {redirectToTenant, redirectToSelectTenant, fragmentToRoam};
 export default router;
