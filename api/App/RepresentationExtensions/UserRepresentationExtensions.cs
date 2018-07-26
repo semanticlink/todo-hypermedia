@@ -38,14 +38,35 @@ namespace App.RepresentationExtensions
                     .RemoveNulls(),
                 Email = user.Email,
                 Name = user.Name,
+                ExternalIds = user.ExternalIds
             };
         }
+
+
+        public static UserCreateData FromRepresentation(this UserCreateDataRepresentation data)
+        {
+            return new UserCreateData
+            {
+                Name = data.Name
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires a name"),
+                Email = data.Email
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires an email"),
+                ExternalId = data.ExternalId
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires an external id")
+            };
+        }
+
+        /////////////////////////////
+        //
+        // Forms
+        // =====
+        //
 
         /// <summary>
         ///     Get the create form to describe to clients of the API how to
         ///     modify instances on the resource
         /// </summary>
-        /// <seealso cref = "UserCreateDataRepresentation" />
+        /// <seealso cref="UserCreateDataRepresentation" />
         public static CreateFormRepresentation ToRegisterUserCreateFormRepresentation(
             this string tenantId,
             IUrlHelper url)
@@ -62,6 +83,27 @@ namespace App.RepresentationExtensions
 
                     // submit
                     tenantId.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Submit)
+                },
+                Items = MakeFormItems()
+            };
+        }
+
+        /// <summary>
+        ///     Get the create form to describe to clients of the API how to
+        ///     modify instances on the resource
+        /// </summary>
+        /// <remarks>
+        ///     The edit form has no <see cref="IanaLinkRelation.Up" /> link to the
+        ///     main resource, thus allowing the edit form to be the same for all instances of
+        ///     the resource and thus fully cacheable.
+        /// </remarks>
+        public static EditFormRepresentation ToUserEditFormRepresentation(this IUrlHelper url)
+        {
+            return new EditFormRepresentation
+            {
+                Links = new[]
+                {
+                    url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.Self)
                 },
                 Items = MakeFormItems()
             };
@@ -87,43 +129,16 @@ namespace App.RepresentationExtensions
                 {
                     Name = "externalId",
                     Description = "The third-party id fo the user (eg 'auth0|xxxxx')",
-                    Required = true,
+                    Required = false,
                     Multiple = true
                 },
-            };
-        }
-
-        /// <summary>
-        ///     Get the create form to describe to clients of the API how to
-        ///     modify instances on the resource
-        /// </summary>
-        /// <remarks>
-        ///     The edit form has no <see cref = "IanaLinkRelation.Up" /> link to the
-        ///     main resource, thus allowing the edit form to be the same for all instances of
-        ///     the resource and thus fully cacheable.
-        /// </remarks>
-        public static EditFormRepresentation ToUserEditFormRepresentation(this IUrlHelper url)
-        {
-            return new EditFormRepresentation
-            {
-                Links = new[]
+                new CollectionInputFormItemRepresentation()
                 {
-                    url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.Self),
+                    Name = "todos",
+                    Description = "The todos of the user",
+                    Required = false,
+                    Multiple = true
                 },
-                Items = MakeFormItems()
-            };
-        }
-
-        public static UserCreateData FromRepresentation(this UserCreateDataRepresentation data)
-        {
-            return new UserCreateData
-            {
-                Name = data.Name
-                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires a name"),
-                Email = data.Email
-                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires an email"),
-                ExternalId = data.ExternalId
-                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A user requires an external id"),
             };
         }
     }

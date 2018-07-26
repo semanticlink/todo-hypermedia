@@ -25,15 +25,13 @@ namespace App.RepresentationExtensions
                     // logical parent of tenant is root
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // todos over the entire tenant
-                    // url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
+                    // users over the entire tenant
+                    tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users),
 
                     // edit form
                     url.MakeTenantEditFormUri().MakeWebLink(IanaLinkRelation.EditForm),
-
-                    // users over the entire tenant
-                    tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users)
                 },
+
 
                 Code = tenant.Code,
                 Name = tenant.Name,
@@ -79,7 +77,9 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     tenantId.MakeTenantUsersUri(url).MakeWebLink(IanaLinkRelation.Self),
+
                     tenantId.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Up),
+
                     tenantId.MakeRegisterUserCreateFormUri(url).MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = userIds
@@ -139,6 +139,12 @@ namespace App.RepresentationExtensions
                 {
                     Name = "name",
                     Description = "The name of the tenant to be shown on the screen",
+                    Required = false
+                },
+                new CollectionInputFormItemRepresentation()
+                {
+                    Name = "users",
+                    Description = "Users that belong to this tenant",
                     Required = false
                 }
             };
