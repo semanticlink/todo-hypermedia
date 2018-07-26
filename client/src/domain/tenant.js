@@ -1,6 +1,6 @@
-import { nodMaker, link, _ } from "semanticLink";
-import { log } from 'logger';
-import SparseResource from "semanticLink/SparseResource";
+import {nodMaker, link, _} from 'semanticLink';
+import {log} from 'logger';
+import SparseResource from 'semanticLink/SparseResource';
 
 /**
  * Search for a tenant using the search form on the collection
@@ -9,9 +9,9 @@ import SparseResource from "semanticLink/SparseResource";
  * @param tenantName
  * @returns {Promise.<CollectionRepresentation>} containing the search result collection
  */
-const searchForTenant = (tenantCollection, tenantName) => {
+export const searchForTenant = (tenantCollection, tenantName) => {
 
-    if (!tenantName){
+    if (!tenantName) {
         return Promise.resolve();
     }
 
@@ -39,11 +39,22 @@ const searchForTenant = (tenantCollection, tenantName) => {
             }
         })
         .then(createdResult => link.http.get(createdResult.headers.location))
-        .then(searchResult =>  SparseResource.mapFeedItemsToCollectionItems(searchResult.data));
+        .then(searchResult => SparseResource.mapFeedItemsToCollectionItems(searchResult.data));
 };
 
-const getTenants = apiResource => nodMaker
-    .getResource(apiResource)
-    .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/));
+export const getTenants = apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/)
 
-export { searchForTenant, getTenants };
+const getTags = apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tags', /tags/);
+
+export const getTenantAndTodos = apiResource => {
+    return Promise.all([getTenants(apiResource), getTags(apiResource)])
+        .then(([tenantCollection]) => nodMaker.tryGetNamedCollectionResourceAndItemsOnCollectionItems(tenantCollection, 'users', /users/))
+        .then(tenantCollectionItems => _(tenantCollectionItems)
+            .mapWaitAll(tenant => _(tenant)
+                .mapFlattenWaitAll(user => nodMaker.tryGetCollectionResourceAndItems(user, 'todos', /todos/)))
+        )
+        .then(userTodoCollectionItems => _([].concat(...userTodoCollectionItems))
+            .mapWaitAll(userTodo => _(userTodo)
+                .mapWaitAll(todo => nodMaker.tryGetCollectionResourceAndItems(todo, 'tags', /tags/))))
+        .then(() => apiResource);
+};

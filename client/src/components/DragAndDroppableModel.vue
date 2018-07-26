@@ -48,6 +48,14 @@
                 }
             },
             /**
+             * Optional callback function to load up the model on drag start
+             * @return {Promise.<LinkedRepresentation>}
+             */
+            dragStart: {
+                type: Function,
+                default: () => Promise.resolve()
+            },
+            /**
              * Pick the type of media to return
              * @example 'application/json'
              * @example 'text/uri-list'
@@ -66,11 +74,16 @@
                     this.mediaType);
             },
             dragstart(event) {
+                this.dragStart()
+                    .then(resource => {
 
-                if (this.mediaType === undefined) {
-                    log.warn('No mediaType set using application/json');
-                }
-                return dragstart(event, this.model, this.mediaType || 'application/json');
+                        const model = resource ? resource : this.model;
+
+                        if (this.mediaType === undefined) {
+                            log.warn('No mediaType set using application/json');
+                        }
+                        return dragstart(event, model, this.mediaType || 'application/json');
+                    })
             },
             dragover,
             dragenter,

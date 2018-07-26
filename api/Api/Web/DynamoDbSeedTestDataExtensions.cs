@@ -129,7 +129,6 @@ namespace Api.Web
                     Permission.FullControl | Permission.Owner,
                     CallerCollectionRights.User);
 
-
                 //////////////////////////
                 // Seed a tenant
                 // =============

@@ -29,7 +29,7 @@ namespace Api.Controllers
         [HttpGet("", Name = TagUriFactory.AllTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [Authorise(RightType.RootTagCollection, Permission.Get)]
+        [Authorise(RightType.RootTagCollection, Permission.Get, ResourceKey.Root)]
         public async Task<FeedRepresentation> GetAllTags()
         {
             return (await _tagStore

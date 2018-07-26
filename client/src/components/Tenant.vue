@@ -9,7 +9,8 @@
                     :model="tenant"
                     :context="$root.$api"
                     media-type="application/json"
-                    :dropped="createOrUpdateTenantOnRoot">
+                    :dropped="createOrUpdateTenantOnRoot"
+                    :dragStart="hydrateTenant">
                 <b-button @click="gotoTenant(tenant)">{{ tenant.name }}</b-button>
             </drag-and-droppable-model>
         </div>
@@ -22,6 +23,7 @@
     import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
     import {redirectToTenant, redirectToSelectTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
+    import {getTenantAndTodos} from '../domain/tenant';
 
     export default {
         components: {DragAndDroppableModel},
@@ -52,7 +54,7 @@
                     .then(apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tenants', /tenants/))
                     .then(tenants => {
                         if (tenants && _(tenants.items).isEmpty()) {
-                            log.info('No tenants found: redirect to search for tenant')
+                            log.info('No tenants found: redirect to search for tenant');
                             redirectToSelectTenant();
                         }
                         this.tenants = tenants;
@@ -75,7 +77,6 @@
                 redirectToTenant(organisation);
             },
             createOrUpdateTenantOnRoot(tenantDocument, rootRepresentation) {
-                log.debug(tenantDocument)
                 nodSynchroniser.getResourceInNamedCollection(rootRepresentation, 'tenants', /tenants/, tenantDocument, [])
                     .then(resource => log.debug(resource))
                     .catch(err => {
@@ -84,6 +85,20 @@
                             text: err.message,
                             type: 'error'
                         });
+                        log.error(err);
+                    });
+            },
+            hydrateTenant() {
+                return getTenantAndTodos(this.$root.$api)
+                    .then(hydratedApi => {
+                        const tenant = _({}).extendResource(hydratedApi);
+                        delete tenant.me;
+                        delete tenant.users;
+                        delete tenant.authenticate;
+                        return tenant;
+                    })
+                    .catch(err => {
+                        this.$notify({type: 'error', title: 'Could not load up the tenant'})
                         log.error(err);
                     });
             }

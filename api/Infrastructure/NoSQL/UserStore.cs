@@ -72,6 +72,14 @@ namespace Infrastructure.NoSQL
 
             await _context.SaveAsync(newUser);
 
+            await _userRightStore.CreateRights(
+                newUser.Id,
+                resourceId,
+                new Dictionary<RightType, Permission>
+                {
+                    {RightType.RootTagCollection, Permission.Get | Permission.Post}
+                });
+
             // create rights for new user and also the owner (if the owner if different)
             await Task.WhenAll(
                 new List<string> {newUser.Id, ownerId}
@@ -87,6 +95,8 @@ namespace Infrastructure.NoSQL
                             ResourceId = resourceId,
                             InheritedTypes = new List<RightType>
                             {
+                                RightType.RootTagCollection,
+
                                 RightType.User,
                                 RightType.UserTenantCollection,
                                 RightType.UserTodoCollection

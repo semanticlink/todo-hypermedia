@@ -16,6 +16,15 @@ namespace Api.Authorisation
         /// <summary>
         ///     This template/profile for the creation of a user in the context of the root user
         /// </summary>
+        public static readonly IDictionary<RightType, Permission> Root = new Dictionary<RightType, Permission>
+        {
+            {RightType.RootTagCollection, Permission.Get | Permission.Post},
+
+        }; 
+        
+        /// <summary>
+        ///     This template/profile for the creation of a user in the context of the root user
+        /// </summary>
         public static readonly IDictionary<RightType, Permission> User = new Dictionary<RightType, Permission>
         {
             {RightType.RootUserCollection, Permission.Get},
