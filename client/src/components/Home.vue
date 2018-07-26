@@ -1,34 +1,30 @@
 <template>
     <div class="hello">
-        <h1>Organisations
-            <droppable-model
-                    :context="$root.$api"
-                    :dropped="createOrUpdateTenantOnRoot">
-            </droppable-model>
-        </h1>
+        <h1>Organisations</h1>
 
-        <ul>
-            <li v-for="tenant in tenants.items">
-                <a v-on:click="gotoTenant(tenant)">{{ tenant.name }}</a>
-                <drag-and-droppable-model
-                        :msg="tenant.name"
-                        :model="tenant"
-                        :context="$root.$api"
-                        :dropped="createOrUpdateTenantOnRoot">
-                </drag-and-droppable-model>
-            </li>
-        </ul>
+        <div v-for="tenant in tenants.items" v-cloak>
+
+            <drag-and-droppable-model
+                    :msg="tenant.name"
+                    :model="tenant"
+                    :context="$root.$api"
+                    media-type="application/json"
+                    :dropped="createOrUpdateTenantOnRoot">
+                <b-button @click="gotoTenant(tenant)">{{ tenant.name }}</b-button>
+            </drag-and-droppable-model>
+        </div>
     </div>
 </template>
 
 <script>
-    import { nodMaker, SemanticLink, _ } from 'semanticLink';
-    import { log } from 'logger';
-    import { toSitePath } from '../lib/util/UriMapping';
-    import { nodSynchroniser } from 'semanticLink/NODSynchroniser';
-    import { redirectToTenant, redirectToSelectTenant } from "router";
+    import {nodMaker, SemanticLink, _} from 'semanticLink';
+    import {log} from 'logger';
+    import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
+    import {redirectToTenant, redirectToSelectTenant} from "router";
+    import DragAndDroppableModel from './DragAndDroppableModel.vue'
 
     export default {
+        components: {DragAndDroppableModel},
         data() {
             return {
                 msg: 'Looking ...',
@@ -51,7 +47,7 @@
             const strategyOneProvidedTenant = (apiResource) => {
                 log.info('Looking for provided tenant');
 
-                 return nodMaker
+                return nodMaker
                     .getResource(apiResource)
                     .then(apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tenants', /tenants/))
                     .then(tenants => {
@@ -61,7 +57,14 @@
                         }
                         this.tenants = tenants;
                     })
-                    .catch(err => log.error(err));
+                    .catch(err => {
+                        this.$notify({
+                            title: response.statusText,
+                            text: err,
+                            type: 'error'
+                        });
+                        log.error(err);
+                    });
             };
 
             return strategyOneProvidedTenant(this.$root.$api);
@@ -72,9 +75,17 @@
                 redirectToTenant(organisation);
             },
             createOrUpdateTenantOnRoot(tenantDocument, rootRepresentation) {
+                log.debug(tenantDocument)
                 nodSynchroniser.getResourceInNamedCollection(rootRepresentation, 'tenants', /tenants/, tenantDocument, [])
                     .then(resource => log.debug(resource))
-                    .catch(err => log.error(err));
+                    .catch(err => {
+                        this.$notify({
+                            title: "Provisioning Error",
+                            text: err.message,
+                            type: 'error'
+                        });
+                        log.error(err);
+                    });
             }
 
         },

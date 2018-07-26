@@ -1,11 +1,10 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import { makeAbsolute, makeRelative, toSitePath } from './lib/util/UriMapping';
+import {makeAbsolute, makeRelative, toSitePath} from './lib/util/UriMapping';
 import Home from './components/Home.vue';
 import SelectTenants from './components/SelectTenants.vue';
 import Todo from './components/Todo.vue';
-import Roam from './components/Roam.vue';
-import { SemanticLink } from 'semanticLink';
+import {SemanticLink} from 'semanticLink';
 
 Vue.use(VueRouter);
 
@@ -97,12 +96,6 @@ let router = new VueRouter({
             component: Home,
         },
         {
-            path: makePath(clientPath.Roam),
-            name: 'Roam',
-            component: Roam,
-            props: resolve
-        },
-        {
             path: makePath(clientPath.SelectTenants),
             name: 'SelectTenants',
             component: SelectTenants,
@@ -138,5 +131,5 @@ const redirectToSelectTenant = () => router.push(toSitePath('', makePrefix(clien
  */
 const fragmentToRoam = representationUri => `#${toSitePath(makeRelative(representationUri), makePrefix(clientPath.Roam))}`;
 
-export { redirectToTenant, redirectToSelectTenant, fragmentToRoam };
+export {redirectToTenant, redirectToSelectTenant, fragmentToRoam};
 export default router;

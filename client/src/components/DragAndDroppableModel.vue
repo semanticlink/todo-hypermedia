@@ -18,6 +18,7 @@
 <script>
 
     import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/util/dragAndDropModel';
+    import {log} from '../lib/logger';
 
     export default {
         name: 'drag-and-droppable-model',
@@ -65,7 +66,11 @@
                     this.mediaType);
             },
             dragstart(event) {
-                return dragstart(event, this.model, this.mediaType);
+
+                if (this.mediaType === undefined) {
+                    log.warn('No mediaType set using application/json');
+                }
+                return dragstart(event, this.model, this.mediaType || 'application/json');
             },
             dragover,
             dragenter,

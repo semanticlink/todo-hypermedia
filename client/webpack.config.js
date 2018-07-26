@@ -12,7 +12,7 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const clientConfig = {
     entry: {
         // single-page app
-        app: './src/main',
+        app: './src/app',
         api: './src/api'
     },
     output: {

@@ -20,7 +20,8 @@ const createModel = (transfer, mediaType) => {
 
     return new Promise((resolve, reject) => {
 
-        log.debug(`[Drop] media type: ['${mediaType}']`);
+        log.debug(`[Drop] media type: [${mediaType}]`);
+        log.debug(`[Drop] types available: [${[transfer.types].join(',')}]`);
 
         Object.entries(transfer.items).forEach(
             ([key, item]) => log.debug(`[Drag] item: kind '${item.kind}' type '${item.type}'`)
@@ -125,7 +126,7 @@ const dragLogic = (model, dataTransfer, replacerStrategy, mediaType) => {
     mediaType = mediaType || ['application/json', 'text/plain', 'DownloadUrl', 'text/uri-list'];
     mediaType = [mediaType];
 
-    log.debug(`[Drop] using media types: [${mediaType.join(',')}]`);
+    log.debug(`[Drag] using media types: [${mediaType.join(',')}]`);
 
     const canonicalJson = JSON.stringify(model, null, 1);
 
