@@ -94,26 +94,7 @@ namespace App.RepresentationExtensions
                     // Create a new organisation on the collection
                     url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Submit)
                 },
-                Items = MakeCreateFormItems()
-            };
-        }
-
-        private static FormItemRepresentation[] MakeCreateFormItems()
-        {
-            return new FormItemRepresentation[]
-            {
-                new TextInputFormItemRepresentation
-                {
-                    Name = "name",
-                    Description = "What needs to be done?",
-                    Required = true
-                },
-                new CheckInputFormItemRepresentation
-                {
-                    Name = "state",
-                    Description = "A todo can only toggle between open and complete."
-                },
-                new DateTimeInputFormItemRepresentation {Name = "due", Description = "The UTC date the todo is due"},
+                Items = MakeFormItems()
             };
         }
 
@@ -172,11 +153,11 @@ namespace App.RepresentationExtensions
                 {
                     url.MakeTodoEditFormUri().MakeWebLink(IanaLinkRelation.Self),
                 },
-                Items = MakeEditFormItems()
+                Items = MakeFormItems()
             };
         }
 
-        private static FormItemRepresentation[] MakeEditFormItems()
+        private static FormItemRepresentation[] MakeFormItems()
         {
             return new FormItemRepresentation[]
             {

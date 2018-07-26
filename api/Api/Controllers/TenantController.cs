@@ -48,6 +48,27 @@ namespace Api.Controllers
                 .ToRepresentation(Url);
         }
 
+
+        [HttpGet("form/create", Name = TenantUriFactory.CreateFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        public CreateFormRepresentation TenantCreateForm()
+        {
+            return Url.ToTenantCreateFormRepresentation();
+        }
+
+        [HttpGet("form/edit", Name = TenantUriFactory.EditFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        public EditFormRepresentation TenantEditForm()
+        {
+            return Url.ToTenantEditFormRepresentation();
+        }
+
+
+        ///////////////////////////////////////
+        //
+        //  User collection
+        //  ===============
+
         /// <summary>
         ///     User collection on a tenant
         /// </summary>

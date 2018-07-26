@@ -64,12 +64,6 @@ namespace Api.Controllers
                 .MakeRedirect();
         }
 
-        ///////////////////////////////////////////////////////////////
-        //
-        //  The collection of tenant resource
-        //  =================================
-        //
-
         /// <summary>
         ///     This is a logical resource which represents all tenants or a search for a single tenant (as a list)
         /// </summary>

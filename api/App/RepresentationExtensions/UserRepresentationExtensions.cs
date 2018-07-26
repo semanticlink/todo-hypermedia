@@ -38,7 +38,6 @@ namespace App.RepresentationExtensions
                     .RemoveNulls(),
                 Email = user.Email,
                 Name = user.Name,
-                CreatedAt = user.CreatedAt,
             };
         }
 
@@ -64,11 +63,11 @@ namespace App.RepresentationExtensions
                     // submit
                     tenantId.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Submit)
                 },
-                Items = MakeRegisterUserCreateFormItems()
+                Items = MakeFormItems()
             };
         }
 
-        private static FormItemRepresentation[] MakeRegisterUserCreateFormItems()
+        private static FormItemRepresentation[] MakeFormItems()
         {
             return new FormItemRepresentation[]
             {
@@ -84,11 +83,12 @@ namespace App.RepresentationExtensions
                     Description = "The name of the user to be shown on the screen",
                     Required = true
                 },
-                new TextInputFormItemRepresentation
+                new SelectFormItemRepresentation
                 {
                     Name = "externalId",
                     Description = "The third-party id fo the user (eg 'auth0|xxxxx')",
-                    Required = true
+                    Required = true,
+                    Multiple = true
                 },
             };
         }
@@ -110,32 +110,7 @@ namespace App.RepresentationExtensions
                 {
                     url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.Self),
                 },
-                Items = MakeEditFormItems()
-            };
-        }
-
-        private static FormItemRepresentation[] MakeEditFormItems()
-        {
-            return new FormItemRepresentation[]
-            {
-                new EmailInputFormItemRepresentation
-                {
-                    Name = "email",
-                    Description = "The email address of the user",
-                    Required = true
-                },
-                new TextInputFormItemRepresentation
-                {
-                    Name = "name",
-                    Description = "The name of the user to be shown on the screen"
-                },
-                new CollectionInputFormItemRepresentation()
-                {
-                    Name = "externalIds",
-                    Description = "Linked systems of authentication [not implemented]",
-                    Multiple = true,
-                    Required = false,
-                }
+                Items = MakeFormItems()
             };
         }
 

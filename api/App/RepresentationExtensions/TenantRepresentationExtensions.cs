@@ -6,6 +6,7 @@ using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit.LinkRelations;
+using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
 
 namespace App.RepresentationExtensions
@@ -26,28 +27,40 @@ namespace App.RepresentationExtensions
 
                     // todos over the entire tenant
                     // url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Todos)
-                    
+
+                    // edit form
+                    url.MakeTenantEditFormUri().MakeWebLink(IanaLinkRelation.EditForm),
+
                     // users over the entire tenant
                     tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users)
                 },
 
                 Code = tenant.Code,
                 Name = tenant.Name,
-                Description = tenant.Description,
-                CreatedAt = tenant.CreatedAt,
-                UpdatedAt = tenant.UpdatedAt
+                Description = tenant.Description
             };
         }
 
-        public static FeedRepresentation ToRepresentation(this IEnumerable<Tenant> tenants, string criteria, IUrlHelper url)
+        public static FeedRepresentation ToRepresentation(
+            this IEnumerable<Tenant> tenants,
+            string criteria,
+            IUrlHelper url)
         {
             var feedRepresentation = new FeedRepresentation
             {
                 Links = new[]
                 {
+                    // self
                     criteria.MakeHomeTenantsUri(url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // home is the logical parent
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
-                    url.MakeHomeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Search),
+
+                    // edit form
+                    url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm),
+
+                    // make a search for a tenant
+                    url.MakeHomeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Search)
                 },
                 Items = tenants
                     .Select(c => ToFeedRepresentationItem(c, url))
@@ -56,7 +69,10 @@ namespace App.RepresentationExtensions
             return feedRepresentation;
         }
 
-        public static FeedRepresentation ToRepresentation(this IEnumerable<string> userIds, string tenantId, IUrlHelper url)
+        public static FeedRepresentation ToRepresentation(
+            this IEnumerable<string> userIds,
+            string tenantId,
+            IUrlHelper url)
         {
             return new FeedRepresentation
             {
@@ -87,6 +103,65 @@ namespace App.RepresentationExtensions
             return new FeedItemRepresentation
             {
                 Id = userId.MakeUserUri(url)
+            };
+        }
+
+
+        /// <summary>
+        ///     Get the create form to describe to clients of the API how to
+        ///     modify instances on the resource
+        /// </summary>
+        /// <seealso cref="UserCreateDataRepresentation" />
+        public static CreateFormRepresentation ToTenantCreateFormRepresentation(this IUrlHelper url)
+        {
+            return new CreateFormRepresentation
+            {
+                Links = new[]
+                {
+                    // this collection
+                    url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.Self)
+                },
+                Items = MakeFormItems()
+            };
+        }
+
+        private static FormItemRepresentation[] MakeFormItems()
+        {
+            return new FormItemRepresentation[]
+            {
+                new TextInputFormItemRepresentation
+                {
+                    Name = "code",
+                    Description = "The unique name in domain name format",
+                    Required = true
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "name",
+                    Description = "The name of the tenant to be shown on the screen",
+                    Required = false
+                }
+            };
+        }
+
+        /// <summary>
+        ///     Get the create form to describe to clients of the API how to
+        ///     modify instances on the resource
+        /// </summary>
+        /// <remarks>
+        ///     The edit form has no <see cref="IanaLinkRelation.Up" /> link to the
+        ///     main resource, thus allowing the edit form to be the same for all instances of
+        ///     the resource and thus fully cacheable.
+        /// </remarks>
+        public static EditFormRepresentation ToTenantEditFormRepresentation(this IUrlHelper url)
+        {
+            return new EditFormRepresentation
+            {
+                Links = new[]
+                {
+                    url.MakeTenantEditFormUri().MakeWebLink(IanaLinkRelation.Self)
+                },
+                Items = MakeFormItems()
             };
         }
     }
