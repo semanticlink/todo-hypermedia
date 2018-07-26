@@ -85,7 +85,7 @@ export default class Collection {
 
                 if (existingResource) {
 
-                    log.info(`Pooled: ${collectionName} on ${parentUri} - found: ${link.getUri(existingResource, /self|canonical/)}`);
+                    log.info(`Pooled: ${collectionName} on ${parentUri} - found: ${SemanticLink.getUri(existingResource, /self|canonical/)}`);
                     return Collection.resolve(resourceDocument, existingResource, options);
 
                 } else if (SemanticLink.tryGetUri(resourceDocument, /self|canonical/)) {

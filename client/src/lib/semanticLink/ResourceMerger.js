@@ -1,6 +1,6 @@
 import _ from './mixins/underscore';
 import SparseResource from './SparseResource';
-import { link, SemanticLink } from './SemanticLink';
+import {link, SemanticLink} from './SemanticLink';
 import log from './Logger';
 
 /**
@@ -16,7 +16,7 @@ export default class ResourceMerger {
      * @return {function(link:Link):{links: *[]}}
      * @private
      */
-    static get defaultSparseResourceFactory () {
+    static get defaultSparseResourceFactory() {
         return link => SparseResource.makeFromFeedItem(link);
     }
 
@@ -42,7 +42,7 @@ export default class ResourceMerger {
      * @param {string[]=} defaultFields
      * @return {string[]}
      */
-    fields (formResource, defaultFields = []) {
+    fields(formResource, defaultFields = []) {
         return _(formResource.items)
             .chain()
             .map(item => item.name)
@@ -60,14 +60,19 @@ export default class ResourceMerger {
      * @return {Promise} containing the merged document
      * @private
      */
-    resolveFields (doc, form, options) {
+    resolveFields(doc, form, options) {
 
         return _(doc).mapObjectWaitAll(
             (textUriOrResource, field) => {
 
                 const resolveFieldToFieldByType = (textUriOrResource, formItem, options) => {
 
-                    if (formItem.type === 'http://types/text' ||formItem.type === 'http://types/date' || formItem.type === 'http://types/date/time' ) {
+                    if (formItem.type === 'http://types/text'
+                        || formItem.type === 'http://types/date'
+                        || formItem.type === 'http://types/date/time'
+                        || formItem.type === 'http://types/text/email'
+                        || formItem.type === 'http://types/datetime'
+                    ) {
                         if (formItem.multiple) {
                             return _(textUriOrResource).mapWaitAll(text => Promise.resolve(text));
                         } else {
@@ -187,7 +192,7 @@ export default class ResourceMerger {
      * @return {*} document with matched fields
      * @private
      */
-    resolveLinkRelationToFieldByType (doc, formResource, aLink, options) {
+    resolveLinkRelationToFieldByType(doc, formResource, aLink, options) {
 
         const rel = aLink.rel;
         const href = aLink.href;
@@ -262,7 +267,7 @@ export default class ResourceMerger {
      * @return {*}
      * @private
      */
-    resolveLinkRelations (resource, fieldsToReturn, formResource, options) {
+    resolveLinkRelations(resource, fieldsToReturn, formResource, options) {
 
         // link relations exist as a dashed form and fields/create forms use camel case
         let linkRelationsToReturn = _(fieldsToReturn).filterCamelToDash();
@@ -305,7 +310,7 @@ export default class ResourceMerger {
      * @param {string[]} fields array of fields that require update
      * @private
      */
-    fieldsRequiringUpdate (resource, mergedDocument, fields) {
+    fieldsRequiringUpdate(resource, mergedDocument, fields) {
         return _.reject(fields, field => {
             if (_(mergedDocument).has(field)) {
                 // WARNING: This might have problems if the field is a 'multiple'    <<<<<<<<<<<<<<<< ---- todd could you please review
@@ -324,7 +329,7 @@ export default class ResourceMerger {
      * @return {Promise.<*>|Promise} containing the document updates to be merged
      * @private
      */
-    mergeLinksAndFields (document, formResource, options) {
+    mergeLinksAndFields(document, formResource, options) {
         options.resolver = options.resolver || {resolve: url => url};
         options.resourceResolver = options.resourceResolver || (() => () => Promise.resolve(undefined));
 
@@ -339,7 +344,7 @@ export default class ResourceMerger {
             .then(resolvedFields =>
                 this.resolveLinkRelations(document, fieldsToReturn, formResource, options)
 
-                    // step 3: merge all fields together as a document
+                // step 3: merge all fields together as a document
                     .then(resolvedLinks => _(resolvedFields).extend(resolvedLinks)));
     }
 
@@ -349,7 +354,7 @@ export default class ResourceMerger {
      * @param document
      * @param isTracked
      */
-    transformAndCleanTrackedResources (resource, document, isTracked) {
+    transformAndCleanTrackedResources(resource, document, isTracked) {
 
         const filterTrackedFieldsOnesource = resource => _(resource)
             .chain()
@@ -514,7 +519,7 @@ export default class ResourceMerger {
      * @param {CreateMergeOptions=} options
      * @return {Promise} containing the resource to be created as a resource
      */
-    createMerge (resource, formResource, options = {}) {
+    createMerge(resource, formResource, options = {}) {
         return this.mergeLinksAndFields(resource, formResource, options);
     }
 
@@ -542,7 +547,7 @@ export default class ResourceMerger {
      * @param {EditMergeOptions=} options
      * @return {*|undefined}
      */
-    editMerge (resource, document, formResource, options = {}) {
+    editMerge(resource, document, formResource, options = {}) {
 
         const isTracked = options.isTracked || (() => false);
 
