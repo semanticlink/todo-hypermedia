@@ -108,17 +108,4 @@ export const redirectToTenant = (tenantRepresentation, filter) => {
     return redirect(tenantRepresentation, makePrefix(clientPath.Todo), filter);
 };
 
-/**
- * Takes in an api uri to be browsed and constructs a client-side relative path to be used in href attributes
- *
- * @example
- *      api: http://localhost:5000/todo/1
- *      client: roam/a/
- *      result --> #/roam/a/todo/1
- *
- * @param {string} representationUri absolute uri of an api resource (eg http://localhost:5000/todo/1)
- * @returns {string} client-side fragment
- */
-export const fragmentToRoam = representationUri => `#${toSitePath(makeRelative(representationUri), makePrefix(clientPath.Roam))}`;
-
 export default router;
