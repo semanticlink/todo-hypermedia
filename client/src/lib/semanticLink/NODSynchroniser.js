@@ -1,15 +1,11 @@
 'use strict';
 import _ from './mixins/underscore';
-import { link, SemanticLink } from './SemanticLink';
+import {link, SemanticLink} from './SemanticLink';
 import log from './Logger';
-import { nodMaker } from './NODMaker';
+import {nodMaker} from './NODMaker';
 import Differencer from './Differencer';
 import axios from 'axios';
-
-// TODO: upgrade to es6 and use spread
-const arrayToArguments = (functionWithArgs) => {
-    return array => functionWithArgs.apply(this, array);
-};
+import {put} from 'semantic-link';
 
 /**
  * Internal data structure for working out which active to perform on documents.
@@ -40,7 +36,7 @@ export default class NODSynchroniser {
     /**
      * @return {injectableNODSynchroniseService}
      */
-    static get defaultResolver () {
+    static get defaultResolver() {
         return {
             resolve: u => u,
             remove: _.noop,
@@ -53,7 +49,7 @@ export default class NODSynchroniser {
      * Default resource finder assumes that resources are in a collection via the 'items' attribute/array.
      * @return {function(CollectionRepresentation=, LinkedRepresentation=): LinkedRepresentation}
      */
-    static get defaultfindResourceInCollectionStrategy () {
+    static get defaultfindResourceInCollectionStrategy() {
         return (collectionResource, resourceDocument) => _(collectionResource).findResourceInCollection(resourceDocument);
     }
 
@@ -64,7 +60,7 @@ export default class NODSynchroniser {
      * @param syncInfos
      * @return {Promise.<void>}
      */
-    static tailRecursionThroughStrategies (strategies, options, syncInfos) {
+    static tailRecursionThroughStrategies(strategies, options, syncInfos) {
         return _(strategies).sequentialWaitAll((unusedMemo, strategy) => {
 
             if (options.childStrategyBatchSize === 0 || _(options.childStrategyBatchSize).isUndefined()) {
@@ -84,7 +80,7 @@ export default class NODSynchroniser {
      * @param {UtilOptions} options
      * @return {function(syncInfo:SyncInfo):Promise.<LinkedRepresentation>} containing the representation (@link LinkedRepresentation}
      */
-    static syncInfos (strategies, options) {
+    static syncInfos(strategies, options) {
         return syncInfo =>
             NODSynchroniser.tailRecursionThroughStrategies(strategies, options, [syncInfo])
                 .then(() => syncInfo.resource);
@@ -95,7 +91,7 @@ export default class NODSynchroniser {
      *
      * The default strategy is to look for 'self' link relation if it is a linked representation
      *
-     * However, in most cases, you will need to write your own resolver, beefore synchronisation. In this example,
+     * However, in most cases, you will need to write your own resolver, before synchronisation. In this example,
      * the resolver the notifications collection also looks into the `question-item` link relation:
      *
      *  options = _({}).extend(options, {
@@ -107,15 +103,29 @@ export default class NODSynchroniser {
      *
      * TODO: the default could better use and extend representation underscore makeUriLists
      *
-     * @param {LinkedRepresentation|string[]} uriListOrResource
+     * @param {CollectionRepresentation|LinkedRepresentation|string[]} uriListOrResource
      * @return {string[]}
      */
-    static defaultUriListResolver (uriListOrResource) {
-        if (uriListOrResource.links) {
-            return [SemanticLink.getUri(uriListOrResource, /self|canonical/)];
+    static defaultUriListResolver(uriListOrResource) {
+
+        if (uriListOrResource.items) {
+
+            const uriList = [...uriListOrResource.items]
+                .map(item => SemanticLink.getUri(item, /self|canonical/))
+                .filter(item => !!item);
+
+            log.debug(`[Sync] Uri resolving resource items on 'self' [${uriList.join(',')}]`);
+            return uriList;
         }
-        // fallback to assuming is an array of uris
-        return uriListOrResource;
+        else if (uriListOrResource.links) {
+            const uri = SemanticLink.getUri(uriListOrResource, /self|canonical/);
+            log.debug(`[Sync] Uri resolving resource on 'self' ${uri}`);
+            return [uri];
+        } else {
+            log.debug(`[Sync] Uri resolving default uri-list [${[uriListOrResource].join(',')}]`);
+            // fallback to assuming is an array of uris
+            return uriListOrResource;
+        }
     }
 
     /**
@@ -125,8 +135,8 @@ export default class NODSynchroniser {
      * @param (string[]} uriList
      * @return {*}
      */
-    static toUriListMimeTypeFormat (uriList) {
-        uriList.map(i => i + '\r\n').join('');
+    static toUriListMimeTypeFormat(uriList) {
+        uriList.join('\n');
     }
 
     /**
@@ -139,7 +149,7 @@ export default class NODSynchroniser {
      * @return {Promise.<SyncInfo>} contains a syncInfo
      * @private
      */
-    syncResourceInCollection (collectionResource, resourceDocument, options = {}) {
+    syncResourceInCollection(collectionResource, resourceDocument, options = {}) {
 
         const findResourceInCollectionStrategy = options.findResourceInCollectionStrategy || NODSynchroniser.defaultfindResourceInCollectionStrategy;
 
@@ -185,7 +195,7 @@ export default class NODSynchroniser {
      * @returns {Promise}
      * @private
      */
-    synchroniseCollection (collectionResource, collectionDocument, options = {}) {
+    synchroniseCollection(collectionResource, collectionDocument, options = {}) {
 
         /**
          * @type {injectableNODSynchroniseService}
@@ -249,7 +259,7 @@ export default class NODSynchroniser {
                 deleteFactory: item => {
                     let itemUri = SemanticLink.getUri(item, /canonical|self/);
                     let collectionUri = SemanticLink.getUri(collectionResource, /canonical|self/);
-                    log.info(`Removing item '${itemUri}' from collection ${collectionUri}`);
+                    log.debug(`[Sync] Removing item '${itemUri}' from collection ${collectionUri}`);
                     return link.delete(
                         collectionResource,
                         /canonical|self/,
@@ -327,14 +337,15 @@ export default class NODSynchroniser {
         };
 
         if (options.contributeonly) {
-            log.info(`Collection '${SemanticLink.getUri(collectionResource, /self|canonical/)}' is contribute-only`);
-            const contributeOnly = _({}).extend(
-                options, {
+            log.debug(`[Sync] Collection '${SemanticLink.getUri(collectionResource, /self|canonical/)}' is contribute-only`);
+            const contributeOnly = {
+                ...options,
+                ...{
                     createStrategy: addContributeOnlyResourceAndUpdateResolver,
                     updateStrategy: updateContributeOnlyResourceAndUpdateResolver,
                     deleteStrategy: removeContributeOnlyResourceAndUpdateResolver
                 }
-            );
+            };
 
             return Differencer.diffCollection(collectionResource, collectionDocument, contributeOnly);
         }
@@ -342,39 +353,41 @@ export default class NODSynchroniser {
         // if missing a 'create-form' representation then we assume that the NOD can
         // not be changed.
         else if (options.readonly || !SemanticLink.matches(collectionResource, /create-form/)) {
-            log.info(`Collection '${SemanticLink.getUri(collectionResource, /self|canonical/)}' is read-only`);
-            const readOnlyOptions = _({}).extend(
-                options, {
+            log.debug(`[Sync] Collection '${SemanticLink.getUri(collectionResource, /self|canonical/)}' is read-only`);
+            const readOnlyOptions = {
+                ...options,
+                ...{
                     createStrategy: createReadonlyResourceAndUpdateResolver,
                     updateStrategy: updateReadonlyResourceAndUpdateResolver,
                     deleteStrategy: deleteReadonlyResourceAndUpdateResolver
                 }
-            );
+            };
 
             return Differencer.diffCollection(collectionResource, collectionDocument, readOnlyOptions);
         } else {
-            log.debug(`Collection  '${SemanticLink.getUri(collectionResource, /self|canonical/)}' is updatable`);
-            const opts = _({}).extend(
-                options, {
+            log.debug(`[Sync] Collection  '${SemanticLink.getUri(collectionResource, /self|canonical/)}' is updatable`);
+            const opts = {
+                ...options,
+                ...{
                     createStrategy: createResourceAndUpdateResolver,
                     updateStrategy: updateResourceAndUpdateResolver,
                     deleteStrategy: deleteResourceAndUpdateResolver
                 }
-            );
+            };
             return Differencer.diffCollection(collectionResource, collectionDocument, opts);
         }
     }
 
     /**
-     * Retrieves a resource and synchronises (its atrributes)
+     * Retrieves a resource and synchronises (its attributes)
      * @param {LinkedRepresentation} resource
      * @param {*} resourceDocument
      * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
      * @param {UtilOptions} options
      * @return {Promise} containing the resource {@link LinkedRepresentation}
      */
-    getResource (resource, resourceDocument, strategies, options = {}) {
-        log.info(`[Sync] resource ${SemanticLink.getUri(resource, /self/)}`);
+    getResource(resource, resourceDocument, strategies, options = {}) {
+        log.debug(`[Sync] resource ${SemanticLink.getUri(resource, /self/)}`);
 
         return nodMaker.getResource(resource, options)
             .then(resource => {
@@ -385,13 +398,16 @@ export default class NODSynchroniser {
                             if (strategy) {
 
                                 if (!_(strategy).isFunction()) {
-                                    log.warn('Calling function has not handed in correct strategy and will not provision');
+                                    log.warn('[Sync] Calling function has not handed in correct strategy and will not provision');
                                     return Promise.resolve({});
                                 }
                                 return strategy(resource, resourceDocument, options);
                             }
                             return Promise.resolve({});
-                        }));
+                        })
+                        // TODO: not understood
+                        .catch(err => log.warn(`Empty object ${SemanticLink.getUri(err, /self/)}`))
+                    );
             });
     }
 
@@ -404,9 +420,9 @@ export default class NODSynchroniser {
      * @param {UtilOptions} options
      * @return {Promise} containing the resource {@link LinkedRepresentation}
      */
-    getResourceInCollection (parentResource, resourceDocument, strategies, options = {}) {
+    getResourceInCollection(parentResource, resourceDocument, strategies, options = {}) {
 
-        log.info(`[Sync] collection ${SemanticLink.getUri(parentResource, /self/)}`);
+        log.debug(`[Sync] collection ${SemanticLink.getUri(parentResource, /self/)}`);
 
         return nodMaker
             .getCollectionResource(parentResource, _({}).defaults(options, {mappedTitle: 'name'}))
@@ -424,23 +440,24 @@ export default class NODSynchroniser {
      * @param {UtilOptions} options
      * @return {Promise} containing the collection {@link CollectionRepresentation}
      */
-    getCollectionInNamedCollection (parentResource, collectionName, collectionRel, collectionDocument, strategies, options = {}) {
+    getCollectionInNamedCollection(parentResource, collectionName, collectionRel, collectionDocument, strategies, options = {}) {
 
-        log.info(`[Sync] collection '${collectionName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
+        log.debug(`[Sync] collection '${collectionName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
 
-        options = _({}).defaults(options, {mappedTitle: 'name'});
+        options = {...options, ...{mappedTitle: 'name'}};
 
         return nodMaker
             .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
             .then(collectionResource => {
 
                 if (!collectionResource) {
-                    log.info(`No '${collectionName}' on resource ${SemanticLink.getUri(parentResource, /self/)}`);
+                    log.info(`[Sync] No '${collectionName}' on resource ${SemanticLink.getUri(parentResource, /self/)}`);
                     return Promise.resolve(parentResource);
                 }
                 // in the context of the collection, synchronise the collection part of the document
                 return this.synchroniseCollection(collectionResource, collectionDocument, options)
-                    .then(arrayToArguments(syncInfos => {
+                // returns [infos, createResults, updateItems, deleteItems], we'll just have 'infos'
+                    .then(([syncInfos]) => {
                         return nodMaker
                         // populate the potentially sparse collection - we need to ensure that
                         // any existing ones (old) are not stale and that any just created (sparse)
@@ -450,7 +467,7 @@ export default class NODSynchroniser {
                                 // each item in the collection perform the strategy
                                 return NODSynchroniser.tailRecursionThroughStrategies(strategies, options, syncInfos);
                             });
-                    }))
+                    })
                     .then(() => collectionResource);
             });
     }
@@ -466,7 +483,7 @@ export default class NODSynchroniser {
      * @param {UtilOptions} options
      * @return {Promise} containing the collection {@link CollectionRepresentation}
      */
-    getNamedCollection (parentResource, collectionName, collectionRel, parentDocument, strategies, options) {
+    getNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies, options) {
         return this.getCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument[collectionName], strategies, options);
     }
 
@@ -481,9 +498,9 @@ export default class NODSynchroniser {
      * @param {UtilOptions} options
      * @return {Promise} containing the resource {@link LinkedRepresentation}
      */
-    getResourceInNamedCollection (parentResource, collectionName, collectionRel, resourceDocument, strategies, options = {}) {
+    getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, strategies, options = {}) {
 
-        log.info(`[Sync] resource '${collectionName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
+        log.debug(`[Sync] resource '${collectionName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
 
         return nodMaker
         // ensure that the collection is added to the parent resource
@@ -504,11 +521,11 @@ export default class NODSynchroniser {
      * @param {UtilOptions} options
      * @return {Promise} containing the collection {@link CollectionRepresentation}
      */
-    getSingleton (parentResource, singletonName, singletonRel, parentDocument, strategies, options = {}) {
+    getSingleton(parentResource, singletonName, singletonRel, parentDocument, strategies, options = {}) {
 
         options = _({}).defaults(options, {mappedTitle: 'name'});
 
-        log.info(`[Sync] singleton '${singletonName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
+        log.debug(`[Sync] singleton '${singletonName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
 
         return nodMaker
             .getResource(parentResource)
@@ -516,7 +533,7 @@ export default class NODSynchroniser {
                 .tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options)
                 .then(singletonResource => {
                     if (!singletonResource) {
-                        log.info(`No update: singleton '${singletonName}' not found on ${SemanticLink.getUri(parentResource, /self/)}`);
+                        log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${SemanticLink.getUri(parentResource, /self/)}`);
                         return Promise.resolve(resource);
                     } else {
                         return nodMaker
@@ -526,7 +543,7 @@ export default class NODSynchroniser {
                                     if (strategy) {
 
                                         if (!_(strategy).isFunction()) {
-                                            log.warn(`Calling function has not handed in correct strategy and will not provision '${singletonName}'`, options);
+                                            log.warn(`[Sync] Calling function has not handed in correct strategy and will not provision '${singletonName}'`, options);
                                             return Promise.resolve({});
                                         }
                                         return strategy(singletonResource, parentDocument[singletonName], options);
@@ -542,10 +559,10 @@ export default class NODSynchroniser {
      * @param {CollectionRepresentation} collection
      * @param {string[]} documentUriList
      * @param {UtilOptions} options
-     * @return [] syncInfos
+     * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} syncInfos
      * @private
      */
-    synchroniseUriList (collection, documentUriList, options = {}) {
+    synchroniseUriList(collection, documentUriList, options = {}) {
 
         const uriListResolver = options.uriListResolver || NODSynchroniser.defaultUriListResolver;
         const resolver = options.resolver || NODSynchroniser.defaultResolver;
@@ -571,7 +588,7 @@ export default class NODSynchroniser {
                         return link.post(collection, /self/, 'application/json', uriList)
                             .then(response => {
                                 if (response.status === 201) {
-                                    log.info('Created');
+                                    log.debug('[Sync] Created');
                                     return axios.get(response.headers().location);
                                 } else {
                                     return Promise.reject(new Error(`Unable to create resources '${uriList.join(',')}'`));
@@ -594,15 +611,10 @@ export default class NODSynchroniser {
                             );
                         });
                     } else {
-                        log.error(`Ill formed representation on GET '${response.config.url}'`);
+                        log.error(`[Sync] Ill formed representation on GET '${response.config.url}'`);
                     }
                     return uriList;
                 });
-        };
-
-        const updateUriListAndUpdateResolver = () => {
-            // not implemented/not needed
-            return [];
         };
 
         const deleteUriListAndUpdateResolver = uriList => {
@@ -615,7 +627,7 @@ export default class NODSynchroniser {
                         });
                     }
                     else {
-                        log.error(`Unable to DELETE resources  '${uriList.join(',')}'`);
+                        log.error(`[Sync] Unable to DELETE resources  '${uriList.join(',')}'`);
                     }
                     return uriList;
                 })
@@ -626,14 +638,14 @@ export default class NODSynchroniser {
                             .then(response => {
 
                                 if (response.status === 200 || response.status === 204) {
-                                    log.info('Deleted');
+                                    log.debug('[Sync] Deleted');
 
                                     _(uriList).each(uri => {
                                         resolver.remove(uri);
                                     });
                                 }
                                 else {
-                                    log.error(`Unable to DELETE resources  '${uriList.join(',')}'`);
+                                    log.error(`[Sync] Unable to DELETE resources  '${uriList.join(',')}'`);
                                 }
                                 return uriList;
                             });
@@ -642,18 +654,86 @@ export default class NODSynchroniser {
 
         };
 
-        options = _({}).extend(
-            options,
-            {
-                createStrategy: createUriListAndUpdateResolver,
-                updateStrategy: updateUriListAndUpdateResolver,
-                deleteStrategy: deleteUriListAndUpdateResolver
-            }
-        );
+
+        /**
+         * Don't make request back to update, just remember the URI mapping so that if a reference to the
+         * network of data resource is required we can resolve a document reference to the real resource in
+         * our network.
+         */
+        const updateContributeOnlyResourceAndUpdateResolver = (collectionResourceItem, updateDataDocument) => {
+            resolver.update(
+                SemanticLink.getUri(updateDataDocument, /self|canonical/),
+                SemanticLink.getUri(collectionResourceItem, /self|canonical/)
+            );
+            return Promise.resolve(undefined);
+        };
+
+        /**
+         * A contribute-only collection allows to add a the new resource to the collection and then
+         * link it.
+         */
+        const addContributeOnlyResourceAndUpdateResolver = (collectionResource, createDataDocument) => {
+
+            return nodMaker
+                .createCollectionResourceItem(collectionResource, createDataDocument, options)
+                .then(result => {
+                    resolver.add(
+                        SemanticLink.getUri(createDataDocument, /self|canonical/),
+                        SemanticLink.getUri(result, /self|canonical/));
+                    return result;
+                });
+        };
+
 
         const resourceUriList = uriListResolver(collection);
 
-        return Differencer.diffUriList(resourceUriList, documentUriList, options);
+        if (options.contributeonly) {
+            log.debug(`[Sync] uri-list is contribute-only: [${resourceUriList.join(',')}]`);
+            const contributeOnly = {
+                ...options,
+                ...{
+                    createStrategy: addContributeOnlyResourceAndUpdateResolver,
+                    updateStrategy: updateContributeOnlyResourceAndUpdateResolver,
+                    deleteStrategy: () => []
+                }
+            };
+
+            return Differencer.diffUriList(resourceUriList, documentUriList, contributeOnly);
+        }
+        // If the caller has signalled that the collection is read-only, or the collection
+        // if missing a 'create-form' representation then we assume that the NOD can
+        // not be changed.
+        else if (options.readonly) {
+
+            log.error('Readonly uri-list is not implemented');
+
+            log.debug('[Sync] uri-list is read-only: ');
+            const readOnlyOptions = {
+                ...options,
+                ...{
+                    createStrategy: () => [],
+                    updateStrategy: () => [],
+                    deleteStrategy: () => []
+                }
+            };
+            return Differencer.diffUriList(uriListResolver(collection), documentUriList, readOnlyOptions);
+
+
+        } else {
+            log.debug(`[Sync] uri-list is updateable: [${[resourceUriList].join(',')}]`);
+            const opts = {
+                ...options,
+                ...{
+                    createStrategy: createUriListAndUpdateResolver,
+                    updateStrategy: () => [],
+                    deleteStrategy: deleteUriListAndUpdateResolver
+                }
+            };
+            return Differencer.diffUriList(resourceUriList, documentUriList, opts);
+
+
+        }
+
 
     }
 
@@ -668,25 +748,64 @@ export default class NODSynchroniser {
      * @param {UtilOptions} options
      * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
      */
-    getUriListOnNamedCollection (parentResource, uriListName, uriListRel, uriList, options = {}) {
+    getUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {
 
-        log.info(`[Sync] uriList '${uriListName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
+        log.debug(`[Sync] uriList '${uriListName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
 
         return nodMaker
             .getResource(parentResource)
             .then(resource => nodMaker
-                .tryGetNamedCollectionResource(resource, uriListName, uriListRel, undefined, options)
+                .tryGetNamedCollectionResource(resource, uriListName, uriListRel, options)
                 .then(collection => {
                     if (!collection) {
-                        log.info(`No update: uri-list '${uriListName}' not found on ${SemanticLink.getUri(parentResource, /self/)}`);
+                        log.info(`[Sync] No update: uri-list '${uriListName}' not found on ${SemanticLink.getUri(parentResource, /self/)}`);
                         return Promise.resolve(undefined);
                     } else {
 
                         return this.synchroniseUriList(collection, uriList, options)
-                            .then(arrayToArguments(() => {
-                                options = _({}).extend(options, {forceLoad: true});
+                        // note discarding synch infos (not sure why)
+                            .then(() => {
+                                options = {...options, ...{forceLoad: true}};
                                 return nodMaker.getCollectionResourceAndItems(collection, options);
-                            }));
+                            });
+                    }
+                }));
+    }
+
+    /**
+     * Retrieves a uri-list from a named collection on a resource, uses the uriListResolver to resolve
+     * items in the collection (if necessary) and then PUTs the provided uri-list back on the collection.
+     *
+     * @param {LinkedRepresentation} parentResource
+     * @param {string} uriListName
+     * @param {string|RegExp|string[]|RegExp[]} uriListRel
+     * @param {*[]} uriList
+     * @param {UtilOptions} options
+     * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
+     */
+    patchUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {
+
+        log.debug(`[Sync] uriList '${uriListName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
+
+        return nodMaker
+            .getResource(parentResource)
+            .then(resource => nodMaker
+                .tryGetNamedCollectionResource(resource, uriListName, uriListRel, options)
+                .then(collection => {
+                    if (!collection) {
+                        log.info(`[Sync] No update: uri-list '${uriListName}' not found on ${SemanticLink.getUri(parentResource, /self/)}`);
+                        return Promise.resolve(undefined);
+                    } else {
+                        // make all the necessary changes to create and remove individual uri
+                        return this.synchroniseUriList(collection, uriList, options)
+                            .then(() => {
+                                // now make it so and the server should pay nicely and accept all the changes
+                                log.debug('[Sync] update collection with uri-list');
+                                return nodMaker
+                                    .getSingletonResource(collection, 'editForm', /edit-form/, options)
+                                    .then(form => put(form, /submit/, 'text/uri-list', uriList.join('\n')));
+                            })
+                            .then(() => nodMaker.getCollectionResourceAndItems(collection, {...options, ...{forceLoad: true}}));
                     }
                 }));
     }

@@ -1,5 +1,5 @@
 'use strict';
-import { nodMaker } from './NODMaker';
+import {nodMaker} from './NODMaker';
 import Collection from './Collection';
 import log from './Logger';
 
@@ -16,7 +16,7 @@ export default class PooledResource {
     /**
      * @param {LinkedRepresentation} resource
      */
-    constructor (resource) {
+    constructor(resource) {
         this.resource = resource;
 
         /**
@@ -43,7 +43,7 @@ export default class PooledResource {
      * @returns {function(LinkedRepresentation, *):Promise.<LinkedRepresentation>|undefined}
      * @private
      */
-    resolve (collectionName, collectionRel, type) {
+    resolve(collectionName, collectionRel, type) {
         return (resource, options) => Collection
             .getResourceInNamedCollection(resource, collectionName, collectionRel, resource, options)
             .then(document => {
@@ -61,7 +61,7 @@ export default class PooledResource {
      * @param {Link} linkRel
      * @returns {LinkedRepresentation}
      */
-    resourceFactory (linkRel) {
+    resourceFactory(linkRel) {
         return nodMaker.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title});
     }
 
@@ -76,7 +76,7 @@ export default class PooledResource {
      * @param {string|RegExp|string[]|RegExp[]} collectionRel
      * @param type
      */
-    registerRelToResolve (collectionName, collectionRel, type) {
+    registerRelToResolve(collectionName, collectionRel, type) {
         this.relsToResolve[type] = this.resolve(collectionName, collectionRel, type);
     }
 
@@ -85,15 +85,48 @@ export default class PooledResource {
      * @param {string} type
      * @returns {*}
      */
-    resourceResolver (type/*, context */) {
+    resourceResolver(type/*, context */) {
 
         if (this.relsToResolve[type]) {
             return this.relsToResolve[type];
         } else {
-            //log.info(`Unable to resolve pooled resource '${type}', available: ${_(rels).keys().join(', ')}`);
+            log.info(`Unable to resolve pooled resource '${type}', available: [${Object.keys(this.relsToResolve).join(',')}]`);
             return () => Promise.resolve(undefined);
         }
     }
+}
+
+export default function (contextResource) {
+
+    let resolve = (collectionName, collectionRel, type) =>
+        (resource, options) => Collection
+            .getResourceInNamedCollection(contextResource, collectionName, collectionRel, resource, options)
+            .then(document => {
+                if (document) {
+                    return document;
+                } else {
+                    log.error(`TODO: make new pooled resource: ${type} '${resource.name || ""}'`);
+                    return undefined;
+                }
+            });
+
+    return {
+        resourceFactory: linkRel => nodMaker.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
+        resourceResolver: (type/*, context */) => {
+
+            const rels = {
+                role: resolve('roles', /roles/, type),
+            };
+
+            if (rels[type]) {
+                return rels[type];
+            } else {
+                $log.info(`Unable to resolve pooled resource '${type}', available: [${Object.keys(this.relsToResolve).join(',')}]`);
+                return () => Promise.resolve(undefined);
+            }
+        }
+    };
+
 }
 
 export let pooledResource = (resource) => new PooledResource(resource);

@@ -7,7 +7,7 @@
             <drag-and-droppable-model
                     :model="hydrateTenant"
                     media-type="application/json"
-                    :dropped="createOrUpdateTenantOnRoot">
+                    :dropped="createOrUpdateUsersOnTenant">
                 <b-button @click="gotoTenant(tenant)">{{ tenant.name }}</b-button>
             </drag-and-droppable-model>
         </div>
@@ -21,6 +21,8 @@
     import {redirectToTenant, redirectToSelectTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
     import {getTenantAndTodos} from '../domain/tenant';
+    import {pooledTagResourceResolver} from '../domain/tags';
+    import {getUri} from 'semantic-link';
 
     export default {
         components: {DragAndDroppableModel},
@@ -89,13 +91,73 @@
                         log.error(err);
                     });
             },
-            hydrateTenant() {
+            createOrUpdateUsersOnTenant(document, options) {
+
+                const tenantRepresentation = this.$root.$api.tenants.items[0];
+                const tenantDocument = document.tenants.items[0];
+
+                log.debug(`Update tenant ${tenantRepresentation.name} --> ${SemanticLink.getUri(tenantRepresentation, 'self')}`);
+
+
+                const syncUsersStrategy = (tenantRepresentation, tenantDocument, strategies, options) => {
+                    return nodSynchroniser.getNamedCollection(tenantRepresentation, 'users', /users/, tenantDocument, strategies, options);
+                };
+
+                const syncTodosStrategy = (userRepresentation, userDocument, strategies, options) => {
+                    return nodSynchroniser.getNamedCollection(userRepresentation, 'todos', /todos/, userDocument, strategies, options);
+                };
+
+                const syncTagsStrategy = (todoRepresentation, todoDocument, strategies, options) => {
+                    const tagUriList = [...todoDocument.tags.items].map(item => getUri(item, 'self'));
+                    log.info(`Using tag uri-list: [${tagUriList.join(',')}]`)
+                    return nodSynchroniser.patchUriListOnNamedCollection(
+                        todoRepresentation,
+                        'tags',
+                        /tags/,
+                        tagUriList,
+                        {
+                            ...options,
+                            ...{contributeonly: true},
+                            ...pooledTagResourceResolver(this.$root.$api)
+                        });
+                };
+
+                nodSynchroniser
+                    .getResource(
+                        tenantRepresentation,
+                        tenantDocument,
+                        [
+                            (tenantRepresentation, tenantDocument, options) => syncUsersStrategy(
+                                tenantRepresentation,
+                                tenantDocument,
+                                [
+                                    (usersRepresentation, usersDocument, options) => syncTodosStrategy(
+                                        usersRepresentation,
+                                        usersDocument,
+                                        [
+                                            (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, [], options)
+                                        ],
+                                        options)
+                                ],
+                                options)
+                        ],
+                        {})
+                    .catch(err => {
+                        this.$notify({
+                            title: "Provisioning Error",
+                            text: err.message,
+                            type: 'error'
+                        });
+                        log.error(err);
+                    });
+            },
+            hydrateTenant(tenant) {
                 return getTenantAndTodos(this.$root.$api)
                     .then(hydratedApi => {
                         const tenant = _({}).extendResource(hydratedApi);
-                        delete tenant.me;
-                        delete tenant.users;
-                        delete tenant.authenticate;
+                        // delete tenant.me;
+                        // delete tenant.users;
+                        // delete tenant.authenticate;
                         return tenant;
                     })
                     .catch(err => {

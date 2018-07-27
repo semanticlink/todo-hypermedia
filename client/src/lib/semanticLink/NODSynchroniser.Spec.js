@@ -116,6 +116,7 @@ describe('NOD Synchroniser', () => {
                 getResource.returns(Promise.resolve());
                 tryGetNamedCollectionResource.returns(Promise.resolve({singleton: ''}));
                 getCollectionResourceAndItems.returns(Promise.resolve());
+
             });
 
             it('should use default create resolver POSTs back and add to resolver', () => {
@@ -168,6 +169,7 @@ describe('NOD Synchroniser', () => {
                     .callsFake((x, y, options) => Promise.resolve(options.deleteStrategy(['item'])));
 
                 let options = {
+                    readonly: false,
                     resolver: {
                         remove: sinon.stub()
                     }

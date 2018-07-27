@@ -1,11 +1,7 @@
 import _ from './mixins/underscore';
 import log from './Logger';
-import { Comparator } from './Comparator';
+import {Comparator} from './Comparator';
 import SemanticLink from './SemanticLink';
-
-const arrayToArguments = (functionWithArgs) => {
-    return array => functionWithArgs.apply(this, array);
-};
 
 /**
  * Processes difference sets (create, update, delete) for between two client-side collections {@Link CollectionRepresentation}
@@ -46,7 +42,7 @@ export default class Differencer {
      *
      * @type {function()[]}
      */
-    static get defaultEqualityOperators () {
+    static get defaultEqualityOperators() {
         return [
             Comparator.canonicalOrSelf,
             Comparator.name,
@@ -95,7 +91,8 @@ export default class Differencer {
      * @param {SynchroniseOptions} options a document with a collection CollectionRepresentation
      * format that describes the state of the resources.
      *
-     * @return {Promise} <p>An array of 4 values for the form [SynchroniseInfo[], createlist, updatelist, deletelist].</p>
+     * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>}
+     *   <p>An array of 4 values for the form [SynchroniseInfo[], createlist, updatelist, deletelist].</p>
      *   <p>
      *   Where the first collection is the collection resource grouped with the document data. The createlist is
      *   an array describing the resources created. The update list is an array that describes the resources
@@ -114,7 +111,7 @@ export default class Differencer {
      *   the collection resource prior to being deleted.
      *   </p>
      */
-    static diffCollection (collectionResource, collectionDocument = {items: []}, options = {}) {
+    static diffCollection(collectionResource, collectionDocument = {items: []}, options = {}) {
 
         const createStrategy = options.createStrategy || (item => Promise.resolve(item));
         const updateStrategy = options.updateStrategy ||
@@ -127,23 +124,24 @@ export default class Differencer {
             comparators = [comparators];
         }
 
-        /** @type {LinkedRepresentation[]} items from the collectionResource */
-        let deleteItems = [];
-
-        /** @type {*} tuple of collection item {@Link LinkedRepresentation}
-         *            document item (@Link LinkedRepresentation}
+        /**
+         * tuple of collection item and and document item
+         * @type {Array.<LinkedRepresentation, LinkedRepresentation>}
          */
         let updateItems = [];
 
-        /* @type {LinkedRepresentation[]} document items {@Link LinkedRepresentation} */
-        let createItems = [];
+        // clone the items
+        /** @type {LinkedRepresentation[]} items from the collectionResource */
+        let deleteItems = [...collectionResource.items];
 
-        deleteItems = collectionResource.items ? collectionResource.items.slice(0) : [];
-        createItems = collectionDocument.items ? collectionDocument.items.slice(0) : [];
+        /* @type {LinkedRepresentation[]} items from the document } */
+        let createItems = [...collectionDocument.items];
 
         _(comparators).each(comparator => {
 
             // Get a list of items that need to be updated.
+            // create an array of indexes, eg
+            // if the first two match return [[0,0]]
             let itemsToMove = _(deleteItems)
                 .chain()
                 .map((collectionItem, collectionIndex) => {
@@ -154,6 +152,7 @@ export default class Differencer {
                 .value();
 
             // Remove those items that are to be updated from the 'delete' list
+            // on any that are removed, add reference for later processing onto the pair
             _(itemsToMove)
                 .chain()
                 .sortBy(pair => pair[0])
@@ -164,6 +163,7 @@ export default class Differencer {
                 });
 
             // Remove those items that are to be updated from the 'create' list
+            // on any that are removed, add reference for later processing onto the pair
             _(itemsToMove)
                 .chain()
                 .sortBy(pair => pair[1])
@@ -246,24 +246,29 @@ export default class Differencer {
 
                 const infos = makeSynchronisationInfos(createResults, updateItems);
 
-                log.debug(`[Collection] '${SemanticLink.tryGetUri(collectionResource, /self/)}' - [create, update, delete] (${createResults.length} ${updateItems.length} ${deleteItems.length} )`)
+                log.debug(`[Collection] '${SemanticLink.tryGetUri(collectionResource, /self/)}' - [add, matched, remove] (${createResults.length} ${updateItems.length} ${deleteItems.length} )`);
                 return [infos, createResults, updateItems, deleteItems];
             });
     }
 
     /**
-     * A basic differencer based on two sets of uri-list (array of strings). It currently does not support updates. You
-     * are either creating or deleting to get back the UriList
+     * A basic differencer based on two sets of uri-list (array of strings).
+     *
+     * No support for :
+     *  - updates. You are either creating or deleting to get back the UriList
+     *  - readonly (do you can't create or delete)
+     *  - contribute (you can create and link)
      *
      * @param {*[]} resourceUriList
      * @param {*[]} documentUriList
      * @param {UtilOptions} options
-     * @return {Promise.<Array>} containing
+     * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} containing [syncInfos, created, updated, deleted]
      */
-    static diffUriList (resourceUriList, documentUriList, options = {}) {
+    static diffUriList(resourceUriList, documentUriList, options = {}) {
 
         const createStrategy = options.createStrategy || (uriList => Promise.resolve(uriList));
         const deleteStrategy = options.deleteStrategy || (uriList => Promise.resolve(uriList));
+        const updateStrategy = options.updateStrategy || (uriList => Promise.resolve(uriList));
 
         const all = _(resourceUriList)
             .chain()
@@ -296,7 +301,7 @@ export default class Differencer {
                     })
                     .then(() => [createResults, [], deletedItems]);
             })
-            .then(arrayToArguments((createResults, updateItems, deleteItems) => {
+            .then(([createResults, updateItems, deleteItems]) => {
 
                 /**
                  * The synchronise info describes the new state, that is the state of the
@@ -304,7 +309,7 @@ export default class Differencer {
                  *
                  * @return {SynchroniseInfo[]}
                  */
-                const makeSynchronisationInfos = (createResults) => {
+                const makeSynchronisationInfos = createResults => {
                     return _(createResults)
                         .chain()
                         .map(createResult => ({
@@ -318,7 +323,7 @@ export default class Differencer {
                 const infos = makeSynchronisationInfos(createResults, deleteItems);
                 return [infos, createResults, updateItems, deleteItems];
 
-            }));
+            });
 
     }
 

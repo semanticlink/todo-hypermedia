@@ -131,14 +131,7 @@ namespace App.RepresentationExtensions
                     Description = "The third-party id fo the user (eg 'auth0|xxxxx')",
                     Required = false,
                     Multiple = true
-                },
-                new CollectionInputFormItemRepresentation()
-                {
-                    Name = "todos",
-                    Description = "The todos of the user",
-                    Required = false,
-                    Multiple = true
-                },
+                }
             };
         }
     }

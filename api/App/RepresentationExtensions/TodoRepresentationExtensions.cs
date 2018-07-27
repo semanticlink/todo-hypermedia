@@ -198,14 +198,7 @@ namespace App.RepresentationExtensions
                     Name = "due",
                     Description = "The UTC date the todo is due"
                 },
-                new CollectionInputFormItemRepresentation
-                {
-                    Name = "tags",
-                    Description = "A todo can be grouped by tags (known also as categories)",
-                    Required = false,
-                    Multiple = true
-                },
-            };
+             };
         }
     }
 }

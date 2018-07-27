@@ -141,12 +141,6 @@ namespace App.RepresentationExtensions
                     Description = "The name of the tenant to be shown on the screen",
                     Required = false
                 },
-                new CollectionInputFormItemRepresentation()
-                {
-                    Name = "users",
-                    Description = "Users that belong to this tenant",
-                    Required = false
-                }
             };
         }
 

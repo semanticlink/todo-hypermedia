@@ -1,4 +1,4 @@
-import { expect } from 'chai';
+import {expect} from 'chai';
 import log from './Logger';
 import Differencer from './Differencer';
 
@@ -33,11 +33,11 @@ describe('NOD Differencer', () => {
      * @return {*}
      */
     const verifySyncCounts = (createdCount, updatedCount, deletedCount) => {
-        return arrayToArguments((syncInfos, created, updated, deleted) => {
+        return ([, created, updated, deleted]) => {
             expect(created.length).to.equal(createdCount, 'created');
             expect(updated.length).to.equal(updatedCount, 'updated');
             expect(deleted.length).to.equal(deletedCount, 'deleted');
-        });
+        };
     };
 
     describe('Collections', () => {

@@ -1,5 +1,3 @@
-const nodeExternals = require('webpack-node-externals');
-
 /**
  * @see https://github.com/zinserjan/mocha-webpack/blob/v2.0.0-beta.0/docs/installation/webpack-configuration.md
  */
@@ -22,6 +20,5 @@ module.exports = {
         devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
     },
     target: 'node',  // webpack should compile node compatible code
-    externals: [nodeExternals()], // in order to ignore all modules in node_modules folder
     devtool: 'inline-cheap-module-source-map'
 };

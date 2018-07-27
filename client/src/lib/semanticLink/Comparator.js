@@ -48,8 +48,8 @@ export default class Comparator {
      * @return {boolean}
      */
     static canonicalOrSelf (lvalue, rvalue) {
-        const lUri = SemanticLink.getUri(lvalue, /canonical|self/);
-        const rUri = SemanticLink.getUri(rvalue, /canonical|self/);
+        const lUri = SemanticLink.getUri(lvalue, /self|canonical/);
+        const rUri = SemanticLink.getUri(rvalue, /self|canonical/);
         return !!lUri && lUri === rUri;
     }
 
