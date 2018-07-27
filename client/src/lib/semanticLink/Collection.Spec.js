@@ -7,22 +7,22 @@ describe('Pooled collection', () => {
 
     let document = {
         links: [{
-            rel: 'self', href: 'http://example.com/role/1'
+            rel: 'self', href: 'http://api.example.com/role/1'
         }],
         name: 'Admin'
     };
 
     let pooledCollection = {
         links: [
-            {rel: 'self', href: 'http://example.com/role/'}
+            {rel: 'self', href: 'http://api.example.com/role/'}
         ],
         items: [document]
     };
 
     let parentCollection = {
         links: [
-            {rel: 'self', href: 'http://example.com/collection/'},
-            {rel: 'roles', href: 'http://example.com/role/'},
+            {rel: 'self', href: 'http://api.example.com/collection/'},
+            {rel: 'roles', href: 'http://api.example.com/role/'},
         ],
         roles: pooledCollection
     };
@@ -34,7 +34,7 @@ describe('Pooled collection', () => {
 
         let resource = {
             links: [{
-                rel: 'self', href: 'http://example.com/role/2'
+                rel: 'self', href: 'http://api.example.com/role/2'
             }],
             name: 'Admin'
         };
@@ -70,8 +70,8 @@ describe('Pooled collection', () => {
             Collection
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(() => {
-                    expect(documentUriResolved).to.equal('http://example.com/role/2');
-                    expect(nodUriResolved).to.equal('http://example.com/role/1');
+                    expect(documentUriResolved).to.equal('http://api.example.com/role/2');
+                    expect(nodUriResolved).to.equal('http://api.example.com/role/1');
                 });
         });
     });
@@ -80,7 +80,7 @@ describe('Pooled collection', () => {
 
         let resource = {
             links: [{
-                rel: 'self', href: 'http://example.com/role/2'
+                rel: 'self', href: 'http://api.example.com/role/2'
             }],
             name: 'NewRole'
         };
@@ -89,9 +89,9 @@ describe('Pooled collection', () => {
             let options = {
                 resolver: {
                     resolve: resolving => {
-                        expect(resolving).to.equal('http://example.com/role/2');
+                        expect(resolving).to.equal('http://api.example.com/role/2');
                         // we just say here that we've already got it - so return this from the known collection
-                        return 'http://example.com/role/1';
+                        return 'http://api.example.com/role/1';
                     }
                 }
             };
@@ -108,15 +108,15 @@ describe('Pooled collection', () => {
                 resolver: {
                     resolve: resolving => resolving,
                     add: (documentUri, nodUri) => {
-                        expect(documentUri).to.equal('http://example.com/role/2');
-                        expect(nodUri).to.equal('http://example.com/role/3');
+                        expect(documentUri).to.equal('http://api.example.com/role/2');
+                        expect(nodUri).to.equal('http://api.example.com/role/3');
                     },
                 }
             };
 
             let createdResource = {
                 links: [{
-                    rel: 'self', href: 'http://example.com/role/3'
+                    rel: 'self', href: 'http://api.example.com/role/3'
                 }],
                 name: 'NewRole'
             };
@@ -156,7 +156,7 @@ describe('Pooled collection', () => {
 
             let createdResource = {
                 links: [{
-                    rel: 'self', href: 'http://example.com/role/3'
+                    rel: 'self', href: 'http://api.example.com/role/3'
                 }],
                 name: 'UtterlyNewRole'
             };

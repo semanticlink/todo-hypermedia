@@ -15,43 +15,43 @@ describe('Resource Merger:', () => {
             'links': [
                 {
                     'rel': 'self',
-                    'href': 'http://localhost:1080/filter/user/113194'
+                    'href': 'http://api.example.com/filter/user/113194'
                 },
                 {
                     'rel': 'user',
-                    'href': 'http://localhost:1080/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
+                    'href': 'http://api.example.com/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
                 },
             ],
             'name': 'Age Group',
             'order': 3,
             'questionItems': [
-                'http://localhost:1080/question/item/627800'
+                'http://api.example.com/question/item/627800'
             ]
         };
         let document = {
             'links': [
                 {
                     'rel': 'self',
-                    'href': 'http://localhost:1080/filter/user/113194'
+                    'href': 'http://api.example.com/filter/user/113194'
                 },
                 {
                     'rel': 'user',
-                    'href': 'http://localhost:1080/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
+                    'href': 'http://api.example.com/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
                 },
             ],
             'name': 'Age Group',
             'order': 3,
             'questionItems': [
-                'http://localhost:1080/question/item/627801',
-                'http://localhost:1080/question/item/627802',
-                'http://localhost:1080/question/item/627803',
+                'http://api.example.com/question/item/627801',
+                'http://api.example.com/question/item/627802',
+                'http://api.example.com/question/item/627803',
             ]
         };
         let form = {
             'links': [
                 {
                     'rel': 'self',
-                    'href': 'http://localhost:1080/filter/user/form/edit'
+                    'href': 'http://api.example.com/filter/user/form/edit'
                 }
             ],
             'items': [
@@ -96,9 +96,9 @@ describe('Resource Merger:', () => {
             expect(result.questionItems.length).to.equal(3);
         });
         it('should update to new form elements with resolved values', () => {
-            expect(_(result.questionItems).contains('http://localhost:1080/question/item/627801XX')).to.be.true;
-            expect(_(result.questionItems).contains('http://localhost:1080/question/item/627802XX')).to.be.true;
-            expect(_(result.questionItems).contains('http://localhost:1080/question/item/627803XX')).to.be.true;
+            expect(_(result.questionItems).contains('http://api.example.com/question/item/627801XX')).to.be.true;
+            expect(_(result.questionItems).contains('http://api.example.com/question/item/627802XX')).to.be.true;
+            expect(_(result.questionItems).contains('http://api.example.com/question/item/627803XX')).to.be.true;
         });
     });
 
@@ -288,7 +288,7 @@ describe('Resource Merger:', () => {
                 it('should return arrays on the top-level', () => {
 
                     let form = {
-                        'links': [{'rel': 'self', 'href': 'http://localhost:1080/question/logic/item/form/edit'}],
+                        'links': [{'rel': 'self', 'href': 'http://api.example.com/question/logic/item/form/edit'}],
                         'items': [
                             {
                                 'type': 'http://types/text',
@@ -334,20 +334,20 @@ describe('Resource Merger:', () => {
 
                     var resource = {
                         'expression': {
-                            'type': 'http://types.cemplicity.com/survey/logic/operator/and',
+                            'type': 'http://types.example.com/survey/logic/operator/and',
                             'items': [
                                 {
-                                    'question': 'http://localhost:1080/question/104646',
+                                    'question': 'http://api.example.com/question/104646',
                                     'questionItem': [
-                                        'http://localhost:1080/question/item/695493'
+                                        'http://api.example.com/question/item/695493'
                                     ]
                                 },
                                 {
-                                    'question': 'http://localhost:1080/question/104652',
+                                    'question': 'http://api.example.com/question/104652',
                                     'questionItem': [
-                                        'http://localhost:1080/question/item/695508',
-                                        'http://localhost:1080/question/item/695509',
-                                        'http://localhost:1080/question/item/695510'
+                                        'http://api.example.com/question/item/695508',
+                                        'http://api.example.com/question/item/695509',
+                                        'http://api.example.com/question/item/695510'
                                     ]
                                 }
                             ]
@@ -371,15 +371,15 @@ describe('Resource Merger:', () => {
                              * We don't want this type of response
                              {
                                  "expression": {
-                                     "type": "http://types.cemplicity.com/survey/logic/operator/and",
+                                     "type": "http://types.example.com/survey/logic/operator/and",
                                      "items": {
                            here ------>  "0": {
-                                             "question": "http://localhost:1080/question/104646",
-                                             "questionItem": ["http://localhost:1080/question/item/695493"]
+                                             "question": "http://api.example.com/question/104646",
+                                             "questionItem": ["http://api.example.com/question/item/695493"]
                                          },
                                          "1": {
-                                             "question": "http://localhost:1080/question/104652",
-                                             "questionItem": ["http://localhost:1080/question/item/695508", "http://localhost:1080/question/item/695509", "http://localhost:1080/question/item/695510"]
+                                             "question": "http://api.example.com/question/104652",
+                                             "questionItem": ["http://api.example.com/question/item/695508", "http://api.example.com/question/item/695509", "http://api.example.com/question/item/695510"]
                                          }
                                      }
                                  },
@@ -413,7 +413,7 @@ describe('Resource Merger:', () => {
                         ],
                         'name': 'Simplest Survey',
                         'title': 'Simplest Survey',
-                        'state': 'http://types.cemplicity.com/survey/state/new',
+                        'state': 'http://types.example.com/survey/state/new',
                         'reference': '',
                     };
 
@@ -435,7 +435,7 @@ describe('Resource Merger:', () => {
                     return resourceMerger.createMerge(document, form, options)
                         .then(doc => {
                             expect(_(doc).keys()).to.deep.equal(['title', 'state']);
-                            expect(doc.state).to.equal('http://types.cemplicity.com/survey/state/newXX');
+                            expect(doc.state).to.equal('http://types.example.com/survey/state/newXX');
 
                         });
                 });
@@ -446,11 +446,11 @@ describe('Resource Merger:', () => {
                 const document = {
                     'expression': {
                         'type': 'not',
-                        'question': 'http://localhost:1080/question/87869',
+                        'question': 'http://api.example.com/question/87869',
                         'question-item': [
-                            'http://localhost:1080/question/item/572444',
-                            'http://localhost:1080/question/item/572445'],
-                        'single-multiple': 'http://localhost:1080/question/item/55555'
+                            'http://api.example.com/question/item/572444',
+                            'http://api.example.com/question/item/572445'],
+                        'single-multiple': 'http://api.example.com/question/item/55555'
                     },
                 };
 
@@ -523,18 +523,18 @@ describe('Resource Merger:', () => {
                     });
 
                     it('should  match http://types/select single: question with uri rewrite', () => {
-                        expect(expression.question).to.equal('http://localhost:1080/question/87869XX');
+                        expect(expression.question).to.equal('http://api.example.com/question/87869XX');
                     });
 
                     it('should match http://types/select multiple: questionItem with array or rewritten uris', () => {
                         expect(expression.questionItem).to.deep.equal([
-                            'http://localhost:1080/question/item/572444XX',
-                            'http://localhost:1080/question/item/572445XX']);
+                            'http://api.example.com/question/item/572444XX',
+                            'http://api.example.com/question/item/572445XX']);
                     });
 
                     it('should match http://types/select multiple: string returned as array', () => {
 
-                        expect(expression.singleMultiple).to.deep.equal(['http://localhost:1080/question/item/55555XX']);
+                        expect(expression.singleMultiple).to.deep.equal(['http://api.example.com/question/item/55555XX']);
                     });
 
                 });
@@ -758,36 +758,36 @@ describe('Resource Merger:', () => {
                     'links': [
                         {
                             'rel': 'self',
-                            'href': 'http://localhost:1080/filter/user/113194'
+                            'href': 'http://api.example.com/filter/user/113194'
                         },
                         {
                             'rel': 'user',
-                            'href': 'http://localhost:1080/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
+                            'href': 'http://api.example.com/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
                         },
                     ],
                     'name': 'Age Group',
                     'order': 3,
                     'questionItems': [
-                        'http://localhost:1080/question/item/627800'
+                        'http://api.example.com/question/item/627800'
                     ]
                 };
                 let document = {
                     'links': [
                         {
                             'rel': 'self',
-                            'href': 'http://localhost:1080/filter/user/113194'
+                            'href': 'http://api.example.com/filter/user/113194'
                         },
                         {
                             'rel': 'user',
-                            'href': 'http://localhost:1080/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
+                            'href': 'http://api.example.com/user/97cde947-9edb-4c1a-9c27-5ae3cfb092b4'
                         },
                     ],
                     'name': 'Age Group',
                     'order': 3,
                     'questionItems': [
-                        'http://localhost:1080/question/item/627801',
-                        'http://localhost:1080/question/item/627802',
-                        'http://localhost:1080/question/item/627803',
+                        'http://api.example.com/question/item/627801',
+                        'http://api.example.com/question/item/627802',
+                        'http://api.example.com/question/item/627803',
                     ]
                 };
 
@@ -795,7 +795,7 @@ describe('Resource Merger:', () => {
                 const result = resourceMerger.transformAndCleanTrackedResources(resource, document, stubbedResource.isTracked);
 
                 expect(stub.called).to.be.true;
-                expect(result.links[0].href).to.equal('http://localhost:1080/filter/user/113194');
+                expect(result.links[0].href).to.equal('http://api.example.com/filter/user/113194');
                 expect(result.name).to.not.be.null;
                 expect(result.questionItems).to.not.be.null;
                 expect(result.questionItems.length).to.equal(3);
@@ -854,13 +854,13 @@ describe('Resource Merger:', () => {
                 const document = {
                     'dataSources': [
                         {
-                            'id': 'http://types.cemplicity.com/chart/identifier/4',
+                            'id': 'http://types.example.com/chart/identifier/4',
                             'items': [
                                 {
-                                    'question': 'http://localhost:1080/question/96905'
+                                    'question': 'http://api.example.com/question/96905'
                                 },
                                 {
-                                    'question': 'http://localhost:1080/question/969010'
+                                    'question': 'http://api.example.com/question/969010'
                                 }
                             ]
                         }
@@ -883,8 +883,8 @@ describe('Resource Merger:', () => {
                         const dataSource = doc.dataSources[0];
 
                         expect(dataSource.items.length).to.equal(2);
-                        expect(dataSource.items[0].question).to.equal('http://localhost:1080/question/96905XX');
-                        expect(dataSource.items[1].question).to.equal('http://localhost:1080/question/969010XX');
+                        expect(dataSource.items[0].question).to.equal('http://api.example.com/question/96905XX');
+                        expect(dataSource.items[1].question).to.equal('http://api.example.com/question/969010XX');
 
                     });
 

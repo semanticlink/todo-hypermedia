@@ -58,19 +58,19 @@ describe('NOD Synchroniser', () => {
                 'links': [
                     {
                         'rel': 'self',
-                        'href': 'http://localhost:1080/survey/question/notification/1504'
+                        'href': 'http://api.example.com/survey/question/notification/1504'
                     },
                     {
                         'rel': 'up',
-                        'href': 'http://localhost:1080/question/107214'
+                        'href': 'http://api.example.com/question/107214'
                     },
                     {
                         'rel': 'question-item',
-                        'href': 'http://localhost:1080/question/item/705233'
+                        'href': 'http://api.example.com/question/item/705233'
                     }
                 ],
                 'email': [
-                    'http://localhost:1080/user/02f46ed8-3b6e-4cef-ae47-e15cccf730eb'
+                    'http://api.example.com/user/02f46ed8-3b6e-4cef-ae47-e15cccf730eb'
                 ]
 
             };
@@ -80,7 +80,7 @@ describe('NOD Synchroniser', () => {
                 'links': [
                     {
                         'rel': 'self',
-                        'href': 'http://localhost:1080/user/02f46ed8-3b6e-4cef-ae47-e15cccf730eb/notification/'
+                        'href': 'http://api.example.com/user/02f46ed8-3b6e-4cef-ae47-e15cccf730eb/notification/'
                     }
                 ],
                 'items': [item]

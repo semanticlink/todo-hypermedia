@@ -6,14 +6,14 @@ describe('Collection mixins', () => {
 
     let document = {
         links: [{
-            rel: 'self', href: 'http://example.com/role/1'
+            rel: 'self', href: 'http://api.example.com/role/1'
         }],
         name: 'Admin'
     };
 
     let collection = {
         links: [
-            {rel: 'self', href: 'http://example.com/role/'}
+            {rel: 'self', href: 'http://api.example.com/role/'}
         ],
         items: [document]
     };
@@ -34,7 +34,7 @@ describe('Collection mixins', () => {
 
                 let document2 = {
                     links: [{
-                        rel: 'self', href: 'http://example.com/role/2'
+                        rel: 'self', href: 'http://api.example.com/role/2'
                     }],
                     name: 'NOtAdmin'
                 };
@@ -71,7 +71,7 @@ describe('Collection mixins', () => {
 
                 let document2 = {
                     links: [{
-                        rel: 'self', href: 'http://example.com/role/2'
+                        rel: 'self', href: 'http://api.example.com/role/2'
                     }],
                     name: 'NOtAdmin'
                 };
@@ -98,7 +98,7 @@ describe('Collection mixins', () => {
         beforeEach(() => {
             document = {
                 links: [{
-                    rel: 'self', href: 'http://example.com/role/1'
+                    rel: 'self', href: 'http://api.example.com/role/1'
                 }],
                 name: 'Admin'
             };
@@ -106,13 +106,13 @@ describe('Collection mixins', () => {
 
         let document2 = {
             links: [{
-                rel: 'self', href: 'http://example.com/role/1'
+                rel: 'self', href: 'http://api.example.com/role/1'
             }],
             name: 'Admin'
         };
         let document3 = {
             links: [{
-                rel: 'self', href: 'http://example.com/role/2'
+                rel: 'self', href: 'http://api.example.com/role/2'
             }],
             name: 'Admin2'
         };
@@ -136,7 +136,7 @@ describe('Collection mixins', () => {
 
     describe('_.findItemByUriOrName', () => {
         it('document with uri', () => {
-            let found = _(collection).findItemByUriOrName('http://example.com/role/1');
+            let found = _(collection).findItemByUriOrName('http://api.example.com/role/1');
             expect(found).to.deep.equal(document);
         });
 
@@ -156,7 +156,7 @@ describe('Collection mixins', () => {
         });
 
         it('document with default attribute title returns not found as undefined', () => {
-            let notFound = _(collection).findItemByUriOrName('http://example.com/role/1', /up/);
+            let notFound = _(collection).findItemByUriOrName('http://api.example.com/role/1', /up/);
             expect(notFound).to.be.undefined;
         });
     });
@@ -171,7 +171,7 @@ describe('Collection mixins', () => {
         it('document with self and without name returns item in collection', () => {
             let resource = {
                 links: [{
-                    rel: 'self', href: 'http://example.com/role/1'
+                    rel: 'self', href: 'http://api.example.com/role/1'
                 }]
             };
 
@@ -182,7 +182,7 @@ describe('Collection mixins', () => {
         it('document without self and with name returns item from collection and not resource as search input', () => {
             let resource = {
                 links: [{
-                    rel: 'self', href: 'http://example.com/role/2'
+                    rel: 'self', href: 'http://api.example.com/role/2'
                 }],
                 name: 'Admin'
             };
@@ -196,14 +196,14 @@ describe('Collection mixins', () => {
 
             let documentWithTitle = {
                 links: [{
-                    rel: 'self', href: 'http://example.com/role/1'
+                    rel: 'self', href: 'http://api.example.com/role/1'
                 }],
                 title: 'Admin'
             };
 
             let collectionWithTitleDocument = {
                 links: [
-                    {rel: 'self', href: 'http://example.com/role/'}
+                    {rel: 'self', href: 'http://api.example.com/role/'}
                 ],
                 items: [documentWithTitle]
             };
@@ -246,14 +246,14 @@ describe('Collection mixins', () => {
 
         let document = {
             links: [{
-                rel: 'self', href: 'http://example.com/role/1'
+                rel: 'self', href: 'http://api.example.com/role/1'
             }],
             name: 'Admin'
         };
 
         let collection = {
             links: [
-                {rel: 'self', href: 'http://example.com/role/'}
+                {rel: 'self', href: 'http://api.example.com/role/'}
             ],
             items: [document]
         };
@@ -295,7 +295,7 @@ describe('Collection mixins', () => {
         it('document with self and without name returns item in collection', () => {
             let resource = {
                 links: [{
-                    rel: 'self', href: 'http://example.com/role/1'
+                    rel: 'self', href: 'http://api.example.com/role/1'
                 }]
             };
 
@@ -307,7 +307,7 @@ describe('Collection mixins', () => {
 
             let resource = {
                 links: [{
-                    rel: 'parent', href: 'http://example.com/role/2'
+                    rel: 'parent', href: 'http://api.example.com/role/2'
                 }],
                 name: 'Admin'
             };
