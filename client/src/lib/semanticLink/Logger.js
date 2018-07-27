@@ -14,7 +14,7 @@
  */
 const LEVEL = {
     DEBUG: {
-        console: 'log',
+        console: 'debug',
         level: 1
     },
     INFO: {

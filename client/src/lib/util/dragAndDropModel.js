@@ -224,7 +224,7 @@ export function dragstart(event, model, mediaType) {
         return true;
     }
 
-    log.info('[Drag] start');
+    log.debug('[Drag] start');
 
     dragLogic(model, event.dataTransfer, defaultReplacer(event), mediaType);
 
