@@ -86,7 +86,7 @@
              */
             startEdit() {
                 this.editing = true;
-                this.editItem = Object.assign({}, this.item);
+                this.editItem = {...this.item};
             },
 
             /**

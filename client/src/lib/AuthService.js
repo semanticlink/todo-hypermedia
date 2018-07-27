@@ -1,7 +1,7 @@
 import auth0 from 'auth0-js';
-import { log } from 'logger';
+import {log} from 'logger';
 import axios from 'axios';
-import { getAuthenticationUri } from './http-interceptors';
+import {getAuthenticationUri} from './http-interceptors';
 
 
 /**
@@ -143,8 +143,8 @@ export default class AuthService {
         /**
          *  @type {AuthServiceConfiguration}
          */
-        const opts = Object.assign(
-            {
+        const opts = {
+            ...{
                 domain: '',
                 clientID: '',
                 audience: '',
@@ -152,7 +152,8 @@ export default class AuthService {
                 redirectUri: window.location.origin,
                 nonce: AuthService.makeNonce()
             },
-            options);
+            ...options
+        };
 
         this.auth0 = new auth0.WebAuth(opts);
 
@@ -447,4 +448,4 @@ export default class AuthService {
 
 let authService = new AuthService();
 
-export { authService };
+export {authService};

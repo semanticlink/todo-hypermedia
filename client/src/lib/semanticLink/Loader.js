@@ -48,7 +48,7 @@ export default class Loader {
 
     static limiterFactory (options) {
         log.debug('[Limiter] Created');
-        return new Bottleneck(Object.assign({}, options, Loader.defaultOptions));
+        return new Bottleneck({...options, ...Loader.defaultOptions});
     }
 
     /**

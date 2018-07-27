@@ -179,7 +179,7 @@
                 set(value) {
                     this.todoCollection.items.forEach(todo => {
                         // sets the 'known' attribute completed - you SHOULD NOT hard code this but read it from the form
-                        const updateTodo = Object.assign({}, todo, {state: mapCompletedToState(value), completed: value});
+                        const updateTodo = {...todo, ...{state: mapCompletedToState(value), completed: value}};
                         nodMaker.updateResource(todo, updateTodo)
                             .catch(err => log.error(err));
                     })
@@ -193,14 +193,14 @@
              * Clears out the new todo ready to be entered and created
              */
             reset() {
-                this.newTodo = Object.assign({}, defaultTodo(this.todoCollection));
+                this.newTodo = {...defaultTodo(this.todoCollection)};
             },
 
             /**
              * Adds the new todo document into the existing todo collection
              */
             addTodo() {
-                return nodMaker.createCollectionResourceItem(this.todoCollection, Object.assign({}, this.newTodo))
+                return nodMaker.createCollectionResourceItem(this.todoCollection, {...this.newTodo})
                     .then(todoResource => nodMaker.getResource(todoResource)
                         .then(() => this.reset()))
                     .catch(err => log.error(err));

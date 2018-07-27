@@ -128,6 +128,6 @@ export default class FormService {
     static makeFormObj(form, collection) {
         return FormService.hasSubmitLinkRel(form)
             ? {}                                 // POST clean/new
-            : Object.assign({}, collection);     // PUT clone
+            : {...collection};     // PUT clone
     }
 }
