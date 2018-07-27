@@ -70,9 +70,9 @@ class UriMappingResolver {
      * @returns {{}} cloned version of the resolutions map
      */
     out () {
-        return Object.assign({}, this.resolutionsMap);
+        return {...this.resolutionsMap};
     }
 
 }
 
-export let resolver = new UriMappingResolver();
+export let uriMappingResolver = new UriMappingResolver();

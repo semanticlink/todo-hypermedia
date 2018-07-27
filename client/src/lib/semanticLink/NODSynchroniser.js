@@ -6,6 +6,7 @@ import {nodMaker} from './NODMaker';
 import Differencer from './Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';
+import {uriMappingResolver} from './UriMappingResolver';
 
 /**
  * Internal data structure for working out which active to perform on documents.
@@ -565,7 +566,9 @@ export default class NODSynchroniser {
     synchroniseUriList(collection, documentUriList, options = {}) {
 
         const uriListResolver = options.uriListResolver || NODSynchroniser.defaultUriListResolver;
-        const resolver = options.resolver || NODSynchroniser.defaultResolver;
+
+        // KLUDGE: for now inject uriMappingResolver for everyone. Gives a resolver without configuring up
+        const resolver = options.resolver || uriMappingResolver || NODSynchroniser.defaultResolver;
 
         /**
          *
