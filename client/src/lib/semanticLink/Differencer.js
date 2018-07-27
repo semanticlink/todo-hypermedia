@@ -4,31 +4,7 @@ import {Comparator} from './Comparator';
 import SemanticLink from './SemanticLink';
 
 /**
- * Processes difference sets (create, update, delete) for between two client-side collections {@Link CollectionRepresentation}
- *
- * Note: this is a differencing set and update can be misleading. What is means is that we have 'matched' these
- * two resource as both 'existing' and thus may or may not require some form of update on them. The decision on
- * whether there is an actual difference is up to some other decision that know about the internals of the resource
- * (such as an edit form merger).
- *
- *     set one - current collection
- *     set two - new collection
 
- *     create - not in set one but in set two
- *     update - intersection of both sets
- *     delete - in set one and not in set two
- *
- *                       set one: current
- *                 +-----------------------------+
- *     +-----------------------------------------+
- *     |           |              |              |
- *     |  create   |    update    |   delete     |
- *     |           |              |              |
- *     +-----------------------------------------+
- *     +--------------------------+
- *           set two: new
- *
- *
  * @params {Comparator} comparator
  */
 export default class Differencer {
@@ -82,6 +58,31 @@ export default class Differencer {
      */
 
     /**
+     *  Processes difference sets (create, update, delete) for between two client-side collections {@Link CollectionRepresentation}
+     *
+     * **NOTE** this is a differencing set and update can be misleading. What is means is that we have 'matched' these
+     * two resource as both 'existing' and thus may or may not require some form of update on them. The decision on
+     * whether there is an actual difference is up to some other decision that know about the internals of the resource
+     * (such as an edit form merger).
+     *
+     *     set one - current collection
+     *     set two - new collection
+
+     *     add/create    - not in set one but in set two
+     *     match/update  - intersection of both sets
+     *     remove/delete - in set one and not in set two
+     *
+     *                       set one: current
+     *                 +-----------------------------+
+     *     +-----------------------------------------+
+     *     |           |              |              |
+     *     |   add     |    match     |   remove     |
+     *     |           |              |              |
+     *     +-----------------------------------------+
+     *     +--------------------------+
+     *           set two: new
+     *
+     *
      * @param {CollectionRepresentation} collectionResource an existing resource collection that is
      * synchronised with the server (network of data).
      *
@@ -153,6 +154,7 @@ export default class Differencer {
 
             // Remove those items that are to be updated from the 'delete' list
             // on any that are removed, add reference for later processing onto the pair
+            // if there is a match return [0,0,{item}]
             _(itemsToMove)
                 .chain()
                 .sortBy(pair => pair[0])
