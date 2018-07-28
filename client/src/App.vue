@@ -21,7 +21,7 @@
         components: {Offline, Login,},
         created: function () {
 
-            const apiUri = link.getUri(document.querySelector('HEAD'), 'api');
+            const apiUri = link.getUri('HEAD', 'api');
 
             /**
              * The api representation is the 'top of the tree' in terms of the network of
