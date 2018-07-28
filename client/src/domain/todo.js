@@ -1,5 +1,5 @@
-import { log, nodMaker, SemanticLink } from 'semanticLink';
-import { TEXT } from '../lib/form-type-mappings';
+import {log, nodMaker, SemanticLink} from 'semanticLink';
+import {TEXT} from '../lib/form-type-mappings';
 
 /**
  * use the organisation from a provided list (when authenticated)
@@ -47,11 +47,11 @@ const defaultTodo = todoResource => {
             const obj = {};
 
             if (form && form.items) {
-                form.items.forEach(item => {
+                [...form.items].forEach(item => {
                     obj[item.name] = item.type === TEXT ? '' : null;
                 });
             } else {
-                log.error(`Form has no fields: '${SemanticLink.getUri(this.formRepresentation, /self/)}'`);
+                log.warn(`Form has no fields: '${SemanticLink.getUri(form, /self/)}'`);
             }
 
             return obj;
@@ -59,4 +59,4 @@ const defaultTodo = todoResource => {
         .catch((err) => log.error(err));
 };
 
-export { getTenant, getTodos, defaultTodo };
+export {getTenant, getTodos, defaultTodo};
