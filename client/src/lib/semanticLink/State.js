@@ -1,11 +1,11 @@
 /* global JSON */
 
 import _ from './mixins/underscore';
-import { stateFlagEnum } from './stateFlagEnum';
+import {stateFlagEnum} from './stateFlagEnum';
 import SparseResource from './SparseResource';
 import log from './Logger';
-import SemanticLink, { link } from './SemanticLink';
-import { loader } from './Loader';
+import SemanticLink, {link} from './SemanticLink';
+import {loader} from './Loader';
 import StateFactory from './StateFactory';
 
 /**
@@ -21,7 +21,7 @@ export default class State {
      *
      * @param {stateFlagEnum} defaultStatus
      */
-    constructor (defaultStatus) {
+    constructor(defaultStatus) {
         /**
          * @type {stateFlagEnum}
          * @default {@link stateFlagEnum.unknown}
@@ -66,7 +66,7 @@ export default class State {
      * @return {boolean}
      * @private
      */
-    resourceExists (resourceName) {
+    resourceExists(resourceName) {
         return _(this.resources).contains(resourceName);
     }
 
@@ -76,7 +76,7 @@ export default class State {
      * @return {boolean}
      * @private
      */
-    collectionExists (collectionResourceName) {
+    collectionExists(collectionResourceName) {
         return _(this.collection).contains(collectionResourceName);
     }
 
@@ -85,7 +85,7 @@ export default class State {
      * @param {string} resourceName
      * @return {boolean}
      */
-    isTracked (resourceName) {
+    isTracked(resourceName) {
         return this.resourceExists(resourceName) || this.collectionExists(resourceName);
     }
 
@@ -97,7 +97,7 @@ export default class State {
      * @return boolean
      * @private
      */
-    static cacheBust (status, options) {
+    static cacheBust(status, options) {
         return options.forceLoad && status === stateFlagEnum.hydrated;
     }
 
@@ -113,14 +113,14 @@ export default class State {
      * @return boolean
      * @private
      */
-    static needsFetch (status, options) {
+    static needsFetch(status, options) {
         return status === stateFlagEnum.unknown ||
             status === stateFlagEnum.locationOnly ||
             status === stateFlagEnum.stale ||
             State.cacheBust(status, options);
     }
 
-    static defaultPostFactory (resource, data) {
+    static defaultPostFactory(resource, data) {
         return link.post(resource, /canonical|self/, 'application/json', data);
     }
 
@@ -129,7 +129,7 @@ export default class State {
      * @param {LinkedRepresentation} resource
      * @param {*} data
      */
-    static defaultPutFactory (resource, data) {
+    static defaultPutFactory(resource, data) {
         return link.put(resource, /canonical|self/, 'application/json', data);
     }
 
@@ -150,7 +150,7 @@ export default class State {
      * Returns the value of the private status flag
      * @return {stateFlagEnum}
      */
-    getStatus () {
+    getStatus() {
         return this.status;
     }
 
@@ -163,7 +163,7 @@ export default class State {
      * @param {Function} linkedRepresentationFactory
      * @return {LinkedRepresentation} newly created resource
      */
-    addResourceByName (resource, resourceName, linkedRepresentationFactory) {
+    addResourceByName(resource, resourceName, linkedRepresentationFactory) {
 
         if (this.resourceExists(resourceName) && resource[resourceName]) {
             return resource[resourceName];
@@ -175,7 +175,7 @@ export default class State {
             return resource[resourceName];
         }
 
-        log.warn('Trying to add an existing resource of ', resourceName);
+        log.warn(`[State] Trying to add an existing resource of '${resourceName}'`);
         return resource[resourceName];
 
     }
@@ -189,7 +189,7 @@ export default class State {
      * @param {Function} linkedRepresentationFactory
      * @return {CollectionRepresentation} newly created resource
      */
-    addCollectionResourceByName (resource, collectionResourceName, linkedRepresentationFactory) {
+    addCollectionResourceByName(resource, collectionResourceName, linkedRepresentationFactory) {
         if (this.collectionExists(collectionResourceName) && resource[collectionResourceName]) {
             return resource[collectionResourceName];
         }
@@ -211,7 +211,7 @@ export default class State {
      * @param {Function} linkedRepresentationFactory
      * @return {LinkedRepresentation}
      */
-    static addItemToCollectionResource (collection, linkedRepresentationFactory) {
+    static addItemToCollectionResource(collection, linkedRepresentationFactory) {
 
         if (!collection) {
             throw new Error('No collection passed in');
@@ -238,7 +238,7 @@ export default class State {
      * @param item
      * @return {*|LinkedRepresentation} undefined if not found otherwise the removed resource
      */
-    removeItemFromCollectionResource (collection, item) {
+    removeItemFromCollectionResource(collection, item) {
         const resourceUri = SemanticLink.getUri(item, /canonical|self/);
         const indexOfItemToBeRemoved = _(collection.items).findIndex(item => SemanticLink.getUri(item, /canonical|self/) === resourceUri);
         if (indexOfItemToBeRemoved >= 0) {
@@ -257,7 +257,7 @@ export default class State {
      * TODO: this really needs to be a merge
      * see {@link ResourceMerger}
      */
-    static mergeResource (resource, updateValues) {
+    static mergeResource(resource, updateValues) {
         // this implementation is naively assuming that there is effectively a one-to-one match
         // of attributes across the two objects
         return {...resource, ...updateValues};
@@ -268,7 +268,7 @@ export default class State {
      * @param {stateFlagEnum} state
      * @return {SparseResourceOptions}
      */
-    static makeSparseResourceOptions (state) {
+    static makeSparseResourceOptions(state) {
         return {
             stateFactory: () => StateFactory.make(state)
         };
@@ -280,7 +280,7 @@ export default class State {
      * @param {stateFlagEnum=} state
      * @return {LinkedRepresentation}
      */
-    static makeLinkedRepresentationWithState (defaultValues, state) {
+    static makeLinkedRepresentationWithState(defaultValues, state) {
         return SparseResource.makeLinkedRepresentation(State.makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
     }
 
@@ -293,7 +293,7 @@ export default class State {
      * @param {stateFlagEnum=} state
      * @return {CollectionRepresentation}
      */
-    static makeCollection (defaultValues, state) {
+    static makeCollection(defaultValues, state) {
         return SparseResource.makeCollection(State.makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
     }
 
@@ -307,7 +307,7 @@ export default class State {
      * @param {stateFlagEnum=} state
      * @return {LinkedRepresentation}
      */
-    static makeFromUri (uri, defaultValues, state) {
+    static makeFromUri(uri, defaultValues, state) {
         if (uri) {
             return SparseResource.makeFromUri(uri, State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly), defaultValues);
         } else {
@@ -326,7 +326,7 @@ export default class State {
      * @param {stateFlagEnum=} state
      * @return {CollectionRepresentation}
      */
-    static makeCollectionFromUri (uriOrLinkRelation, defaultValues, state) {
+    static makeCollectionFromUri(uriOrLinkRelation, defaultValues, state) {
         let options = State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly);
 
         if (_(uriOrLinkRelation).isString() || !uriOrLinkRelation) {
@@ -346,7 +346,7 @@ export default class State {
      * @param state
      * @return {CollectionRepresentation}
      */
-    makeSparseCollectionItemsFromFeed (collection, resourceTitleAttributeName, state) {
+    makeSparseCollectionItemsFromFeed(collection, resourceTitleAttributeName, state) {
         this.mappedTitle = resourceTitleAttributeName;
         return SparseResource
             .mapFeedItemsToCollectionItems(collection, resourceTitleAttributeName, State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly));
@@ -360,7 +360,7 @@ export default class State {
      * @return {Promise}
      * @private
      */
-    static defaultGetFactory (item, rel, cancellable) {
+    static defaultGetFactory(item, rel, cancellable) {
         return link.get(item, rel, cancellable);
     }
 
@@ -369,14 +369,15 @@ export default class State {
      * @param {LinkedRepresentation} resource
      * @param {string|RegExp} rel
      * @param {UtilOptions|{}} options
-     * @return {Promise} promise contains a {@link LinkedRepresentation}
+     * @return {Promise.<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
      */
-    loadResource (resource, rel, options = {}) {
+    loadResource(resource, rel, options = {}) {
 
         // TODO Promise.reject need to all return Errors. Error may need to be subclassed
         // TODO Need to hook messages into the loader
         // TODO Load centre is not taking in options to get different priority requests
         // TODO no checking of retrieval based on headers and previous requests
+        // TODO no media type
 
         const uri = (options.getUri || SemanticLink.getUri)(resource, rel);
 
@@ -394,7 +395,22 @@ export default class State {
 
         const getFactory = options.getFactory || State.defaultGetFactory;
 
-        const id = SemanticLink.tryGetUri(resource, rel);
+        let id = SemanticLink.tryGetUri(resource, rel);
+
+        /**
+         * Currently, the same job is dropped if duplicated. However, what we want to
+         * route the same request to multiple sources. This does not currently look possible.
+         * In other words, we can't have multiple returns from a single id.
+         *
+         * @see https://github.com/SGrondin/bottleneck/issues/68
+         *
+         * TODO: don't recreate the jobs, need to put in a mechanism to solve this problem
+         */
+        if (loader.limiter.jobStatus(id) != null) {
+            log.debug(`[State] job id '${id}' already exists`);
+            id += Date.now().toString();
+        }
+
         return loader.limiter.schedule({id}, getFactory, resource, rel, loader.cancellable)
             .then(response => {
                 // save the across-the-wire meta data so we can check for collisions/staleness
@@ -407,35 +423,37 @@ export default class State {
 
                 return response.data;
             })
-            .catch(response => {
+            .catch(/** @type {Error|BottleneckError|AxiosError} */err => {
 
-                // TODO: add catching Bottlneck error handling
+                // TODO: add catching Bottleneck error handling
+                // TODO: add error instanceof handling
                 // @see https://github.com/SGrondin/bottleneck#debugging-your-application
 
-                if (response.status === 403) {
+                if (err.status === 403) {
+                    log.error(`Request error ${err.status}`)
                     // save the across-the-wire meta data so we can check for collisions/staleness
                     this.status = stateFlagEnum.forbidden;
                     // when was it retrieved
                     this.retrieved = new Date();
                     // how was it retrieved
-                    this.headers = response.headers;
+                    this.headers = err.headers;
                     // return original
                     return Promise.reject(resource);
-                } else if (response.status === 404) {
+                } else if (err.status === 404) {
                     log.info(`Likely stale collection for '${SemanticLink.tryGetUri(resource, ['up', 'parent', 'self', '*'])}' on resource ${uri}`);
                     this.status = stateFlagEnum.deleted;
                     return Promise.reject(resource);
-                } else if (response.status >= 400 && response.status < 499) {
-                    log.info(`Client error '${response.statusText}' on resource ${uri}`);
+                } else if (err.status >= 400 && err.status < 499) {
+                    log.info(`Client error '${err.statusText}' on resource ${uri}`);
                     this.status = stateFlagEnum.unknown;
                     return Promise.resolve(resource);
-                } else if (response.status >= 500 && response.status < 599) {
-                    log.info(`Server error '${response.statusText}' on resource ${uri}`);
+                } else if (err.status >= 500 && err.status < 599) {
+                    log.info(`Server error '${err.statusText}' on resource ${uri}`);
                     this.status = stateFlagEnum.unknown;
                     return Promise.resolve(resource);
                 } else {
+                    log.error(`Request error unknown: '${err.message}' ${typeof err}`);
                     return Promise.reject(resource);
-
                 }
             });
     }
@@ -450,13 +468,14 @@ export default class State {
      * @param {UtilOptions|{}} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
-    synchronise (resource, rel, options = {}) {
+    synchronise(resource, rel, options = {}) {
 
         if (State.needsFetch(this.status, options)) {
+            log.debug(`[State] fetch '${SemanticLink.tryGetUri(resource, rel)}'`);
             return this.loadResource(resource, rel, options)
                 .then(response => State.mergeResource(resource, response));
         } else {
-            //log.info(`Using previous resource: '${link.tryGetUri(resource, rel)}' [${status.toString()}]`);
+            log.debug(`[State] no fetch resource ${this.status.toString()}: '${SemanticLink.tryGetUri(resource, rel)}'`);
             return Promise.resolve(resource);
         }
     }
@@ -471,7 +490,7 @@ export default class State {
      * @return {Promise} promise contains a {@link LinkedRepresentation}
      * TODO: actually make this a synchronise collection
      */
-    synchroniseCollection (collection, rel, options = {}) {
+    synchroniseCollection(collection, rel, options = {}) {
 
         if (State.needsFetch(this.status, options)) {
             return this.loadResource(collection, rel, options)
@@ -502,7 +521,7 @@ export default class State {
      * @param {UtilOptions} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
-    getResource (resource, options) {
+    getResource(resource, options) {
         return this.synchronise(resource, /self|canonical/, options);
     }
 
@@ -514,7 +533,7 @@ export default class State {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains new {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
-    makeSingletonResource (resource, singletonName, rel, options) {
+    makeSingletonResource(resource, singletonName, rel, options) {
         options = options || {};
 
         if (this.collectionExists(singletonName)) {
@@ -527,9 +546,11 @@ export default class State {
             const uri = (options.getUri || SemanticLink.tryGetUri)(resource, rel);
 
             if (!uri) {
-                log.info(`No ${singletonName} (${rel.toString()}) for resource ${SemanticLink.getUri(resource, /self|canonical/)}`);
+                log.warn(`[State] No ${singletonName} (${rel.toString()}) for resource ${SemanticLink.getUri(resource, /self|canonical/)} returning default undefined`);
                 return Promise.resolve(undefined);
             }
+
+            log.debug(`[State] add singleton '${rel}' as ${this.status.toString()} '${uri}' on ${SemanticLink.getUri(resource, /self|canonical/)}`);
 
             // add a sparsely populated resource ready to be synchronised
             resource[singletonName] = this.addResourceByName(resource, singletonName, () => State.makeFromUri(uri));
@@ -548,7 +569,7 @@ export default class State {
      * @param {UtilOptions=} options
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      */
-    makeCollectionResource (resource, collectionName, rel, options) {
+    makeCollectionResource(resource, collectionName, rel, options) {
         options = options || {};
 
         if (this.resourceExists(collectionName)) {
@@ -584,7 +605,7 @@ export default class State {
      * @param {UtilOptions|{}} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
-    makeItemOnCollectionResource (collection, itemUri, options = {}) {
+    makeItemOnCollectionResource(collection, itemUri, options = {}) {
 
         if (!collection.items) {
             log.error(`Collection not created through makeRepresentation ${SemanticLink.tryGetUri(collection, /self|canonical/)} - this is likely to be a coding error that the resource is not a collection`);
@@ -609,7 +630,7 @@ export default class State {
      * @param {UtilOptions|{}} options
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      */
-    getCollectionResource (resource, options = {}) {
+    getCollectionResource(resource, options = {}) {
         return this.synchroniseCollection(resource, /self|canonical/, options);
     }
 
@@ -621,7 +642,7 @@ export default class State {
      * @param options
      * @return {Promise} containing created resource (@link LinkedRepresentation}
      */
-    createResource (resource, data, options = {}) {
+    createResource(resource, data, options = {}) {
 
         let uri = SemanticLink.getUri(resource, /self/);
 
@@ -664,7 +685,7 @@ export default class State {
      * @param {UtilOptions|{}} options
      * @return {Promise}  containing the original {@link LinkedRepresentation}
      */
-    updateResource (resource, data, options = {}) {
+    updateResource(resource, data, options = {}) {
 
         this.previousStatus = status;
         let uri = SemanticLink.getUri(resource, /self/);
@@ -702,7 +723,7 @@ export default class State {
 
     }
 
-    static defaultDeleteFactory (item) {
+    static defaultDeleteFactory(item) {
         return link.delete(item, /canonical|self/);
     }
 
@@ -715,7 +736,7 @@ export default class State {
      * @param {UtilOptions=} options
      * @return {Promise}  containing the original {@link LinkedRepresentation}
      */
-    deleteResource (item, options = {}) {
+    deleteResource(item, options = {}) {
 
         this.previousStatus = status;
 

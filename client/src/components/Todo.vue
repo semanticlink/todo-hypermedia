@@ -60,12 +60,12 @@
 
 <script>
 
-    import { _, nodMaker } from 'semanticLink';
-    import { log } from 'logger';
-    import { redirectToTenant } from 'router';
+    import {_, nodMaker} from 'semanticLink';
+    import {log} from 'logger';
+    import {redirectToTenant} from 'router';
     import TodoItem from './TodoItem.vue';
-    import { defaultTodo, getTenant, getTodos } from "domain/todo";
-    import { mapCompletedToState } from "../lib/form-type-mappings";
+    import {defaultTodo, getTenant, getTodos} from "domain/todo";
+    import {mapCompletedToState} from "../lib/form-type-mappings";
 
     /**
      * This component displays and allows updates to the todo list
@@ -127,7 +127,7 @@
                  *
                  * @type TodoCollectionRepresentation
                  */
-                todoCollection: {items: []},
+                todoCollection: {},
 
                 /**
                  * New item holder - this will be initiated in created
@@ -164,25 +164,60 @@
         },
         computed: {
             filteredTodos() {
-                return filters[this.visibility](this.todoCollection.items)
+                return filters[this.visibility](this.collection)
             },
             remaining() {
-                return filters[filterEnum.ACTIVE](this.todoCollection.items).length;
+                return filters[filterEnum.ACTIVE](this.collection).length;
             },
             totalItems() {
-                return this.todoCollection.items.length;
+                return this.collection.length;
+            },
+            collection() {
+                if (!this.todoCollection.items) {
+                    this.$set(this.todoCollection, 'items', []);
+                }
+                return this.todoCollection.items;
             },
             allDone: {
                 get() {
                     return this.remaining === 0
                 },
                 set(value) {
-                    this.todoCollection.items.forEach(todo => {
-                        // sets the 'known' attribute completed - you SHOULD NOT hard code this but read it from the form
-                        const updateTodo = {...todo, ...{state: mapCompletedToState(value), completed: value}};
-                        nodMaker.updateResource(todo, updateTodo)
-                            .catch(err => log.error(err));
-                    })
+
+                    // TODO: utilities
+                    const all = (...promises) => {
+                        const results = [];
+
+                        const merged = promises.reduce(
+                            (acc, p) => acc.then(() => p).then(r => results.push(r)),
+                            Promise.resolve(null));
+
+                        return merged.then(() => results);
+                    };
+
+                    all(this.collection.map(todo => {
+                        /**
+                         * One of the issues with representations is that many fields are optional (eg completed).
+                         * In such cases, we need to ensure that Vue is bound to them.
+                         *
+                         * In many ways, it actually shows the domain smell because we provided completed as
+                         * a helper property that is a rule of a subset of state.
+                         */
+                        todo.completed = this.$set(todo, 'completed', value);
+
+                        /**
+                         * I cannot explain why either of the two assignments below don't work.
+                         *
+                         * @see https://vuejs.org/v2/guide/reactivity.html
+
+                         item = {...item, completed: value};
+                         item = Object.assign({}, item, {completed: value});
+
+                         */
+                        return nodMaker.updateResource(todo, {...todo, state: mapCompletedToState(value)});
+                    }))
+                        .catch(err => log.error(err));
+
                 }
             }
         },
@@ -194,7 +229,8 @@
              */
             reset() {
                 this.newTodo = {...defaultTodo(this.todoCollection)};
-            },
+            }
+            ,
 
             /**
              * Adds the new todo document into the existing todo collection
@@ -204,7 +240,8 @@
                     .then(todoResource => nodMaker.getResource(todoResource)
                         .then(() => this.reset()))
                     .catch(err => log.error(err));
-            },
+            }
+            ,
 
             /**
              * Clear Completed: iterates through all the completed todos and deletes them from the collection.
@@ -215,7 +252,8 @@
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
                         .map(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo)))
                     .catch(err => log.error(err));
-            },
+            }
+            ,
 
             // **********************************
             // FILTERS
@@ -238,29 +276,36 @@
                         this.visibility = filterEnum.ALL;
                         break;
                 }
-            },
+            }
+            ,
 
             isAll() {
                 return this.visibility === filterEnum.ALL;
-            },
+            }
+            ,
             isActive() {
                 return this.visibility === filterEnum.ACTIVE;
-            },
+            }
+            ,
             isCompleted() {
                 return this.visibility === filterEnum.COMPLETED;
-            },
+            }
+            ,
 
             // Change filters
 
             showAll() {
                 this.redirectOnVisibilityChange(filterEnum.ALL);
-            },
+            }
+            ,
             showActive() {
                 this.redirectOnVisibilityChange(filterEnum.ACTIVE);
-            },
+            }
+            ,
             showCompleted() {
                 this.redirectOnVisibilityChange(filterEnum.COMPLETED);
-            },
+            }
+            ,
 
 
             /**
@@ -289,7 +334,8 @@
 
             }
         }
-    };
+    }
+    ;
 </script>
 
 <style>

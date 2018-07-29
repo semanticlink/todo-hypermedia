@@ -1,9 +1,9 @@
 'use strict';
 import _ from './mixins/underscore';
-import { stateFlagEnum } from './stateFlagEnum';
-import { SparseResource } from './SparseResource';
+import {stateFlagEnum} from './stateFlagEnum';
+import {SparseResource} from './SparseResource';
 import StateFactory from './StateFactory';
-import { resourceMerger } from './ResourceMerger';
+import {resourceMerger} from './ResourceMerger';
 import SemanticLink from './SemanticLink';
 import log from './Logger';
 import State from './State';
@@ -244,7 +244,7 @@ export default class NODMaker {
      * @return {CollectionRepresentation}
      */
     makeCollectionItemsFromFeedAddedToCollection(collection, feedRepresentation) {
-        feedRepresentation.items.forEach(item => nodMaker.addCollectionResourceItemByUri(collection, item.id, { name: item.title }));
+        feedRepresentation.items.forEach(item => nodMaker.addCollectionResourceItemByUri(collection, item.id, {name: item.title}));
         return collection;
     }
 
@@ -418,6 +418,7 @@ export default class NODMaker {
         const tryResource = StateFactory.tryGet(resource, defaultValue);
 
         if (tryResource === defaultValue) {
+            log.debug(`Using default value on ${SemanticLink.getUri(resource, /self/)}`);
             return Promise.resolve(defaultValue);
         } else {
             return tryResource
@@ -490,7 +491,7 @@ export default class NODMaker {
                     return this.getResource(resource[singletonName], options);
                 } else {
                     return this.getResourceState(resource)
-                        // add a sparsely populated resource as a named attribute and return it
+                    // add a sparsely populated resource as a named attribute and return it
                         .makeSingletonResource(resource, singletonName, rel, options)
                         .then(resource => this.getResource(resource, options));
                 }
@@ -516,16 +517,23 @@ export default class NODMaker {
         });
 
         if (!SemanticLink.tryGetUri(resource, rel)) {
+            log.debug(`Missing uri for rel '${rel}' - resolving with default value`);
             return Promise.resolve(defaultValue);
         }
 
         if (resource[singletonName]) {
-            return this.tryGetResource(resource[singletonName], defaultValue, options);
+            return this.tryGetResource(resource[singletonName], defaultValue, options)
         } else {
             return this.getResourceState(resource)
-                // add a sparsely populated resource as a named attribute and return it
+            // add a sparsely populated resource as a named attribute and return it
                 .makeSingletonResource(resource, singletonName, rel, options)
-                .then(resource => this.getResource(resource, options));
+                .then(resource => {
+                    //
+                    return this.getResource(resource, options);
+                })
+                .catch(() => {
+                    return log.error(`Unexpected error making singleton '${singletonName}'`);
+                });
         }
     }
 
@@ -816,8 +824,12 @@ export default class NODMaker {
             }
         };
 
-        options = _({}).extend(options, { isTracked });
-        return resourceMerger.editMerge(resource, documentResource, editForm, options);
+        options = _({}).extend(options, {isTracked});
+
+        return resourceMerger.editMerge(resource, documentResource, editForm, options)
+            .catch(() => {
+                log.error('[Merge] unknown merge error');
+            });
     }
 
     /**
@@ -847,7 +859,7 @@ export default class NODMaker {
                 if (!editForm) {
                     log.info(`Resource has no edit form ${SemanticLink.getUri(resource, /self|canonical/)}`);
                     // return Promise.resolve(resource);
-                    editForm = { items: [] };
+                    editForm = {items: []};
                 }
 
                 return mergeStrategy(resource, documentResource, editForm, options)
@@ -859,7 +871,14 @@ export default class NODMaker {
                             log.info(`No update required ${SemanticLink.getUri(resource, /canonical|self/)}`);
                             return Promise.resolve(resource);
                         }
+                    })
+                    .catch(err => {
+                        log.error(`Merge error: edit-form on ${SemanticLink.getUri(resource, /self|canonical/)}`, err);
                     });
+            })
+            .catch(() => {
+                // with a tryGet we should never get here (alas that is not always the case)
+                log.error(`Unexpected error on 'edit-form': on ${SemanticLink.getUri(resource, /self|canonical/)}`/*, err, resource*/);
             });
     }
 

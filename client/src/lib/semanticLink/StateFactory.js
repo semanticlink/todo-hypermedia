@@ -1,12 +1,13 @@
 'use strict';
 import State from './State';
 import SemanticLink from './SemanticLink';
+import log from './Logger';
 
 const stateFlagName = Symbol('state');
 
 /**
  * TODO: can't see why this is now needed with the use of static methods and es6 imports
- * TODO: This class was a originally need in the context of es6 and angular 1x
+ * TODO: This class was a originally need in the context of es5 and angular 1x
  */
 class StateFactory {
 
@@ -20,7 +21,7 @@ class StateFactory {
      * @param {stateFlagEnum=} state
      * @return {{Symbol(state): State}}
      */
-    static make (state) {
+    static make(state) {
         const obj = {};
         obj[stateFlagName] = new State(state);
         return obj;
@@ -32,7 +33,7 @@ class StateFactory {
      * @return {State}
      * @throws
      */
-    static get (resource) {
+    static get(resource) {
         if (!resource) {
             throw new Error('No resource to find state on');
         }
@@ -51,12 +52,14 @@ class StateFactory {
      * @param {*=undefined} defaultValue
      * @return {State|*|undefined}
      */
-    static tryGet (resource, defaultValue = undefined) {
+    static tryGet(resource, defaultValue = undefined) {
         if (!resource) {
+            log.debug('[State] No resource using default');
             return defaultValue;
         }
 
         if (!resource[stateFlagName]) {
+            log.debug('[State] No state on resource using default');
             return defaultValue;
         }
 
@@ -68,7 +71,7 @@ class StateFactory {
      * @param {*} resource
      * @return {*}
      */
-    static delete (resource) {
+    static delete(resource) {
         if (resource) {
             delete resource[stateFlagName];
         }
@@ -77,5 +80,5 @@ class StateFactory {
 
 }
 
-export { StateFactory };
+export {StateFactory};
 export default StateFactory;
