@@ -25,7 +25,6 @@
 <script>
 
     import DragAndDroppableModel from './DragAndDroppableModel.vue';
-    import DroppableModel from './DraggableModel.vue';
 
     import {matches, get, put, patch} from 'semantic-link';
     import {log} from 'logger';
@@ -35,7 +34,7 @@
 
     export default {
         name: 'drag-droppable-collection',
-        components: {DroppableModel, DragAndDroppableModel},
+        components: {DragAndDroppableModel},
         props: {
             /**
              * Collection or item representation.
