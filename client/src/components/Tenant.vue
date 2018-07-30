@@ -108,13 +108,11 @@
                 };
 
                 const syncTagsStrategy = (todoRepresentation, todoDocument, strategies, options) => {
-                    const tagUriList = [...todoDocument.tags.items].map(item => getUri(item, 'self'));
-                    log.info(`Using tag uri-list: [${tagUriList.join(',')}]`)
                     return nodSynchroniser.patchUriListOnNamedCollection(
                         todoRepresentation,
                         'tags',
                         /tags/,
-                        tagUriList,
+                        [...todoDocument.tags.items].map(item => getUri(item, 'self')),
                         {
                             ...options,
                             ...{contributeonly: true},

@@ -12,91 +12,129 @@ const getFileExtension = (file) => file.name.replace(/.*\.([a-zA-Z]+)$/, '$1');
  *  * application/json
  *  * File (application/json) - first file only
  *
+ *  This is a synchronise version
+ *
  * @param {DataTransfer} transfer - drag event
  * @param {string} mediaType
- * @returns {Promise.<LinkedRepresentation|Object>}
+ * @returns {LinkedRepresentation|Object|undefined}
  */
-const createModel = (transfer, mediaType) => {
+const getDragData = (transfer, mediaType) => {
 
-    return new Promise((resolve, reject) => {
+    /**
+     *
+     * Warning on dataTransfer.types
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#droptargets
+     *
+     * Note that the latest spec now dictates that DataTransfer.types should return a frozen array
+     * of DOMStrings rather than a DOMStringList (this is supported in Firefox 52 and above.
+     * As a result, the contains method no longer works on the property; the includes method
+     * should be used instead to check if a specific type of data is provided, using code
+     * like the following:
+     *
+     * @example
+     *         if ([...event.dataTransfer.types].includes('text/html')) {
+         *              // Do something
+         *          }
+     */
 
-        log.debug(`[Drop] media type: [${mediaType}]`);
-        log.debug(`[Drop] types available: [${[transfer.types].join(',')}]`);
+    log.debug(`[Drop] media type: [${mediaType}]`);
+    log.debug(`[Drop] types available: [${[transfer.types].join(',')}]`);
 
-        Object.entries(transfer.items).forEach(
-            ([key, item]) => log.debug(`[Drag] item: kind '${item.kind}' type '${item.type}'`)
-        );
+    Object.entries(transfer.items).forEach(
+        ([, item]) => log.debug(`[Drag] item: kind '${item.kind}' type '${item.type}'`)
+    );
 
-        if (mediaType === 'application/json' && [...transfer.types].includes('application/json')) {
+    if (mediaType === 'application/json' && [...transfer.types].includes('application/json')) {
 
-            log.debug('[Drop] found: application/json');
+        log.debug('[Drop] found: application/json');
 
-            const data = transfer.getData('application/json');
-            return resolve(JSON.parse(data));
+        const data = transfer.getData('application/json');
+        return JSON.parse(data);
 
-        } else if (mediaType === 'text/uri-list' && _(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')) {
+    } else if (mediaType === 'text/uri-list' && _(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')) {
 
-            log.debug('[Drop] found: text/uri-list');
+        log.debug('[Drop] found: text/uri-list');
 
-            let uriItem = _(transfer.items).find(item => item.kind === 'string' && item.type === 'text/uri-list');
+        let uriItem = _(transfer.items).find(item => item.kind === 'string' && item.type === 'text/uri-list');
 
 
-            uriItem.getAsString(str => {
-                log.debug(`[Drop] result: ${str}`);
-                return resolve(str);
-            });
+        uriItem.getAsString(str => {
+            log.debug(`[Drop] result: ${str}`);
+            return str;
+        });
 
-        } else if (_(transfer.files).size() > 0) {
+    } else if (_(transfer.files).size() > 0) {
 
-            // currently we are only going to take one file
-            // TODO: multiple dropped files
-            const file = _(transfer.files).first();
-            log.debug('File: "' + file.name + '" of type ' + file.type);
+        // currently we are only going to take one file
+        // TODO: multiple dropped files
+        const file = _(transfer.files).first();
+        log.debug(`File: "${file.name}" of type ${file.type}`);
 
-            const extension = getFileExtension(file);
-            // TODO: wider set of mime types
-            if ('json' === extension) {
+        const extension = getFileExtension(file);
+        // TODO: wider set of mime types
+        if ('json' === extension) {
 
-                const reader = new FileReader();
-                reader.onload = function (evt) {
-                    log.debug('[Drop] data loaded');
-                    try {
-                        return resolve(JSON.parse(evt.target.result));
-                    } catch (err) {
-                        log.error(err);
-                        return reject(err);
-                    }
+            /**
+             * Apologies, this is a blocking, synchronise file reader
+             */
 
-                };
-                reader.readAsText(file);
-            } else {
-                log.error();
-                return reject('Unknown file type');
-            }
-        } else if (mediaType === 'text/plain' && _(transfer.types).contains('text/plain')) {
-            //
-            //  After all the content types and file have been processed, have a few guesses
-            //  at what the content is. If it has come from an editor then JSON could be
-            //  represented as text. Try parsing it as JSON and proceed if that works.
-            //
-            log.debug('[Drop] trying text as JSON');
-            try {
-                return resolve(JSON.parse(transfer.getData('Text')));
-            } catch (e) {
-                log.error('[Drop] error parsing text as JSON');
-                if (e instanceof SyntaxError) {
-                    return reject('The content is not valid JSON');
+            let ready = false;
+            let result = '';
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                log.debug('[Drop] data loaded');
+                try {
+                    result = JSON.parse(evt.target.result);
+                    ready = true;
+                } catch (err) {
+                    log.error(err);
+                    return undefined;
                 }
-                else {
-                    return reject('The content type is not JSON and unsupported');
+            };
+
+            reader.readAsText(file);
+
+            const check = () => {
+                if (ready === true) {
+                    return result;
                 }
-            }
+                setTimeout(check, 500);
+            };
+
+            check();
+
+
         } else {
-            log.error(`[Drop] content is an unsupported file/content type: '${mediaType}'`);
-            return reject('Unsupported drop type(s)');
+            log.error('Unknown file type');
+            return undefined;
         }
+    } else if (mediaType === 'text/plain' && [...transfer.types].includes('text/plain')) {
+        //
+        //  After all the content types and file have been processed, have a few guesses
+        //  at what the content is. If it has come from an editor then JSON could be
+        //  represented as text. Try parsing it as JSON and proceed if that works.
+        //
+        log.debug('[Drop] trying text as JSON');
+        try {
+            return JSON.parse(transfer.getData('Text'));
+        } catch (e) {
+            log.error('[Drop] error parsing text as JSON');
+            if (e instanceof SyntaxError) {
+                log.error('The content is not valid JSON')
+                return undefined;
+            }
+            else {
+                log.error('The content type is not JSON and unsupported')
+                return undefined;
+            }
+        }
+    } else {
+        log.debug(`[Drop] content is an unsupported file/content type: '${mediaType}' in [${[transfer.types].join(',')}]`);
+        return undefined;
+    }
 
-    });
 
 };
 
@@ -105,6 +143,30 @@ const createModel = (transfer, mediaType) => {
  * @type {string}
  */
 const DEFAULT_FILE_NAME = 'Unnamed';
+
+const makeJson = model => {
+
+    // Alert: JSON.stringify can crash the browser on a large model with a complex replacer strategy
+    //        If no strategy is handed in then we will use the canonical form
+    try {
+        return JSON.stringify(model, null, 0);
+
+    } catch (e) {
+        log.error(e);
+        return JSON.stringify({}, null, 0);
+    }
+};
+
+const makePrettyJson = (model, replacer) => {
+
+    try {
+        return JSON.stringify(model, replacer || null, 2);
+
+    } catch (e) {
+        log.error(e);
+        return JSON.stringify({}, null, 1);
+    }
+};
 
 /**
  * Sets up a data transfer. Currently works to transfer model as JSON only. Currently offers
@@ -117,53 +179,52 @@ const DEFAULT_FILE_NAME = 'Unnamed';
  * TODO: text/csv (for dragging to Excel)
  *
  * @param {LinkedRepresentation|Object} model
- * @param {DataTransfer} dataTransfer
+ * @param {Event} event
  * @param {function(key:string, value:string):string|undefined=} replacerStrategy JSON.stringify replacer function
  *         see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
  * @param {?string|string[]} mediaType media types to be included in the {@link DataTransfer} object on drag
  */
-const dragLogic = (model, dataTransfer, replacerStrategy, mediaType) => {
+const setDragData = (model, event, replacerStrategy, mediaType) => {
+
+    const dataTransfer = event.dataTransfer;
 
     mediaType = mediaType || ['application/json', 'text/plain', 'DownloadUrl', 'text/uri-list'];
     mediaType = [mediaType];
 
     log.debug(`[Drag] using media types: [${mediaType.join(',')}]`);
 
-    const canonicalJson = JSON.stringify(model, null, 1);
-
-    // Alert: JSON.stringify can crash the browser on a large model with a complex replacer strategy
-    //        If no strategy is handed in then we will use the canonical form
-    let prettyJson = replacerStrategy ? JSON.stringify(model, replacerStrategy || null, 2) : canonicalJson;
-
-    /**
-     * the model should be {@link LinkedRepresentation} so there are search strategy. Title should actually
-     * be retired.
-     * TODO: we could use link relation 'self' to get titles, for example
-     * @type {string}
-     */
-    const filename = (model.title || model.name || model.description || DEFAULT_FILE_NAME) + '.json';
-
-    dataTransfer.effectAllowed = 'copy';
-    dataTransfer.dropEffect = 'copy';
 
     if (mediaType.includes('application/json')) {
-        dataTransfer.setData('application/json', canonicalJson);
+
+        dataTransfer.clearData('application/json');
         log.debug('[Drop] set data application/json');
+        const data = makeJson(model);
+        dataTransfer.setData('application/json', data);
+
     }
 
     if (mediaType.includes('DownloadUrl')) {
+        log.debug('[Drop] set data DownloadURL');
+
+        /**
+         * the model should be {@link LinkedRepresentation} so there are search strategy. Title should actually
+         * be retired.
+         * TODO: we could use link relation 'self' to get titles, for example
+         * @type {string}
+         */
+        const filename = (model.title || model.name || model.description || DEFAULT_FILE_NAME) + '.json';
+
         // encode the prettyJson so that carriage returns are not lost
         // http://stackoverflow.com/questions/332872/encode-url-in-javascript
         // 'DownloadURL' is chrome specific (I think) see https://www.html5rocks.com/en/tutorials/casestudies/box_dnd_download/
         dataTransfer.setData(
             'DownloadURL',
-            'application/json:' + filename + ':data:application/json,' + encodeURI(prettyJson)
+            `application/json:${filename}:data:application/json,${encodeURI(makePrettyJson(model, replacerStrategy))}`
         );
-        log.debug('[Drop] set data DownloadURL');
     }
 
     if (mediaType.includes('text/plain')) {
-        dataTransfer.setData('text/plain', prettyJson);
+        dataTransfer.setData('text/plain', makePrettyJson(model, replacerStrategy));
         log.debug('[Drop] set data text/plain');
     }
 
@@ -217,20 +278,33 @@ const defaultReplacer = event => {
  * @return {boolean}
  */
 export function dragstart(event, model, mediaType) {
-    event = event.originalEvent || event;
-
-    // Check whether the element is draggable, since dragstart might be triggered on a child.
-    if ((event.srcElement || event.originalTarget).draggable === 'false') {
-        return true;
-    }
 
     log.debug('[Drag] start');
 
-    dragLogic(model, event.dataTransfer, defaultReplacer(event), mediaType);
+    /**
+     * Drop effect from drag can be set in dragenter and/or dragover
+     *
+     * You can modify the dropEffect property during the dragenter or dragover events, if
+     * for example, a particular drop target only supports certain operations. You can modify
+     * the dropEffect property to override the user effect, and enforce a specific drop operation
+     * to occur. Note that this effect must be one listed within the effectAllowed property. Otherwise,
+     * it will be set to an alternate value that is allowed.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#drageffects
+     */
+    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.dropEffect = 'copy';
 
-    (event.srcElement || event.originalTarget).classList.add('drag');
+    event.srcElement.classList.add('drag');
 
-    event.stopPropagation();
+    setDragData(model, event, defaultReplacer(event), mediaType);
+
+    if (event.dataTransfer.types.length === 0) {
+        log.warn('[Drag] drag data was not set');
+    } else {
+        log.debug(`[Drag] data drag set for [${[event.dataTransfer.types].join(',')}]`);
+    }
+
+
 }
 
 /**
@@ -239,9 +313,16 @@ export function dragstart(event, model, mediaType) {
  * @return {boolean}
  */
 export function dragend(event) {
-    log.debug('[Drag] out - end ');
+
+    if (event.dataTransfer.dropEffect === 'none') {
+        log.debug('[Drag] cancelled');
+    } else {
+        log.debug(`[Drag] complete ${event.dataTransfer.dropEffect}`);
+
+    }
+
     event.target.classList.remove('drag');
-    event.stopPropagation();
+    event.target.classList.remove('over');
 }
 
 /**
@@ -250,17 +331,35 @@ export function dragend(event) {
  * @return {boolean}
  */
 export function dragover(event) {
-    log.debug('[Drag] in - over');
-    event = event.originalEvent || event;
 
+    log.debug('[Drag] in - over');
+
+    /**
+     * Drop effect from drag can be set in dragenter and/or dragover
+     *
+     * You can modify the dropEffect property during the dragenter or dragover events, if
+     * for example, a particular drop target only supports certain operations. You can modify
+     * the dropEffect property to override the user effect, and enforce a specific drop operation
+     * to occur. Note that this effect must be one listed within the effectAllowed property. Otherwise,
+     * it will be set to an alternate value that is allowed.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#drageffects
+     */
     event.dataTransfer.dropEffect = 'copy';
 
-    // allows us to drop
-    if (event.preventDefault) {
-        event.preventDefault();
-    }
     event.target.classList.add('over');
-    return false;
+
+    /**
+     * Allows us to drop and we could either return false or event.preventDefault()
+     *
+     * If you want to allow a drop, you must prevent the default handling by cancelling
+     * the event. You can do this either by returning false from an attribute-defined
+     * event listener, or by calling the event's preventDefault() method. The latter
+     * may be more feasible in a function defined in a separate script.
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#droptargets
+     */
+    event.preventDefault();
+    // return false;
 }
 
 /**
@@ -269,24 +368,46 @@ export function dragover(event) {
  * @return {boolean}
  */
 export function dragenter(event) {
+
     log.debug('[Drag] in - enter');
-    event = event.originalEvent || event;
+
+    /**
+     * Drop effect from drag can be set in dragenter and/or dragover
+     *
+     * You can modify the dropEffect property during the dragenter or dragover events, if
+     * for example, a particular drop target only supports certain operations. You can modify
+     * the dropEffect property to override the user effect, and enforce a specific drop operation
+     * to occur. Note that this effect must be one listed within the effectAllowed property. Otherwise,
+     * it will be set to an alternate value that is allowed.
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#drageffects
+     */
+    event.dataTransfer.dropEffect = 'copy';
 
     event.target.classList.add('over');
-    return false;
+
+    /**
+     * Allows us to drop and we could either return false or event.preventDefault()
+     *
+     * If you want to allow a drop, you must prevent the default handling by cancelling
+     * the event. You can do this either by returning false from an attribute-defined
+     * event listener, or by calling the event's preventDefault() method. The latter
+     * may be more feasible in a function defined in a separate script.
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#droptargets
+     */
+    event.preventDefault();
+    // return false;
 }
 
 /**
- * On drag leave, remove the 'over' icon from the target
+ * On drag leave, remove the 'over' icon from the target. No cancel events are required
  * @param {DragEvent} event
  * @return {boolean}
  */
 export function dragleave(event) {
     log.debug('[Drag] in - leave');
-    event = event.originalEvent || event;
 
     event.target.classList.remove('over');
-    return false;
 }
 
 /**
@@ -306,23 +427,35 @@ export function drop(event, cb, mediaType) {
     mediaType = mediaType || 'application/json';
 
     log.debug('[Drag] in - drop');
-    event = event.originalEvent || event;
 
-    // Stops some browsers from redirecting.
-    // see http://stackoverflow.com/questions/16701092/angularjs-multiple-ng-click-event-bubbling
-    if (event.stopPropagation) {
+    if (event.dataTransfer.items.length !== 0) {
+
+        // Stops some browsers from redirecting.
         event.stopPropagation();
+
+        event.target.classList.remove('over');
+
+        const result = getDragData(event.dataTransfer, mediaType);
+
+        if (result) {
+            cb(result);
+            /**
+             * Accept the drop event
+             *
+             * Call the preventDefault() method of the
+             * event if you have accepted the drop so that the default browser
+             * handling does not handle the dropped data as well.
+             *
+             * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#drop
+             */
+            event.preventDefault();
+            return false;
+
+        }
+    } else {
+        log.debug('[Drop] event has no drop data');
     }
-    if (event.preventDefault) {
-        event.preventDefault();
-    }
 
-    event.target.classList.remove('over');
-
-    createModel(event.dataTransfer, mediaType)
-        .then(model => cb(model));
-
-    return false;
 }
 
 /**

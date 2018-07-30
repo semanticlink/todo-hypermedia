@@ -788,8 +788,7 @@ export default class NODSynchroniser {
      */
     patchUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {
 
-        log.debug(`[Sync] uriList '${uriListName}' on ${SemanticLink.getUri(parentResource, /self/)}`);
-
+        log.debug(`[Sync] uriList '${uriListName}' on ${SemanticLink.getUri(parentResource, /self/)} [${[uriList].join(',')}]`);
         return nodMaker
             .getResource(parentResource)
             .then(resource => nodMaker

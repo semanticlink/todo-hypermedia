@@ -389,7 +389,7 @@ export default class State {
             return Promise.reject(`Resource is deleted ${uri}`);
         } else if (this.status === stateFlagEnum.forbidden) {
             // TODO: enhance forbidden strategy as needed currently assumes forbidden access doesn't change per session
-            log.info(`Resource is already forbidden and will not be fetched ${uri}`);
+            log.info(`[State] Resource is already forbidden and will not be fetched ${uri}`);
             return Promise.resolve(resource);
         }
 
@@ -430,30 +430,40 @@ export default class State {
                 // @see https://github.com/SGrondin/bottleneck#debugging-your-application
 
                 if (err.status === 403) {
-                    log.error(`Request error ${err.status}`)
+                    log.debug(`[State] Request error ${err.status} ${err.statusText} '${uri}'`);
                     // save the across-the-wire meta data so we can check for collisions/staleness
                     this.status = stateFlagEnum.forbidden;
                     // when was it retrieved
                     this.retrieved = new Date();
                     // how was it retrieved
                     this.headers = err.headers;
-                    // return original
-                    return Promise.reject(resource);
+                    /**
+                     * On a forbidden resource we are going to let the decision of what to do with
+                     * it lie at the application level. So we'll set the state, etc and return the
+                     * resource. This means that the application needs to check if it is {@link stateFlagEnum.forbidden}
+                     * and decide whether to remove (from say the set, or in the UI dim the item).
+                     */
+                    return Promise.resolve(resource);
                 } else if (err.status === 404) {
-                    log.info(`Likely stale collection for '${SemanticLink.tryGetUri(resource, ['up', 'parent', 'self', '*'])}' on resource ${uri}`);
+                    log.info(`[State] Likely stale collection for '${SemanticLink.tryGetUri(resource, ['up', 'parent', 'self', '*'])}' on resource ${uri}`);
                     this.status = stateFlagEnum.deleted;
                     return Promise.reject(resource);
                 } else if (err.status >= 400 && err.status < 499) {
-                    log.info(`Client error '${err.statusText}' on resource ${uri}`);
+                    log.info(`[State] Client error '${err.statusText}' on resource ${uri}`);
                     this.status = stateFlagEnum.unknown;
                     return Promise.resolve(resource);
                 } else if (err.status >= 500 && err.status < 599) {
-                    log.info(`Server error '${err.statusText}' on resource ${uri}`);
+                    log.info(`[State] Server error '${err.statusText}' on resource ${uri}`);
                     this.status = stateFlagEnum.unknown;
                     return Promise.resolve(resource);
                 } else {
                     log.error(`Request error unknown: '${err.message}' ${typeof err}`);
-                    return Promise.reject(resource);
+                    this.status = stateFlagEnum.unknown;
+                    /**
+                     * We really don't know what is happening here. But allow the application
+                     * to continue.
+                     */
+                    return Promise.resolve(resource);
                 }
             });
     }
@@ -471,11 +481,11 @@ export default class State {
     synchronise(resource, rel, options = {}) {
 
         if (State.needsFetch(this.status, options)) {
-            log.debug(`[State] fetch '${SemanticLink.tryGetUri(resource, rel)}'`);
+            log.debug(`[State] Fetch resource ${this.status.toString()}: '${SemanticLink.tryGetUri(resource, rel)}'`);
             return this.loadResource(resource, rel, options)
                 .then(response => State.mergeResource(resource, response));
         } else {
-            log.debug(`[State] no fetch resource ${this.status.toString()}: '${SemanticLink.tryGetUri(resource, rel)}'`);
+            log.debug(`[State] Fetch cached resource ${this.status.toString()}: '${SemanticLink.tryGetUri(resource, rel)}'`);
             return Promise.resolve(resource);
         }
     }
@@ -493,6 +503,7 @@ export default class State {
     synchroniseCollection(collection, rel, options = {}) {
 
         if (State.needsFetch(this.status, options)) {
+            log.debug(`[State] Fetch collection ${this.status.toString()}: '${SemanticLink.tryGetUri(collection, rel)}'`);
             return this.loadResource(collection, rel, options)
                 .then(representation => State.mergeResource(collection, representation))
                 .then(collection => {
@@ -509,10 +520,11 @@ export default class State {
                      */
                     return this.makeSparseCollectionItemsFromFeed(collection, options.mappedTitle);
                 });
+        } else {
+            log.debug(`[State] Fetch cached collection ${this.status.toString()}: '${SemanticLink.tryGetUri(collection, rel)}'`);
+            // actually it is already loaded so return the resource (TODO: and not stale)
+            return Promise.resolve(collection);
         }
-
-        // actually it is already loaded so return the resource (TODO: and not stale)
-        return Promise.resolve(collection);
     }
 
     /**
@@ -582,7 +594,7 @@ export default class State {
             const uri = (options.getUri || SemanticLink.tryGetUri)(resource, rel);
 
             if (!uri) {
-                log.info(`No '${collectionName}' (${rel.toString()}) for resource ${SemanticLink.tryGetUri(resource, /self|canonical/)}`);
+                log.info(`[State] No '${collectionName}' (${rel.toString()}) for resource ${SemanticLink.tryGetUri(resource, /self|canonical/)}`);
                 return Promise.resolve(undefined);
             }
 
@@ -665,9 +677,9 @@ export default class State {
                 // @see https://github.com/SGrondin/bottleneck#debugging-your-application
 
                 if (response.status === 403) {
-                    log.info(`Resource forbidden ${uri}`, options);
+                    log.info(`[State] Resource forbidden ${uri}`, options);
                 } else if (response.status === 404 || response.status === 405) {
-                    log.info(`Resource not found ${uri}`, options);
+                    log.info(`[State] Resource not found ${uri}`, options);
                 } else {
                     // 500, 400, 409
                     let msg = `Error '${response.statusText}' (${response.status}) on create '${uri}':`;
@@ -693,7 +705,7 @@ export default class State {
         let putFactory = options.putFactory || State.defaultPutFactory;
 
         const id = SemanticLink.tryGetUri(resource, /self/);
-        log.debug(`[PUT] ${id}`);
+        log.debug(`[State] [PUT] ${id}`);
 
         return loader.limiter.schedule({id}, putFactory, resource, data)
             .then(response => {
@@ -711,7 +723,7 @@ export default class State {
                     this.status = stateFlagEnum.forbidden;
                 } else if (response.status === 404 || response.status === 405) {
                     this.status = this.previousStatus;
-                    log.info(`Resource not found ${uri}`, options);
+                    log.info(`[State] Resource not found ${uri}`, options);
                 } else {
                     // 500, 400, 409
                     let msg = `Error on update resource ${uri}: ${response.statusText} [${stateFlagEnum.unknown.toString()}]`;
@@ -750,19 +762,19 @@ export default class State {
             this.status = stateFlagEnum.deleteInProgress;
         }
         else if (this.status === stateFlagEnum.deleteInProgress) {
-            log.info(`Delete already in progress ${uri}`);
+            log.info(`[State] Delete already in progress ${uri}`);
             return Promise.resolve(item);
         }
         else if (this.status === stateFlagEnum.virtual) {
-            log.info(`Virtual resources can just be removed ${uri}`);
+            log.info(`[State] Virtual resources can just be removed ${uri}`);
             return Promise.resolve(item);
         }
         else if (stateFlagEnum.deleted) {
-            log.info(`Already deleted, please remove from collection ${uri}`);
+            log.info(`[State] Already deleted, please remove from collection ${uri}`);
             return Promise.resolve(item);
         }
         else if (stateFlagEnum.forbidden) {
-            log.info(`Forbidden access ${uri}`);
+            log.info(`[State] Forbidden access ${uri}`);
             return Promise.resolve(item);
         }
         else {
@@ -773,7 +785,7 @@ export default class State {
         return loader.limiter.schedule({id}, deleteFactory, item)
             .then(() => {
                 this.status = stateFlagEnum.deleted;
-                log.info(`Resource '${uri}' ${status.toString()}`, options);
+                log.info(`[State] Resource '${uri}' ${status.toString()}`, options);
                 return item;
             })
             .catch(response => {
