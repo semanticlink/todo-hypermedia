@@ -51,7 +51,9 @@
 
         <footer class="info">
             <p>Double-click to edit a todo</p>
-            <p>Based on <a href="http://evanyou.me">Evan You</a></p>
+            <p>Written by the <a href="https://github.com/semanticlink">semantic link project</a>
+                and originally based on <a href="http://todomvc.com/examples/vue/">Vue.js</a> version by
+                <a href="http://evanyou.me">Evan You</a></p>
             <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
         </footer>
 
