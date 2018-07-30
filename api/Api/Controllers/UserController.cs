@@ -27,6 +27,21 @@ namespace Api.Controllers
             _todoStore = todoStore;
         }
 
+        /// <summary>
+        ///     A virtual resource to return a redirect. 
+        /// </summary>
+        /// <remarks>
+        ///     However, redirects with preflight requests do not work in Firefox.  Firefox just marked their
+        ///     issue "fixed" for Firefox 63, which is currently scheduled for beta on 2018-09-05
+        ///     and stable on 2018-10-23.
+        /// 
+        ///     The test page is here, open on browsers to test functionality:
+        /// 
+        ///         http://storage.googleapis.com/shaka-demo-assets/_bugs/cors_redirect/index.html
+        ///
+        ///     The best page to track this issues is here: https://github.com/google/shaka-player/issues/666
+        /// </remarks>
+/*
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
@@ -38,6 +53,21 @@ namespace Api.Controllers
                 .MakeUserUri(Url)
                 .MakeRedirect();
         }
+*/
+
+
+        [HttpGet("me", Name = UserUriFactory.UserMeName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(AddNoCache = true)]
+        [AuthoriseRedirect]
+        public async Task<UserRepresentation> Me()
+        {
+
+            return (await _userStore
+                    .Get(User.GetIdentityId()))
+                .ToRepresentation(Url);
+        }
+
 
         [HttpGet("{id}", Name = UserUriFactory.UserRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
