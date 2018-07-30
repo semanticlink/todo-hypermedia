@@ -260,7 +260,7 @@ export default class State {
     static mergeResource(resource, updateValues) {
         // this implementation is naively assuming that there is effectively a one-to-one match
         // of attributes across the two objects
-        return {...resource, ...updateValues};
+        return Object.assign(resource, updateValues);
     }
 
     /**

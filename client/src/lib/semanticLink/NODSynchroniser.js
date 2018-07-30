@@ -505,7 +505,7 @@ export default class NODSynchroniser {
 
         return nodMaker
         // ensure that the collection is added to the parent resource
-            .getNamedCollectionResource(parentResource, collectionName, collectionRel, {...options, ...{mappedTitle: 'name'}})
+            .getNamedCollectionResource(parentResource, collectionName, collectionRel, Object.assign({}, options, {mappedTitle: 'name'}))
             .then(collectionResource => this.syncResourceInCollection(collectionResource, resourceDocument, options))
             .then(NODSynchroniser.syncInfos(strategies, options));
     }

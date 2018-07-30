@@ -16,7 +16,7 @@ class SparseResource {
      * Default mapped title between feed items and sparse resources
      * @type {string}
      */
-    static get mappedTitle() {
+    static get mappedTitle () {
         return 'name';
     }
 
@@ -24,7 +24,7 @@ class SparseResource {
      * Default state factory will return an empty object
      * @returns {function():{}}
      */
-    static get defaultStateFactory() {
+    static get defaultStateFactory () {
         return () => {
             return {};
         };
@@ -36,7 +36,7 @@ class SparseResource {
      * @param {string=} resourceTitleAttributeName
      * @return {{links: *[]}}
      */
-    static makeFromFeedItem(feedItem, resourceTitleAttributeName) {
+    static makeFromFeedItem (feedItem, resourceTitleAttributeName) {
 
         let localResource = {
             links: [{
@@ -54,14 +54,14 @@ class SparseResource {
      * @param {?*} defaultValues
      * @return {LinkedRepresentation|CollectionRepresentation}
      */
-    static makeLinkedRepresentation(options, defaultValues) {
+    static makeLinkedRepresentation (options, defaultValues) {
         options = options || {};
 
         if (!options.stateFactory) {
             options.stateFactory = SparseResource.defaultStateFactory;
         }
 
-        return {...options.stateFactory(), ...{links: []}, ...defaultValues};
+        return Object.assign(options.stateFactory(), {links: []}, defaultValues);
     }
 
     /**
@@ -72,10 +72,10 @@ class SparseResource {
      * @param {?*} defaultValues
      * @return {LinkedRepresentation|CollectionRepresentation}
      */
-    static makeFromUri(uri, options, defaultValues) {
+    static makeFromUri (uri, options, defaultValues) {
 
         const localResource = {links: [{rel: 'self', href: uri}]};
-        return SparseResource.makeLinkedRepresentation(options, {...localResource, ...defaultValues});
+        return SparseResource.makeLinkedRepresentation(options, Object.assign(localResource, defaultValues));
     }
 
     /**
@@ -86,8 +86,8 @@ class SparseResource {
      * @param {?[{rel:string,href:string,title:string}]}defaultItems
      * @return {CollectionRepresentation}
      */
-    static makeCollection(options, defaultValues, defaultItems = []) {
-        return SparseResource.makeLinkedRepresentation(options, {...{items: defaultItems}, ...defaultValues});
+    static makeCollection (options, defaultValues, defaultItems = []) {
+        return SparseResource.makeLinkedRepresentation(options, Object.assign({items: defaultItems}, defaultValues));
     }
 
     /**
@@ -99,8 +99,8 @@ class SparseResource {
      * @param {?*} defaultValues
      * @return {CollectionRepresentation}
      */
-    static makeCollectionFromUri(uri, options, defaultValues) {
-        return SparseResource.makeFromUri(uri, options, {...{items: []}, ...defaultValues});
+    static makeCollectionFromUri (uri, options, defaultValues) {
+        return SparseResource.makeFromUri(uri, options, Object.assign({items: []}, defaultValues));
     }
 
     /**
@@ -113,9 +113,9 @@ class SparseResource {
      * @param {?*} defaultValues default values to populate the locate representation of the resource with
      * @return {LinkedRepresentation}
      */
-    static makeResourceFromFeedItem(feedItem, resourceTitleAttributeName, options, defaultValues) {
+    static makeResourceFromFeedItem (feedItem, resourceTitleAttributeName, options, defaultValues) {
         const localResource = SparseResource.makeFromFeedItem(feedItem, resourceTitleAttributeName);
-        return SparseResource.makeLinkedRepresentation(options, {...localResource, ...defaultValues});
+        return SparseResource.makeLinkedRepresentation(options, Object.assign(localResource, defaultValues));
     }
 
     /**
@@ -127,12 +127,12 @@ class SparseResource {
      * @param {SparseResourceOptions} options
      * @return {CollectionRepresentation}
      */
-    static mapFeedItemsToCollectionItems(collection, resourceTitleAttributeName, options) {
+    static mapFeedItemsToCollectionItems (collection, resourceTitleAttributeName, options) {
         collection.items = _(collection.items).map(
             item => SparseResource.makeResourceFromFeedItem(item, resourceTitleAttributeName, options));
         return collection;
     }
 }
 
-export {SparseResource};
+export { SparseResource };
 export default SparseResource;

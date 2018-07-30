@@ -1,14 +1,6 @@
 import _ from './mixins/underscore';
 
-/**
- * wrapper to lessen syntax
- * @param options
- * @param obj
- * @return {{}}
- */
-export const makeOptions = (options, obj) => {
-    return {...options, ...obj};
-};
+export const makeOptions = (options, obj) => Object.assign({}, options, obj);
 export default makeOptions;
 
 /**

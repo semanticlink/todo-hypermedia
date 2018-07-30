@@ -72,7 +72,7 @@ export default class Collection {
      */
     static getResourceInNamedCollection (parentResource, collectionName, collectionRel, resourceDocument, options) {
 
-        options = {...{mappedTitle: 'name'}, ...options};
+        options = Object.assign({}, {mappedTitle: 'name'}, options);
 
         return nodMaker
             .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
