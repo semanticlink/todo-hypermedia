@@ -42,6 +42,9 @@ axios.interceptors.response.use(
         // axios returns a network error that we need to match against readyState < DONE (4)
         // to correctly trap network down errors. All other errors should be passed through.
         if (error.message === 'Network Error' && error.request.readyState <= 4) {
+
+            log.debug(`[Network] ${error.message} on '${error.config.url}'`);
+
             const promise = Promise.resolve(error);
             httpQueue.pushToBuffer(error.config, promise);
             EventBus.$emit(offline, error);
