@@ -84,7 +84,7 @@
 
             },
             drop(event) {
-                return drop(
+                drop(
                     event,
                     document => this.dropped(document, this.context),
                     this.mediaType);

@@ -52,17 +52,19 @@ const getDragData = (transfer, mediaType) => {
         const data = transfer.getData('application/json');
         return JSON.parse(data);
 
-    } else if (mediaType === 'text/uri-list' && _(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')) {
+    } else if (mediaType === 'text/uri-list'/* && _(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')*/) {
 
         log.debug('[Drop] found: text/uri-list');
-
+        /*
+        // async version
         let uriItem = _(transfer.items).find(item => item.kind === 'string' && item.type === 'text/uri-list');
-
 
         uriItem.getAsString(str => {
             log.debug(`[Drop] result: ${str}`);
-            return str;
+            return Promise.resolve(str);
         });
+        */
+        return transfer.getData('text/uri-list');
 
     } else if (_(transfer.files).size() > 0) {
 
@@ -279,7 +281,7 @@ const defaultReplacer = event => {
  */
 export function dragstart(event, model, mediaType) {
 
-    log.debug('[Drag] start');
+    log.debug(`[Drag] start ${mediaType}`);
 
     /**
      * Drop effect from drag can be set in dragenter and/or dragover
@@ -296,13 +298,13 @@ export function dragstart(event, model, mediaType) {
 
     event.srcElement.classList.add('drag');
 
-    setDragData(model, event, defaultReplacer(event), mediaType);
-
     if (event.dataTransfer.types.length === 0) {
         log.warn('[Drag] drag data was not set');
     } else {
         log.debug(`[Drag] data drag set for [${[event.dataTransfer.types].join(',')}]`);
+
     }
+    setDragData(model, event, defaultReplacer(event), mediaType);
 
 
 }
@@ -426,7 +428,7 @@ export function drop(event, cb, mediaType) {
 
     mediaType = mediaType || 'application/json';
 
-    log.debug('[Drag] in - drop');
+    log.debug(`[Drag] in - drop ${mediaType}`);
 
     if (event.dataTransfer.items.length !== 0) {
 
@@ -437,23 +439,24 @@ export function drop(event, cb, mediaType) {
 
         const result = getDragData(event.dataTransfer, mediaType);
 
+        /**
+         * Accept the drop event (regardless of pass or fail)
+         *
+         * Call the preventDefault() method of the
+         * event if you have accepted the drop so that the default browser
+         * handling does not handle the dropped data as well.
+         *
+         * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#drop
+         */
+        event.preventDefault();
+
         if (result) {
             cb(result);
-            /**
-             * Accept the drop event
-             *
-             * Call the preventDefault() method of the
-             * event if you have accepted the drop so that the default browser
-             * handling does not handle the dropped data as well.
-             *
-             * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#drop
-             */
-            event.preventDefault();
-            return false;
-
+        } else {
+            log.debug(`[Drop] result undefined for ${mediaType}`);
         }
     } else {
-        log.debug('[Drop] event has no drop data');
+        log.debug(`[Drop] event has no drop data for ${mediaType}`);
     }
 
 }
