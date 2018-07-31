@@ -25,7 +25,7 @@
 
     import Delete from 'vue-ionicons/dist/md-remove-circle-outline.vue';
     import Add from 'vue-ionicons/dist/md-add-circle-outline.vue';
-    import Edit from 'vue-ionicons/dist/md-settings.vue';
+    import Edit from 'vue-ionicons/dist/md-create.vue';
     import Search from 'vue-ionicons/dist/md-search.vue';
     import Put from 'vue-ionicons/dist/md-cloud-upload.vue';
     import Patch from 'vue-ionicons/dist/md-cloud-upload.vue';
