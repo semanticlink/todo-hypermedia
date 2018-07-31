@@ -12,10 +12,7 @@
           @dragleave="dragleave"
           @dragend="dragend">
                 <slot>
-                        <span class="btn btn-xs btn-success glyphicon glyphicon-import"
-                              role="button">
-
-                        </span>
+                        <span>+</span>
                 </slot>
         </span>
 </template>
@@ -69,9 +66,6 @@
                 resource: {}
             }
         },
-        created(){
-
-        },
         methods: {
             mousedown(event) {
 
@@ -79,7 +73,7 @@
                  * Work around to load up the model from async before making it draggable
                  */
                 const getModel = (typeof this.model === 'object')
-                    ? Promise.resolve(this.model)
+                    ? () => Promise.resolve(this.model)
                     : this.model;
 
                 getModel()

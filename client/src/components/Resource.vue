@@ -17,10 +17,23 @@
                     <div v-show="!formRepresentation">
                         <b-button size="sm" @click="copyToClipboard">Copy</b-button>
                         <b-button size="sm" @click="saveToFile">Save</b-button>
-                        <drag-droppable-collection
+                        <!-- Allow for the drag and drop on Put and Patch -->
+                        <form-drag-drop
                                 v-if="isLoaded"
-                                :representation="representation">
-                        </drag-droppable-collection>
+                                method="PUT"
+                                :representation="representation"
+                                :map="toUriList"
+                                mediaType="text/uri-list"
+                                title="Drag a uri to create (via PUT)">
+                        </form-drag-drop>
+                        <form-drag-drop
+                                v-if="isLoaded"
+                                method="PATCH"
+                                :representation="representation"
+                                :map="toPatchDocument"
+                                mediaType="application/json-patch+json"
+                                title="Drag a uri to create (via PATCH)">
+                        </form-drag-drop>
                         <br/>
                         <pre v-html="htmlRepresentation"/>
                     </div>
@@ -71,21 +84,26 @@
 
     import axios from 'axios';
     import {linkifyToSelf} from '../filters/linkifyWithClientRouting';
-    import {makeButtonOnLinkifyLinkRels} from "../filters/makeButtonOnLinkifyLinkRels";
+    import {findLinkRel, makeButtonOnLinkifyLinkRels} from "../filters/makeButtonOnLinkifyLinkRels";
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
     import {copyToClipboard, saveToFile} from "../lib/raw-helpers";
     import {get, _delete, LinkedRepresentation, CollectionRepresentation, getUri} from 'semantic-link';
+    import FormAction from './FormAction.vue';
+    import Vue from 'vue';
+    import {fromUriList, makeUriList} from "../lib/util/dragAndDropModel";
+    import {compare, deepClone} from 'fast-json-patch'
 
-    import DragDroppableCollection from './DragDroppableCollection.vue';
+
+    import FormDragDrop from './FormDragDrop.vue';
 
 
     export default {
         props: {
             apiUri: {type: String},
         },
-        components: {Logout, Headers, Form, DragDroppableCollection},
+        components: {Logout, Headers, Form, FormDragDrop},
         data() {
             return {
                 /**
@@ -131,6 +149,19 @@
             }
         },
         methods: {
+            toUriList() {
+                const itemUris = (this.representation.items || []).map(({id}) => id);
+                return makeUriList([...new Set([...itemUris, ...fromUriList(document)])]);
+            },
+            toPatchDocument() {
+                const newCollection = deepClone(this.representation);
+
+                // add to the collection
+                fromUriList(document).forEach(uri => newCollection.items.push({id: uri}));
+
+                return compare(this.representation, newCollection);
+
+            },
             /**
              * On a button click of an action, GET the form so that it can be rendered
              * @param {string} rel link relation
@@ -226,33 +257,36 @@
 
                         this.$nextTick(() => {
 
+                            const Component = Vue.extend(FormAction);
+
+                            /**
+                             *  Add an action button on the linkify link relations html structure
+                             * @see see https://css-tricks.com/creating-vue-js-component-instances-programmatically/
+                             * @param {string|RegExp} rel link relation to add button onto (eg self, create-form, edit-form)
+                             * @param onClick
+                             * @param type
+                             * @param mediaType
+                             */
+                            const makeButtonOnLinkifyLinkRels = (rel, onClick, type, mediaType) => {
+                                const component = new Component({propsData: {type, onClick, rel, mediaType}});
+                                return findLinkRel(rel, mediaType).forEach(el =>
+                                    el && el.insertBefore(component.$mount().$el, el.firstChild));
+                            };
+
                             /**
                              *
                              * Match tightly on the value being the link relation. This includes the quotation
                              * marks '"' but the element must only contain that.
                              */
-                            makeButtonOnLinkifyLinkRels("edit-form", {onClick: this.getForm, title: 'Edit'});
-                            makeButtonOnLinkifyLinkRels("create-form", {onClick: this.getForm, title: 'Add'});
-                            makeButtonOnLinkifyLinkRels("search", {onClick: this.getForm, title: 'Search'});
-                            makeButtonOnLinkifyLinkRels("self", {onClick: this.tryDelete, title: 'Delete'});
+                            makeButtonOnLinkifyLinkRels('edit-form', this.getForm, 'Edit');
+                            makeButtonOnLinkifyLinkRels('create-form', this.getForm, 'Add');
+                            makeButtonOnLinkifyLinkRels('search', this.getForm, 'Search');
+                            makeButtonOnLinkifyLinkRels('self', this.tryDelete, 'Delete');
 
-/*
-                            makeButtonOnLinkifyLinkRels(
-                                "edit-form",
-                                "application/json-patch+json",
-                                {
-                                    onClick: this.getForm,
-                                    title: 'Put'
-                                });
-
-                            makeButtonOnLinkifyLinkRels(
-                                "edit-form",
-                                "text/uri-list",
-                                {
-                                    onClick: this.getForm,
-                                    title: 'Patch'
-                                });
-*/
+                            /*
+                            makeButtonOnLinkifyLinkRels('edit-form', this.getForm, 'Put', 'application/json-patch+json');
+                            makeButtonOnLinkifyLinkRels('edit-form', this.getForm, 'Patch', 'text/uri-list');
+                            */
                         });
 
                         this.resetForm();
