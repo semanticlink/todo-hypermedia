@@ -54,8 +54,8 @@
 
 
         </b-form-group>
+        <b-button variant="outline" @click="onCancel" v-if="!noCancel"><Back h="26px" w="26px"/></b-button>
         <b-button type="submit" variant="primary">{{ submitTitle }}</b-button>
-        <b-button variant="secondary" @click="onCancel" v-if="!noCancel">Cancel</b-button>
     </b-form>
 
 </template>
@@ -69,10 +69,13 @@
     import FormService from "../lib/FormService";
     import { filter, getUri } from 'semantic-link';
 
+    import Back from 'vue-ionicons/dist/md-arrow-round-back.vue';
+    import Ok from 'vue-ionicons/dist/md-send.vue';
+
 
     export default {
         name: "Form",
-        components: {datetime: Datetime},
+        components: {datetime: Datetime, Back, Ok},
         props: {
             /**
              * Collection or item representation.
