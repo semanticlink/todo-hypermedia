@@ -1,9 +1,9 @@
 <template>
     <div>
 
-        <b-tabs>
+        <b-tabs id="view" ref="view" v-model="currentViewIndex">
 
-            <b-tab title="JSON" active>
+            <b-tab title="JSON">
 
                 <b-container fluid class="m-3 pr-3">
 
@@ -84,7 +84,7 @@
 
     import axios from 'axios';
     import {linkifyToSelf} from '../filters/linkifyWithClientRouting';
-    import {findLinkRel, makeButtonOnLinkifyLinkRels} from "../filters/makeButtonOnLinkifyLinkRels";
+    import {findLinkRel} from "../filters/makeButtonOnLinkifyLinkRels";
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
@@ -94,6 +94,9 @@
     import Vue from 'vue';
     import {fromUriList, makeUriList} from "../lib/util/dragAndDropModel";
     import {compare, deepClone} from 'fast-json-patch'
+    import bTabs from 'bootstrap-vue/es/components/tabs/tabs';
+    import bTab from 'bootstrap-vue/es/components/tabs/tab';
+    import {log} from 'logger';
 
 
     import FormDragDrop from './FormDragDrop.vue';
@@ -103,7 +106,7 @@
         props: {
             apiUri: {type: String},
         },
-        components: {Logout, Headers, Form, FormDragDrop},
+        components: {Logout, Headers, Form, FormDragDrop, bTabs, bTab},
         data() {
             return {
                 /**
@@ -137,20 +140,126 @@
                  * Print print UI flag. True = formatted down the page, False = no extra white spaces
                  * @type {boolean}
                  */
-                prettyprint: false
-            };
+                prettyprint: false,
+                /**
+                 * Tracks and sets the view (tabs). It is matched as the fragment in the url against the title of tab
+                 * @type {number}
+                 */
+                currentViewIndex: 0,
+            }
         },
         created() {
-            return this.getRepresentation();
+            this.getRepresentation();
+        },
+        mounted() {
+
+            /////////////////////////////
+            //
+            // Client-side routing
+            // ===================
+            //
+            // Simple client router mixed in with tabs for navigation through the url/window.location
+            //
+
+            /**
+             * Incoming setting of the client-side state view.
+             *
+             * We are matching the url fragment against a tab index
+             *
+             * ** Warning ** Tabs must be setup correctly for this to work in tabs and tab
+             *
+             *    `<b-tabs id="view" ref="view" v-model="currentViewIndex">`
+             *
+             *    id: used to pick out the correct tabs layout
+             *    ref: used when lost click context
+             *    currentViewIndex: bound to the tabs for setting tabs
+             *
+             *    `<b-tab title="Json">`
+             *
+             *    title: bound to the url fragment in lowercase (eg url#json)
+             */
+            const viewTitle = window.location.hash.replace('#', '');
+            this.currentViewIndex = this.$refs.view.tabs.findIndex(tab => tab.title.toLowerCase() === viewTitle);
+            log.debug(`[View] set ${viewTitle}`);
+
+            /**
+             *
+             * The user agent fires a popstate event when the user navigates through their history,
+             * whether backwards or forwards, provided it isn’t taking the user away from the
+             * current page. That is, all those pushStates we called will keep the user on the current page,
+             * so the 'popstate' event will fire for each history item they pop through.
+             *
+             * Pages can add state objects between their entry in the session history and the next (“forward”)
+             * entry. These are then returned to the script when the user (or script) goes back in the history,
+             * thus enabling authors to use the “navigation” metaphor even in one-page applications.
+             *
+             * ** WARNING **
+             * If you look at the developer console in Chrome when you load the page for the first time, you’ll
+             * see the popstate event fired immediately, before you’ve even clicked a link. This is because
+             * Chrome considers the initial page load to be a change in state, and so it fires the event.
+             * In this instance, the state property is null, but thankfully the updateContent function deals
+             * with this. Keep this in mind when developing as it could catch you out, especially if other
+             * browsers assume this behavior.
+             *
+             * However, this listener is not being registered early enough (ie on mounted) and thus
+             * does not receive this event.
+             *
+             * @see http://html5doctor.com/history-api/
+             *
+             */
+            window.addEventListener('popstate', (e) => {
+                if (e.state) {
+                    this.currentViewIndex = e.state.tabIndex || 0;
+                }
+            });
+
+            /**
+             * Listening for the global `changed::tab` even that provides us with context and the tab selection.
+             *
+             * In doing so, it does mean that we need to ensure we are looking at the correct tabs which is identified
+             * by its `id` which needs to be set in the template (otherwise, if the app has more tabs it will collide).
+             *
+             */
+            this.$root.$on('changed::tab', (tabs, tabIndex, tab) => {
+
+                /**
+                 * There is one problem: using the back button creates a 'double'/bounce click effect. The tabs component watches
+                 * for any tab changes and then emits events for tab:click and $root:changed::tab. We need to work out
+                 * whether the origin of the event was a Back/Forward button or a user click. This is done via checking the
+                 * document uri (which has the previous orig) and match against the current. If they are the same then
+                 * we are going to say that it was Back/Forward event so we need to debounce it.
+                 *
+                 * @param {string} title
+                 * @return {boolean}
+                 */
+                const isTabChange = title => {
+                    return title !== document.URL.replace(document.referrer, '').replace('#', '')
+                };
+
+                if (tabs.id === 'view') {
+
+                    const title = tab.title.toLowerCase();
+                    log.debug(`[View] changed '${title}'`);
+
+                    if (isTabChange(title)) {
+                        log.debug(`[History] pushstate '${title}'`);
+                        window.history.pushState({tabIndex}, title, `${window.location.pathname}#${title}`);
+                    }
+
+                } else {
+                    log.debug(`[View] tabs not processed ${tabs.id}`);
+                }
+
+            })
         },
         computed: {
             isLoaded() {
                 return this.representation != null;
-            }
+            },
         },
         methods: {
             toUriList() {
-                const itemUris = (this.representation.items || []).map(({id}) => id);
+                const itemUris = [this.representation.items].map(({id}) => id);
                 return makeUriList([...new Set([...itemUris, ...fromUriList(document)])]);
             },
             toPatchDocument() {
