@@ -258,9 +258,9 @@
             },
         },
         methods: {
-            toUriList() {
+            toUriList(data) {
                 const itemUris = [this.representation.items].map(({id}) => id);
-                return makeUriList([...new Set([...itemUris, ...fromUriList(document)])]);
+                return makeUriList([...new Set([...itemUris, ...fromUriList(data)])]);
             },
             toPatchDocument() {
                 const newCollection = deepClone(this.representation);

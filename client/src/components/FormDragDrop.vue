@@ -89,8 +89,9 @@
              * The 'map' function in the parent provides the  Json Patch Document or uri-list
              */
             update (data) {
+                const uriList = this.map(data);
                 link.get(this.representation, this.rel, this.mediaType)
-                    .then(response => link[this.method](response.data, 'submit', this.mediaType, this.map(data)))
+                    .then(response => link[this.method.toLowerCase()](response.data, 'submit', this.mediaType, uriList))
                     .then(/** @type {AxiosResponse} */response => {
                         this.$notify({
                             text: `${response.statusText} <a href="${response.headers.location}">item<a>`,
@@ -99,7 +100,7 @@
 
                     })
                     .catch(/** @type {AxiosError} */error => {
-                        this.$notify({text: error.statusText, type: 'error'});
+                        this.$notify({text: error.message || error.statusText, type: 'error'});
                     })
             }
         }
