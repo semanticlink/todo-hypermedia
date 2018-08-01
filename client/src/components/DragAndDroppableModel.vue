@@ -44,12 +44,12 @@
             },
             /**
              * Callback after the dropped model is loaded and then can be acted on (eg updated)
+             *
+             * Takes a callback function with the dropped document as the parameter
              */
             dropped: {
                 type: Function,
-                default: () => () => {
-                }
-            },
+                default: () => (document) => document            },
             /**
              * Pick the type of media to send from a drag event
              *

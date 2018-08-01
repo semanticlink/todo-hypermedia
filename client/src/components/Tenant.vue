@@ -5,9 +5,10 @@
         <div v-for="tenant in tenants.items" v-cloak>
 
             <drag-and-droppable-model
-                    :model="hydrateTenant"
+                    :model="hydrateTenant(tenant)"
                     media-type="application/json"
-                    :dropped="createOrUpdateUsersOnTenant">
+                    :dropped="createOrUpdateUsersOnTenant"
+            >
                 <b-button @click="gotoTenant(tenant)">{{ tenant.name }}</b-button>
             </drag-and-droppable-model>
         </div>
@@ -18,14 +19,16 @@
     import {nodMaker, SemanticLink, _} from 'semanticLink';
     import {log} from 'logger';
     import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
-    import {redirectToTenant, redirectToSelectTenant} from "router";
+    import {redirectToTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
     import {getTenantAndTodos} from '../domain/tenant';
     import {pooledTagResourceResolver} from '../domain/tags';
     import {getUri} from 'semantic-link';
+    import bButton from 'bootstrap-vue/es/components/button/button';
+    import {findResourceInCollection} from "semanticLink/mixins/collection";
 
     export default {
-        components: {DragAndDroppableModel},
+        components: {DragAndDroppableModel, bButton},
         data() {
             return {
                 msg: 'Looking ...',
@@ -91,10 +94,10 @@
                         log.error(err);
                     });
             },
-            createOrUpdateUsersOnTenant(document, options) {
+            createOrUpdateUsersOnTenant(tenantDocument) {
 
-                const tenantRepresentation = this.$root.$api.tenants.items[0];
-                const tenantDocument = document.tenants.items[0];
+                const tenantRepresentation = findResourceInCollection(this.$root.$api.tenants, tenantDocument, 'self');
+
 
                 log.debug(`Update tenant ${tenantRepresentation.name} --> ${SemanticLink.getUri(tenantRepresentation, 'self')}`);
 
@@ -149,17 +152,11 @@
                         log.error(err);
                     });
             },
-            hydrateTenant(tenant) {
+            hydrateTenant: function (tenantRepresentation) {
                 return getTenantAndTodos(this.$root.$api)
-                    .then(hydratedApi => {
-                        const tenant = _({}).extendResource(hydratedApi);
-                        // delete tenant.me;
-                        // delete tenant.users;
-                        // delete tenant.authenticate;
-                        return tenant;
-                    })
+                    .then(() => tenantRepresentation)
                     .catch(err => {
-                        this.$notify({type: 'error', title: 'Could not load up the tenant'})
+                        this.$notify({type: 'error', title: 'Could not load up the tenant'});
                         log.error(err);
                     });
             }

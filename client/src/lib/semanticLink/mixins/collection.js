@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import { SemanticLink } from '../SemanticLink';
 
-const normaliseCollection = collection => {
+export const normaliseCollection = collection => {
     if (!collection) {
         return [];
     }
@@ -22,7 +22,7 @@ const normaliseCollection = collection => {
  * @param {string=|string[]} attributeNameOrLinkRelation
  * @return {LinkedRepresentation}
  */
-const findItemByUriOrName = (collection, resourceIdentifier, attributeNameOrLinkRelation) => {
+export const findItemByUriOrName = (collection, resourceIdentifier, attributeNameOrLinkRelation) => {
 
     // if a linked representation is handed in (instead of a string) find its self link
     if (_(resourceIdentifier).isObject() && resourceIdentifier.links) {
@@ -52,7 +52,7 @@ const findItemByUriOrName = (collection, resourceIdentifier, attributeNameOrLink
  * @param {string} attributeName
  * @return {LinkedRepresentation|undefined}
  */
-const findResourceInCollectionByRelAndAttribute = (collection, resource, rel = /canonical|self/, attributeName = 'name') => {
+export const findResourceInCollectionByRelAndAttribute = (collection, resource, rel = /canonical|self/, attributeName = 'name') => {
 
     // if its not a resource return
     if (!(_(resource).isObject() && resource.links)) {
@@ -78,7 +78,7 @@ const findResourceInCollectionByRelAndAttribute = (collection, resource, rel = /
  * @param {string} uri
  * @param {string|Regexp} attributeNameOrLinkRelation
  */
-const findItemByUri = (collection, uri, attributeNameOrLinkRelation) =>
+export const findItemByUri = (collection, uri, attributeNameOrLinkRelation) =>
     _(collection.items || collection || []).find(item => SemanticLink.tryGetUri(item, attributeNameOrLinkRelation || /self|canonical/) === uri);
 
 /**
@@ -89,7 +89,7 @@ const findItemByUri = (collection, uri, attributeNameOrLinkRelation) =>
  * @param {string=} attributeNameOrLinkRelation
  * @return {LinkedRepresentation}
  */
-const findResourceInCollectionByUri = (collection, representation, attributeNameOrLinkRelation) => {
+export const findResourceInCollectionByUri = (collection, representation, attributeNameOrLinkRelation) => {
     const uri = SemanticLink.tryGetUri(representation, /canonical|self/);
 
     if (uri) {
@@ -110,7 +110,7 @@ const findResourceInCollectionByUri = (collection, representation, attributeName
  * @param {string=} attributeNameOrLinkRelation
  * @return {LinkedRepresentation}
  */
-const findResourceInCollection = (collection, representation, attributeNameOrLinkRelation) => {
+export const findResourceInCollection = (collection, representation, attributeNameOrLinkRelation) => {
 
     const itemByUri = findResourceInCollectionByUri(collection, representation, attributeNameOrLinkRelation);
     if (itemByUri) {
@@ -124,15 +124,6 @@ const findResourceInCollection = (collection, representation, attributeNameOrLin
             return itemByName;
         }
     }
-
-    // TODO: this strategy REALLY needs to be gone ASAP. We have about 20% resources still using title rather than name
-    const title = representation.title;
-    if (title) {
-        const itemByTitle = findItemByUriOrName(collection, title, 'title');
-        if (itemByTitle) {
-            return itemByTitle;
-        }
-    }
 };
 
 /**
@@ -143,7 +134,7 @@ const findResourceInCollection = (collection, representation, attributeNameOrLin
  * @param {string=} attributeNameOrLinkRelation
  * @return {LinkedRepresentation[]}
  */
-const differenceCollection = (leftCollection, rightCollection, attributeNameOrLinkRelation) => {
+export const differenceCollection = (leftCollection, rightCollection, attributeNameOrLinkRelation) => {
 
     // guard for the reject
     leftCollection = leftCollection || [];
@@ -165,7 +156,7 @@ const differenceCollection = (leftCollection, rightCollection, attributeNameOrLi
  * @param {*[]?} values
  * @return {*[]}
  */
-const spliceAll = (array, values) => {
+export const spliceAll = (array, values) => {
 
     if (_(array).isArray()) {
         array.splice.apply(array, [0, array.length].concat(values));
@@ -184,7 +175,7 @@ const spliceAll = (array, values) => {
  * @param array
  * @param values
  */
-const pushAll = (array, values) => {
+export const pushAll = (array, values) => {
 
     if (_(array).isArray()) {
         array.push.apply(array, values);
@@ -202,7 +193,7 @@ const pushAll = (array, values) => {
  * @param resource
  * @param attributeNameOrLinkRelation
  */
-const pushResource = (array, resource, attributeNameOrLinkRelation) => {
+export const pushResource = (array, resource, attributeNameOrLinkRelation) => {
 
     array = array || [];
 
@@ -221,7 +212,7 @@ const pushResource = (array, resource, attributeNameOrLinkRelation) => {
  * @param {LinkedRepresentation[]} array
  * @return {string[]} uri-list form of an array
  */
-const mapUriList = array => {
+export const mapUriList = array => {
     return _(array)
         .chain()
         .map(item => SemanticLink.tryGetUri(item, /self|canonical/))
@@ -234,7 +225,7 @@ const mapUriList = array => {
  * @param {CollectionRepresentation|LinkedRepresentation[]} collection
  * @returns {boolean}
  */
-const isCollectionEmpty = collection => {
+export const isCollectionEmpty = collection => {
     return _(normaliseCollection(collection)).isEmpty();
 };
 
@@ -243,7 +234,7 @@ const isCollectionEmpty = collection => {
  * @param {CollectionRepresentation|LinkedRepresentation[]} collection
  * @returns {LinkedRepresentation}
  */
-const firstItem = collection => {
+export const firstItem = collection => {
     return _(normaliseCollection(collection)).first();
 };
 

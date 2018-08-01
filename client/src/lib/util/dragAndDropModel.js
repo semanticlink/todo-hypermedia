@@ -1,11 +1,4 @@
-import {_, log} from 'semanticLink';
-
-/**
- * Grok the extension of a file name
- * @param {string} file
- * @returns {string}
- */
-const getFileExtension = (file) => file.name.replace(/.*\.([a-zA-Z]+)$/, '$1');
+import {log} from 'logger';
 
 /**
  * Returns the model out of the dataTransfer in order of:
@@ -20,124 +13,85 @@ const getFileExtension = (file) => file.name.replace(/.*\.([a-zA-Z]+)$/, '$1');
  */
 const getDragData = (transfer, mediaType) => {
 
-    /**
-     *
-     * Warning on dataTransfer.types
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#droptargets
-     *
-     * Note that the latest spec now dictates that DataTransfer.types should return a frozen array
-     * of DOMStrings rather than a DOMStringList (this is supported in Firefox 52 and above.
-     * As a result, the contains method no longer works on the property; the includes method
-     * should be used instead to check if a specific type of data is provided, using code
-     * like the following:
-     *
-     * @example
-     *         if ([...event.dataTransfer.types].includes('text/html')) {
+    return new Promise(resolve => {
+
+        /**
+         *
+         * Warning on dataTransfer.types
+         *
+         * @see https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#droptargets
+         *
+         * Note that the latest spec now dictates that DataTransfer.types should return a frozen array
+         * of DOMStrings rather than a DOMStringList (this is supported in Firefox 52 and above.
+         * As a result, the contains method no longer works on the property; the includes method
+         * should be used instead to check if a specific type of data is provided, using code
+         * like the following:
+         *
+         * @example
+         *         if ([...event.dataTransfer.types].includes('text/html')) {
          *              // Do something
          *          }
-     */
+         */
 
-    log.debug(`[Drop] media type: [${mediaType}]`);
-    log.debug(`[Drop] types available: [${[transfer.types].join(',')}]`);
+        log.debug(`[Drop] media type: [${mediaType}]`);
+        log.debug(`[Drop] types available: [${[transfer.types].join(',')}]`);
 
-    Object.entries(transfer.items).forEach(
-        ([, item]) => log.debug(`[Drag] item: kind '${item.kind}' type '${item.type}'`)
-    );
+        [...transfer.items].forEach(item => log.debug(`[Drag] item: kind '${item.kind}' type '${item.type}'`));
 
-    if (mediaType === 'application/json' && [...transfer.types].includes('application/json')) {
+        if (mediaType === 'application/json' && [...transfer.types].includes('application/json')) {
 
-        log.debug('[Drop] found: application/json');
+            log.debug('[Drop] found: application/json');
 
-        const data = transfer.getData('application/json');
-        return JSON.parse(data);
+            const data = transfer.getData('application/json');
+            return resolve(JSON.parse(data));
 
-    } else if (mediaType === 'text/uri-list'/* && _(transfer.items).any(item => item.kind === 'string' && item.type === 'text/uri-list')*/) {
+        } else if (mediaType === 'text/uri-list') {
 
-        log.debug('[Drop] found: text/uri-list');
-        /*
-        // async version
-        let uriItem = _(transfer.items).find(item => item.kind === 'string' && item.type === 'text/uri-list');
+            log.debug('[Drop] found: text/uri-list');
 
-        uriItem.getAsString(str => {
-            log.debug(`[Drop] result: ${str}`);
-            return Promise.resolve(str);
-        });
-        */
-        return transfer.getData('text/uri-list');
+            return resolve(transfer.getData('text/uri-list'));
 
-    } else if (_(transfer.files).size() > 0) {
+        } else if ([...transfer.items].findIndex(item => item.kind === 'file' && item.type === mediaType && item.type === 'application/json') >= 0) {
 
-        // currently we are only going to take one file
-        // TODO: multiple dropped files
-        const file = _(transfer.files).first();
-        log.debug(`File: "${file.name}" of type ${file.type}`);
+            // currently we are only going to take one file
+            // TODO: multiple dropped files
+            const [file,] = [...transfer.files];
 
-        const extension = getFileExtension(file);
-        // TODO: wider set of mime types
-        if ('json' === extension) {
-
-            /**
-             * Apologies, this is a blocking, synchronise file reader
-             */
-
-            let ready = false;
-            let result = '';
+            log.debug(`File: "${file.name}" of type ${file.type}`);
 
             const reader = new FileReader();
             reader.onload = function (evt) {
                 log.debug('[Drop] data loaded');
-                try {
-                    result = JSON.parse(evt.target.result);
-                    ready = true;
-                } catch (err) {
-                    log.error(err);
-                    return undefined;
-                }
+                return resolve(JSON.parse(evt.target.result));
             };
-
             reader.readAsText(file);
 
-            const check = () => {
-                if (ready === true) {
-                    return result;
+        } else if (mediaType === 'text/plain' && [...transfer.types].includes('text/plain')) {
+            //
+            //  After all the content types and file have been processed, have a few guesses
+            //  at what the content is. If it has come from an editor then JSON could be
+            //  represented as text. Try parsing it as JSON and proceed if that works.
+            //
+            log.debug('[Drop] trying text as JSON');
+            try {
+                return resolve(JSON.parse(transfer.getData('Text')));
+            } catch (e) {
+                log.error('[Drop] error parsing text as JSON');
+                if (e instanceof SyntaxError) {
+                    log.error('The content is not valid JSON');
+                    return resolve(undefined);
                 }
-                setTimeout(check, 500);
-            };
-
-            check();
-
-
+                else {
+                    log.error('The content type is not JSON and unsupported');
+                    return resolve(undefined);
+                }
+            }
         } else {
-            log.error('Unknown file type');
-            return undefined;
+            log.debug(`[Drop] content is an unsupported file/content type: '${mediaType}' in [${[transfer.types].join(',')}]`);
+            resolve(undefined);
         }
-    } else if (mediaType === 'text/plain' && [...transfer.types].includes('text/plain')) {
-        //
-        //  After all the content types and file have been processed, have a few guesses
-        //  at what the content is. If it has come from an editor then JSON could be
-        //  represented as text. Try parsing it as JSON and proceed if that works.
-        //
-        log.debug('[Drop] trying text as JSON');
-        try {
-            return JSON.parse(transfer.getData('Text'));
-        } catch (e) {
-            log.error('[Drop] error parsing text as JSON');
-            if (e instanceof SyntaxError) {
-                log.error('The content is not valid JSON');
-                return undefined;
-            }
-            else {
-                log.error('The content type is not JSON and unsupported');
-                return undefined;
-            }
-        }
-    } else {
-        log.debug(`[Drop] content is an unsupported file/content type: '${mediaType}' in [${[transfer.types].join(',')}]`);
-        return undefined;
-    }
 
-
+    });
 };
 
 /**
@@ -190,7 +144,7 @@ const setDragData = (model, event, replacerStrategy, mediaType) => {
 
     const dataTransfer = event.dataTransfer;
 
-    mediaType = mediaType || ['application/json','text/uri-list'];
+    mediaType = mediaType || ['application/json', 'text/uri-list'];
 
     /**
      * In practice, we are going to want to be able to drag data out to the desktop/folders and other applications.
@@ -432,7 +386,6 @@ export function dragleave(event) {
  * @param {DragEvent} event
  * @param {function(LinkedRepresentation)}cb callback function process the model
  * @param {string?} mediaType='application/json' media type to be returned
- * @return {boolean}
  */
 export function drop(event, cb, mediaType) {
 
@@ -447,8 +400,6 @@ export function drop(event, cb, mediaType) {
 
         event.target.classList.remove('over');
 
-        const result = getDragData(event.dataTransfer, mediaType);
-
         /**
          * Accept the drop event (regardless of pass or fail)
          *
@@ -460,11 +411,16 @@ export function drop(event, cb, mediaType) {
          */
         event.preventDefault();
 
-        if (result) {
-            cb(result);
-        } else {
-            log.debug(`[Drop] result undefined for ${mediaType}`);
-        }
+        getDragData(event.dataTransfer, mediaType)
+            .then(result => {
+                if (result) {
+                    cb(result);
+                } else {
+                    log.debug(`[Drop] result undefined for ${mediaType}`);
+                }
+
+            });
+
     } else {
         log.debug(`[Drop] event has no drop data for ${mediaType}`);
     }
