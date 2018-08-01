@@ -7,8 +7,7 @@
             <drag-and-droppable-model
                     :model="hydrateTenant(tenant)"
                     media-type="application/json"
-                    :dropped="createOrUpdateUsersOnTenant"
-            >
+                    :dropped="createOrUpdateUsersOnTenant">
                 <b-button @click="gotoTenant(tenant)">{{ tenant.name }}</b-button>
             </drag-and-droppable-model>
         </div>
@@ -16,16 +15,13 @@
 </template>
 
 <script>
-    import {nodMaker, SemanticLink, _} from 'semanticLink';
+    import {_} from 'semanticLink';
     import {log} from 'logger';
     import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
     import {redirectToTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
-    import {getTenantAndTodos, getTenants} from '../domain/tenant';
-    import {pooledTagResourceResolver} from '../domain/tags';
-    import {getUri} from 'semantic-link';
+    import {getTenantAndTodos, getTenants, createOrUpdateUsersOnTenant} from '../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
-    import {findResourceInCollection} from "semanticLink/mixins/collection";
 
     export default {
         components: {DragAndDroppableModel, bButton},
@@ -83,72 +79,13 @@
 
                 nodSynchroniser.getResourceInNamedCollection(this.$root.$api, 'tenants', /tenants/, tenantDocument, [])
                     .then(resource => log.debug(resource))
-                    .catch(err => {
-                        this.$notify({
-                            title: "Provisioning Error",
-                            text: err.message,
-                            type: 'error'
-                        });
-                        log.error(err);
-                    });
+                    .catch(err => logError);
             },
             createOrUpdateUsersOnTenant(tenantDocument) {
 
-                const tenantRepresentation = findResourceInCollection(this.$root.$api.tenants, tenantDocument, 'self');
+                createOrUpdateUsersOnTenant(this.$root.$api.tenants, tenantDocument, this.$root.$api, {})
+                    .catch(err => logError);
 
-
-                log.debug(`Update tenant ${tenantRepresentation.name} --> ${SemanticLink.getUri(tenantRepresentation, 'self')}`);
-
-
-                const syncUsersStrategy = (tenantRepresentation, tenantDocument, strategies, options) => {
-                    return nodSynchroniser.getNamedCollection(tenantRepresentation, 'users', /users/, tenantDocument, strategies, options);
-                };
-
-                const syncTodosStrategy = (userRepresentation, userDocument, strategies, options) => {
-                    return nodSynchroniser.getNamedCollection(userRepresentation, 'todos', /todos/, userDocument, strategies, options);
-                };
-
-                const syncTagsStrategy = (todoRepresentation, todoDocument, strategies, options) => {
-                    return nodSynchroniser.patchUriListOnNamedCollection(
-                        todoRepresentation,
-                        'tags',
-                        /tags/,
-                        [...todoDocument.tags.items].map(item => getUri(item, 'self')),
-                        {
-                            ...options,
-                            ...{contributeonly: true},
-                            ...pooledTagResourceResolver(this.$root.$api)
-                        });
-                };
-
-                nodSynchroniser
-                    .getResource(
-                        tenantRepresentation,
-                        tenantDocument,
-                        [
-                            (tenantRepresentation, tenantDocument, options) => syncUsersStrategy(
-                                tenantRepresentation,
-                                tenantDocument,
-                                [
-                                    (usersRepresentation, usersDocument, options) => syncTodosStrategy(
-                                        usersRepresentation,
-                                        usersDocument,
-                                        [
-                                            (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, [], options)
-                                        ],
-                                        options)
-                                ],
-                                options)
-                        ],
-                        {})
-                    .catch(err => {
-                        this.$notify({
-                            title: "Provisioning Error",
-                            text: err.message,
-                            type: 'error'
-                        });
-                        log.error(err);
-                    });
             },
             hydrateTenant: function (tenantRepresentation) {
                 return getTenantAndTodos(this.$root.$api)
@@ -157,6 +94,14 @@
                         this.$notify({type: 'error', title: 'Could not load up the tenant'});
                         log.error(err);
                     });
+            },
+            logError(err) {
+                this.$notify({
+                    title: "Provisioning Error",
+                    text: err.message,
+                    type: 'error'
+                });
+                log.error(err);
             }
 
         },
