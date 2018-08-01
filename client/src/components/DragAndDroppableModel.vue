@@ -51,7 +51,9 @@
                 }
             },
             /**
-             * Pick the type of media to return
+             * Pick the type of media to send from a drag event
+             *
+             * // TODO: is this really a content-type (cf accept)
              * @example 'application/json'
              * @example 'text/uri-list'
              * @example 'text/plain'
@@ -59,6 +61,17 @@
              */
             mediaType: {
                 type: String
+            },
+            /**
+             * Pick the type of media to return from a drop event
+             *
+             * @example 'application/json'
+             * @example 'text/uri-list'
+             * @example 'text/plain'
+             * @example 'DownloadUrl'
+             */
+            accept: {
+                type: String,
             }
         },
         data() {
@@ -68,6 +81,7 @@
         },
         methods: {
             mousedown(event) {
+
 
                 /**
                  * Work around to load up the model from async before making it draggable
@@ -84,15 +98,20 @@
 
             },
             drop(event) {
+
+                if (this.accept === undefined) {
+                    log.debug('No accept media type set using application/json');
+                }
+
                 drop(
                     event,
                     document => this.dropped(document, this.context),
-                    this.mediaType);
+                    this.accept || 'application/json');
             },
             dragstart(event) {
 
                 if (this.mediaType === undefined) {
-                    log.warn('No mediaType set using application/json');
+                    log.debug('No mediaType set using application/json');
                 }
 
                 dragstart(event, this.resource, this.mediaType || 'application/json');

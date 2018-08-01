@@ -482,7 +482,8 @@ export function makeUriList(representation) {
  * @returns {string[]}
  */
 export function fromUriList(uriList) {
-    const list = uriList.split('\n');
-    return list.filter(uri => !uri.startsWith('#'));
+    return uriList
+        .split('\n')
+        .filter(uri => !uri.startsWith('#'));
 
 }

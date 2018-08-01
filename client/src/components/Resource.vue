@@ -24,6 +24,7 @@
                                 :representation="representation"
                                 :map="toUriList"
                                 mediaType="text/uri-list"
+                                accept="text/uri-list"
                                 title="Drag a uri to create (via PUT)">
                         </form-drag-drop>
                         <form-drag-drop
@@ -32,6 +33,7 @@
                                 :representation="representation"
                                 :map="toPatchDocument"
                                 mediaType="application/json-patch+json"
+                                accept="text/uri-list"
                                 title="Drag a uri to create (via PATCH)">
                         </form-drag-drop>
                         <br/>
@@ -258,17 +260,17 @@
             },
         },
         methods: {
-            toUriList(data) {
-                const itemUris = [this.representation.items].map(({id}) => id);
+            toUriList(data, resource) {
+                const itemUris = [resource.items].map(({id}) => id);
                 return makeUriList([...new Set([...itemUris, ...fromUriList(data)])]);
             },
-            toPatchDocument() {
-                const newCollection = deepClone(this.representation);
+            toPatchDocument(data, resource) {
+                const newCollection = deepClone(resource);
 
                 // add to the collection
-                fromUriList(document).forEach(uri => newCollection.items.push({id: uri}));
+                fromUriList(data).forEach(uri => newCollection.items.push({id: uri}));
 
-                return compare(this.representation, newCollection);
+                return compare(resource, newCollection);
 
             },
             /**
