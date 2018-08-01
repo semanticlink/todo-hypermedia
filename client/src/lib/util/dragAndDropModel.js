@@ -124,11 +124,11 @@ const getDragData = (transfer, mediaType) => {
         } catch (e) {
             log.error('[Drop] error parsing text as JSON');
             if (e instanceof SyntaxError) {
-                log.error('The content is not valid JSON')
+                log.error('The content is not valid JSON');
                 return undefined;
             }
             else {
-                log.error('The content type is not JSON and unsupported')
+                log.error('The content type is not JSON and unsupported');
                 return undefined;
             }
         }
