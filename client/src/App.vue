@@ -6,7 +6,7 @@
         <notifications/>
         <router-view></router-view>
         <div>
-            <b-link :to="{ name: 'Home' }">Home</b-link>
+            <router-link :to="{ name: routeName.Admin }" v-if="$route.fullPath !== routePath.Admin">Admin</router-link>
         </div>
     </div>
 </template>
@@ -17,13 +17,17 @@
     import Login from './components/Login.vue';
     import {nodMaker} from 'semanticLink';
     import * as link from 'semantic-link';
+    import {routeName, routePath} from "router";
 
     export default {
         name: 'app',
         components: {Offline, Login, Spinner},
+        data() {
+            return {
+                routeName, routePath
+            }
+        },
         created: function () {
-
-            const apiUri = link.getUri('HEAD', 'api');
 
             /**
              * The api representation is the 'top of the tree' in terms of the network of
@@ -35,11 +39,30 @@
              * Until a better solution is found, we are injecting it from the previous state on the
              * state change events. See below.
              *
-             * Note: this is currently found on `this.$root.$api`
+             * Note: this is currently found on `this.$root.$api` because it was pre-registered
+             *
+             * @example setup example
+             *
+             *   let store;
+             *
+             *   const apiPlugin = {
+             *       store,
+             *       install(Vue) {
+             *           // attach to the root view
+             *           // access via this.$root.$api
+             *           Vue.prototype.$api = store;
+             *       }
+             *   };
+             *
+             *   Vue.use(apiPlugin);
+             *
+             * @example usage
+             *
+             *  getUri(this.$root.$api, 'self') --> a uri
              *
              * @type {ApiRepresentation}
              */
-            this.$root.$api = this.$root.$api || nodMaker.makeSparseResourceFromUri(apiUri);
+            this.$root.$api = this.$root.$api || nodMaker.makeSparseResourceFromUri(link.getUri('HEAD', 'api'));
 
         }
     };

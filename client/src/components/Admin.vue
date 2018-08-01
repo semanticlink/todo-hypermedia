@@ -21,7 +21,7 @@
     import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
     import {redirectToTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
-    import {getTenantAndTodos} from '../domain/tenant';
+    import {getTenantAndTodos, getTenants} from '../domain/tenant';
     import {pooledTagResourceResolver} from '../domain/tags';
     import {getUri} from 'semantic-link';
     import bButton from 'bootstrap-vue/es/components/button/button';
@@ -51,9 +51,7 @@
             const strategyOneProvidedTenant = (apiResource) => {
                 log.info('Looking for provided tenant');
 
-                return nodMaker
-                    .getResource(apiResource)
-                    .then(apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tenants', /tenants/))
+                return getTenants(apiResource)
                     .then(tenants => {
                         if (tenants && _(tenants.items).isEmpty()) {
                             this.$notify({

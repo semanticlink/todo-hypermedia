@@ -1,7 +1,8 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import {makeAbsolute, makeRelative, toSitePath} from './lib/util/UriMapping';
-import Home from './components/Tenant.vue';
+import {makeAbsolute, toSitePath} from './lib/util/UriMapping';
+import SelectTenant from './components/SelectTenant.vue';
+import Admin from './components/Admin.vue';
 import Todo from './components/Todo.vue';
 import {SemanticLink} from 'semanticLink';
 
@@ -83,19 +84,34 @@ const makePath = clientPath => `${makePrefix(clientPath)}:apiUri(.*)`;
 
 const clientPath = {
     Todo: 'todo',
-    Resource: 'roam'
+};
+
+export const routeName = {
+    Todo: 'Todo',
+    Home: 'Home',
+    Admin: 'Admin',
+};
+
+export const routePath = {
+    Home: '/',
+    Admin: '/admin',
 };
 
 const router = new VueRouter({
     routes: [
         {
-            path: '/',
-            name: 'Home',
-            component: Home,
+            path: routePath.Home,
+            name: routeName.Home,
+            component: SelectTenant,
+        },
+        {
+            path: routePath.Admin,
+            name: routeName.Admin,
+            component: Admin,
         },
         {
             path: makePath(clientPath.Todo),
-            name: 'Todo',
+            name: routeName.Todo,
             component: Todo,
             props: resolve
         }
