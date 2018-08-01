@@ -7,54 +7,61 @@ const source = CancelToken.source();
 
 /**
  * @class LoaderOptions
+ * @extends {module:bottleneck.ConstructorOptions}
  * @properties {number} maxConcurrent=5
  * @properties {number} minTime=0
  * @properties {number} highWater=-1
  */
 
 /**
- * Loading service to allow for rate limiting concurrent requests and
+ * Loading service to allow for rate limiting and prioritising concurrent requests and
  * being able to cancel some or all requests.
  *
- * Wraps bottleneck and axios cancellables in the background.
+ * Wraps bottleneck and axios cancellables in the background using es6 promises.
  *
- * @class Loader
  */
 export default class Loader {
 
     /**
-     * @param {LoaderOptions=} options
+     * @param {module:bottleneck.ConstructorOptions=} options
      */
-    constructor (options) {
+    constructor(options) {
 
         this._currentOptions = options;
 
         this._limiter = Loader.limiterFactory(options);
 
-        this.schedule = this._limiter.schedule;
-
-        const cancellable = axios.CancelToken;
+        /**
+         *
+         * @type {CancelTokenStatic}
+         */
+        const cancelToken = axios.CancelToken;
         this._cancelleable = source.token;
-        this._cancel = () => cancellable.cancel;
+        this._cancel = () => cancelToken.cancel;
 
-        this._limiter.on('error', error => {
+        this._limiter.on(Loader.event.ERROR, error => {
             log.error(`[Limiter] Error: ${error}`);
         });
 
-        this._limiter.on('debug', (message) => {
+        this._limiter.on(Loader.event.DEBUG, (message) => {
             log.debug(`[Limiter] ${message}`);
         });
     }
 
-    static limiterFactory (options) {
+    /**
+     * Make a new limiter with the options
+     * @param {module:bottleneck.ConstructorOptions} options
+     * @return {module:bottleneck.Bottleneck}
+     */
+    static limiterFactory(options) {
         log.debug('[Limiter] Created');
-        return new Bottleneck(Object.assign({}, options, Loader.defaultOptions));
+        return new Bottleneck({...options, ...Loader.defaultOptions});
     }
 
     /**
-     * @returns {LoaderOptions}
+     * @returns {module:bottleneck.ConstructorOptions}
      */
-    static get defaultOptions () {
+    static get defaultOptions() {
         return {
             // num of jobs that can be running at the same time
             maxConcurrent: 5,
@@ -62,36 +69,65 @@ export default class Loader {
             minTime: 0,
             // default: how long can the queue get? At this stage unlimited
             highWater: null,
-            // this is actaully the default
+            // this is actually the default
             strategy: Bottleneck.strategy.LEAK,
             // use es6 promise over the default Bluebird
             Promise: Promise
         };
     }
 
-    get limiter () {
+
+    /**
+     * @see {@link Bottleneck.on}
+     * @return {{EMPTY: string, IDLE: string, DROPPED: string, DEPLETED: string, DEBUG: string, ERROR: string}}
+     */
+    static get event() {
+        return {
+            EMPTY: 'empty',
+            IDLE: 'idle',
+            DROPPED: 'dropped',
+            DEPLETED: 'depleted',
+            DEBUG: 'debug',
+            ERROR: 'error',
+        };
+    }
+
+    /**
+     * Access to the limiter. Chain the methods of this instance if you require it
+     *
+     * @example loader.limiter.on(loader.event.DEBUG, () => {});
+     * @example itemsInQueue = loader.limiter.queued();
+     * @example loader.limiter.schedule( ...
+     * @return {Bottleneck}
+     */
+    get limiter() {
         return this._limiter;
     }
 
-    get queued () {
-        return this._limiter.nbQueued();
-    }
-
-    get cancellable () {
+    /**
+     * Access to the cancel token
+     * @return {CancelToken | *}
+     */
+    get cancellable() {
         return this._cancelleable;
     }
 
-    clearAll () {
-        // stop shuts everything down
-        this._limiter.stopAll();
+    /**
+     * Current options in the limiter
+     * @return {module:bottleneck.ConstructorOptions|*}
+     */
+    get currentOptions() {
+        return this._currentOptions;
+    }
+
+    /**
+     * Stop all current and pending requests and reset all queues.
+     */
+    clearAll() {
         // this will abort any xhr requests
         this._cancel();
         // unfortunately, we still need one! TODO: ask library for update to be able to clear queues and keep running
         this._limiter = Loader.limiterFactory(this._currentOptions);
-    }
-
-    onEmpty (callback) {
-        this._limiter.on('empty', callback);
     }
 
 }

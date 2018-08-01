@@ -58,6 +58,7 @@
     "vue-html-loader": "^1.2.4",
     "vue-ionicons": "^2.2.1",
     "vue-loader": "^15.2.0",
+    "vue-simple-spinner": "^1.2.8",
     "vue-template-compiler": "^2.5.16",
     "webpack": "^4.8.3",
     "webpack-cli": "^2.1.4",

@@ -1,5 +1,6 @@
 <template>
     <div id="app">
+        <Spinner/>
         <Offline/>
         <Login/>
         <notifications/>
@@ -11,6 +12,7 @@
 </template>
 
 <script>
+    import Spinner from './components/Spinner.vue';
     import Offline from './components/Offline.vue';
     import Login from './components/Login.vue';
     import {nodMaker} from 'semanticLink';
@@ -18,7 +20,7 @@
 
     export default {
         name: 'app',
-        components: {Offline, Login,},
+        components: {Offline, Login, Spinner},
         created: function () {
 
             const apiUri = link.getUri('HEAD', 'api');
