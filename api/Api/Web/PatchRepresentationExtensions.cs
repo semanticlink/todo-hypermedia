@@ -39,6 +39,7 @@ namespace Api.Web
                     .Select(routeAndParam =>
                         item.Id.GetParamFromNamedRoute(routeAndParam.Param, routeAndParam.Route, context))
                     .First(tagid => !tagid.IsNullOrWhitespace()))
+                .Distinct()
                 .ToList();
         }
     }

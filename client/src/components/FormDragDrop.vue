@@ -7,8 +7,7 @@
             :accept="accept"
             :dropped="update">
 
-            <FormAction :media-type="mediaType" :rel="rel" :type="method" :title="title"
-            />
+            <FormAction :media-type="mediaType" :rel="rel" :type="method" :title="title"/>
 
     </drag-and-droppable-model>
 
@@ -95,7 +94,7 @@
              *
              * The 'map' function in the parent provides the  Json Patch Document or uri-list
              */
-            update (data) {
+            update(data) {
                 const uriList = this.map(data, this.representation);
                 link.get(this.representation, this.rel, this.mediaType)
                     .then(response => link[this.method.toLowerCase()](response.data, 'submit', this.mediaType, uriList))

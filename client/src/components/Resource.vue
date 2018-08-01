@@ -8,60 +8,38 @@
                 <b-container fluid class="m-3 pr-3">
 
 
+                   <div v-show="!formRepresentation">
+                        <b-button size="sm"
+                                  @click="copyToClipboard"
+                                  v-b-tooltip.hover.html.bottom
+                                  title="Copy the data to the clipboard">
+                            Copy
+                        </b-button>
+                        <b-button
+                                size="sm"
+                                @click="saveToFile"
+                                v-b-tooltip.hover.html.bottom
+                                title="Save the data to a file">
+                            Save
+                        </b-button>
+
+                        <b-button size="sm" @click="prettyprint = !prettyprint" v-if="!prettyprint">Raw</b-button>
+                        <b-button size="sm" variant="outline" @click="prettyprint = !prettyprint" v-else>Pretty Print
+                        </b-button>
+                        <br/>
+
+
+                        <pre v-if="prettyprint">{{ representation }}</pre>
+                        <pre v-html="htmlRepresentation" v-else/>
+                    </div>
+
                     <Form :representation="representation"
                           :formRepresentation="formRepresentation"
                           :on-cancel="onClose"
                           v-if="formRepresentation"/>
 
-
-                    <div v-show="!formRepresentation">
-                        <b-button size="sm" @click="copyToClipboard">Copy</b-button>
-                        <b-button size="sm" @click="saveToFile">Save</b-button>
-                        <!-- Allow for the drag and drop on Put and Patch -->
-                        <form-drag-drop
-                                v-if="isLoaded"
-                                method="PUT"
-                                :representation="representation"
-                                :map="toUriList"
-                                mediaType="text/uri-list"
-                                accept="text/uri-list"
-                                title="Drag a uri to create (via PUT)">
-                        </form-drag-drop>
-                        <form-drag-drop
-                                v-if="isLoaded"
-                                method="PATCH"
-                                :representation="representation"
-                                :map="toPatchDocument"
-                                mediaType="application/json-patch+json"
-                                accept="text/uri-list"
-                                title="Drag a uri to create (via PATCH)">
-                        </form-drag-drop>
-                        <br/>
-                        <pre v-html="htmlRepresentation"/>
-                    </div>
-
-
                 </b-container>
 
-            </b-tab>
-
-            <b-tab title="Raw">
-
-                <b-container fluid class="m-3 pr-3">
-
-                    <b-button size="sm" @click="copyToClipboard">Copy</b-button>
-                    <b-button size="sm" @click="saveToFile">Save</b-button>
-
-                    <b-button size="sm" @click="prettyprint = !prettyprint" v-if="!prettyprint">Pretty Print</b-button>
-                    <b-button size="sm" variant="outline" @click="prettyprint = !prettyprint" v-else>Pretty Print
-                    </b-button>
-                    <br/>
-                    <div class="mt-3">
-                        <pre v-if="prettyprint">{{ representation }}</pre>
-                        <code v-else>{{ representation }}</code>
-                    </div>
-
-                </b-container>
             </b-tab>
 
             <b-tab title="Headers">
@@ -98,6 +76,7 @@
     import {compare, deepClone} from 'fast-json-patch'
     import bTabs from 'bootstrap-vue/es/components/tabs/tabs';
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
+    import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
 
 
@@ -108,7 +87,7 @@
         props: {
             apiUri: {type: String},
         },
-        components: {Logout, Headers, Form, FormDragDrop, bTabs, bTab},
+        components: {Logout, Headers, Form, FormDragDrop, bTabs, bTab, bTooltip},
         data() {
             return {
                 /**
@@ -260,18 +239,40 @@
             },
         },
         methods: {
+            /**
+             *
+             * Takes two representations and merges into a distinct set of uri-list that needs to be PUT
+             * onto the collection
+             *
+             * @param {string} data uri-list (not an array)
+             * @param {CollectionRepresentation} resource
+             * @return {string} uri-list (not an array) (no comments)
+             */
             toUriList(data, resource) {
+                // make uri-list from a collection
                 const itemUris = [resource.items].map(({id}) => id);
+                // make a distinct list of uris and return as uri-list
                 return makeUriList([...new Set([...itemUris, ...fromUriList(data)])]);
             },
+            /**
+             *
+             * Takes to representations and merges into a JSON Patch Document to PATCH against the collection
+             *
+             * Note: this does not currently allow for removing items from a collection
+             *
+             * @param {string} data uri-list (not an array)
+             * @param {CollectionRepresentation} resource
+             * @return {*} Json Patch Document
+             */
             toPatchDocument(data, resource) {
+                // create a copy as the template
                 const newCollection = deepClone(resource);
 
-                // add to the collection
+                // Add any new uris that need to be added to the collection
                 fromUriList(data).forEach(uri => newCollection.items.push({id: uri}));
 
+                // generate the Json Patch document
                 return compare(resource, newCollection);
-
             },
             /**
              * On a button click of an action, GET the form so that it can be rendered
@@ -368,36 +369,81 @@
 
                         this.$nextTick(() => {
 
-                            const Component = Vue.extend(FormAction);
-
                             /**
-                             *  Add an action button on the linkify link relations html structure
-                             * @see see https://css-tricks.com/creating-vue-js-component-instances-programmatically/
-                             * @param {string|RegExp} rel link relation to add button onto (eg self, create-form, edit-form)
-                             * @param onClick
-                             * @param type
-                             * @param mediaType
-                             */
-                            const makeButtonOnLinkifyLinkRels = (rel, onClick, type, mediaType) => {
-                                const component = new Component({propsData: {type, onClick, rel, mediaType}});
-                                return findLinkRel(rel, mediaType).forEach(el =>
-                                    el && el.insertBefore(component.$mount().$el, el.firstChild));
-                            };
-
-                            /**
+                             * Now that we have the resource loaded, wait for the render (ie nextTick) and attach
+                             * all the actions we want onto the links relations.
                              *
-                             * Match tightly on the value being the link relation. This includes the quotation
-                             * marks '"' but the element must only contain that.
+                             * Below is a list of all the different actions available:
+                             *   - buttons (ie forms that are filled out by the user
+                             *   - drop (and drag) targets
+                             *
+                             * These will get placed in-line as components. You should be able to register
+                             * more as you go. Hopefully, this pluggable approach is readable and workable.
+                             *
+                             * Add components dynamically is a well known approach
+                             * @see see https://css-tricks.com/creating-vue-js-component-instances-programmatically/
                              */
-                            makeButtonOnLinkifyLinkRels('edit-form', this.getForm, 'Edit');
-                            makeButtonOnLinkifyLinkRels('create-form', this.getForm, 'Add');
-                            makeButtonOnLinkifyLinkRels('search', this.getForm, 'Search');
-                            makeButtonOnLinkifyLinkRels('self', this.tryDelete, 'Delete');
 
-                            /*
-                            makeButtonOnLinkifyLinkRels('edit-form', this.getForm, 'Put', 'application/json-patch+json');
-                            makeButtonOnLinkifyLinkRels('edit-form', this.getForm, 'Patch', 'text/uri-list');
-                            */
+                            const ButtonComponent = Vue.extend(FormAction);
+                            const DropTargetComponent = Vue.extend(FormDragDrop);
+
+                            [
+                                ['edit-form', undefined, new ButtonComponent({
+                                    propsData: {
+                                        type: 'Edit',
+                                        onClick: this.getForm,
+                                        rel: 'edit-form',
+                                        title: 'Click to update existing information'
+                                    }
+                                })],
+                                ['search', undefined, new ButtonComponent({
+                                    propsData: {
+                                        type: 'Search',
+                                        onClick: this.getForm,
+                                        rel: 'search',
+                                        title: 'Click to open a search form'
+                                    }
+                                })],
+                                ['create-form', undefined, new ButtonComponent({
+                                    propsData: {
+                                        type: 'Add',
+                                        onClick: this.getForm,
+                                        rel: 'create-form',
+                                        title: 'Click to enter new information to create a new item'
+                                    }
+                                })],
+                                ['self', undefined, new ButtonComponent({
+                                    propsData: {
+                                        type: 'Delete',
+                                        onClick: this.tryDelete,
+                                        rel: 'self',
+                                        title: 'Click to delete'
+                                    }
+                                })],
+                                ['edit-form', 'text/uri-list', new DropTargetComponent({
+                                    propsData: {
+                                        method: 'put',
+                                        representation: this.representation,
+                                        map: this.toUriList,
+                                        mediaType: 'text/uri-list',
+                                        accept: 'text/uri-list',
+                                        title: 'Drag a uri to create (via PUT uri-list)'
+                                    }
+                                })],
+                                ['edit-form', 'application/json-patch+json', new DropTargetComponent({
+                                    propsData: {
+                                        method: 'patch',
+                                        representation: this.representation,
+                                        map: this.toPatchDocument,
+                                        mediaType: 'application/json-patch+json',
+                                        accept: 'text/uri-list',
+                                        title: 'Drag a uri to create (via PATCH)'
+                                    }
+                                })],
+                            ].forEach(([rel, mediaType, component]) => findLinkRel(rel, mediaType)
+                                .forEach(el => el && el.insertBefore(component.$mount().$el, el.firstChild)));
+
+
                         });
 
                         this.resetForm();

@@ -185,7 +185,7 @@ namespace Api.Controllers
 
             patch.ApplyTo(document);
 
-            // normaliese
+            // normalise
             await _todoStore.Update(id, todo =>
             {
                 // normalise tags back to a string list
