@@ -190,8 +190,18 @@ const setDragData = (model, event, replacerStrategy, mediaType) => {
 
     const dataTransfer = event.dataTransfer;
 
-    mediaType = mediaType || ['application/json', 'text/plain', 'DownloadUrl', 'text/uri-list'];
-    mediaType = [mediaType];
+    mediaType = mediaType || ['application/json','text/uri-list'];
+
+    /**
+     * In practice, we are going to want to be able to drag data out to the desktop/folders and other applications.
+     * To do this, we can't use application/json (although we can use text/uri-list). At this stage, default to add
+     * plain text forms of the representation (which are JSON in plain text).
+     *
+     * If this becomes a problem (like with very large files) then this default can be changed.
+     *
+     * @see https://stackoverflow.com/questions/19362416/cross-browser-html5-drag-and-drop-json-datatransfer-fails
+     */
+    mediaType = [mediaType].concat(['text/plain', 'DownloadUrl']);
 
     log.debug(`[Drag] using media types: [${mediaType.join(',')}]`);
 
