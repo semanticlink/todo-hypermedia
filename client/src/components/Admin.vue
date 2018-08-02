@@ -1,30 +1,51 @@
 <template>
     <div class="hello">
-        <h1>Organisations</h1>
+        <h1>Organisations
+            <drag-and-droppable-model
+                    :model="this.$root.$api"
+                    :context="this.$root.$api"
+                    media-type="application/json"
+                    :dropped="createTenantOnRoot">
+                <b-button variant="outline"
+                          v-b-tooltip.hover.html.right
+                          title="Drop on to create">
+                    <add w="22px" h="22px"/>
+                </b-button>
+            </drag-and-droppable-model>
+        </h1>
 
         <div v-for="tenant in tenants.items" v-cloak>
-
             <drag-and-droppable-model
                     :model="hydrateTenant(tenant)"
                     media-type="application/json"
                     :dropped="createOrUpdateUsersOnTenant">
-                <b-button @click="gotoTenant(tenant)">{{ tenant.name }}</b-button>
+                <b-button v-b-tooltip.hover.html.right
+                          title="Drag off to take a copy or drop on to update"
+                          @click="gotoTenant(tenant)">
+                    {{ tenant.name }}
+                </b-button>
             </drag-and-droppable-model>
+
         </div>
     </div>
 </template>
 
 <script>
     import {_} from 'semanticLink';
+    import {getUri} from 'semantic-link';
     import {log} from 'logger';
     import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
     import {redirectToTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
-    import {getTenantAndTodos, getTenants, createOrUpdateUsersOnTenant} from '../domain/tenant';
+    import {getTenantAndTodos, getTenants, createOrUpdateUsersOnTenant, createTenantOnRoot} from '../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
+    import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
+    import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
+    import {uriMappingResolver} from "semanticLink/UriMappingResolver";
+
 
     export default {
-        components: {DragAndDroppableModel, bButton},
+        components: {DragAndDroppableModel, bButton, Add, bTooltip},
         data() {
             return {
                 msg: 'Looking ...',
@@ -75,16 +96,25 @@
             gotoTenant(organisation) {
                 redirectToTenant(organisation);
             },
-            createOrUpdateTenantOnRoot(tenantDocument) {
+            createTenantOnRoot(tenantDocument, apiResource) {
 
-                nodSynchroniser.getResourceInNamedCollection(this.$root.$api, 'tenants', /tenants/, tenantDocument, [])
-                    .then(resource => log.debug(resource))
-                    .catch(err => logError);
+                // Ensure the survey name is 'unique'
+                tenantDocument.name = `${tenantDocument.name || 'New tenant'} (${Date.now() % 1000000})`;
+                if ('links' in tenantDocument) {
+                    tenantDocument.links[0].href = ''; // remove the self link
+                }
+
+                this.$notify('Starting create new tenant');
+
+                createTenantOnRoot(apiResource, tenantDocument, {})
+                    .then(this.notifySuccess)
+                    .catch(this.notifyError);
             },
             createOrUpdateUsersOnTenant(tenantDocument) {
 
                 createOrUpdateUsersOnTenant(this.$root.$api.tenants, tenantDocument, this.$root.$api, {})
-                    .catch(err => logError);
+                    .then(this.notifySuccess)
+                    .catch(this.notifyError);
 
             },
             hydrateTenant: function (tenantRepresentation) {
@@ -95,13 +125,21 @@
                         log.error(err);
                     });
             },
-            logError(err) {
+            notifyError(err) {
+                const message = err.message || '';
                 this.$notify({
                     title: "Provisioning Error",
-                    text: err.message,
+                    text: message,
                     type: 'error'
                 });
                 log.error(err);
+            },
+            notifySuccess(resource) {
+                this.$notify({
+                    title: "Success update or create",
+                    text: getUri(resource, /self/),
+                    type: 'success'
+                });
             }
 
         },

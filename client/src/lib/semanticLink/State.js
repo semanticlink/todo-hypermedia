@@ -656,17 +656,19 @@ export default class State {
      */
     createResource(resource, data, options = {}) {
 
+
         let uri = SemanticLink.getUri(resource, /self/);
 
         let postFactory = options.postFactory || State.defaultPostFactory;
 
-        const id = SemanticLink.tryGetUri(resource, /self/);
-        return loader.limiter.schedule({id}, postFactory, resource, data)
+        log.debug(`[State] start create resource ${uri}`);
+
+        return loader.limiter.schedule({id: uri}, postFactory, resource, data)
             .then(response => {
 
                 const resourceUri = response.headers.location;
                 if (!resourceUri) {
-                    log.error(`Create failed to return new resource location for ${uri}`, options);
+                    log.error(`[State] Create failed to return new resource location for ${uri} [${Object.keys(options).map(o => o).join(',')}]`);
                     return Promise.resolve(undefined);
                 }
                 return this.getResource(State.makeFromUri(resourceUri));
@@ -679,13 +681,13 @@ export default class State {
                 if (response.status === 403) {
                     log.info(`[State] Resource forbidden ${uri}`, options);
                 } else if (response.status === 404 || response.status === 405) {
-                    log.info(`[State] Resource not found ${uri}`, options);
+                    log.error(`[State] create returned not found '${response.status}' for create ${uri} [${Object.keys(options).map(o => o).join(',')}]`);
                 } else {
                     // 500, 400, 409
                     let msg = `Error '${response.statusText}' (${response.status}) on create '${uri}':`;
                     return Promise.reject(msg);
                 }
-                return Promise.resolve(undefined);
+                return Promise.resolve(State.makeLinkedRepresentationWithState(resource));
             });
 
     }
@@ -723,7 +725,7 @@ export default class State {
                     this.status = stateFlagEnum.forbidden;
                 } else if (response.status === 404 || response.status === 405) {
                     this.status = this.previousStatus;
-                    log.info(`[State] Resource not found ${uri}`, options);
+                    log.info(`[State] Resource not found for update ${uri} [${Object.keys(options).map(o => o).join(',')}]`);
                 } else {
                     // 500, 400, 409
                     let msg = `Error on update resource ${uri}: ${response.statusText} [${stateFlagEnum.unknown.toString()}]`;
@@ -785,7 +787,7 @@ export default class State {
         return loader.limiter.schedule({id}, deleteFactory, item)
             .then(() => {
                 this.status = stateFlagEnum.deleted;
-                log.info(`[State] Resource '${uri}' ${status.toString()}`, options);
+                log.info(`[State] Resource  for delete'${uri}' ${status.toString()} `);
                 return item;
             })
             .catch(response => {
@@ -796,14 +798,14 @@ export default class State {
                 if (response.status === 403) {
 
                     this.status = stateFlagEnum.forbidden;
-                    log.error(`Resource '${uri}' ${status.toString()}`, options);
+                    log.debug(`Resource forbidden '${uri}' ${status.toString()}`);
 
                     return Promise.resolve(item);
 
                 } else if (response.status === 404 || response.status === 405) {
 
                     this.status = this.previousStatus;
-                    log.error(`Resource not found ${uri} ${status.toString()}`, options);
+                    log.debug(`Resource not found ${uri} ${status.toString()} [${Object.keys(options).map(o => o).join(',')}]`);
 
                     return Promise.resolve(item);
 
@@ -815,35 +817,6 @@ export default class State {
 
             });
     }
-
-    /*
-        /!**
-         * @class State
-         *!/
-        return {
-            // methods on the resource state
-            getStatus,
-            isTracked,
-
-            // methods making, fetching and changing
-            makeSingletonResource,
-            makeCollectionResource,
-            makeItemOnCollectionResource,
-
-            addResourceByName,
-            addCollectionResourceByName,
-            addItemToCollectionResource,
-            removeItemFromCollectionResource,
-
-            getResource,
-            getCollectionResource,
-            createResource,
-            updateResource,
-            deleteResource,
-
-            // serialisation
-            toJson,
-        };*/
 
 }
 

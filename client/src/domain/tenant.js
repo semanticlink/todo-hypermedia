@@ -4,14 +4,15 @@ import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from '../domain/tags';
 import {findResourceInCollection} from 'semanticLink/mixins/collection';
+import {uriMappingResolver} from 'semanticLink/UriMappingResolver';
 
 
-export const getTenants = apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/);
+export const getTenants = root => nodMaker.getNamedCollectionResource(root, 'tenants', /tenants/);
 
-const getTags = apiResource => nodMaker.tryGetCollectionResourceAndItems(apiResource, 'tags', /tags/);
+const getTags = root => nodMaker.tryGetCollectionResourceAndItems(root, 'tags', /tags/);
 
-export const getTenantAndTodos = apiResource => {
-    return Promise.all([getTenants(apiResource), getTags(apiResource)])
+export const getTenantAndTodos = root => {
+    return Promise.all([getTenants(root), getTags(root)])
         .then(([tenantCollection]) => nodMaker.tryGetNamedCollectionResourceAndItemsOnCollectionItems(tenantCollection, 'users', /users/))
         .then(tenantCollectionItems => _(tenantCollectionItems)
             .mapWaitAll(tenant => _(tenant)
@@ -20,48 +21,36 @@ export const getTenantAndTodos = apiResource => {
         .then(userTodoCollectionItems => _([].concat(...userTodoCollectionItems))
             .mapWaitAll(userTodo => _(userTodo)
                 .mapWaitAll(todo => nodMaker.tryGetCollectionResourceAndItems(todo, 'tags', /tags/))))
-        .then(() => apiResource);
+        .then(() => root);
 };
 
-/**
- * Takes a tenant and updates on the collection
- *
- * @param {CollectionRepresentation} tenantCollection
- * @param {LinkedRepresentation} tenantDocument
- * @param {ApiRepresentation} apiResource
- * @param options
- * @return {Promise|*|{x, links}}
- */
-export const createOrUpdateUsersOnTenant = (tenantCollection, tenantDocument, apiResource, options) => {
 
-    const tenantRepresentation = findResourceInCollection(tenantCollection, tenantDocument, 'self');
+const syncUsersStrategy = (tenant, aTenant, strategies, options) => {
+    return nodSynchroniser.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
+};
 
-    log.debug(`Update tenant ${tenantRepresentation.name} --> ${getUri(tenantRepresentation, 'self')}`);
+const syncTodosStrategy = (user, aUser, strategies, options) => {
+    return nodSynchroniser.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
+};
 
-    const syncUsersStrategy = (tenantRepresentation, tenantDocument, strategies, options) => {
-        return nodSynchroniser.getNamedCollection(tenantRepresentation, 'users', /users/, tenantDocument, strategies, options);
-    };
+const syncTagsStrategy = (todo, aTodo, strategies, options) => {
+    return nodSynchroniser.patchUriListOnNamedCollection(
+        todo,
+        'tags',
+        /tags/,
+        aTodo.tags.items.map(item => getUri(item, 'self')),
+        {
+            ...options,
+            ...{contributeonly: true},
+            ...pooledTagResourceResolver(root)
+        });
+};
 
-    const syncTodosStrategy = (userRepresentation, userDocument, strategies, options) => {
-        return nodSynchroniser.getNamedCollection(userRepresentation, 'todos', /todos/, userDocument, strategies, options);
-    };
 
-    const syncTagsStrategy = (todoRepresentation, todoDocument, strategies, options) => {
-        return nodSynchroniser.patchUriListOnNamedCollection(
-            todoRepresentation,
-            'tags',
-            /tags/,
-            todoDocument.tags.items.map(item => getUri(item, 'self')),
-            {
-                ...options,
-                ...{contributeonly: true},
-                ...pooledTagResourceResolver(apiResource)
-            });
-    };
-
+function syncTenant(tenantRepresentation, aTenant, options) {
     return nodSynchroniser.getResource(
         tenantRepresentation,
-        tenantDocument,
+        aTenant,
         [
             (tenantRepresentation, tenantDocument, options) => syncUsersStrategy(
                 tenantRepresentation,
@@ -78,4 +67,65 @@ export const createOrUpdateUsersOnTenant = (tenantCollection, tenantDocument, ap
                 options)
         ],
         options);
+}
+
+/**
+ * Takes a tenant and updates on the collection
+ *
+ * @param {CollectionRepresentation} tenant
+ * @param {LinkedRepresentation} aTenant
+ * @param {ApiRepresentation} root
+ * @param options
+ * @return {Promise|*|{x, links}}
+ */
+export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
+
+    const tenantRepresentation = findResourceInCollection(tenant, aTenant, 'self');
+
+    log.debug(`Update tenant ${tenantRepresentation.name} --> ${getUri(tenantRepresentation, 'self')}`);
+
+    return syncTenant(tenantRepresentation, aTenant, options);
+};
+
+const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) => {
+    return nodSynchroniser.getResourceInCollection(tenantCollection, aTenant, strategies, options);
+};
+
+export const createTenantOnRoot = (root, aTenant, options) => {
+
+    if (!aTenant) {
+        throw new Error('Tenant is empty');
+    }
+
+    log.debug('[Tenant] start create on root');
+
+    return getTenants(root)
+        .then(tenantCollection => {
+            log.debug('[Tenant] root loaded');
+            return syncTenantStrategy(
+                tenantCollection,
+                aTenant,
+                [
+                    (tenantRepresentation, tenantDocument, options) => syncUsersStrategy(
+                        tenantRepresentation,
+                        tenantDocument,
+                        [
+                            (usersRepresentation, usersDocument, options) => syncTodosStrategy(
+                                usersRepresentation,
+                                usersDocument,
+                                [
+                                    (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, [], options)
+                                ],
+                                options)
+                        ],
+                        options)
+                ],
+                {
+                    ...options,
+                    ...pooledTagResourceResolver(root),
+                    resolver: uriMappingResolver
+                });
+        });
+
+
 };

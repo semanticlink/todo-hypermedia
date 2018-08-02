@@ -423,7 +423,7 @@ export default class NODSynchroniser {
      */
     getResourceInCollection(parentResource, resourceDocument, strategies, options = {}) {
 
-        log.debug(`[Sync] collection ${SemanticLink.getUri(parentResource, /self/)}`);
+        log.debug(`[Sync] collection ${SemanticLink.getUri(parentResource, /self/)} with '${SemanticLink.getUri(resourceDocument, /self/) || resourceDocument.name}'`);
 
         return nodMaker
             .getCollectionResource(parentResource, _({}).defaults(options, {mappedTitle: 'name'}))
