@@ -41,14 +41,14 @@ namespace Api.Controllers
             return (await _todoStore
                     .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(User.GetIdentityId(), Url);
+                .ToRepresentation(User.GetId(), Url);
         }
 
         [HttpPost(Name = TodoUriFactory.SelfRouteName)]
         [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data)
         {
-            var userId = User.GetIdentityId();
+            var userId = User.GetId();
             return (await _todoStore.Create(
                     userId, 
                     userId, // context is the userId
@@ -246,7 +246,7 @@ namespace Api.Controllers
         public async Task<CreatedResult> CreateTag([FromBody] TagCreateDataRepresentation tag, string id)
         {
             var tagId = await _tagStore.Create(
-                User.GetIdentityId(),
+                User.GetId(),
                 TrustDefaults.KnownHomeResourceId,
                 tag.ThrowInvalidDataExceptionIfNull("Invalid tag create data").FromRepresentation(),
                 Permission.Get,

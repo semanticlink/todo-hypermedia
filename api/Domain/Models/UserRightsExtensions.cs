@@ -6,7 +6,7 @@ namespace Domain.Models
     public static class UserRightsExtensions
     {
         
-        public static bool IsAllowed(this UserRight userRight, Permission permission)
+        public static bool hasRights(this UserRight userRight, Permission permission)
         {
             if (userRight == null)
             {

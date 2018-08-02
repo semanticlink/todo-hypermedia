@@ -88,7 +88,7 @@ namespace Api.Controllers
                     //
                     : User != null && User.Identity.IsAuthenticated
                         // If the user is authenticated, then return all tenants that the user has access to.
-                        ? await _tenantStore.GetTenantsForUser(User.GetIdentityId())
+                        ? await _tenantStore.GetTenantsForUser(User.GetId())
 
                         // The user is not authenticated and there is no query, so the caller gets no tenants.
                         : new Tenant[] { })
@@ -141,7 +141,7 @@ namespace Api.Controllers
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
         [AuthoriseRootUserCollection(Permission.Get)]
-        public async Task<IActionResult> GetUsers()
+        public IActionResult GetUsers()
         {
             return NoContent();
         }

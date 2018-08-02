@@ -77,7 +77,8 @@ namespace Infrastructure.NoSQL
                 resourceId,
                 new Dictionary<RightType, Permission>
                 {
-                    {RightType.RootTagCollection, Permission.Get | Permission.Post}
+                    {RightType.RootTenantCollection, Permission.Get | Permission.Post},
+                    {RightType.RootTagCollection, Permission.Get | Permission.Post},
                 });
 
             // create rights for new user and also the owner (if the owner if different)

@@ -5,6 +5,7 @@ using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
+using Toolkit;
 using Toolkit.LinkRelations;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
@@ -106,7 +107,6 @@ namespace App.RepresentationExtensions
             };
         }
 
-
         /// <summary>
         ///     Get the create form to describe to clients of the API how to
         ///     modify instances on the resource
@@ -119,7 +119,10 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // this collection
-                    url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.Self)
+                    url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.Self),
+
+                    // create
+                    url.MakeTenantsUri().MakeWebLink(CustomLinkRelation.Submit)
                 },
                 Items = MakeFormItems()
             };
@@ -139,6 +142,12 @@ namespace App.RepresentationExtensions
                 {
                     Name = "name",
                     Description = "The name of the tenant to be shown on the screen",
+                    Required = false
+                },
+               new TextInputFormItemRepresentation
+                {
+                    Name = "description",
+                    Description = "Other details about the organisation",
                     Required = false
                 },
             };
@@ -162,6 +171,20 @@ namespace App.RepresentationExtensions
                     url.MakeTenantEditFormUri().MakeWebLink(IanaLinkRelation.Self)
                 },
                 Items = MakeFormItems()
+            };
+        }
+        
+        
+        public static TenantCreateData FromRepresentation(this TenantCreateDataRepresentation tenant)
+        {
+            return new TenantCreateData
+            {
+                Name = tenant.Name
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A tenant requires a name"),
+
+                // TODO: perhaps the code needs validation as per a subdomain for SaaS business
+                Code = tenant.Code,
+                Description = tenant.Description
             };
         }
     }

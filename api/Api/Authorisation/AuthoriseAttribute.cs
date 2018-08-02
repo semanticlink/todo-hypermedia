@@ -38,6 +38,14 @@ namespace Api.Authorisation
         }
     }
 
+    public class AuthoriseRootTenantCollectionAttribute : AuthoriseAttribute
+    {
+        public AuthoriseRootTenantCollectionAttribute(Permission permission)
+            : base(RightType.RootTenantCollection, permission, ResourceKey.Root)
+        {
+        }
+    }
+
     public class AuthoriseTenantUserCollectionAttribute : AuthoriseAttribute
     {
         public AuthoriseTenantUserCollectionAttribute(Permission permission)

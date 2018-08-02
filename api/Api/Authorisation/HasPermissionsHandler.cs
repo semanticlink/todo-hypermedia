@@ -40,16 +40,21 @@ namespace Api.Authorisation
             switch (resourceKeyInUri)
             {
                 case ResourceKey.Root:
+                    Log.Trace("Resource access delegated from '[0]'", ResourceKey.Root);
                     return TrustDefaults.KnownHomeResourceId;
                 case ResourceKey.User:
-                    return authContext.HttpContext.User.GetIdentityId();
+                    var id = authContext.HttpContext.User.GetId();
+                    Log.Trace("Resource access from authentication '[0]'", id);
+                    return id;
                 /*
                  * Pick up all other route params including:
                  * 
                  * case ResourceKey.Id:
                  */
                 default:
-                    return authContext.RouteData.Values[resourceKeyInUri]?.ToString();
+                    var resourceId = authContext.RouteData.Values[resourceKeyInUri]?.ToString();
+                    Log.Trace("Resource access determined from route '[0]': '[1]'", resourceId, resourceKeyInUri);
+                    return resourceId;
             }
         }
 
@@ -67,7 +72,7 @@ namespace Api.Authorisation
                 var resourceId = ResourceId(requirement.ResourceKeyInUri, authContext);
 
                 // get the user Id from the claims that already setup
-                var userId = authContext.HttpContext.User.GetIdentityId();
+                var userId = authContext.HttpContext.User.GetId();
 
                 // if there is no authenticated user return onto other handlers/requirements
                 if (!userId.IsNullOrWhitespace() && resourceId != null)
@@ -75,8 +80,13 @@ namespace Api.Authorisation
                     var rights = await _userRightStore.Get(userId, resourceId, requirement.Type);
 
                     // does the user have the access rights?
-                    if (rights.IsAllowed(requirement.Access))
+                    if (rights.hasRights(requirement.Access))
                     {
+                        Log.Trace(
+                            "User {0} has permission {1} on resource {2}",
+                            userId,
+                            requirement.Access,
+                            resourceId);
                         // yup, set for later use in the pipeline
                         context.Succeed(requirement);
                     }

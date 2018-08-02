@@ -36,7 +36,7 @@ namespace Api.Controllers
         ///    There is a small level of disclosure here because we want authenticated users
         ///     to find this tenant and then be able to register against it.
         /// </remarks>
-        [HttpGet("{id}", Name = TenantUriFactory.SelfRouteName)]
+        [HttpGet("{id}", Name = TenantUriFactory.TenantRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
         [Authorise(RightType.Tenant, Permission.Get)]
@@ -47,7 +47,6 @@ namespace Api.Controllers
                 .ThrowObjectNotFoundExceptionIfNull("Invalid tenant")
                 .ToRepresentation(Url);
         }
-
 
         [HttpGet("form/create", Name = TenantUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
@@ -61,6 +60,41 @@ namespace Api.Controllers
         public EditFormRepresentation TenantEditForm()
         {
             return Url.ToTenantEditFormRepresentation();
+        }
+
+        [HttpPost(Name = TenantUriFactory.SelfRouteName)]
+        [AuthoriseRootTenantCollection(Permission.Post)]
+        public async Task<CreatedResult> Create([FromBody] TenantCreateDataRepresentation data)
+        {
+            (await _tenantStore.GetByCode(data.Code))
+                .ThrowInvalidDataExceptionIfNotNull("Invalid tenant");
+
+
+            var tenantId = await _tenantStore.Create(
+                User.GetId(),
+                TrustDefaults.KnownHomeResourceId,
+                data
+                    .ThrowInvalidDataExceptionIfNull("Invalid tenant create data")
+                    .FromRepresentation(),
+                Permission.FullControl | Permission.Owner,
+                CallerCollectionRights.Tenant);
+
+
+            //////////////////////////
+            // Add user to tenant
+            // ==================
+            //
+
+            await _tenantStore.IncludeUser(
+                tenantId,
+                User.GetId(),
+                Permission.Get | Permission.Owner,
+                CallerCollectionRights.Tenant);
+
+            // now, we have the identity user, link this into the new user
+            return tenantId
+                .MakeTenantUri(Url)
+                .MakeCreated();
         }
 
 
@@ -115,7 +149,7 @@ namespace Api.Controllers
             {
                 // make the user
                 var userId = await _userStore.Create(
-                    User.GetIdentityId(),
+                    User.GetId(),
                     id,
                     data.FromRepresentation(),
                     Permission.FullControl,

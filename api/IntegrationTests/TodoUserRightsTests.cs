@@ -76,7 +76,7 @@ namespace IntegrationTests
 
             // Access?
             var resourceRights = await userRightStore.Get(UserId, todoId, RightType.Todo);
-            Assert.Equal(allow, resourceRights.IsAllowed(requiredPermission));
+            Assert.Equal(allow, resourceRights.hasRights(requiredPermission));
 
             // Clean up
             await Task.WhenAll(userRights.Select(right => 

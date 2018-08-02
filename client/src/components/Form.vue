@@ -212,11 +212,12 @@
                         }
 
                     })
-                    .catch(/** @type {AxiosResponse|string} */response => {
+                    .catch(/** @type {AxiosResponse|string} */err => {
                         if (this.onFailure) {
-                            this.onFailure(response)
+                            this.onFailure(err)
                         } else {
-                            this.$notify({text: response.statusText || response, type: 'error'});
+                            const message = err.statusText || err.message || '';
+                            this.$notify({title: 'Error submitting', text: message, type: 'error'});
                         }
 
                     });

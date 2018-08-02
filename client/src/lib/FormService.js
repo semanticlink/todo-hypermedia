@@ -1,7 +1,8 @@
-import { _ } from 'semanticLink';
+import {_} from 'semanticLink';
 import axios from 'axios';
-import { getAuthenticationUri, getBearerLinkRelation } from '../lib/http-interceptors';
-import { filter, matches, post, put, get } from 'semantic-link';
+import {getAuthenticationUri, getBearerLinkRelation} from '../lib/http-interceptors';
+import {filter, matches, post, put, get} from 'semantic-link';
+import {log} from 'logger';
 
 /**
  * A form has the job to POST to a collection or PUT to an item (this is by convention).
@@ -60,8 +61,8 @@ export default class FormService {
      * @param {*} data
      * @param {FormRepresentation}form
      * @param {CollectionRepresentation} collection
-     * @param {string} mediaType
-     * @returns {Promise<AxiosResponse<any>>}
+     * @param {?string} mediaType
+     * @returns {Promise<AxiosResponse<LinkedRepresentation>>}
      */
     static submitForm(data, form, collection, mediaType) {
         /**
@@ -74,8 +75,10 @@ export default class FormService {
         function verb(form) {
             const [weblink] = filter(form, /^submit$/);
             if (weblink) {
+                log.debug('[Form] using POST - has \'submit\'');
                 return /*(weblink || {}).method ||*/ post;
             } else {
+                log.debug('[Form] using PUT');
                 return put;
             }
         }

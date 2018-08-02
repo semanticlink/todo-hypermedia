@@ -64,7 +64,7 @@ namespace Api.Controllers
         {
 
             return (await _userStore
-                    .Get(User.GetIdentityId()))
+                    .Get(User.GetId()))
                 .ToRepresentation(Url);
         }
 
@@ -76,7 +76,7 @@ namespace Api.Controllers
         public async Task<UserRepresentation> Get(string id)
         {
             return (await _userStore
-                    .Get(User.GetIdentityId()))
+                    .Get(User.GetId()))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
                 .ToRepresentation(Url);
         }
@@ -128,7 +128,7 @@ namespace Api.Controllers
         [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data, string id)
         {
-            var userId = User.GetIdentityId();
+            var userId = User.GetId();
             return (await _todoStore.Create(
                     userId,
                     userId, // context is the userId

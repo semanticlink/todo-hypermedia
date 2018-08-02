@@ -17,7 +17,7 @@ namespace App
         /// <summary>
         ///     Add a <see cref="User.Id"/> onto the claim as a <see cref="JwtRegisteredClaimNames.Jti"/>
         /// </summary>
-        /// <seealso cref="GetIdentityId"/>
+        /// <seealso cref="GetId"/>
         public static void AddIdentityIdToClaims(this ClaimsPrincipal user, string userId)
         {
             // Add the user id to the claim 
@@ -49,7 +49,7 @@ namespace App
         /// <summary>
         /// Retrieves the user Identity Id from the <see cref="User"/> from the claim via <see cref="UserIdClaimKey"/>.
         /// </summary>
-        public static string GetIdentityId(this ClaimsPrincipal user)
+        public static string GetId(this ClaimsPrincipal user)
         {
             return user.Value(UserIdClaimKey);
         }
