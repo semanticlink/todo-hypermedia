@@ -92,7 +92,7 @@ axios.interceptors.response.use(
                 // eg EventBus.$emit(loginConfimed)
                 EventBus.$on(loginConfirmed, () => {
 
-                    log.info('Authentication: login confirmed (http-interceptor)');
+                    log.debug('[Authentication] login confirmed (http-interceptor)');
                     httpQueue.retryAll()
                         .then(resolve)
                         .catch(reject);
@@ -109,10 +109,10 @@ axios.interceptors.response.use(
 export const setJsonWebTokenOnHeaders = (token) => {
 
     if (!token) {
-        log.info('Authentication: no access token found');
+        log.info('[Authentication] no access token found');
     }
 
-    log.info('Authentication: setting access token');
+    log.debug(`[Authentication] setting token on www-authenicate header interceptor scheme '${JWT}'`);
 
     axios.interceptors.request.use(
         config => {
@@ -130,7 +130,7 @@ export const setJsonWebTokenOnHeaders = (token) => {
  */
 export const clearJsonWebTokenOnHeaders = () => {
 
-    log.info('Authentication: clearing access token');
+    log.debug('[Authentication] clearing access token');
 
     axios.interceptors.request.use(
         config => {
@@ -174,6 +174,9 @@ export const JWT = 'jwt';
 export const API_AUTH0_REALM = 'api-auth0';
 
 /**
+ *
+ * Return type for the 'auth_header' node module
+ *
  * @class WWWAuthenticateHeader
  * @property {string} scheme Default: jwt
  * @property {?string} token Usually used in conjunction with scheme 'Bearer'
@@ -186,15 +189,13 @@ export const API_AUTH0_REALM = 'api-auth0';
  *
  * @see from AspNetCore Authentication JwtBearerHandler https://github.com/aspnet/Security/blob/master/src/Microsoft.AspNetCore.Authentication.JwtBearer/JwtBearerHandler.cs#L63
  *
- * @example
- *
- * Success
+ * @example Success
  *
  * WWW-Authenticate: jwt realm="api-auth0", uri=https://example.com/authenticate/auth0
- *
- * Error
+ * @example Error
  *
  * WWW-Authenticate: jwt realm="api-auth0", error="invalid_token", error_description="The access token expired"
+ *
  * @see Error Codes: https://tools.ietf.org/html/rfc6750#section-3.1
  */
 
@@ -218,17 +219,17 @@ export const INVALID_TOKEN = {
  * TODO: this does not implement multiple www-authenticate headers
  * TODO: this does not deal with underlying implementation of multiple realms in one header
  * @param {AxiosError} error
- * @returns {WWWAuthenticateHeader}
+ * @return {WWWAuthenticateHeader}
  */
 const parseErrorForAuthenticateHeader = error => {
     if (!error && !error.response) {
-        log.error('This does not look like an Axios error');
+        log.error('[Authentication] This does not look like an Axios error');
         return;
     }
 
     const wwwAuthenticate = error.response.headers[WWW_AUTHENTICATE_HEADER];
     if (!wwwAuthenticate) {
-        log.error(`No www-authenticate header for bearer token on ${error.config.url}`);
+        log.error(`[Authentication] No www-authenticate header for bearer token on ${error.config.url}`);
         return;
     }
 
@@ -239,14 +240,14 @@ const parseErrorForAuthenticateHeader = error => {
     const auth = authorization.parse(wwwAuthenticate);
 
     if (!auth && auth.scheme === JWT && auth.params.rel === API_AUTH0_REALM) {
-        log.error(`No '${JWT}' scheme on realm '${API_AUTH0_REALM}' with link rel found: '${wwwAuthenticate}'`);
+        log.error(`[Authentication ] No '${JWT}' scheme on realm '${API_AUTH0_REALM}' with link rel found: '${wwwAuthenticate}'`);
     }
 
     return auth;
 };
 
 /**
- * Looks inside the 401 response wwww-authenticate headers to see if it is an expired token that needs renewal
+ * Looks inside the 401 response www-authenticate headers to see if it is an expired token that needs renewal
  * @param error
  * @returns {boolean}
  */
@@ -259,7 +260,7 @@ export const renewToken = error => {
  * Looks inside the 401 response www-authenticate header and gets the link relation
  *
  * @param {AxiosError} error
- * @returns {WWWAuthenticateHeader.params.rel} rel
+ * @returns {WWWAuthenticateHeader.params.rel|string} rel
  */
 export const getBearerLinkRelation = error => parseErrorForAuthenticateHeader(error).params.rel;
 
@@ -268,7 +269,7 @@ export const getBearerLinkRelation = error => parseErrorForAuthenticateHeader(er
  * Looks inside the 401 response www-authenticate header and gets the representation uri
  *
  * @param {AxiosError} error
- * @returns {WWWAuthenticateHeader.params.uri} uri
+ * @returns {WWWAuthenticateHeader.params.uri|string} uri
  */
 export const getAuthenticationUri = error => parseErrorForAuthenticateHeader(error).params.uri;
 
@@ -276,7 +277,7 @@ export const getAuthenticationUri = error => parseErrorForAuthenticateHeader(err
  * Looks inside the 401 response www-authenticate header and gets the realm
  *
  * @param {AxiosError} error
- * @returns {WWWAuthenticateHeader.params.realm} realm
+ * @returns {WWWAuthenticateHeader.params.realm|string} realm
  */
 export const getAuthenticationRealm = error => parseErrorForAuthenticateHeader(error).params.realm;
 
@@ -284,7 +285,7 @@ export const getAuthenticationRealm = error => parseErrorForAuthenticateHeader(e
  * Looks inside the 401 response www-authenticate header and gets the scheme
  *
  * @param {AxiosError} error
- * @returns {WWWAuthenticateHeader.scheme} scheme
+ * @returns {WWWAuthenticateHeader.scheme|string} scheme
  */
 export const getAuthenticationScheme = error => parseErrorForAuthenticateHeader(error).scheme;
 

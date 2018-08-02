@@ -81,6 +81,34 @@ import {getAuthenticationUri} from './http-interceptors';
  * @property {string} tokenType
  */
 
+/**
+ * Error result from an Auth0 token renew
+ *
+ * @class Auth0RenewTokenError
+ * @property {string} error enum ['error']
+ * @property {string} error_description
+ */
+
+
+/**
+ * Error result from an Auth0 authorize
+ *
+ * @see auth0 response-handler (this tries to normalise the error response)
+ *
+ * @class Auth0AuthorizeError
+ * @property {string} statusCode comes from the response
+ * @property {string} statusText comes from the response
+ * @property {*} response.body
+ * @property {*} err
+ * @property {string} code
+ * @property {string} description alias for (error_description)
+ * @property {string} name
+ * @property {string} policy
+ * @property {?string} error enum ['error', 'generic_error', 'invalid_token']
+ * @property {?string} error_description
+ * @property {?string} original when user closed a window
+ */
+
 
 /**
  * Local storage keys
@@ -157,7 +185,7 @@ export default class AuthService {
 
         this.auth0 = new auth0.WebAuth(opts);
 
-        log.debug('[Auth0] loaded');
+        log.debug('[Auth] loaded');
     }
 
     /**
@@ -172,24 +200,42 @@ export default class AuthService {
 
     /**
      * Login via auth0 popup window
-     * @param {Function} cb
+     *
+     * @return {Promise<AuthResult|undefined>}
      */
-    login(cb) {
+    login() {
 
-        log.debug('Opening popup login window');
+        log.debug('[Auth] Opening popup login window');
 
-        this.auth0.popup.authorize({}, (err, /** @type {AuthResult} */authResult) => {
-            if (authResult) {
-                AuthService.setSession(authResult);
-            }
+        return new Promise((resolve, reject) => {
 
-            // KLUDGE: false negative of entering into a page when we don't want authentication
-            if (err && err.code === null) {
-                return;
-            }
+            this.auth0.popup.authorize(
+                {},
+                /**
+                 *
+                 * @param {Auth0AuthorizeError} err
+                 * @param {AuthResult} authResult
+                 */
+                (err, authResult) => {
+                    if (authResult) {
+                        log.debug(`[Auth] set session iat: '${authResult.idTokenPayload.iat}'`);
+                        AuthService.setSession(authResult);
+                        return resolve(authResult);
+                    }
 
-            cb(err, authResult);
+                    // KLUDGE: false negative of entering into a page when we don't want authentication
+                    // it looks like webpack dev components are having an interaction that this componsates for
+                    // error is on detector.js
+                    if (err && err.code === null) {
+                        log.debug('[Auth] re-entering');
+                        return resolve(undefined);
+                    }
+
+                    reject(new Error(`Cannot login '${err.code || err.name}' ${err.description || err.original}`));
+                });
         });
+
+
     }
 
     /**
@@ -200,36 +246,54 @@ export default class AuthService {
         clearTimeout(tokenRenewalTimeout);
     }
 
+
     /**
      * Renew the access token
+     * @return {Promise<AuthResult>}
      */
     renewToken() {
-        this.auth0.checkSession(
-            {
-                //audience: AuthService.clientConfiguration.audience
-            },
-            (err, authResult) => {
-                if (err) {
-                    log.warn(`Could not get a new token using silent authentication (${err.error}).`);
-                } else {
-                    log.info('Successfully renewed auth!');
-                    AuthService.setSession(authResult);
-                }
-            });
+        return new Promise((resolve, reject) => {
+            this.auth0.checkSession(
+                {
+                    //audience: AuthService.clientConfiguration.audience
+                },
+                /**
+                 * @param {Auth0RenewTokenError} err
+                 * @param {AuthResult} authResult
+                 */
+                (err, authResult) => {
+                    if (err) {
+                        reject(new Error(`Could not get a new token using silent authentication (${err.error_description}).`));
+                    } else {
+                        log.info('[Auth] Successfully renewed auth!');
+                        AuthService.setSession(authResult);
+                        resolve(authResult);
+                    }
+                });
+
+        });
     }
 
     /**
      * Adds a timer to renew the login
+     *
+     * @return {Promise<AuthResult>}
      */
     scheduleRenewal() {
-        const service = this;
-        //TODO: deal with this as a sliding window
-        const delay = AuthService.tokenExpiresAt - Date.now();
-        if (delay > 0) {
-            tokenRenewalTimeout = setTimeout(function () {
-                service.renewToken();
-            }, delay);
-        }
+
+        return new Promise((resolve, reject) => {
+
+            const service = this;
+            //TODO: deal with this as a sliding window
+            const delay = AuthService.tokenExpiresAt - Date.now();
+            if (delay > 0) {
+                tokenRenewalTimeout = setTimeout(function () {
+                    return service.renewToken()
+                        .then(resolve)
+                        .catch(reject);
+                }, delay);
+            }
+        });
     }
 
     /**
@@ -241,7 +305,7 @@ export default class AuthService {
      * @param {AuthResult} authResult
      */
     close(authResult) {
-        log.debug('Closing popup window');
+        log.debug('[Auth] Closing popup window');
 
         /**
          * Both are mandatory (and undocumented)
@@ -253,7 +317,7 @@ export default class AuthService {
     }
 
     /**
-     * @class AuthError
+     * @class AuthHandleAuthenticationError
      * @property {string} error
      * @property {string} errorMessage
      */
@@ -266,11 +330,15 @@ export default class AuthService {
      * and so we can't leave this up to the router. We must intercept and stop the process which means
      * closing the window.
      *
+     * TODO: this may need to be promised if it ever returns something
+     *
      */
     handleAuthentication() {
-        this.auth0.parseHash((/** @type {AuthError}*/err, /** @type {AuthResult} */authResult) => {
+
+        this.auth0.parseHash((/** @type {AuthHandleAuthenticationError}*/err, /** @type {AuthResult} */authResult) => {
 
             //ignore the err because handleAuthentication is called on all entries to the site
+
             if (err) {
                 log.warn(`[Auth] ${err.error}: ${err.errorMessage}`);
             }
@@ -306,6 +374,7 @@ export default class AuthService {
      */
     static setSession(authResult) {
         // Set the time that the access token will expire at
+        // TODO: poor desing to renew at expiry time. Needs a sliding window
         const expiresAt = (authResult.expiresIn * 1000) + new Date().getTime();
         localStorage.setItem(KEY.ACCESS_TOKEN, authResult.accessToken);
         localStorage.setItem(KEY.ID_TOKEN, authResult.idToken);
