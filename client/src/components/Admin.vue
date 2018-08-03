@@ -6,27 +6,33 @@
                     :context="this.$root.$api"
                     media-type="application/json"
                     :dropped="createTenantOnRoot">
-                <b-button variant="outline"
-                          v-b-tooltip.hover.html.right
-                          title="Drop on to create">
+                <b-button
+                        variant="outline"
+                        v-b-tooltip.hover.html.right
+                        title="Drop on to create">
                     <add w="22px" h="22px"/>
                 </b-button>
             </drag-and-droppable-model>
         </h1>
+        <ul>
+            <li v-for="tenant in tenants.items" v-cloak>
+                <b-link @click="gotoTenant(tenant)">{{ tenant.name }}</b-link>
+                <drag-and-droppable-model
+                        :model="hydrateTenant(tenant)"
+                        media-type="application/json"
+                        :dropped="createOrUpdateUsersOnTenant">
+                    <b-button
+                            variant="outline"
+                            v-b-tooltip.hover.html.right
+                            title="Drag off to take a copy or drop on to update"
+                            >
 
-        <div v-for="tenant in tenants.items" v-cloak>
-            <drag-and-droppable-model
-                    :model="hydrateTenant(tenant)"
-                    media-type="application/json"
-                    :dropped="createOrUpdateUsersOnTenant">
-                <b-button v-b-tooltip.hover.html.right
-                          title="Drag off to take a copy or drop on to update"
-                          @click="gotoTenant(tenant)">
-                    {{ tenant.name }}
-                </b-button>
-            </drag-and-droppable-model>
+                        <add w="22px" h="22px"/>
+                    </b-button>
+                </drag-and-droppable-model>
 
-        </div>
+            </li>
+        </ul>
     </div>
 </template>
 
@@ -34,18 +40,17 @@
     import {_} from 'semanticLink';
     import {getUri} from 'semantic-link';
     import {log} from 'logger';
-    import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
     import {redirectToTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
     import {getTenantAndTodos, getTenants, createOrUpdateUsersOnTenant, createTenantOnRoot} from '../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
+    import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
-    import {uriMappingResolver} from "semanticLink/UriMappingResolver";
 
 
     export default {
-        components: {DragAndDroppableModel, bButton, Add, bTooltip},
+        components: {DragAndDroppableModel, bButton, Add, bTooltip, bLink},
         data() {
             return {
                 msg: 'Looking ...',

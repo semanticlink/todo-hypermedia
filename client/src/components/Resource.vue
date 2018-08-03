@@ -8,7 +8,7 @@
                 <b-container fluid class="m-3 pr-3">
 
 
-                   <div v-show="!formRepresentation">
+                    <div v-show="!formRepresentation">
                         <b-button size="sm"
                                   @click="copyToClipboard"
                                   v-b-tooltip.hover.html.bottom
@@ -78,10 +78,9 @@
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
-
+    import EventBus, {loginConfirmed} from '../lib/util/EventBus';
 
     import FormDragDrop from './FormDragDrop.vue';
-
 
     export default {
         props: {
@@ -132,7 +131,16 @@
         created() {
             this.getRepresentation();
         },
-        mounted() {
+        mounted: function () {
+
+            /////////////////////////////
+            //
+            // Authentication
+            // ==============
+            //
+            // After (re)authentication load up the representation (we could have just redirected)
+
+            EventBus.$on(loginConfirmed, this.getRepresentation);
 
             /////////////////////////////
             //
