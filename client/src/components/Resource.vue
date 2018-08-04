@@ -70,6 +70,7 @@
     import Form from './Form.vue';
     import {copyToClipboard, saveToFile} from "../lib/raw-helpers";
     import {get, _delete, LinkedRepresentation, CollectionRepresentation, getUri} from 'semantic-link';
+    import * as link from 'semantic-link';
     import FormAction from './FormAction.vue';
     import Vue from 'vue';
     import {fromUriList, makeUriList} from "../lib/util/dragAndDropModel";
@@ -79,6 +80,7 @@
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
     import EventBus, {authConfirmed, authRenewed} from '../lib/util/EventBus';
+    import {loader} from '../lib/semanticLink/Loader';
 
     import FormDragDrop from './FormDragDrop.vue';
 
@@ -288,7 +290,8 @@
              * @param {?string} type media type
              */
             getForm(rel, type) {
-                get(this.representation, rel, type)
+                const getPromise = get(this.representation, rel, type);
+                loader.schedule({id: link.getUri(this.representation, 'self')}, getPromise)
                     .then(/** @type {AxiosResponse} */response => {
                         this.formRepresentation = response.data;
                     });
@@ -305,7 +308,7 @@
              */
             tryDelete(rel) {
 
-                return _delete(this.representation, /^self$/)
+                return loader.schedule(() => link.delete(this.representation, rel))
                     .then(/** @type {AxiosResponse|Error} */response => {
 
                         // appropriate repsonses from a deleted resource
@@ -318,7 +321,7 @@
                             }
 
                             // check that it has in fact been deleted
-                            return get(this.representation, /^self$/)
+                            return loader.schedule(() => get(this.representation, /^self$/))
                             // it is an error if it succeeds
                                 .then(() => this.$notify({
                                     type: 'error',
@@ -371,7 +374,7 @@
 
                 log.warn('Fetching representation ');
 
-                return axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}})
+                return loader.schedule(() => axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}}))
                     .then(/** @type {AxiosResponse} */response => {
                         this.responseHeaders = response.headers;
                         this.representation = response.data;

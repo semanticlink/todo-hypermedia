@@ -16,6 +16,7 @@ import VueLocalStorage from 'vue-localstorage';
 import Offline from './components/Offline.vue';
 import Login from './components/Login.vue';
 import Resource from './components/Resource.vue';
+import Spinner from './components/Spinner.vue';
 
 import {setJsonWebTokenOnHeaders} from './lib/http-interceptors';
 import AuthService from './lib/AuthService';
@@ -56,6 +57,6 @@ new Vue({
     data: {
         apiUri: document.querySelector('HEAD link[rel="self"]').href
     },
-    components: {Offline, Login, Resource},
-    template: '<div><Resource :apiUri="this.apiUri"></Resource><Offline/><Login/><notifications/></div>'
+    components: {Offline, Login, Resource, Spinner},
+    template: '<div><Spinner/><Resource :apiUri="this.apiUri"></Resource><Offline/><Login/><notifications/></div>'
 });

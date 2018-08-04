@@ -1,9 +1,10 @@
 import {_} from 'semanticLink';
 import axios from 'axios';
 import {getAuthenticationUri, getBearerLinkRelation} from '../lib/http-interceptors';
-import {filter, matches, post, put, get} from 'semantic-link';
+import {filter, matches, put, get} from 'semantic-link';
 import * as link from 'semantic-link';
 import {log} from 'logger';
+import {loader} from './semanticLink/Loader';
 
 /**
  * A form has the job to POST to a collection or PUT to an item (this is by convention).
@@ -86,7 +87,7 @@ export default class FormService {
                         case 'post':
                             return link.post;
                         case 'delete':
-                            return link._delete;
+                            return link.delete;
                         case 'patch':
                             return link.patch;
                         default:
@@ -117,7 +118,7 @@ export default class FormService {
         const http = verb(form, collection);
         const obj = pickFieldsFromForm(data, form);
 
-        return http(links, rel, mediaType, obj);
+        return loader.limiter.schedule(() => http(links, rel, mediaType, obj));
     }
 
     /**
@@ -129,10 +130,10 @@ export default class FormService {
      * @returns {Promise<AxiosResponse<LinkedRepresentation[]>>}
      */
     static loadFormFrom401BearerChallenge(error) {
-        return axios.get(getAuthenticationUri(error))
+        return loader.limiter.schedule(() => axios.get(getAuthenticationUri(error)))
             .then(response => get(response.data, getBearerLinkRelation(error)))
             .then(authenticateCollection => {
-                return get(authenticateCollection.data, /create-form/)
+                return loader.limiter.schedule(() => link.get(authenticateCollection.data, /create-form/))
                     .then(authenticateLoginRepresentation => {
                         return [
                             authenticateLoginRepresentation.data,

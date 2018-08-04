@@ -121,6 +121,17 @@ export default class Loader {
     }
 
     /**
+     * Wrapper around the limiter schedule function
+     *
+     * @see Bottleneck.schedule
+     * @param params
+     * @return {*}
+     */
+    schedule(...params){
+        return this._limiter.schedule(...params);
+    }
+
+    /**
      * Stop all current and pending requests and reset all queues.
      */
     clearAll() {
