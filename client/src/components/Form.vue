@@ -54,20 +54,23 @@
 
 
         </b-form-group>
-        <b-button variant="outline" @click="onCancel" v-if="!noCancel"><Back h="26px" w="26px"/></b-button>
-        <b-button type="submit" variant="primary">{{ submitTitle }}</b-button>
+        <b-button variant="outline" @click="onCancel" v-if="!noCancel">
+            <Back h="26px" w="26px"/>
+        </b-button>
+        <b-button variant="primary" @click="submit">{{ submitTitle }}</b-button>
     </b-form>
 
 </template>
 
 <script>
-    import { mapApiToUiType } from '../lib/form-type-mappings';
-    import { Datetime } from 'vue-datetime';
-    import { DateTime as LuxonDateTime } from 'luxon'
+    import {mapApiToUiType} from '../lib/form-type-mappings';
+    import {Datetime} from 'vue-datetime';
+    import {DateTime as LuxonDateTime} from 'luxon'
     // You need a specific loader for CSS files
     import 'vue-datetime/dist/vue-datetime.css'
     import FormService from "../lib/FormService";
-    import { filter, getUri } from 'semantic-link';
+    import {filter, getUri} from 'semantic-link';
+    import {log} from 'logger';
 
     import Back from 'vue-ionicons/dist/md-arrow-round-back.vue';
     import Ok from 'vue-ionicons/dist/md-send.vue';
@@ -187,29 +190,28 @@
 
                 this.onSubmit();
 
+                log.debug(`[Form] submit ${link.getUri(this.representation, 'self')}`);
+
                 return FormService.submitForm(this.formObj, this.formRepresentation, this.representation)
                     .then(/** @type {AxiosResponse} */response => {
 
-                        if (this.onSuccess) {
-                            this.onSuccess(response);
-                        } else {
+                        this.$notify({
+                            title: `${response.statusText} <a href="${response.headers.location}">item<a>`,
+                            text: 'Redirecting ...',
+                            type: 'success'
+                        });
 
-                            this.$notify({
-                                text: `${response.statusText} <a href="${response.headers.location}">item<a>`,
-                                type: 'success'
-                            });
+                        log.debug(`[Form] return [${response.status}] `);
 
-                            // on success if updated return to item (204) otherwise go to new (201)
-                            // scope it here otherwise SemanticLink looks to loose scope (??) in the setTimeout
-                            const returnUri = response.status === 201
-                                ? response.headers.location
-                                : getUri(links, rel);
+                        // on success if updated return to item (204) otherwise go to new (201)
+                        // scope it here otherwise SemanticLink looks to loose scope (??) in the setTimeout
+                        const returnUri = response.status === 201
+                            ? response.headers.location
+                            : getUri(this.representation, 'self');
 
-                            setTimeout(() => {
-                                window.location = returnUri;
-                            }, 4000)
-
-                        }
+                        setTimeout(() => {
+                            window.location = returnUri;
+                        }, 2000)
 
                     })
                     .catch(/** @type {AxiosResponse|string} */err => {
@@ -219,8 +221,8 @@
                             const message = err.statusText || err.message || '';
                             this.$notify({title: 'Error submitting', text: message, type: 'error'});
                         }
-
                     });
+
             },
             mapApiToUiType: mapApiToUiType
         }
