@@ -29,7 +29,7 @@ import Vue from 'vue';
  *   Option Two: handler
  *
  *      const handler = arg => {}
- *      EventBu s.$on(unathorised, handler)
+ *      EventBus.$on(unauthorised, handler)
  *
  *   Note: options is useful if you need to deregister handlers (see below)
  *
@@ -48,15 +48,15 @@ import Vue from 'vue';
  *  Removing events
  *  ===============
  *
- *  Option One: deresigister all listeners to an event
+ *  Option One: de-resigister all listeners to an event
  *
  *      EventBus.$off(unauthorised)
  *
- *  Option Two: deregister specific listeners to an event
+ *  Option Two: de-register specific listeners to an event
  *
  *      EventBus.$off(unauthorised, handler)
  *
- *  Options Thress: deregsiter all listerners to all events
+ *  Options Thress: de-regisiter all listeners to all events
  *
  *      EventBus.$off()
  *
@@ -80,14 +80,14 @@ export default EventBus;
  *
  * @type {string}
  */
-export const loginRequired = 'event:auth-loginRequired';
+export const authRequired = 'event:auth-required';
 
 /**
  * HTTP response 401 not authorised. This event should be triggered once the user has made successfully authenticated.
  *
  * @type {string}
  */
-export const loginConfirmed = 'event:auth-loginConfirmed';
+export const authConfirmed = 'event:auth-confirmed';
 
 /**
  * The browser cannot find an connection out to the internet.

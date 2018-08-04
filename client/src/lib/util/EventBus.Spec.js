@@ -1,4 +1,4 @@
-import EventBus, { loginRequired } from './EventBus';
+import EventBus, { authRequired } from './EventBus';
 import { expect } from 'chai';
 
 describe('Event Bus', () => {
@@ -6,11 +6,11 @@ describe('Event Bus', () => {
     it('should be able to subscribe to event', () => {
 
         return new Promise(pass => {
-            EventBus.$on(loginRequired, () => {
+            EventBus.$on(authRequired, () => {
                 pass();
             });
 
-            EventBus.$emit(loginRequired);
+            EventBus.$emit(authRequired);
 
         });
 
@@ -19,12 +19,12 @@ describe('Event Bus', () => {
     it('should be able to subscribe to event with args', () => {
 
         return new Promise(pass => {
-            EventBus.$on(loginRequired, val => {
+            EventBus.$on(authRequired, val => {
                 expect(val).to.equal('test');
                 pass();
             });
 
-            EventBus.$emit(loginRequired, 'test');
+            EventBus.$emit(authRequired, 'test');
         });
 
     });

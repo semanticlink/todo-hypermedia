@@ -1,15 +1,15 @@
 <template>
-    
+
     <b-form @submit="submit" v-if="authenticated">
-        <b-button type="submit" variant="primary">Logout</b-button>
+        <b-button variant="primary" @click="submit">Logout</b-button>
     </b-form>
 
 </template>
 
 <script>
-    import EventBus, { loginConfirmed } from '../lib/util/EventBus';
+    import EventBus, {authConfirmed} from '../lib/util/EventBus';
     import AuthService from '../lib/AuthService';
-    import { clearJsonWebTokenOnHeaders } from "../lib/http-interceptors";
+    import {clearJsonWebTokenOnHeaders} from "../lib/http-interceptors";
 
     /**
      * Logout:
@@ -19,13 +19,26 @@
      */
     export default {
         name: "Logout",
+        props: {
+            /**
+             * Callback once logout has completed. Used for post logout actions on
+             * the parent context.
+             *
+             * @example show a notify and redirect
+             */
+            onLogout: {
+                type: Function,
+                default: () => () => {
+                }
+            }
+        },
         data() {
             return {
                 authenticated: false
             };
         },
         mounted() {
-            EventBus.$on(loginConfirmed, this.loginConfirmed);
+            EventBus.$on(authConfirmed, this.loginConfirmed);
             this.loginConfirmed();
         },
         methods: {
@@ -36,6 +49,7 @@
                 AuthService.logout();
                 clearJsonWebTokenOnHeaders();
                 this.authenticated = false;
+                this.onLogout();
             }
 
         }

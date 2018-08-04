@@ -16,7 +16,7 @@ import VueLocalStorage from 'vue-localstorage';
 
 import App from './App.vue';
 
-import {setJsonWebTokenOnHeaders} from './lib/http-interceptors';
+import {setJsonWebTokenOnHeaders, setInterceptors} from './lib/http-interceptors';
 import AuthService from './lib/AuthService';
 
 import BootstrapVue from 'bootstrap-vue';
@@ -33,7 +33,6 @@ Vue.use(Notifications);
  * Add runtime dependencies
  */
 require('./lib/uri-mappings');
-require('./lib/http-interceptors');
 
 setLogLevel(LEVEL.DEBUG);
 
@@ -65,6 +64,8 @@ Vue.use(apiPlugin);
  * Allows us to access local storage via `this.$localStorage`
  */
 Vue.use(VueLocalStorage, {name: 'localStorage'});
+
+setInterceptors({queue401s: false});
 
 if (AuthService.accessToken) {
     setJsonWebTokenOnHeaders(AuthService.accessToken);

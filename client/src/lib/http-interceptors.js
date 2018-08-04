@@ -1,108 +1,127 @@
 import axios from 'axios';
 import {log} from 'semanticLink';
-import EventBus, {loginConfirmed, loginRequired, offline, serverError} from './util/EventBus';
+import EventBus, {authConfirmed, authRequired, offline, serverError} from './util/EventBus';
 import {httpQueue} from './util/HTTPQueue';
 import * as authorization from 'auth-header';
 
-log.debug('[Axios] Setting up http interceptors');
-
 /**
- * We are using axios as the http client. It allows us to register interceptors
- *  @see https://github.com/axios/axios#interceptors
+ * @class InterceptorsOptions
+ * @property {boolean|undefined} queue401s when a 401 is intercepted add to queue for replay (or simply drop)
  */
-
 /**
- * Setup the headers on the xhr object so that we can play nice with the API
- */
-axios.interceptors.request.use(
-    config => {
-        /*
-         * We are going to be a monolingual JSON application
-         */
-        config.headers['Accept'] = 'application/json;q=1.0';
-        config.headers['X-Requested-With'] = 'XMLHttpRequest';
-
-        return config;
-    },
-    err => Promise.reject(err));
-
-/**
- * Intercept http offline error message of "Network Error" so we can continue
- * with request processing after it comes back online. The Offline component
- * has subscribed to the `offline` message and continues processing.
  *
- * Note: `error` contains the original `config` to replay the original request.
- *
- * The order of this method MUST be before other error handling (eg 500, 401) because error in this scenario
- * does NOT return a response.
+ * @param options
  */
-axios.interceptors.response.use(
-    response => response,
-    error => {
-        // axios returns a network error that we need to match against readyState < DONE (4)
-        // to correctly trap network down errors. All other errors should be passed through.
-        if (error.message === 'Network Error' && error.request.readyState <= 4) {
+export const setInterceptors = options => {
 
-            log.debug(`[Network] ${error.message} on '${error.config.url}'`);
+    options = {
+        queue401s: true,
+        ...options,
+    };
 
-            const promise = Promise.resolve(error);
-            httpQueue.pushToBuffer(error.config, promise);
-            EventBus.$emit(offline, error);
-        } else {
-            return Promise.reject(error);
-        }
-    });
+    log.debug('[Axios] Setting up http interceptors');
 
-/**
- * Intercept 500 (server error) request so that we can login on-demand and then continue
- * with request processing.
- */
-axios.interceptors.response.use(
-    response => response,
-    error => {
-        if (error.response && 500 === error.response.status) {
-            const promise = Promise.resolve(error);
-            EventBus.$emit(serverError, error);
-            return promise;
-        } else {
-            return Promise.reject(error);
-        }
-    });
+    /**
+     * We are using axios as the http client. It allows us to register interceptors
+     *  @see https://github.com/axios/axios#interceptors
+     */
 
-/**
- * Intercept 401 (unauthorised) request so that we can login on-demand and then continue
- * with request processing.
- *
- * TODO: the buffer should really have a set of ignore URLs are blacklisted before pushing
- */
-axios.interceptors.response.use(
-    response => response,
-    error => {
+    /**
+     * Setup the headers on the xhr object so that we can play nice with the API
+     */
+    axios.interceptors.request.use(
+        config => {
+            /*
+             * We are going to be a monolingual JSON application
+             */
+            config.headers['Accept'] = 'application/json;q=1.0';
+            config.headers['X-Requested-With'] = 'XMLHttpRequest';
 
-        if (error.response && 401 === error.response.status) {
+            return config;
+        },
+        err => Promise.reject(err));
 
-            httpQueue.pushToBuffer(error.config);
+    /**
+     * Intercept http offline error message of "Network Error" so we can continue
+     * with request processing after it comes back online. The Offline component
+     * has subscribed to the `offline` message and continues processing.
+     *
+     * Note: `error` contains the original `config` to replay the original request.
+     *
+     * The order of this method MUST be before other error handling (eg 500, 401) because error in this scenario
+     * does NOT return a response.
+     */
+    axios.interceptors.response.use(
+        response => response,
+        error => {
+            // axios returns a network error that we need to match against readyState < DONE (4)
+            // to correctly trap network down errors. All other errors should be passed through.
+            if (error.message === 'Network Error' && error.request.readyState <= 4) {
 
-            return new Promise((resolve, reject) => {
+                log.debug(`[Network] ${error.message} on '${error.config.url}'`);
 
-                // this event starts the process of logging in and MUST be handled
-                EventBus.$emit(loginRequired, error);
+                const promise = Promise.resolve(error);
+                httpQueue.pushToBuffer(error.config, promise);
+                EventBus.$emit(offline, error);
+            } else {
+                return Promise.reject(error);
+            }
+        });
 
-                // the event handling the login MUST then trigger this event to be caught
-                // eg EventBus.$emit(loginConfimed)
-                EventBus.$on(loginConfirmed, () => {
+    /**
+     * Intercept 500 (server error) request so that we can login on-demand and then continue
+     * with request processing.
+     */
+    axios.interceptors.response.use(
+        response => response,
+        error => {
+            if (error.response && 500 === error.response.status) {
+                const promise = Promise.resolve(error);
+                EventBus.$emit(serverError, error);
+                return promise;
+            } else {
+                return Promise.reject(error);
+            }
+        });
 
-                    log.debug('[Authentication] login confirmed (http-interceptor)');
-                    httpQueue.retryAll()
-                        .then(resolve)
-                        .catch(reject);
+    /**
+     * Intercept 401 (unauthorised) request so that we can login on-demand and then continue
+     * with request processing.
+     *
+     * TODO: the buffer should really have a set of ignore URLs are blacklisted before pushing
+     */
+    axios.interceptors.response.use(
+        response => response,
+        error => {
+
+            if (error.response && 401 === error.response.status) {
+
+                if (options.queue401s) {
+                    httpQueue.pushToBuffer(error.config);
+                }
+
+                return new Promise((resolve, reject) => {
+
+                    // this event starts the process of logging in and MUST be handled
+                    EventBus.$emit(authRequired, error);
+
+                    // the event handling the login MUST then trigger this event to be caught
+                    // eg EventBus.$emit(authConfirmed)
+                    EventBus.$on(authConfirmed, () => {
+
+                        log.debug('[Authentication] login confirmed (http-interceptor)');
+                        httpQueue.retryAll()
+                            .then(resolve)
+                            .catch(reject);
+                    });
+
                 });
+            } else {
+                return Promise.reject(error);
+            }
+        });
+}
 
-            });
-        } else {
-            return Promise.reject(error);
-        }
-    });
 /**
  * Set the bearer token in the headers for this axios instance
  */

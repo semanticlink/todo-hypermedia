@@ -52,7 +52,7 @@
 
             <b-tab title="Logout">
                 <b-container fluid>
-                    <Logout class="mt-3"/>
+                    <Logout class="mt-3" :on-logout="onLogout"/>
                 </b-container>
             </b-tab>
         </b-tabs>
@@ -78,7 +78,7 @@
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
-    import EventBus, {loginConfirmed} from '../lib/util/EventBus';
+    import EventBus, {authConfirmed, authRenewed} from '../lib/util/EventBus';
 
     import FormDragDrop from './FormDragDrop.vue';
 
@@ -140,7 +140,7 @@
             //
             // After (re)authentication load up the representation (we could have just redirected)
 
-            EventBus.$on(loginConfirmed, this.getRepresentation);
+            EventBus.$on(authConfirmed, this.getRepresentation);
 
             /////////////////////////////
             //
@@ -368,6 +368,9 @@
              * return {Promise}
              */
             getRepresentation() {
+
+                log.warn('Fetching representation ');
+
                 return axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}})
                     .then(/** @type {AxiosResponse} */response => {
                         this.responseHeaders = response.headers;
@@ -489,6 +492,17 @@
                     JSON.stringify(this.representation, null, 2),
                     (this.representation.name || this.representation.title || 'unknown') + '.json',
                     'application/json');
+            },
+            onLogout() {
+                this.$notify({
+                    title: 'Successfully logged out',
+                    text: 'Redirect back to resource ...',
+                    type: 'success'
+                });
+
+                setTimeout(() => {
+                    this.currentViewIndex = 0;
+                }, 1500)
             }
         }
     }

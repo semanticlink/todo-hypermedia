@@ -9,7 +9,7 @@
 </template>
 
 <script>
-    import EventBus, {loginConfirmed, loginRequired} from '../lib/util/EventBus';
+    import EventBus, {authRequired, authConfirmed} from '../lib/util/EventBus';
     import {log} from 'logger';
     import {
         getAuthenticationScheme,
@@ -48,7 +48,7 @@
             };
         },
         mounted() {
-            EventBus.$on(loginRequired, this.loginRequired);
+            EventBus.$on(authRequired, this.loginRequired);
         },
         methods: {
             /**
@@ -138,10 +138,10 @@
                     setJsonWebTokenOnHeaders(accessToken);
                 }
 
-                EventBus.$emit(loginConfirmed);
-
                 isPerformingAuthentication = false;
                 this.authenticated = true;
+
+                EventBus.$emit(authConfirmed);
 
             },
             /**

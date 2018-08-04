@@ -2,7 +2,7 @@
  * Intercept incoming authentication callbacks with Tokens on the hash
  *
  */
-import { authService } from './lib/AuthService';
+import {authService} from './lib/AuthService';
 
 authService.handleAuthentication();
 authService.scheduleRenewal();
@@ -10,14 +10,14 @@ authService.scheduleRenewal();
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.conf with an alias.
 import Vue from 'vue';
-import { LEVEL, setLogLevel } from 'semanticLink';
+import {LEVEL, setLogLevel} from 'semanticLink';
 import VueLocalStorage from 'vue-localstorage';
 
 import Offline from './components/Offline.vue';
 import Login from './components/Login.vue';
 import Resource from './components/Resource.vue';
 
-import { setJsonWebTokenOnHeaders } from './lib/http-interceptors';
+import {setJsonWebTokenOnHeaders} from './lib/http-interceptors';
 import AuthService from './lib/AuthService';
 
 import BootstrapVue from 'bootstrap-vue';
@@ -29,7 +29,9 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 Vue.use(BootstrapVue);
 Vue.use(Notifications);
 
-require('./lib/http-interceptors');
+import {setInterceptors} from './lib/http-interceptors';
+
+setInterceptors({queue401s: false});
 
 setLogLevel(LEVEL.DEBUG);
 
