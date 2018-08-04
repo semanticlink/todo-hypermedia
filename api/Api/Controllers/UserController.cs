@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
 using App;
@@ -20,11 +21,13 @@ namespace Api.Controllers
     {
         private readonly IUserStore _userStore;
         private readonly ITodoStore _todoStore;
+        private readonly ITenantStore _tenantStore;
 
-        public UserController(IUserStore userStore, ITodoStore todoStore)
+        public UserController(IUserStore userStore, ITodoStore todoStore, ITenantStore tenantStore)
         {
             _userStore = userStore;
             _todoStore = todoStore;
+            _tenantStore = tenantStore;
         }
 
         /// <summary>
@@ -54,18 +57,22 @@ namespace Api.Controllers
                 .MakeRedirect();
         }
 */
-
-
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
         [AuthoriseRedirect]
         public async Task<UserRepresentation> Me()
         {
+            ///////
+            //  Warning
+            //  See note above - make sure you update the real method below
+            // 
+            var userId = User.GetId();
+            var tenants = await _tenantStore.GetTenantsForUser(userId);
 
             return (await _userStore
-                    .Get(User.GetId()))
-                .ToRepresentation(Url);
+                    .Get(userId))
+                .ToRepresentation(tenants.ToList(), Url);
         }
 
 
@@ -75,10 +82,14 @@ namespace Api.Controllers
         [AuthoriseUser(Permission.Get)]
         public async Task<UserRepresentation> Get(string id)
         {
+            var userId = User.GetId();
+            var tenants = await _tenantStore.GetTenantsForUser(userId);
+
+
             return (await _userStore
-                    .Get(User.GetId()))
+                    .Get(userId))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
-                .ToRepresentation(Url);
+                .ToRepresentation(tenants.ToList(), Url);
         }
 
 
@@ -107,26 +118,26 @@ namespace Api.Controllers
 
         /////////////////////////
         //
-        // Todo collection on a user
+        // (tenant) Todo collection on a user
 
         /// <summary>
         ///     User todo collection
         /// </summary>
         /// <see cref="TodoController.GetById"/>
-        [HttpGet("{id}/todo", Name = UserUriFactory.UserTodoCollectionName)]
+        [HttpGet("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [AuthoriseUserTodoCollection(Permission.Get)]
-        public async Task<FeedRepresentation> GetUserTodos(string id)
+        [AuthoriseUserTenantTodoCollection(Permission.Get, "tenantId")]
+        public async Task<FeedRepresentation> GetUserTodos(string tenantId)
         {
             return (await _todoStore
                     .GetAll())
-                .ToFeedRepresentation(id, Url);
+                .ToFeedRepresentation(tenantId, Url);
         }
 
-        [HttpPost("{id}/todo", Name = UserUriFactory.UserTodoCollectionName)]
-        [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
-        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data, string id)
+        [HttpPost("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]
+        [AuthoriseUserTenantTodoCollection(Permission.Post, "tenantId")]
+        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data, string tenantId)
         {
             var userId = User.GetId();
             return (await _todoStore.Create(
@@ -134,7 +145,7 @@ namespace Api.Controllers
                     userId, // context is the userId
                     data
                         .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
-                        .FromRepresentation(Url),
+                        .FromRepresentation(tenantId),
                     Permission.FullControl,
                     CallerCollectionRights.Todo
                 ))

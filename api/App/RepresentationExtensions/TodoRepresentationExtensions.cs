@@ -28,7 +28,7 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    userId.MakeUserTodoCollectionUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    userId.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to user
                     userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
@@ -91,19 +91,22 @@ namespace App.RepresentationExtensions
                     // this collection
                     url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.Self),
 
-                    // Create a new organisation on the collection
-                    url.MakeTodoCollectionUri().MakeWebLink(CustomLinkRelation.Submit)
+                    // no submit to make it cacheable
                 },
                 Items = MakeFormItems()
             };
         }
 
-        public static TodoCreateData FromRepresentation(this TodoCreateDataRepresentation todo, IUrlHelper url)
+        public static TodoCreateData FromRepresentation(this TodoCreateDataRepresentation todo,
+            string tenantId)
         {
             return new TodoCreateData
             {
                 Name = todo.Name
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a name"),
+
+                Tenant = tenantId
+                    .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a tenant"),
 
                 Due = todo.Due,
 
@@ -121,7 +124,7 @@ namespace App.RepresentationExtensions
                     todo.Id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up - the collection of user todos is the logical parent
-                    userId.MakeUserTodoCollectionUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    userId.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // the collection of todos tags (this may or may not have tags ie is an empty collection)
                     todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
@@ -198,7 +201,7 @@ namespace App.RepresentationExtensions
                     Name = "due",
                     Description = "The UTC date the todo is due"
                 },
-             };
+            };
         }
     }
 }

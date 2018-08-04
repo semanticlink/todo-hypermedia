@@ -120,6 +120,8 @@ namespace Infrastructure.NoSQL
             var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
+            var tenantId = todo.Tenant;
+
             var originalTags = todo.Tags.IsNullOrEmpty()
                 ? new List<string>()
                 : new List<string>(todo.Tags); // clone tags to compare with later
@@ -128,11 +130,13 @@ namespace Infrastructure.NoSQL
 
             await SetRightsForTodoTag(id, originalTags, todo.Tags);
 
-            // no messing with the ID allowed
+            // no messing with the IDs allowed
             todo.Id = id;
+            todo.Tenant = tenantId;
+            
             // no messing with the update time allowed
             todo.UpdatedAt = DateTime.UtcNow;
-
+            
             // if tags have been removed, it looks like you can't hand
             // though an empty list but rather need to null it.
             // TODO: check this is true

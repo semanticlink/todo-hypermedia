@@ -40,11 +40,11 @@ namespace Api.Authorisation
             switch (resourceKeyInUri)
             {
                 case ResourceKey.Root:
-                    Log.Trace("Resource access delegated from '[0]'", ResourceKey.Root);
+                    Log.TraceFormat("Resource '{0}' access delegated", ResourceKey.Root);
                     return TrustDefaults.KnownHomeResourceId;
                 case ResourceKey.User:
                     var id = authContext.HttpContext.User.GetId();
-                    Log.Trace("Resource access from authentication '[0]'", id);
+                    Log.TraceFormat("Resource '{0}' access from authentication", id);
                     return id;
                 /*
                  * Pick up all other route params including:
@@ -53,7 +53,7 @@ namespace Api.Authorisation
                  */
                 default:
                     var resourceId = authContext.RouteData.Values[resourceKeyInUri]?.ToString();
-                    Log.Trace("Resource access determined from route '[0]': '[1]'", resourceId, resourceKeyInUri);
+                    Log.TraceFormat("Resource '{0}' access determined from route param '{1}'", resourceId, resourceKeyInUri);
                     return resourceId;
             }
         }
@@ -82,21 +82,24 @@ namespace Api.Authorisation
                     // does the user have the access rights?
                     if (rights.hasRights(requirement.Access))
                     {
-                        Log.Trace(
-                            "User {0} has permission {1} on resource {2}",
+                        Log.TraceFormat(
+                            "User {0} has permission {3} {1} on resource {2}",
                             userId,
                             requirement.Access,
-                            resourceId);
+                            resourceId,
+                            requirement.Type);
                         // yup, set for later use in the pipeline
                         context.Succeed(requirement);
                     }
                     else
                     {
-                        Log.Trace(
-                            "User {0} does not have permission {1} on resource {2}",
+                        Log.TraceFormat(
+                            "User {0} does not have permission {3} ({4}) {1} on resource {2}",
                             userId,
                             requirement.Access,
-                            resourceId);
+                            resourceId, 
+                            requirement.Type,
+                            (int)requirement.Type);
                     }
                 }
                 else

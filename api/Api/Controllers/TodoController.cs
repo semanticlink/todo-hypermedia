@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
@@ -44,27 +45,9 @@ namespace Api.Controllers
                 .ToRepresentation(User.GetId(), Url);
         }
 
-        [HttpPost(Name = TodoUriFactory.SelfRouteName)]
-        [AuthoriseUserTodoCollection(Permission.Post, ResourceKey.User)]
-        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data)
-        {
-            var userId = User.GetId();
-            return (await _todoStore.Create(
-                    userId, 
-                    userId, // context is the userId
-                    data
-                        .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
-                        .FromRepresentation(Url),
-                    Permission.FullControl,
-                    CallerCollectionRights.Todo
-                ))
-                .MakeTodoUri(Url)
-                .MakeCreated();
-        }
-
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
         [AuthoriseTodo(Permission.Put)]
-        public async Task<IActionResult> Update(string id, [FromBody] TodoRepresentation item)
+        public async Task<NoContentResult> Update(string id, [FromBody] TodoRepresentation item)
         {
             await _todoStore.Update(id,
                 todo =>
@@ -75,6 +58,7 @@ namespace Api.Controllers
                     todo.State = item.State;
                     todo.Due = item.Due;
                 });
+            
             return NoContent();
         }
 
@@ -99,7 +83,7 @@ namespace Api.Controllers
 
         [HttpDelete("{id}", Name = TodoUriFactory.TodoRouteName)]
         [AuthoriseTodo(Permission.Delete)]
-        public async Task<IActionResult> Delete(string id)
+        public async Task<NoContentResult> Delete(string id)
         {
             await _todoStore.Delete(id);
             return NoContent();
@@ -176,7 +160,7 @@ namespace Api.Controllers
         [HttpPatch("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes(MediaType.JsonPatch)]
         [AuthoriseTodoTagCollection(Permission.Patch)]
-        public async Task<IActionResult> PatchTagCollection(
+        public async Task<NoContentResult> PatchTagCollection(
             string id,
             [FromBody] JsonPatchDocument<PatchFeedRepresentation> patch)
         {
@@ -219,7 +203,7 @@ namespace Api.Controllers
         [HttpPut("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes(MediaType.UriList)]
         [AuthoriseTodoTagCollection(Permission.Put)]
-        public async Task<IActionResult> PutTagCollection(string id, [FromBody] string[] uriList)
+        public async Task<NoContentResult> PutTagCollection(string id, [FromBody] string[] uriList)
         {
             // check that global tags exist in the todo set sent through as a uriList
             var tagIds = uriList.ToTags(new List<RouteAndParam>
@@ -228,7 +212,7 @@ namespace Api.Controllers
                     new RouteAndParam {Route = TagUriFactory.TagRouteName, Param = "id"},
                 },
                 HttpContext);
-            
+
             await _todoStore.Update(id, todo => { todo.Tags = tagIds; });
 
             return NoContent();

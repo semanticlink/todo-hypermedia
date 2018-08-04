@@ -19,9 +19,8 @@ namespace Api.Authorisation
         public static readonly IDictionary<RightType, Permission> Root = new Dictionary<RightType, Permission>
         {
             {RightType.RootTagCollection, Permission.Get | Permission.Post},
+        };
 
-        }; 
-        
         /// <summary>
         ///     This template/profile for the creation of a user in the context of the root user
         /// </summary>
@@ -46,6 +45,7 @@ namespace Api.Authorisation
             {RightType.RootUserCollection, Permission.FullControl},
             //
             {RightType.TenantUserCollection, Permission.Get | Permission.Post},
+            {RightType.TenantTodoCollection, Permission.Get | Permission.Post},
         };
 
         public static readonly IDictionary<RightType, Permission> Todo = new Dictionary<RightType, Permission>

@@ -36,7 +36,6 @@ namespace Domain.Persistence
 
         /// <summary>
         ///     Update details of a <see cref="Todo"/> that includes checking if the <see cref="Todo.Tags"/> have changed
-        ///     and alter the global <see cref="Tag.Count"/> (increment or decrement)
         /// </summary>
         Task Update(string id, Action<Todo> updater);
 

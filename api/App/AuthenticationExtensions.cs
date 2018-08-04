@@ -74,7 +74,7 @@ namespace App
                  */
                 Log.DebugExceptionFormat(
                     e,
-                    $"Ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed or type '{type}' is not available as a claim"
+                    $"No claim '{type}' found. Either no 'jwt' token sent or ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed"
                 );
                 return string.Empty;
             }

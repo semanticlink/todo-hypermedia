@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 
 namespace App.UriFactory
 {
@@ -10,7 +11,7 @@ namespace App.UriFactory
         public const string CreateFormRouteName = "UserCreateForm";
         public const string RegisterCreateFormRouteName = "RegisterCreateFormRouteName";
         public const string EditFormRouteName = "UserEditForm";
-        public const string UserTodoCollectionName = "UserTodoCollectionRouteName";
+        public const string UserTenantTodosRouteName = "UserTodoCollectionRouteName";
 
         public static string MakeUserUri(this string id, IUrlHelper url)
         {
@@ -37,9 +38,9 @@ namespace App.UriFactory
             return url.Link(UserMeName, new { });
         }
 
-        public static string MakeUserTodoCollectionUri(this string id, IUrlHelper url)
+        public static string MakeUserTenantTodosUri(this string tenantId, IUrlHelper url)
         {
-            return url.Link(UserTodoCollectionName, new {id = id});
+            return url.Link(UserTenantTodosRouteName, new {tenantId = tenantId});
         }
 
     }

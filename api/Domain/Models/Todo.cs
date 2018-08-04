@@ -10,6 +10,14 @@ namespace Domain.Models
     {
         [DynamoDBHashKey] public string Id { get; set; }
 
+        /// <summary>
+        ///     Todos logically belong to a user and a tenant
+        /// </summary>
+        /// <remarks>
+        ///    Todos could actually live across tenants but for now it is only one tenant
+        /// </remarks>
+        public string Tenant { get; set; }
+        
         public string Description { get; set; }
 
         public string Name { get; set; }
@@ -29,7 +37,7 @@ namespace Domain.Models
         /// <remarks>
         ///    This is an array of hash key IDs. See <see cref="Models.Tag"/>
         /// </remarks>
-        [DynamoDBProperty("Tag")]   
+        [DynamoDBProperty("Tag")]
         public List<string> Tags { get; set; }
 
         public DateTime Due { get; set; }
