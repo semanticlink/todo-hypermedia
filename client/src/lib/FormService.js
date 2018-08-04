@@ -2,6 +2,7 @@ import {_} from 'semanticLink';
 import axios from 'axios';
 import {getAuthenticationUri, getBearerLinkRelation} from '../lib/http-interceptors';
 import {filter, matches, post, put, get} from 'semantic-link';
+import * as link from 'semantic-link';
 import {log} from 'logger';
 
 /**
@@ -60,25 +61,44 @@ export default class FormService {
      *
      * @param {*} data
      * @param {FormRepresentation}form
-     * @param {CollectionRepresentation} collection
-     * @param {?string} mediaType
+     * @param {LinkedRepresentation|CollectionRepresentation} collection
+     * @param {?string=undefined} mediaType
      * @returns {Promise<AxiosResponse<LinkedRepresentation>>}
      */
     static submitForm(data, form, collection, mediaType) {
         /**
-         * A form will POST if there is a submit link rel
-         * A form will PUT if no submit
-         * A form will override above if a method is specified
+         * A form will use 'submit' rel 'type' if explicitly set
+         * A form will POST if the parent resource is a collection (has 'items')
+         * A form will PUT if the parent resource is not a collection
          * @param {FormRepresentation} form
+         * @param {LinkedRepresentation|CollectionRepresentation} contextRepresentation
          * @return {Function} semantic link function type
          **/
-        function verb(form) {
+        function verb(form, contextRepresentation) {
             const [weblink] = filter(form, /^submit$/);
+
             if (weblink) {
-                log.debug('[Form] using POST - has \'submit\'');
-                return /*(weblink || {}).method ||*/ post;
+                // if it has a web link type use explicit if know type
+                if (weblink.type) {
+                    switch (weblink.type.toLowerCase()) {
+                        case 'put':
+                            return link.put;
+                        case 'post':
+                            return link.post;
+                        case 'delete':
+                            return link._delete;
+                        case 'patch':
+                            return link.patch;
+                        default:
+                    }
+                }
+            }
+
+            if ('items' in contextRepresentation) {
+                log.debug('[Form] using POST on collection');
+                return link.post;
             } else {
-                log.debug('[Form] using PUT');
+                log.debug('[Form] using PUT on resource');
                 return put;
             }
         }
@@ -94,10 +114,10 @@ export default class FormService {
 
         const rel = FormService.hasSubmitLinkRel(form) ? 'submit' : 'self';
         const links = FormService.hasSubmitLinkRel(form) ? form : collection;
-        const putOrPost = verb(form);
+        const http = verb(form, collection);
         const obj = pickFieldsFromForm(data, form);
 
-        return putOrPost(links, rel, mediaType, obj);
+        return http(links, rel, mediaType, obj);
     }
 
     /**
