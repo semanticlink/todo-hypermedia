@@ -25,7 +25,7 @@
     "linkifyjs": "^2.1.6",
     "luxon": "^1.2.1",
     "moment": "^2.22.1",
-    "semantic-link": "^0.0.8",
+    "semantic-link": "^0.1.0",
     "underscore": "^1.9.0",
     "vue": "^2.5.16",
     "vue-datetime": "^1.0.0-beta.3",
