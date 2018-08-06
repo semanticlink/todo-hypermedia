@@ -193,17 +193,23 @@ namespace Api.Web
 
                 var createTodoDatas = new List<TodoCreateData>
                 {
-                    new TodoCreateData {Name = "One Todo"},
+                    new TodoCreateData
+                    {
+                        Name = "One Todo",
+                        Tenant = tenantId
+                    },
                     new TodoCreateData
                     {
                         Name = "Two Todo (tag)",
                         Tags = new List<string> {tagIds.First()},
-                        State = TodoState.Complete
+                        State = TodoState.Complete,
+                        Tenant = tenantId
                     },
                     new TodoCreateData
                     {
                         Name = "Three Todo (tagged)",
-                        Tags = tagIds
+                        Tags = tagIds,
+                        Tenant = tenantId
                     }
                 };
 

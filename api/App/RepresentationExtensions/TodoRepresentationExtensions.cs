@@ -20,7 +20,7 @@ namespace App.RepresentationExtensions
         /// </summary>
         public static FeedRepresentation ToFeedRepresentation(
             this IEnumerable<Todo> todos,
-            string userId,
+            string tenantId,
             IUrlHelper url)
         {
             return new FeedRepresentation
@@ -28,10 +28,10 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    userId.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    tenantId.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to user
-                    userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    tenantId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
 
 
                     // create-form
@@ -114,7 +114,7 @@ namespace App.RepresentationExtensions
             };
         }
 
-        public static TodoRepresentation ToRepresentation(this Todo todo, string userId, IUrlHelper url)
+        public static TodoRepresentation ToRepresentation(this Todo todo, IUrlHelper url)
         {
             return new TodoRepresentation
             {
@@ -124,7 +124,7 @@ namespace App.RepresentationExtensions
                     todo.Id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up - the collection of user todos is the logical parent
-                    userId.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    todo.Tenant.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // the collection of todos tags (this may or may not have tags ie is an empty collection)
                     todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),

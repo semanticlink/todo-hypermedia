@@ -64,7 +64,7 @@ namespace Api.Authorisation
 
     public class AuthoriseUserTenantTodoCollectionAttribute : AuthoriseAttribute
     {
-        public AuthoriseUserTenantTodoCollectionAttribute(Permission permission, string resourceKey = ResourceKey.Id)
+        public AuthoriseUserTenantTodoCollectionAttribute(Permission permission, string resourceKey = "tenantId")
             : base(RightType.TenantTodoCollection, permission, resourceKey)
         {
         }

@@ -41,6 +41,8 @@ namespace Infrastructure.NoSQL
             var todo = new Todo
             {
                 Id = _idGenerator.New(),
+                Tenant = data.Tenant
+                    .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Tenant cannot be empty"),
                 Name = data.Name,
                 State = data.State,
                 Due = data.Due,
@@ -133,10 +135,10 @@ namespace Infrastructure.NoSQL
             // no messing with the IDs allowed
             todo.Id = id;
             todo.Tenant = tenantId;
-            
+
             // no messing with the update time allowed
             todo.UpdatedAt = DateTime.UtcNow;
-            
+
             // if tags have been removed, it looks like you can't hand
             // though an empty list but rather need to null it.
             // TODO: check this is true

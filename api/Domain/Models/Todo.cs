@@ -17,7 +17,7 @@ namespace Domain.Models
         ///    Todos could actually live across tenants but for now it is only one tenant
         /// </remarks>
         public string Tenant { get; set; }
-        
+
         public string Description { get; set; }
 
         public string Name { get; set; }

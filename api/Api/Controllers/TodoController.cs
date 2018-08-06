@@ -42,7 +42,7 @@ namespace Api.Controllers
             return (await _todoStore
                     .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(User.GetId(), Url);
+                .ToRepresentation(Url);
         }
 
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]

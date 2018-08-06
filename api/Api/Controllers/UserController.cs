@@ -127,7 +127,7 @@ namespace Api.Controllers
         [HttpGet("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(AddNoCache = true)]
-        [AuthoriseUserTenantTodoCollection(Permission.Get, "tenantId")]
+        [AuthoriseUserTenantTodoCollection(Permission.Get)]
         public async Task<FeedRepresentation> GetUserTodos(string tenantId)
         {
             return (await _todoStore
@@ -136,7 +136,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]
-        [AuthoriseUserTenantTodoCollection(Permission.Post, "tenantId")]
+        [AuthoriseUserTenantTodoCollection(Permission.Post)]
         public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data, string tenantId)
         {
             var userId = User.GetId();
