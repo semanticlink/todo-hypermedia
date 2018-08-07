@@ -18,16 +18,17 @@
             <li v-for="tenant in tenants.items" v-cloak>
                 <b-link @click="gotoTenant(tenant)">{{ tenant.name }}</b-link>
                 <drag-and-droppable-model
-                        :model="hydrateTenant(tenant)"
+                        :model="tenant"
+                        :async="true"
                         media-type="application/json"
                         :dropped="createOrUpdateUsersOnTenant">
                     <b-button
+                            @mousedown="hydrateTenant"
                             variant="outline"
                             v-b-tooltip.hover.html.right
                             title="Drag off to take a copy or drop on to update"
-                            >
-
-                        <add w="22px" h="22px"/>
+                    >
+                        <add w="22px" h="22px" title="Drag"/>
                     </b-button>
                 </drag-and-droppable-model>
 
@@ -47,6 +48,7 @@
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
+    import EventBus from "../lib/util/EventBus";
 
 
     export default {
@@ -122,9 +124,9 @@
                     .catch(this.notifyError);
 
             },
-            hydrateTenant: function (tenantRepresentation) {
-                return getTenantAndTodos(this.$root.$api)
-                    .then(() => tenantRepresentation)
+            hydrateTenant: function () {
+                getTenantAndTodos(this.$root.$api)
+                    .then(() => EventBus.$emit('resource:ready'))
                     .catch(err => {
                         this.$notify({type: 'error', title: 'Could not load up the tenant'});
                         log.error(err);

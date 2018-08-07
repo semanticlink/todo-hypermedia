@@ -2,15 +2,14 @@
     <!-- this is a draggable span but the draggable is added when the model is loaded
          this is to get around async with sync events
          -->
-    <span @mousedown="mousedown"
-          @mouseup="mousedown"
-          @click="mousedown"
-          @drop="drop"
-          @dragstart="dragstart"
-          @dragover="dragover"
-          @dragenter="dragenter"
-          @dragleave="dragleave"
-          @dragend="dragend">
+    <span
+            ref="draggable"
+            @drop="drop"
+            @dragstart="dragstart"
+            @dragover="dragover"
+            @dragenter="dragenter"
+            @dragleave="dragleave"
+            @dragend="dragend">
                 <slot>
                         <span>+</span>
                 </slot>
@@ -21,6 +20,7 @@
 
     import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/util/dragAndDropModel';
     import {log} from '../lib/logger';
+    import EventBus from "../lib/util/EventBus";
 
     export default {
         name: 'drag-and-droppable-model',
@@ -49,7 +49,8 @@
              */
             dropped: {
                 type: Function,
-                default: () => (document) => document            },
+                default: () => (document) => document
+            },
             /**
              * Pick the type of media to send from a drag event
              *
@@ -72,31 +73,24 @@
              */
             accept: {
                 type: String,
+            },
+            async: {
+                type: Boolean,
+                required: false,
+                default: () => false
             }
         },
-        data() {
-            return {
-                resource: {}
+        mounted() {
+            if (this.async) {
+                const vm = this;
+                EventBus.$on('resource:ready', () => {
+                    vm.$refs.draggable.setAttribute('draggable', true);
+                })
+            } else {
+                this.$refs.draggable.setAttribute('draggable', true);
             }
         },
         methods: {
-            mousedown(event) {
-
-
-                /**
-                 * Work around to load up the model from async before making it draggable
-                 */
-                const getModel = (typeof this.model === 'object')
-                    ? () => Promise.resolve(this.model)
-                    : this.model;
-
-                getModel()
-                    .then(resource => {
-                        this.resource = resource;
-                        event.target.setAttribute('draggable', true)
-                    })
-
-            },
             drop(event) {
 
                 if (this.accept === undefined) {
@@ -114,7 +108,7 @@
                     log.debug('No mediaType set using application/json');
                 }
 
-                dragstart(event, this.resource, this.mediaType || 'application/json');
+                dragstart(event, this.model, this.mediaType || 'application/json');
 
             },
             dragover,

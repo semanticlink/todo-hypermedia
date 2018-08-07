@@ -33,7 +33,7 @@ const syncTodosStrategy = (user, aUser, strategies, options) => {
     return nodSynchroniser.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
 };
 
-const syncTagsStrategy = (todo, aTodo, strategies, options) => {
+const syncTagsStrategy = (todo, aTodo, root, options) => {
     return nodSynchroniser.patchUriListOnNamedCollection(
         todo,
         'tags',
@@ -47,7 +47,7 @@ const syncTagsStrategy = (todo, aTodo, strategies, options) => {
 };
 
 
-function syncTenant(tenantRepresentation, aTenant, options) {
+function syncTenant(tenantRepresentation, aTenant, root, options) {
     return nodSynchroniser.getResource(
         tenantRepresentation,
         aTenant,
@@ -60,7 +60,7 @@ function syncTenant(tenantRepresentation, aTenant, options) {
                         usersRepresentation,
                         usersDocument,
                         [
-                            (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, [], options)
+                            (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, root, options)
                         ],
                         options)
                 ],
@@ -84,7 +84,7 @@ export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
 
     log.debug(`Update tenant ${tenantRepresentation.name} --> ${getUri(tenantRepresentation, 'self')}`);
 
-    return syncTenant(tenantRepresentation, aTenant, options);
+    return syncTenant(tenantRepresentation, aTenant, root, options);
 };
 
 const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) => {
