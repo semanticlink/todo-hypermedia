@@ -95,7 +95,7 @@ namespace App.RepresentationExtensions
             return new FeedItemRepresentation
             {
                 Id = tenant.Id.MakeTenantUri(url),
-                Title = tenant.Code
+                Title = tenant.Name
             };
         }
 
@@ -144,7 +144,7 @@ namespace App.RepresentationExtensions
                     Description = "The name of the tenant to be shown on the screen",
                     Required = false
                 },
-               new TextInputFormItemRepresentation
+                new TextInputFormItemRepresentation
                 {
                     Name = "description",
                     Description = "Other details about the organisation",
@@ -173,8 +173,8 @@ namespace App.RepresentationExtensions
                 Items = MakeFormItems()
             };
         }
-        
-        
+
+
         public static TenantCreateData FromRepresentation(this TenantCreateDataRepresentation tenant)
         {
             return new TenantCreateData
