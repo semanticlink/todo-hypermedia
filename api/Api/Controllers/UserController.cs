@@ -131,8 +131,8 @@ namespace Api.Controllers
         public async Task<FeedRepresentation> GetUserTodos(string tenantId)
         {
             return (await _todoStore
-                    .GetAll())
-                .ToFeedRepresentation(tenantId, Url);
+                    .GetByTenant(tenantId))
+                .ToFeedRepresentation(User.GetId(), tenantId, Url);
         }
 
         [HttpPost("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]

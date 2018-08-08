@@ -18,8 +18,8 @@ namespace App.RepresentationExtensions
         /// <summary>
         ///     Feed reperesentation of todos parented on a user
         /// </summary>
-        public static FeedRepresentation ToFeedRepresentation(
-            this IEnumerable<Todo> todos,
+        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Todo> todos,
+            string userId,
             string tenantId,
             IUrlHelper url)
         {
@@ -31,7 +31,7 @@ namespace App.RepresentationExtensions
                     tenantId.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to user
-                    tenantId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
 
 
                     // create-form

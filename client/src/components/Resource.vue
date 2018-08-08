@@ -69,7 +69,7 @@
     import Headers from './Headers.vue';
     import Form from './Form.vue';
     import {copyToClipboard, saveToFile} from "../lib/raw-helpers";
-    import {get, _delete, LinkedRepresentation, CollectionRepresentation, getUri} from 'semantic-link';
+    import {LinkedRepresentation, CollectionRepresentation} from 'semantic-link';
     import * as link from 'semantic-link';
     import FormAction from './FormAction.vue';
     import Vue from 'vue';
@@ -290,8 +290,7 @@
              * @param {?string} type media type
              */
             getForm(rel, type) {
-                const getPromise = get(this.representation, rel, type);
-                loader.schedule({id: link.getUri(this.representation, 'self')}, getPromise)
+                loader.schedule(() => link.get(this.representation, rel, type))
                     .then(/** @type {AxiosResponse} */response => {
                         this.formRepresentation = response.data;
                     });
@@ -312,7 +311,7 @@
                     .then(/** @type {AxiosResponse|Error} */response => {
 
                         // appropriate repsonses from a deleted resource
-                        // seehttps://stackoverflow.com/questions/2342579/http-status-code-for-update-and-delete
+                        // see https://stackoverflow.com/questions/2342579/http-status-code-for-update-and-delete
                         if (response.status === 204 || response.status === 200 || response.status === 202) {
 
                             // 202 is that is accepted to be processed (TODO: retry mechanism that isn't immediate)
@@ -321,7 +320,7 @@
                             }
 
                             // check that it has in fact been deleted
-                            return loader.schedule(() => get(this.representation, /^self$/))
+                            return loader.schedule(() => link.get(this.representation, /^self$/))
                             // it is an error if it succeeds
                                 .then(() => this.$notify({
                                     type: 'error',
@@ -331,7 +330,7 @@
                                     // success if it isn't found or no content
                                     if (response.status === 404 || response.status === 204) {
 
-                                        const uri = getUri(this.representation, /up/) || '/';
+                                        const uri = link.getUri(this.representation, /up/) || '/';
 
                                         this.$notify({
                                             type: 'success',

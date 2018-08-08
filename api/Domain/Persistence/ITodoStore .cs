@@ -33,6 +33,7 @@ namespace Domain.Persistence
         ///     Retrieve a full set of todos by <see cref="User"/>
         /// </summary>
         Task<IEnumerable<Todo>> GetByUser();
+        Task<IEnumerable<Todo>> GetByTenant(string tenantId);
 
         /// <summary>
         ///     Update details of a <see cref="Todo"/> that includes checking if the <see cref="Todo.Tags"/> have changed

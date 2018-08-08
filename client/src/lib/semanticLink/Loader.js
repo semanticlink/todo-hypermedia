@@ -127,8 +127,8 @@ export default class Loader {
      * @param params
      * @return {*}
      */
-    schedule(...params){
-        return this._limiter.schedule(...params);
+    schedule(params){
+        return this._limiter.schedule(params);
     }
 
     /**

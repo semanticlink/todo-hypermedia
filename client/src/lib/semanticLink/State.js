@@ -413,15 +413,20 @@ export default class State {
 
         return loader.limiter.schedule({id}, getFactory, resource, rel, loader.cancellable)
             .then(response => {
-                // save the across-the-wire meta data so we can check for collisions/staleness
-                //updateStateMetaData(resource, response.headers());
-                this.status = stateFlagEnum.hydrated;
-                // when was it retrieved
-                this.retrieved = new Date();
-                // how was it retrieved
-                this.headers = response.headers;
 
-                return response.data;
+                if (response) {
+                    // how was it retrieved
+                    this.headers = response.headers;
+                    // save the across-the-wire meta data so we can check for collisions/staleness
+                    this.status = stateFlagEnum.hydrated;
+
+                    // when was it retrieved
+                    this.retrieved = new Date();
+
+                    return response.data;
+                } else {
+                    throw new Error(`[State] response empty on ${id}`);
+                }
             })
             .catch(/** @type {Error|BottleneckError|AxiosError} */err => {
 
@@ -457,7 +462,8 @@ export default class State {
                     this.status = stateFlagEnum.unknown;
                     return Promise.resolve(resource);
                 } else {
-                    log.error(`Request error unknown: '${err.message}' ${typeof err}`);
+                    log.error(`[State] Request error: '${err.message}'}`);
+                    log.debug(err.stack);
                     this.status = stateFlagEnum.unknown;
                     /**
                      * We really don't know what is happening here. But allow the application

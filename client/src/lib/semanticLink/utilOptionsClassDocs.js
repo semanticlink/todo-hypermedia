@@ -24,6 +24,8 @@
  * @property {function(resource:LinkedRepresentation, data:*, options: ?UtilOptions):Promise} putFactory
  * @property {function(link{href:string,title:string}:LinkedRepresentation} resourceFactory
  * @property {string} message usually a success message to be displayed to the user
+ * @property {string} error usually an error message to be displayed to the user
+ * @property {string} success usually a success message to be displayed to the user
  * @property {Array<function(*,*)>} resourceResolver array of resolvers that that are keyed on link relation to factory resources
  * @property {function(*):string[]} uriListResolver array of resolvers that that are keyed on link relation to factory uri lists
  * @property {function(collection:CollectionRepresentation, document:LinkedRepresentation):LinkedRepresentation} findResourceInCollectionStrategy - locate a resource in a collection

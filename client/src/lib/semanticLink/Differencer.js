@@ -186,7 +186,7 @@ export default class Differencer {
         // 1. Delete all resource first
         //
             .mapWaitAll(item => {
-                log.info(`Calling delete strategy: ${SemanticLink.tryGetUri(item, /self/)}`);
+                log.debug(`[Diff] Calling delete strategy: ${SemanticLink.tryGetUri(item, /self/)}`);
                 return deleteStrategy(item);
             })
             //
@@ -248,7 +248,7 @@ export default class Differencer {
 
                 const infos = makeSynchronisationInfos(createResults, updateItems);
 
-                log.debug(`[Collection] '${SemanticLink.tryGetUri(collectionResource, /self/)}' - [add, matched, remove] (${createResults.length} ${updateItems.length} ${deleteItems.length} )`);
+                log.debug(`[Diff] '${SemanticLink.tryGetUri(collectionResource, /self/)}' - [add, matched, remove] (${createResults.length} ${updateItems.length} ${deleteItems.length} )`);
                 return [infos, createResults, updateItems, deleteItems];
             });
     }
@@ -287,7 +287,7 @@ export default class Differencer {
 
         return _(deleteUriList)
             .mapWaitAll(uriList => {
-                log.info(`Calling delete strategy: ${uriList}`);
+                log.debug(`[Diff] Calling delete strategy: ${uriList}`);
                 return deleteStrategy(uriList);
             })
             .then(deletedItems => {
@@ -295,7 +295,7 @@ export default class Differencer {
 
                 return _(createUriList)
                     .mapWaitAll(createUriList => {
-                        log.info(`Calling create strategy: ${createUriList}`);
+                        log.debug(`[Diff] Calling create strategy: ${createUriList}`);
                         return createStrategy(createUriList)
                             .then(newUriList => {
                                 createResults.push([newUriList, createUriList]);

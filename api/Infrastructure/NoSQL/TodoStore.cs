@@ -116,6 +116,14 @@ namespace Infrastructure.NoSQL
             return await GetAll();
         }
 
+        public async Task<IEnumerable<Todo>> GetByTenant(string tenantId)
+        {
+            return await _context.Where<Todo>(new List<ScanCondition>
+            {
+                new ScanCondition(nameof(Todo.Tenant), ScanOperator.Equal, tenantId)
+            });
+        }
+
 
         public async Task Update(string id, Action<Todo> updater)
         {

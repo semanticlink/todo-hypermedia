@@ -657,70 +657,21 @@ export default class NODSynchroniser {
 
         };
 
-
-        /**
-         * Don't make request back to update, just remember the URI mapping so that if a reference to the
-         * network of data resource is required we can resolve a document reference to the real resource in
-         * our network.
-         */
-        const updateContributeOnlyResourceAndUpdateResolver = (collectionResourceItem, updateDataDocument) => {
-            resolver.update(
-                SemanticLink.getUri(updateDataDocument, /self|canonical/),
-                SemanticLink.getUri(collectionResourceItem, /self|canonical/)
-            );
-            return Promise.resolve(undefined);
-        };
-
-        /**
-         * A contribute-only collection allows to add a the new resource to the collection and then
-         * link it.
-         */
-        const addContributeOnlyResourceAndUpdateResolver = (collectionResource, createDataDocument) => {
-
-            return nodMaker
-                .createCollectionResourceItem(collectionResource, createDataDocument, options)
-                .then(result => {
-                    resolver.add(
-                        SemanticLink.getUri(createDataDocument, /self|canonical/),
-                        SemanticLink.getUri(result, /self|canonical/));
-                    return result;
-                });
-        };
-
-
         const resourceUriList = uriListResolver(collection);
 
         if (options.contributeonly) {
-            log.debug(`[Sync] uri-list is contribute-only: [${resourceUriList.join(',')}]`);
-            const contributeOnly = {
-                ...options,
-                ...{
-                    createStrategy: addContributeOnlyResourceAndUpdateResolver,
-                    updateStrategy: updateContributeOnlyResourceAndUpdateResolver,
-                    deleteStrategy: () => []
-                }
-            };
 
-            return Differencer.diffUriList(resourceUriList, documentUriList, contributeOnly);
+            log.debug(`[Sync] uri-list is contribute-only: [${resourceUriList.join(',')}]`);
+            throw new Error('Not implemented');
         }
         // If the caller has signalled that the collection is read-only, or the collection
         // if missing a 'create-form' representation then we assume that the NOD can
         // not be changed.
         else if (options.readonly) {
 
-            log.error('Readonly uri-list is not implemented');
-
             log.debug('[Sync] uri-list is read-only: ');
-            const readOnlyOptions = {
-                ...options,
-                ...{
-                    createStrategy: () => [],
-                    updateStrategy: () => [],
-                    deleteStrategy: () => []
-                }
-            };
-            return Differencer.diffUriList(uriListResolver(collection), documentUriList, readOnlyOptions);
 
+            throw new Error('Not implemented');
 
         } else {
             log.debug(`[Sync] uri-list is updateable: [${[resourceUriList].join(',')}]`);
@@ -733,10 +684,7 @@ export default class NODSynchroniser {
                 }
             };
             return Differencer.diffUriList(resourceUriList, documentUriList, opts);
-
-
         }
-
 
     }
 
@@ -768,7 +716,7 @@ export default class NODSynchroniser {
                         return this.synchroniseUriList(collection, uriList, options)
                         // note discarding synch infos (not sure why)
                             .then(() => {
-                                options = {...options, ...{forceLoad: true}};
+                                options = {...options, forceLoad: true};
                                 return nodMaker.getCollectionResourceAndItems(collection, options);
                             });
                     }

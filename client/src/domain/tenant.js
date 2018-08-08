@@ -26,24 +26,18 @@ export const getTenantAndTodos = root => {
 
 
 const syncUsersStrategy = (tenant, aTenant, strategies, options) => {
-    return nodSynchroniser.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
+    return nodSynchroniser.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options)
+        .catch(log.error);
 };
 
 const syncTodosStrategy = (user, aUser, strategies, options) => {
-    return nodSynchroniser.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
+    return nodSynchroniser.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options)
+        .catch(log.error);
 };
 
 const syncTagsStrategy = (todo, aTodo, root, options) => {
-    return nodSynchroniser.patchUriListOnNamedCollection(
-        todo,
-        'tags',
-        /tags/,
-        aTodo.tags.items.map(item => getUri(item, 'self')),
-        {
-            ...options,
-            ...{contributeonly: true},
-            ...pooledTagResourceResolver(root)
-        });
+    return nodSynchroniser.getNamedCollection(todo, 'tags', /tags/, aTodo, [], options)
+        .catch(log.error);
 };
 
 
@@ -75,7 +69,7 @@ function syncTenant(tenantRepresentation, aTenant, root, options) {
  * @param {CollectionRepresentation} tenant
  * @param {LinkedRepresentation} aTenant
  * @param {ApiRepresentation} root
- * @param options
+ * @param {UtilOptions} options
  * @return {Promise|*|{x, links}}
  */
 export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
@@ -88,7 +82,8 @@ export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
 };
 
 const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) => {
-    return nodSynchroniser.getResourceInCollection(tenantCollection, aTenant, strategies, options);
+    return nodSynchroniser.getResourceInCollection(tenantCollection, aTenant, strategies, options)
+        .catch(log.error);
 };
 
 export const createTenantOnRoot = (root, aTenant, options) => {
@@ -114,7 +109,8 @@ export const createTenantOnRoot = (root, aTenant, options) => {
                                 usersRepresentation,
                                 usersDocument,
                                 [
-                                    (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, [], options)
+                                    (todoRepresentation, todoDocument, options) =>
+                                        syncTagsStrategy(todoRepresentation, todoDocument, root, options)
                                 ],
                                 options)
                         ],

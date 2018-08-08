@@ -190,7 +190,7 @@
 
                 this.onSubmit();
 
-                log.debug(`[Form] submit ${link.getUri(this.representation, 'self')}`);
+                log.debug(`[Form] submit ${getUri(this.representation, 'self')}`);
 
                 return FormService.submitForm(this.formObj, this.formRepresentation, this.representation)
                     .then(/** @type {AxiosResponse} */response => {
