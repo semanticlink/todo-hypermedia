@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "es5",
+    "lib": [
+      "ES6",
+      "ES7",
+      "ESNext",
+      "DOM"
+    ],
+    "module": "es6",
+    "moduleResolution": "node",
+    "declaration": true,
+    "outDir": "./dist",
+    "sourceMap": true,
+    "strict": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/__tests__/*"
+  ],
+  "compileOnSave": false
+}

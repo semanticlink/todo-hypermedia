@@ -62,7 +62,12 @@ const clientConfig = {
             /**
              * vue (combine with resolve>alias above)
              */
-            '.vue'
+            '.vue',
+            /**
+             * typescript
+             */
+            '.ts',
+            '.tsx'
         ]
     },
     module: {
@@ -83,6 +88,12 @@ const clientConfig = {
                 test: /\.js$/,
                 exclude: /node_modules/,
                 loader: 'babel-loader'
+            },
+            {
+
+                test: /\.tsx?$/,
+                exclude: /node_modules/,
+                loader: 'ts-loader'
             },
         ]
     },

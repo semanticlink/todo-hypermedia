@@ -1,8 +1,14 @@
 /**
  * @see https://github.com/zinserjan/mocha-webpack/blob/v2.0.0-beta.0/docs/installation/webpack-configuration.md
+ * @see https://github.com/zinserjan/mocha-webpack-example/blob/master/webpack.config-test.js
  */
+const path = require('path');
 
 module.exports = {
+    resolve: {
+        modules: [path.resolve('./src'), "node_modules"],
+        extensions: ['.ts', '.js'],
+    },
     mode: 'development',
     module: {
         rules: [
@@ -12,6 +18,25 @@ module.exports = {
              */
             {test: /\.scss$/, loader: 'null-loader'},
             {test: /\.css$/, loader: 'null-loader'},
+
+            {
+                test: /.js$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader',
+            },
+            // {
+            //   test: /.js$/,
+            //   exclude: /(node_modules|bower_components)/,
+            //   loader: 'eslint-loader',
+            // },
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                loaders: [
+                    'ts-loader'
+                ]
+            },
+
         ]
     },
     output: {

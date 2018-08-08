@@ -8,8 +8,8 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --mode development --open --hot",
-    "test": "cross-env mocha-webpack --webpack-config webpack.config-test.js \"src/lib/**/*.Spec.js\"",
-    "test-watch": "cross-env  mocha-webpack --webpack-config webpack.config-test.js --watch  \"src/lib/**/*.Spec.js\"",
+    "test": "mocha-webpack  \"src/lib/**/*.Spec.{js,ts}\"",
+    "test-watch": "mocha-webpack --watch  \"src/lib/**/*.Spec.{js,ts}\"",
     "build": "webpack --mode development --progress --hide-modules",
     "dist": "webpack --mode production --colors false --progress false"
   },
@@ -35,6 +35,8 @@
     "weekstart": "^1.0.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.5",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
@@ -55,6 +57,8 @@
     "sass-loader": "^7.0.1",
     "sinon": "^5.0.10",
     "string-replace-webpack-plugin": "^0.1.3",
+    "ts-loader": "^4.4.2",
+    "typescript": "^3.0.1",
     "vue-html-loader": "^1.2.4",
     "vue-ionicons": "^2.2.1",
     "vue-loader": "^15.2.0",
