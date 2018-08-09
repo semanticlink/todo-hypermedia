@@ -1,6 +1,6 @@
-import _ from './mixins/underscore';
+import { findResourceInCollection, findItemByUri } from '../mixins/collection';
 import {log} from 'logger';
-import { nodMaker } from './NODMaker';
+import { nodMaker } from '../NODMaker';
 import * as link from 'semantic-link';
 
 /**
@@ -14,14 +14,14 @@ import * as link from 'semantic-link';
  * When pooled collection is read-only then no resources may be added from other contexts.
  *
  */
-export default class Collection {
+export default class PooledCollection {
 
     static get defaultResolver () {
         return {
             resolve: u => u,
-            remove: _.noop,
-            add: _.noop,
-            update: _.noop
+            remove: () => {},
+            add: () => {},
+            update: () => {}
         };
     }
 
@@ -35,7 +35,7 @@ export default class Collection {
      */
     static resolve (document, resource, options) {
         if (link.matches(document, /self|canonical/)) {
-            (options.resolver || Collection.defaultResolver).add(
+            (options.resolver || PooledCollection.defaultResolver).add(
                 link.getUri(document, /self|canonical/),
                 link.getUri(resource, /self|canonical/));
         }
@@ -55,7 +55,7 @@ export default class Collection {
             .createCollectionResourceItem(collectionResource, resourceDocument, options)
             .then(createdResource => {
                 log.info(`Pooled: created ${link.getUri(createdResource, /self|canonical/)}`);
-                return Collection.resolve(resourceDocument, createdResource, options);
+                return PooledCollection.resolve(resourceDocument, createdResource, options);
             });
     }
 
@@ -80,34 +80,34 @@ export default class Collection {
                 let parentUri = link.getUri(parentResource, /self|canonical/);
 
                 // strategy one & two: it is simply found map it based on self and/or mappedTitle
-                let existingResource = _(collectionResource).findResourceInCollection(resourceDocument, options.mappedTitle);
+                let existingResource = findResourceInCollection(collectionResource, resourceDocument, options.mappedTitle);
 
                 if (existingResource) {
 
                     log.info(`Pooled: ${collectionName} on ${parentUri} - found: ${link.getUri(existingResource, /self|canonical/)}`);
-                    return Collection.resolve(resourceDocument, existingResource, options);
+                    return PooledCollection.resolve(resourceDocument, existingResource, options);
 
                 } else if (link.getUri(resourceDocument, /self|canonical/)) {
 
                     //strategy three: check to see if self is an actual resource anyway and map it if it is, otherwise make
                     let documentURI = link.getUri(resourceDocument, /self|canonical/);
-                    let resolvedUri = (options.resolver || Collection.defaultResolver).resolve(documentURI);
+                    let resolvedUri = (options.resolver || PooledCollection.defaultResolver).resolve(documentURI);
 
                     if (resolvedUri !== documentURI) {
-                        let tryGetResource = _(collectionResource).findItemByUri(resolvedUri);
+                        let tryGetResource = findItemByUri(collectionResource, resolvedUri);
                         if (tryGetResource) {
                             return tryGetResource;
                         } else {
                             log.error(`Resource '${resolvedUri}' is not found on ${parentUri} - very unexpected`);
                         }
                     } else {
-                        return Collection.makeAndResolveResource(collectionResource, resourceDocument, options);
+                        return PooledCollection.makeAndResolveResource(collectionResource, resourceDocument, options);
                     }
 
                 } else {
                     // strategy four: make if we can because we at least might have the attributes
                     log.info(`Pooled: ${collectionName} on ${parentUri} - not found}`);
-                    return Collection.makeAndResolveResource(collectionResource, resourceDocument, options);
+                    return PooledCollection.makeAndResolveResource(collectionResource, resourceDocument, options);
                 }
 
             });

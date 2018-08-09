@@ -1,6 +1,6 @@
 'use strict';
 import {nodMaker} from '../lib/semanticLink/NODMaker';
-import Collection from '../lib/semanticLink/Collection';
+import PooledCollection from '../lib/semanticLink/sync/PooledCollection';
 import {log} from 'logger';
 
 
@@ -27,7 +27,7 @@ import {log} from 'logger';
 export function pooledTagResourceResolver(contextResource) {
 
     let resolve = (collectionName, collectionRel, type) =>
-        (resource, options) => Collection
+        (resource, options) => PooledCollection
             .getResourceInNamedCollection(contextResource, collectionName, collectionRel, resource, options)
             .then(document => {
                 if (document) {

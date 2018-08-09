@@ -1,6 +1,6 @@
 'use strict';
 import {nodMaker} from './NODMaker';
-import Collection from './Collection';
+import PooledCollection from './sync/PooledCollection';
 import {log} from 'logger';
 
 /**
@@ -11,7 +11,7 @@ import {log} from 'logger';
 export default function (contextResource) {
 
     let resolve = (collectionName, collectionRel, type) =>
-        (resource, options) => Collection
+        (resource, options) => PooledCollection
             .getResourceInNamedCollection(contextResource, collectionName, collectionRel, resource, options)
             .then(document => {
                 if (document) {

@@ -1,7 +1,7 @@
-import Collection from './Collection';
+import PooledCollection from './PooledCollection';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { nodMaker } from './NODMaker';
+import { nodMaker } from '../NODMaker';
 
 describe('Pooled collection', () => {
 
@@ -40,7 +40,7 @@ describe('Pooled collection', () => {
         };
 
         it('returns document based on uri/name matching', () => {
-            Collection
+            PooledCollection
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource)
                 .then(representation => {
                     expect(representation).to.deep.equal(document);
@@ -67,7 +67,7 @@ describe('Pooled collection', () => {
                     }
                 }
             };
-            Collection
+            PooledCollection
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(() => {
                     expect(documentUriResolved).to.equal('http://api.example.com/role/2');
@@ -95,7 +95,7 @@ describe('Pooled collection', () => {
                     }
                 }
             };
-            return Collection
+            return PooledCollection
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.deep.equal(document);
@@ -124,7 +124,7 @@ describe('Pooled collection', () => {
             sinon.stub(nodMaker, 'createCollectionResourceItem')
                 .callsFake(() => Promise.resolve(createdResource));
 
-            return Collection
+            return PooledCollection
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.equal(createdResource);
@@ -164,7 +164,7 @@ describe('Pooled collection', () => {
             sinon.stub(nodMaker, 'createCollectionResourceItem')
                 .callsFake(() => Promise.resolve(createdResource));
 
-            return Collection
+            return PooledCollection
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.equal(createdResource);

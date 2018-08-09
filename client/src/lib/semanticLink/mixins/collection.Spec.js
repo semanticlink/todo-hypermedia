@@ -1,5 +1,5 @@
-import _ from './collection';
-import { expect } from 'chai';
+import * as _ from './collection';
+import {expect} from 'chai';
 import * as link from 'semantic-link';
 
 describe('Collection mixins', () => {
@@ -18,16 +18,16 @@ describe('Collection mixins', () => {
         items: [document]
     };
 
-    describe('_.differenceByUriOrName', () => {
+    describe('_.differenceCollection', () => {
 
         describe('Collection', () => {
 
             it('should return empty if sets both empty', () => {
-                expect(_({}).differenceByUriOrName({})).to.deep.equal([]);
+                expect(_.differenceCollection({}, {})).to.deep.equal([]);
             });
 
             it('should return empty if sets are the same', () => {
-                expect(_(collection).differenceByUriOrName(collection)).to.deep.equal([]);
+                expect(_.differenceCollection(collection, collection)).to.deep.equal([]);
             });
 
             describe('different collection', () => {
@@ -47,11 +47,11 @@ describe('Collection mixins', () => {
                 };
 
                 it('should return missing document', () => {
-                    expect(_(collection2).differenceByUriOrName(collection1)).to.deep.equal([document2]);
+                    expect(_.differenceCollection(collection2, collection1)).to.deep.equal([document2]);
                 });
 
                 it('should return empty if sets are the same', () => {
-                    expect(_(collection1).differenceByUriOrName(collection2)).to.deep.equal([]);
+                    expect(_.differenceCollection(collection1, collection2)).to.deep.equal([]);
                 });
 
             });
@@ -60,11 +60,11 @@ describe('Collection mixins', () => {
         describe('LinkedRepresentation[]', () => {
 
             it('should return empty if set are both empty', () => {
-                expect(_([]).differenceByUriOrName()).to.deep.equal([]);
+                expect(_.differenceCollection([])).to.deep.equal([]);
             });
 
             it('should return empty if sets are the same', () => {
-                expect(_([document]).differenceByUriOrName([document])).to.deep.equal([]);
+                expect(_.differenceCollection([document], [document])).to.deep.equal([]);
             });
 
             describe('different collection', () => {
@@ -80,11 +80,11 @@ describe('Collection mixins', () => {
                 let collection2 = [document, document2];
 
                 it('should return missing document', () => {
-                    expect(_(collection2).differenceByUriOrName(collection1)).to.deep.equal([document2]);
+                    expect(_.differenceCollection(collection2, collection1)).to.deep.equal([document2]);
                 });
 
                 it('should return empty if sets are the same', () => {
-                    expect(_(collection1).differenceByUriOrName(collection2)).to.deep.equal([]);
+                    expect(_.differenceCollection(collection1, collection2)).to.deep.equal([]);
                 });
 
             });
@@ -118,45 +118,45 @@ describe('Collection mixins', () => {
         };
 
         it('should push onto empty array', () => {
-            const result = _([]).pushResource(document2);
+            const result = _.pushResource([], document2);
             expect(result).to.deep.equal([document2]);
         });
 
         it('should not push when resource already exists', () => {
-            const result = _([document]).pushResource(document2);
+            const result = _.pushResource([document], document2);
             expect(result).to.deep.equal([document]);
         });
 
         it('should push if new', () => {
-            const result = _([document]).pushResource(document2);
-            const result2 = _(result).pushResource(document3);
+            const result = _.pushResource([document], document2);
+            const result2 = _.pushResource(result, document3);
             expect(result2).to.deep.equal([document, document3]);
         });
     });
 
     describe('_.findItemByUriOrName', () => {
         it('document with uri', () => {
-            let found = _(collection).findItemByUriOrName('http://api.example.com/role/1');
+            let found = _.findItemByUriOrName(collection, 'http://api.example.com/role/1');
             expect(found).to.deep.equal(document);
         });
 
         it('document with name as default', () => {
-            let found = _(collection).findItemByUriOrName('Admin');
+            let found = _.findItemByUriOrName(collection, 'Admin');
             expect(found).to.deep.equal(document);
         });
 
         it('document with name', () => {
-            let found = _(collection).findItemByUriOrName('Admin', 'name');
+            let found = _.findItemByUriOrName(collection, 'Admin', 'name');
             expect(found).to.deep.equal(document);
         });
 
         it('document with name', () => {
-            let found = _(collection).findItemByUriOrName('Admin', 'title');
+            let found = _.findItemByUriOrName(collection, 'Admin', 'title');
             expect(found).not.to.deep.equal(document);
         });
 
         it('document with default attribute title returns not found as undefined', () => {
-            let notFound = _(collection).findItemByUriOrName('http://api.example.com/role/1', /up/);
+            let notFound = _.findItemByUriOrName(collection, 'http://api.example.com/role/1', /up/);
             expect(notFound).to.be.undefined;
         });
     });
@@ -164,7 +164,7 @@ describe('Collection mixins', () => {
     describe('_.findResourceInCollection', () => {
 
         it('document with self and name returns item in collection', () => {
-            let found = _(collection).findResourceInCollection(document);
+            let found = _.findResourceInCollection(collection, document);
             expect(found).to.deep.equal(document);
         });
 
@@ -175,7 +175,7 @@ describe('Collection mixins', () => {
                 }]
             };
 
-            let found = _(collection).findResourceInCollection(resource);
+            let found = _.findResourceInCollection(collection, resource);
             expect(found).to.deep.equal(document);
         });
 
@@ -187,7 +187,7 @@ describe('Collection mixins', () => {
                 name: 'Admin'
             };
 
-            let found = _(collection).findResourceInCollection(resource, 'name');
+            let found = _.findResourceInCollection(collection, resource, 'name');
             expect(found).to.deep.equal(document);
             expect(link.getUri(found, /self/)).not.to.equal(link.getUri(resource, /self/));
         });
@@ -208,7 +208,7 @@ describe('Collection mixins', () => {
                 items: [documentWithTitle]
             };
 
-            let found = _(collectionWithTitleDocument).findResourceInCollection(documentWithTitle);
+            let found = _.findResourceInCollection(collectionWithTitleDocument, documentWithTitle);
             expect(found).to.equal(documentWithTitle);
         });
 
@@ -231,12 +231,12 @@ describe('Collection mixins', () => {
             };
 
             it('should should return a resource on self when attribute name or link relation is undefined', () => {
-                let found = _(collection).findResourceInCollection(documentWithUndefinedName, undefined);
+                let found = _.findResourceInCollection(collection, documentWithUndefinedName, undefined);
                 expect(found).to.equal(item);
             });
 
             it('should should return a resource on self when mapping overrides link relation matching on name', () => {
-                let found = _(collection).findResourceInCollection(documentWithUndefinedName, 'name');
+                let found = _.findResourceInCollection(collection, documentWithUndefinedName, 'name');
                 expect(found).to.equal(item);
             });
         });
@@ -259,27 +259,27 @@ describe('Collection mixins', () => {
         };
 
         it('should return document', () => {
-            let found = _(collection).findResourceInCollectionByRelAndAttribute(document, /self/, 'name');
+            let found = _.findResourceInCollectionByRelAndAttribute(collection, document, /self/, 'name');
             expect(found).to.deep.equal(document);
         });
 
         it('should return document with resource identifier as document with defaults', () => {
-            let found = _(collection).findResourceInCollectionByRelAndAttribute(document);
+            let found = _.findResourceInCollectionByRelAndAttribute(collection, document);
             expect(found).to.deep.equal(document);
         });
 
         it('should not return a document on non-matching attribute', () => {
-            let notFound = _(collection).findResourceInCollectionByRelAndAttribute(document, /self/, 'title');
+            let notFound = _.findResourceInCollectionByRelAndAttribute(collection, document, /self/, 'title');
             expect(notFound).to.be.undefined;
         });
 
         it('should not return a document on non-matching link relation', () => {
-            let notFound = _(collection).findResourceInCollectionByRelAndAttribute(document, /not-found/, 'name');
+            let notFound = _.findResourceInCollectionByRelAndAttribute(collection, document, /not-found/, 'name');
             expect(notFound).to.be.undefined;
         });
 
         it('should not return a document on non-matching link relation and attribute', () => {
-            let notFound = _(collection).findResourceInCollectionByRelAndAttribute(document, /not-found/, 'title');
+            let notFound = _.findResourceInCollectionByRelAndAttribute(collection, document, /not-found/, 'title');
             expect(notFound).to.be.undefined;
         });
 
@@ -288,7 +288,7 @@ describe('Collection mixins', () => {
     describe('_.findResourceInCollectionByUri', () => {
 
         it('document with self and name returns item in collection', () => {
-            let found = _(collection).findResourceInCollection(document);
+            let found = _.findResourceInCollection(collection, document);
             expect(found).to.deep.equal(document);
         });
 
@@ -299,7 +299,7 @@ describe('Collection mixins', () => {
                 }]
             };
 
-            let found = _(collection).findResourceInCollectionByUri(resource);
+            let found = _.findResourceInCollectionByUri(collection, resource);
             expect(found).to.deep.equal(document);
         });
 
@@ -312,7 +312,7 @@ describe('Collection mixins', () => {
                 name: 'Admin'
             };
 
-            let found = _(collection).findResourceInCollectionByUri(resource, 'parent');
+            let found = _.findResourceInCollectionByUri(collection, resource, 'parent');
             expect(found).to.be.undefined;
         });
     });
@@ -324,7 +324,7 @@ describe('Collection mixins', () => {
                 {links: [{rel: 'self', href: 'http://localhost:1080/role/50'}],},
                 {links: [{rel: 'self', href: 'http://localhost:1080/role/49'}],}
             ];
-            expect(_(values).mapUriList()).to.deep.equal(['http://localhost:1080/role/50', 'http://localhost:1080/role/49']);
+            expect(_.mapUriList(values)).to.deep.equal(['http://localhost:1080/role/50', 'http://localhost:1080/role/49']);
         });
 
         it('should not return undefined in the list', () => {
@@ -332,23 +332,23 @@ describe('Collection mixins', () => {
                 {links: [{rel: 'self', href: 'http://localhost:1080/role/50'}],},
                 {links: [{rel: 'up', href: 'http://localhost:1080/role/49'}],}
             ];
-            expect(_(values).mapUriList()).to.deep.equal(['http://localhost:1080/role/50']);
+            expect(_.mapUriList(values)).to.deep.equal(['http://localhost:1080/role/50']);
         });
 
         it('should empty list on empty list', () => {
             const values = [];
-            expect(_(values).mapUriList()).to.deep.equal([]);
+            expect(_.mapUriList(values)).to.deep.equal([]);
         });
 
         it('should empty list on empty list on none found', () => {
             const values = [
                 {links: [{rel: 'up', href: 'http://localhost:1080/role/49'}],}
             ];
-            expect(_(values).mapUriList()).to.deep.equal([]);
+            expect(_.mapUriList(values)).to.deep.equal([]);
         });
 
         it('should empty list on empty list on undefined', () => {
-            expect(_(undefined).mapUriList()).to.deep.equal([]);
+            expect(_.mapUriList(undefined)).to.deep.equal([]);
         });
 
     });

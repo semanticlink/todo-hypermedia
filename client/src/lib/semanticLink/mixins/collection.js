@@ -1,11 +1,32 @@
-import _ from 'underscore';
 import * as link from 'semantic-link';
+import SparseResource from '../SparseResource';
+import {log} from 'logger';
 
+/**
+ *
+ * @param {CollectionRepresentation|LinkedRepresentation[]|undefined} collection
+ * @return {LinkedRepresentation[]}
+ */
 export const normaliseCollection = collection => {
     if (!collection) {
         return [];
     }
-    return collection.items || collection || [];
+
+    if (collection.items) {
+        return collection.items;
+    }
+
+    // where collection is not LinkedRepresentation[]
+    if (!Array.isArray(collection)) {
+        return [];
+    }
+
+    // else LinkedRepresentation[]
+    return collection;
+};
+
+const isLinkedRepresentation = resource => {
+    return resource && resource.links;
 };
 
 /**
@@ -19,22 +40,20 @@ export const normaliseCollection = collection => {
  *
  * @param {CollectionRepresentation|LinkedRepresentation[]} collection
  * @param {string|LinkedRepresentation} resourceIdentifier
- * @param {string=|string[]} attributeNameOrLinkRelation
+ * @param {string|string[]} attributeNameOrLinkRelation
  * @return {LinkedRepresentation}
  */
 export const findItemByUriOrName = (collection, resourceIdentifier, attributeNameOrLinkRelation) => {
 
     // if a linked representation is handed in (instead of a string) find its self link
-    if (_(resourceIdentifier).isObject() && resourceIdentifier.links) {
+    if (isLinkedRepresentation(resourceIdentifier)) {
         resourceIdentifier = link.getUri(resourceIdentifier, attributeNameOrLinkRelation || /self|canonical/, undefined);
     }
 
     // go through the collection and match the URI against either a link relation or attribute
-    return _(collection.items || collection || [])
-        .find(item => {
-            return link.getUri(item, attributeNameOrLinkRelation || /canonical|self/, undefined) === resourceIdentifier ||
-                item[attributeNameOrLinkRelation || 'name'] === resourceIdentifier;
-        });
+    return normaliseCollection(collection)
+        .find(item => link.getUri(item, attributeNameOrLinkRelation || /canonical|self/, undefined) === resourceIdentifier
+            || item[attributeNameOrLinkRelation || SparseResource.mappedTitle] === resourceIdentifier);
 };
 
 /**
@@ -55,7 +74,7 @@ export const findItemByUriOrName = (collection, resourceIdentifier, attributeNam
 export const findResourceInCollectionByRelAndAttribute = (collection, resource, rel = /canonical|self/, attributeName = 'name') => {
 
     // if its not a resource return
-    if (!(_(resource).isObject() && resource.links)) {
+    if (!isLinkedRepresentation(resource)) {
         // this is not a resource
         return undefined;
     }
@@ -68,7 +87,7 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
     }
 
     // go through the collection and match the URI against either a link relation and attribute
-    return _(collection.items || collection || [])
+    return normaliseCollection(collection)
         .find(item => item[attributeName] === resource[attributeName] && link.getUri(item, rel, undefined) === uri);
 };
 
@@ -76,10 +95,10 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
  *
  * @param {CollectionRepresentation|LinkedRepresentation[]} collection
  * @param {string} uri
- * @param {string|Regexp} attributeNameOrLinkRelation
+ * @param {string|RegExp} attributeNameOrLinkRelation
  */
 export const findItemByUri = (collection, uri, attributeNameOrLinkRelation) =>
-    _(collection.items || collection || []).find(item => link.getUri(item, attributeNameOrLinkRelation || /self|canonical/) === uri);
+    normaliseCollection(collection).find(item => link.getUri(item, attributeNameOrLinkRelation || /self|canonical/) === uri);
 
 /**
  * Finds a resource item in a collection by taking in the item itself and then search on a URI
@@ -117,9 +136,9 @@ export const findResourceInCollection = (collection, representation, attributeNa
         return itemByUri;
     }
 
-    const name = representation.name;
+    const name = representation[SparseResource.mappedTitle];
     if (name) {
-        const itemByName = findItemByUriOrName(collection, name, 'name');
+        const itemByName = findItemByUriOrName(collection, name, SparseResource.mappedTitle);
         if (itemByName) {
             return itemByName;
         }
@@ -140,9 +159,9 @@ export const differenceCollection = (leftCollection, rightCollection, attributeN
     leftCollection = leftCollection || [];
 
     // now iterate either through: collection, an array or guard of empty array
-    return _(leftCollection.items || leftCollection || []).reject(item => {
+    return normaliseCollection(leftCollection).filter(item => {
         const uri = link.getUri(item, ['canonical', 'self']);
-        return findItemByUriOrName(rightCollection, uri, [attributeNameOrLinkRelation, 'canonical', 'self']);
+        return !findItemByUriOrName(rightCollection, uri, [attributeNameOrLinkRelation, 'canonical', 'self']);
     });
 };
 
@@ -158,10 +177,10 @@ export const differenceCollection = (leftCollection, rightCollection, attributeN
  */
 export const spliceAll = (array, values) => {
 
-    if (_(array).isArray()) {
+    if (array) {
         array.splice.apply(array, [0, array.length].concat(values));
     } else {
-        // log.error("Array cannot be undefined");
+        log.error('Array cannot be undefined');
     }
 
     return array;
@@ -177,10 +196,10 @@ export const spliceAll = (array, values) => {
  */
 export const pushAll = (array, values) => {
 
-    if (_(array).isArray()) {
+    if (array) {
         array.push.apply(array, values);
     } else {
-        // log.error("Array cannot be undefined");
+        log.error('Array cannot be undefined');
     }
 
     return array;
@@ -198,10 +217,10 @@ export const pushResource = (array, resource, attributeNameOrLinkRelation) => {
     array = array || [];
 
     const uri = link.getUri(resource, /self|canonical/);
-    if (_(array).isArray() && !findItemByUri(array, uri, attributeNameOrLinkRelation)) {
+    if (!findItemByUri(array, uri, attributeNameOrLinkRelation)) {
         array.push(resource);
     } else {
-        // log.error("Array cannot be undefined");
+        log.error('[Collection] Array cannot be undefined');
     }
     return array;
 
@@ -213,11 +232,9 @@ export const pushResource = (array, resource, attributeNameOrLinkRelation) => {
  * @return {string[]} uri-list form of an array
  */
 export const mapUriList = array => {
-    return _(array)
-        .chain()
+    return (array || [])
         .map(item => link.getUri(item, /self|canonical/), undefined)
-        .filter(item => !!item)
-        .value();
+        .filter(item => !!item);
 };
 
 /**
@@ -226,7 +243,7 @@ export const mapUriList = array => {
  * @returns {boolean}
  */
 export const isCollectionEmpty = collection => {
-    return _(normaliseCollection(collection)).isEmpty();
+    return normaliseCollection(collection).length === 0;
 };
 
 /**
@@ -235,7 +252,8 @@ export const isCollectionEmpty = collection => {
  * @returns {LinkedRepresentation}
  */
 export const firstItem = collection => {
-    return _(normaliseCollection(collection)).first();
+    const [head,] = normaliseCollection(collection);
+    return head;
 };
 
 /**
@@ -256,9 +274,3 @@ export const CollectionMixins = {
     firstItem
 };
 
-_.mixin(CollectionMixins);
-
-/**
- * @mixes {CollectionMixins}
- */
-export default _;
