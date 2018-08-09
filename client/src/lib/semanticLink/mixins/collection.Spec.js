@@ -136,27 +136,27 @@ describe('Collection mixins', () => {
 
     describe('_.findItemByUriOrName', () => {
         it('document with uri', () => {
-            let found = _.findItemByUriOrName(collection, 'http://api.example.com/role/1');
+            let found = _.findResourceInCollectionByRelOrAttribute(collection, 'http://api.example.com/role/1');
             expect(found).to.deep.equal(document);
         });
 
         it('document with name as default', () => {
-            let found = _.findItemByUriOrName(collection, 'Admin');
+            let found = _.findResourceInCollectionByRelOrAttribute(collection, 'Admin');
             expect(found).to.deep.equal(document);
         });
 
         it('document with name', () => {
-            let found = _.findItemByUriOrName(collection, 'Admin', 'name');
+            let found = _.findResourceInCollectionByRelOrAttribute(collection, 'Admin', 'name');
             expect(found).to.deep.equal(document);
         });
 
         it('document with name', () => {
-            let found = _.findItemByUriOrName(collection, 'Admin', 'title');
+            let found = _.findResourceInCollectionByRelOrAttribute(collection, 'Admin', 'title');
             expect(found).not.to.deep.equal(document);
         });
 
         it('document with default attribute title returns not found as undefined', () => {
-            let notFound = _.findItemByUriOrName(collection, 'http://api.example.com/role/1', /up/);
+            let notFound = _.findResourceInCollectionByRelOrAttribute(collection, 'http://api.example.com/role/1', /up/);
             expect(notFound).to.be.undefined;
         });
     });
@@ -299,7 +299,7 @@ describe('Collection mixins', () => {
                 }]
             };
 
-            let found = _.findResourceInCollectionByUri(collection, resource);
+            let found = _.findResourceInCollectionByRel(collection, resource);
             expect(found).to.deep.equal(document);
         });
 
@@ -312,45 +312,36 @@ describe('Collection mixins', () => {
                 name: 'Admin'
             };
 
-            let found = _.findResourceInCollectionByUri(collection, resource, 'parent');
+            let found = _.findResourceInCollectionByRel(collection, resource, 'parent');
             expect(found).to.be.undefined;
         });
     });
 
-    describe('_.mapUriList', () => {
+    describe('_.detach()', () => {
 
-        it('should convert items', () => {
-            const values = [
-                {links: [{rel: 'self', href: 'http://localhost:1080/role/50'}],},
-                {links: [{rel: 'self', href: 'http://localhost:1080/role/49'}],}
-            ];
-            expect(_.mapUriList(values)).to.deep.equal(['http://localhost:1080/role/50', 'http://localhost:1080/role/49']);
+        it('should be able to detach an array of objects', () => {
+            const resource = {items: [{name: 'i'}]};
+            const document = [{name: 'i'}];
+            const result = _.clone(resource.items);
+            expect(result).to.deep.equal(document);
         });
 
-        it('should not return undefined in the list', () => {
-            const values = [
-                {links: [{rel: 'self', href: 'http://localhost:1080/role/50'}],},
-                {links: [{rel: 'up', href: 'http://localhost:1080/role/49'}],}
-            ];
-            expect(_.mapUriList(values)).to.deep.equal(['http://localhost:1080/role/50']);
+        it('should be able to detail a collection of items', () => {
+            const resource = {items: [{name: 'i'}]};
+            const document = [{name: 'i'}];
+            const result = _.clone(resource);
+            expect(result).to.deep.equal(document);
         });
 
-        it('should empty list on empty list', () => {
-            const values = [];
-            expect(_.mapUriList(values)).to.deep.equal([]);
+        it('should return object on null', () => {
+            expect(_.clone(null)).to.deep.equal([]);
         });
 
-        it('should empty list on empty list on none found', () => {
-            const values = [
-                {links: [{rel: 'up', href: 'http://localhost:1080/role/49'}],}
-            ];
-            expect(_.mapUriList(values)).to.deep.equal([]);
-        });
-
-        it('should empty list on empty list on undefined', () => {
-            expect(_.mapUriList(undefined)).to.deep.equal([]);
+        it('should return object on undefined', () => {
+            expect(_.clone(undefined)).to.deep.equal([]);
         });
 
     });
+
 
 });

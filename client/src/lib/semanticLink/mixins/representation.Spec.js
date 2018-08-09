@@ -29,32 +29,6 @@ describe('Representation mixins', () => {
 
     });
 
-    describe('_.detach()', () => {
-
-        it('should be able to detach an array of objects', () => {
-            const resource = {items: [{name: 'i'}]};
-            const document = [{name: 'i'}];
-            const result = _.detach(resource.items);
-            expect(result).to.deep.equal(document);
-        });
-
-        it('should be able to detail a collection of items', () => {
-            const resource = {items: [{name: 'i'}]};
-            const document = [{name: 'i'}];
-            const result = _.detach(resource);
-            expect(result).to.deep.equal(document);
-        });
-
-        it('should return object on null', () => {
-            expect(_.detach(null)).to.deep.equal([]);
-        });
-
-        it('should return object on undefined', () => {
-            expect(_.detach(undefined)).to.deep.equal([]);
-        });
-
-    });
-
     describe('_.mergeByFields()', () => {
 
         it('should be able to shallow extend overriding matched fields', () => {

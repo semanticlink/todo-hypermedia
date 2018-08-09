@@ -1,4 +1,4 @@
-import { findResourceInCollection, findItemByUri } from '../mixins/collection';
+import { findResourceInCollection, findResourceInCollectionByUri } from '../mixins/collection';
 import {log} from 'logger';
 import { nodMaker } from '../NODMaker';
 import * as link from 'semantic-link';
@@ -94,7 +94,7 @@ export default class PooledCollection {
                     let resolvedUri = (options.resolver || PooledCollection.defaultResolver).resolve(documentURI);
 
                     if (resolvedUri !== documentURI) {
-                        let tryGetResource = findItemByUri(collectionResource, resolvedUri);
+                        let tryGetResource = findResourceInCollectionByUri(collectionResource, resolvedUri);
                         if (tryGetResource) {
                             return tryGetResource;
                         } else {

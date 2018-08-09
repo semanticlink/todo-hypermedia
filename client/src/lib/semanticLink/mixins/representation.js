@@ -1,24 +1,5 @@
 import _ from 'underscore';
 
-/**
- *
- * @param {*[]|LinkedRepresentation[]} resource
- * @return {*[]} copy detached
- */
-export const detach = resource => {
-    if (!resource) {
-        return [];
-    } else if (resource.items) {
-        return resource.items.map(item => Object.assign({}, item));
-    } else if (Array.isArray(resource)) {
-        return resource.map(item => Object.assign({}, item));
-    } else {
-        return [];
-    }
-};
-
-// TODO: just check that the dash '-' doesn't need escaping (webstorm says it doesn't)
-export const dashToCamel = str => str.replace(/(-[a-z])/g, $1 => $1.toUpperCase().replace('-', ''));
 
 export function extendResource(obj) {
     // stolen from https://gist.github.com/kurtmilam/1868955
@@ -96,8 +77,6 @@ export const compactObject = resource => _(resource).omit(val => {
 });
 
 export const RepresentationMixins = {
-    detach,
-    dashToCamel,
     extendResource,
     mergeByFields,
     compactObject,
