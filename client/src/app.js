@@ -34,7 +34,7 @@ Vue.use(BootstrapVue);
 Vue.use(Notifications);
 
 
-setLogLevel(LogLevel.DEBUG);
+setLogLevel(LogLevel.Debug);
 log.debug('Set log level to DEBUG');
 
 Vue.config.productionTip = false;

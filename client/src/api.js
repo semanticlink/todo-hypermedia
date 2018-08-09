@@ -34,7 +34,7 @@ import {setInterceptors} from './lib/http-interceptors';
 
 setInterceptors({queue401s: false});
 
-setLogLevel(LogLevel.DEBUG);
+setLogLevel(LogLevel.Debug);
 log.debug('Set log level to DEBUG');
 
 Vue.config.productionTip = false;

@@ -4,7 +4,7 @@ import _ from './mixins/underscore';
 import {stateFlagEnum} from './stateFlagEnum';
 import SparseResource from './SparseResource';
 import {log} from 'logger';
-import SemanticLink, {link} from './SemanticLink';
+import * as link from 'semantic-link';
 import {loader} from './Loader';
 import StateFactory from './StateFactory';
 
@@ -120,8 +120,8 @@ export default class State {
             State.cacheBust(status, options);
     }
 
-    static defaultPostFactory(resource, data) {
-        return link.post(resource, /canonical|self/, 'application/json', data);
+    static defaultPostFactory(resource, data, mediaType) {
+        return link.post(resource, /canonical|self/, mediaType, data);
     }
 
     /**
@@ -129,8 +129,8 @@ export default class State {
      * @param {LinkedRepresentation} resource
      * @param {*} data
      */
-    static defaultPutFactory(resource, data) {
-        return link.put(resource, /canonical|self/, 'application/json', data);
+    static defaultPutFactory(resource, data, mediaType) {
+        return link.put(resource, /canonical|self/, mediaType, data);
     }
 
     /*
@@ -225,7 +225,7 @@ export default class State {
         if (!_(collection).findResourceInCollection(representation)) {
             collection.items.push(representation);
         } else {
-            log.info(`Resource ${SemanticLink.getUri(representation, /self/)} already exists in collection ${SemanticLink.getUri(collection, /self/)}`);
+            log.info(`Resource ${link.getUri(representation, /self/)} already exists in collection ${link.getUri(collection, /self/)}`);
         }
         return representation;
     }
@@ -239,8 +239,8 @@ export default class State {
      * @return {*|LinkedRepresentation} undefined if not found otherwise the removed resource
      */
     removeItemFromCollectionResource(collection, item) {
-        const resourceUri = SemanticLink.getUri(item, /canonical|self/);
-        const indexOfItemToBeRemoved = _(collection.items).findIndex(item => SemanticLink.getUri(item, /canonical|self/) === resourceUri);
+        const resourceUri = link.getUri(item, /canonical|self/);
+        const indexOfItemToBeRemoved = _(collection.items).findIndex(item => link.getUri(item, /canonical|self/) === resourceUri);
         if (indexOfItemToBeRemoved >= 0) {
             this.status = stateFlagEnum.stale;
             return _(collection.items.splice(indexOfItemToBeRemoved, 1)).first();
@@ -379,9 +379,9 @@ export default class State {
         // TODO no checking of retrieval based on headers and previous requests
         // TODO no media type
 
-        const uri = (options.getUri || SemanticLink.getUri)(resource, rel);
+        const uri = (options.getUri || link.getUri)(resource, rel);
 
-        // uri may be undefined on a link.tryGetUri
+        // uri may be undefined on a link.getUri
         if (!uri || status === stateFlagEnum.virtual) {
             log.info(`Resource is client-side only and will not be fetched ${uri} ${status.toString()}`);
             return Promise.resolve(resource);
@@ -395,7 +395,7 @@ export default class State {
 
         const getFactory = options.getFactory || State.defaultGetFactory;
 
-        let id = SemanticLink.tryGetUri(resource, rel);
+        let id = link.getUri(resource, rel);
 
         /**
          * Currently, the same job is dropped if duplicated. However, what we want to
@@ -450,7 +450,7 @@ export default class State {
                      */
                     return Promise.resolve(resource);
                 } else if (err.status === 404) {
-                    log.info(`[State] Likely stale collection for '${SemanticLink.tryGetUri(resource, ['up', 'parent', 'self', '*'])}' on resource ${uri}`);
+                    log.info(`[State] Likely stale collection for '${link.getUri(resource, ['up', 'parent', 'self', '*'])}' on resource ${uri}`);
                     this.status = stateFlagEnum.deleted;
                     return Promise.reject(resource);
                 } else if (err.status >= 400 && err.status < 499) {
@@ -487,11 +487,11 @@ export default class State {
     synchronise(resource, rel, options = {}) {
 
         if (State.needsFetch(this.status, options)) {
-            log.debug(`[State] Fetch resource ${this.status.toString()}: '${SemanticLink.tryGetUri(resource, rel)}'`);
+            log.debug(`[State] Fetch resource ${this.status.toString()}: '${link.getUri(resource, rel)}'`);
             return this.loadResource(resource, rel, options)
                 .then(response => State.mergeResource(resource, response));
         } else {
-            log.debug(`[State] Fetch cached resource ${this.status.toString()}: '${SemanticLink.tryGetUri(resource, rel)}'`);
+            log.debug(`[State] Fetch cached resource ${this.status.toString()}: '${link.getUri(resource, rel)}'`);
             return Promise.resolve(resource);
         }
     }
@@ -509,7 +509,7 @@ export default class State {
     synchroniseCollection(collection, rel, options = {}) {
 
         if (State.needsFetch(this.status, options)) {
-            log.debug(`[State] Fetch collection ${this.status.toString()}: '${SemanticLink.tryGetUri(collection, rel)}'`);
+            log.debug(`[State] Fetch collection ${this.status.toString()}: '${link.getUri(collection, rel)}'`);
             return this.loadResource(collection, rel, options)
                 .then(representation => State.mergeResource(collection, representation))
                 .then(collection => {
@@ -527,7 +527,7 @@ export default class State {
                     return this.makeSparseCollectionItemsFromFeed(collection, options.mappedTitle);
                 });
         } else {
-            log.debug(`[State] Fetch cached collection ${this.status.toString()}: '${SemanticLink.tryGetUri(collection, rel)}'`);
+            log.debug(`[State] Fetch cached collection ${this.status.toString()}: '${link.getUri(collection, rel)}'`);
             // actually it is already loaded so return the resource (TODO: and not stale)
             return Promise.resolve(collection);
         }
@@ -561,14 +561,14 @@ export default class State {
         if (!resource[singletonName]) {
 
             // look ahead to see if the link relation exists
-            const uri = (options.getUri || SemanticLink.tryGetUri)(resource, rel);
+            const uri = (options.getUri || link.getUri)(resource, rel, undefined);
 
             if (!uri) {
-                log.warn(`[State] No ${singletonName} (${rel.toString()}) for resource ${SemanticLink.getUri(resource, /self|canonical/)} returning default undefined`);
+                log.warn(`[State] No ${singletonName} (${rel.toString()}) for resource ${link.getUri(resource, /self|canonical/)} returning default undefined`);
                 return Promise.resolve(undefined);
             }
 
-            log.debug(`[State] add singleton '${rel}' as ${this.status.toString()} '${uri}' on ${SemanticLink.getUri(resource, /self|canonical/)}`);
+            log.debug(`[State] add singleton '${rel}' as ${this.status.toString()} '${uri}' on ${link.getUri(resource, /self|canonical/)}`);
 
             // add a sparsely populated resource ready to be synchronised
             resource[singletonName] = this.addResourceByName(resource, singletonName, () => State.makeFromUri(uri));
@@ -597,10 +597,10 @@ export default class State {
         if (!resource[collectionName]) {
 
             // look ahead to see if the link relation exists
-            const uri = (options.getUri || SemanticLink.tryGetUri)(resource, rel);
+            const uri = (options.getUri || link.getUri)(resource, rel, undefined);
 
             if (!uri) {
-                log.info(`[State] No '${collectionName}' (${rel.toString()}) for resource ${SemanticLink.tryGetUri(resource, /self|canonical/)}`);
+                log.info(`[State] No '${collectionName}' (${rel.toString()}) for resource ${link.getUri(resource, /self|canonical/)}`);
                 return Promise.resolve(undefined);
             }
 
@@ -626,7 +626,7 @@ export default class State {
     makeItemOnCollectionResource(collection, itemUri, options = {}) {
 
         if (!collection.items) {
-            log.error(`Collection not created through makeRepresentation ${SemanticLink.tryGetUri(collection, /self|canonical/)} - this is likely to be a coding error that the resource is not a collection`);
+            log.error(`Collection not created through makeRepresentation ${link.getUri(collection, /self|canonical/)} - this is likely to be a coding error that the resource is not a collection`);
             collection.items = [];
         }
 
@@ -657,13 +657,13 @@ export default class State {
      * resource goes into the network of data. All the headers will get set on GET retrieval
      * @param resource
      * @param data
-     * @param options
+     * @param {UtilOptions} options
      * @return {Promise} containing created resource (@link LinkedRepresentation}
      */
     createResource(resource, data, options = {}) {
 
 
-        let uri = SemanticLink.getUri(resource, /self/);
+        let uri = link.getUri(resource, /self/);
 
         let postFactory = options.postFactory || State.defaultPostFactory;
 
@@ -679,7 +679,7 @@ export default class State {
                 }
                 return this.getResource(State.makeFromUri(resourceUri));
             })
-            .catch(response => {
+            .catch(/** @type {Error|BottleneckError|AxiosError} */response => {
 
                 // TODO: add catching Bottlneck error handling
                 // @see https://github.com/SGrondin/bottleneck#debugging-your-application
@@ -708,11 +708,11 @@ export default class State {
     updateResource(resource, data, options = {}) {
 
         this.previousStatus = status;
-        let uri = SemanticLink.getUri(resource, /self/);
+        let uri = link.getUri(resource, /self/);
 
         let putFactory = options.putFactory || State.defaultPutFactory;
 
-        const id = SemanticLink.tryGetUri(resource, /self/);
+        const id = link.getUri(resource, /self/);
         log.debug(`[State] [PUT] ${id}`);
 
         return loader.limiter.schedule({id}, putFactory, resource, data)
@@ -762,7 +762,7 @@ export default class State {
 
         let deleteFactory = options.deleteFactory || State.defaultDeleteFactory;
 
-        let uri = SemanticLink.getUri(item, /self/);
+        let uri = link.getUri(item, /self/);
 
         if (this.status === stateFlagEnum.feedOnly ||
             this.status === stateFlagEnum.hydrated ||
@@ -789,7 +789,7 @@ export default class State {
             log.warn(`Unexpected state on deletion ${uri}`);
         }
 
-        const id = SemanticLink.tryGetUri(item, /self/);
+        const id = link.getUri(item, /self/);
         return loader.limiter.schedule({id}, deleteFactory, item)
             .then(() => {
                 this.status = stateFlagEnum.deleted;

@@ -1,6 +1,6 @@
 'use strict';
 import State from './State';
-import SemanticLink from './SemanticLink';
+import * as link from 'semantic-link';
 import {log} from 'logger';
 
 const stateFlagName = Symbol('state');
@@ -39,7 +39,7 @@ class StateFactory {
         }
 
         if (!resource[stateFlagName]) {
-            const hrefOrActual = SemanticLink.tryGetUri(resource, /self|canonical/) || JSON.stringify(resource);
+            const hrefOrActual = link.getUri(resource, /self|canonical/) || JSON.stringify(resource);
             throw new Error(`No state found on resource '${hrefOrActual}'`);
         }
 

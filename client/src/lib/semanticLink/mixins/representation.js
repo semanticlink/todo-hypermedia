@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import { SemanticLink } from '../SemanticLink';
+import * as link from 'semantic-link';
 
 /**
  * Returns a uri from a string or resource
@@ -10,7 +10,7 @@ const makeUri = resourceOrUri => {
     if (_(resourceOrUri).isString()) {
         return resourceOrUri;
     }
-    return SemanticLink.getUri(resourceOrUri, /canonical|self/);
+    return link.getUri(resourceOrUri, /canonical|self/);
 };
 
 /**

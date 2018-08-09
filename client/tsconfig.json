@@ -6,7 +6,8 @@
       "ES6",
       "ES7",
       "ESNext",
-      "DOM"
+      "DOM",
+      "DOM.Iterable"
     ],
     "module": "es6",
     "moduleResolution": "node",

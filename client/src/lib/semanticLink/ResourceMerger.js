@@ -1,6 +1,6 @@
 import _ from './mixins/underscore';
 import SparseResource from './SparseResource';
-import {link, SemanticLink} from './SemanticLink';
+import * as link from 'semantic-link';
 import {log} from 'logger';
 
 /**
@@ -125,7 +125,7 @@ export default class ResourceMerger {
                                 .then(resource => {
                                     if (resource) {
                                         // resource was found in a pooled collection and return uri (resolved)
-                                        const uri = SemanticLink.getUri(resource, /self|canonical/);
+                                        const uri = link.getUri(resource, /self|canonical/);
                                         const resolved = options.resolver.resolve(uri);
                                         log.info(`Resolved field '${field}' '${uri} --> ${resolved}`, options);
                                         return resolved;
@@ -273,7 +273,7 @@ export default class ResourceMerger {
         let linkRelationsToReturn = _(fieldsToReturn).filterCamelToDash();
 
         if (!resource) {
-            log.warn(`Document does not exist for form ${link.tryGetUri(formResource, /self/)}`);
+            log.warn(`Document does not exist for form ${link.getUri(formResource, /self/)}`);
             return Promise.resolve({});
         }
 
@@ -365,7 +365,7 @@ export default class ResourceMerger {
         const trackedFields = filterTrackedFieldsOnesource(resource);
 
         const fieldsToTransformToLinkRelations = (resource, trackedFields) =>
-            _(trackedFields).filter(field => SemanticLink.matches(resource, _(field).camelToDash()));
+            _(trackedFields).filter(field => link.matches(resource, _(field).camelToDash()));
 
         const linkRelsToUpdate = fieldsToTransformToLinkRelations(resource, trackedFields);
 
@@ -564,7 +564,7 @@ export default class ResourceMerger {
                     const fieldsToUpdate = this.fieldsRequiringUpdate(resource, mergedDocument, this.fields(formResource, options.defaultFields));
 
                     if (!_(fieldsToUpdate).isEmpty()) {
-                        log.info(`Update required on '${mergedDocument.name || SemanticLink.tryGetUri(mergedDocument, /self/)}': different fields ${fieldsToUpdate.join(',')}`);
+                        log.info(`Update required on '${mergedDocument.name || link.getUri(mergedDocument, /self/)}': different fields ${fieldsToUpdate.join(',')}`);
                         return mergedDocument;
                     } else {
                         return undefined;

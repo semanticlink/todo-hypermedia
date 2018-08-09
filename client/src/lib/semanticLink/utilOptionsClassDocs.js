@@ -22,6 +22,7 @@
  * @property {function(LinkedRepresentation, ?UtilOptions):Promise} deleteFactory
  * @property {function(resource:LinkedRepresentation, rel:string, cancellable:?Promise):Promise} getFactory
  * @property {function(resource:LinkedRepresentation, data:*, options: ?UtilOptions):Promise} putFactory
+ * @property {function(resource:LinkedRepresentation, data:*):Promise} postFactory
  * @property {function(link{href:string,title:string}:LinkedRepresentation} resourceFactory
  * @property {string} message usually a success message to be displayed to the user
  * @property {string} error usually an error message to be displayed to the user

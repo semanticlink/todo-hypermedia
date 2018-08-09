@@ -1,4 +1,5 @@
-import {nodMaker, SemanticLink} from 'semanticLink';
+import {nodMaker} from 'semanticLink';
+import * as link from 'semantic-link';
 import {TEXT} from '../lib/form-type-mappings';
 import {log} from 'logger';
 
@@ -43,7 +44,7 @@ const defaultTodo = todoResource => {
     return nodMaker
         .getResource(todoResource)
         .then(todoCollection => nodMaker.getSingletonResource(todoCollection, 'createForm', /create-form/))
-        .catch(() => log.error(`No create form for on '${SemanticLink.getUri(todoResource, /self/)}'`))
+        .catch(() => log.error(`No create form for on '${link.getUri(todoResource, /self/)}'`))
         .then(form => {
             const obj = {};
 
@@ -52,7 +53,7 @@ const defaultTodo = todoResource => {
                     obj[item.name] = item.type === TEXT ? '' : null;
                 });
             } else {
-                log.warn(`Form has no fields: '${SemanticLink.getUri(form, /self/)}'`);
+                log.warn(`Form has no fields: '${link.getUri(form, /self/)}'`);
             }
 
             return obj;

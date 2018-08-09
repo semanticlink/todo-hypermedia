@@ -3,14 +3,6 @@ import {log} from 'logger';
 import Differencer from './Differencer';
 
 describe('NOD Differencer', () => {
-
-    const arrayToArguments = (functionWithArgs) => {
-        const self = this;
-        return array => {
-            return functionWithArgs.apply(self, array);
-        };
-    };
-
     const strategy = (method) => {
         return x => {
             log.info('Execute: ' + method);
@@ -41,6 +33,14 @@ describe('NOD Differencer', () => {
     };
 
     describe('Collections', () => {
+
+        /**
+         * semantic link library has a DOM dependency that we are faking out
+         */
+        before(() => {
+            global.Element = () => {
+            };
+        });
 
         xdescribe('Match on default comparator of link relation self', () => {
 

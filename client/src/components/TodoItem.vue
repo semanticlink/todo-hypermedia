@@ -51,7 +51,8 @@
      *
      */
 
-    import {nodMaker, SemanticLink} from 'semanticLink';
+    import {nodMaker} from 'semanticLink';
+    import * as link from 'semantic-link';
     import {log} from 'logger';
     import {mapCompletedToState, mapStateToCompleted} from "../lib/form-type-mappings";
 
@@ -69,7 +70,7 @@
         computed: {
             self() {
                 // Evaluating the item actually helps with binding. Without this you'll find that items won't bind properly
-                return SemanticLink.tryGetUri(this.item, /self/);
+                return link.getUri(this.item, /self/);
             }
         },
         methods: {

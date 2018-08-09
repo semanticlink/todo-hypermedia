@@ -1,7 +1,7 @@
 import _ from './mixins/underscore';
 import {log} from 'logger';
 import {Comparator} from './Comparator';
-import SemanticLink from './SemanticLink';
+import * as link from 'semantic-link';
 
 /**
 
@@ -186,7 +186,7 @@ export default class Differencer {
         // 1. Delete all resource first
         //
             .mapWaitAll(item => {
-                log.debug(`[Diff] Calling delete strategy: ${SemanticLink.tryGetUri(item, /self/)}`);
+                log.debug(`[Diff] Calling delete strategy: ${link.getUri(item, /self/)}`);
                 return deleteStrategy(item);
             })
             //
@@ -248,7 +248,7 @@ export default class Differencer {
 
                 const infos = makeSynchronisationInfos(createResults, updateItems);
 
-                log.debug(`[Diff] '${SemanticLink.tryGetUri(collectionResource, /self/)}' - [add, matched, remove] (${createResults.length} ${updateItems.length} ${deleteItems.length} )`);
+                log.debug(`[Diff] '${link.getUri(collectionResource, /self/)}' - [add, matched, remove] (${createResults.length} ${updateItems.length} ${deleteItems.length} )`);
                 return [infos, createResults, updateItems, deleteItems];
             });
     }

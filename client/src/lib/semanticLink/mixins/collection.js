@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import { SemanticLink } from '../SemanticLink';
+import * as link from 'semantic-link';
 
 export const normaliseCollection = collection => {
     if (!collection) {
@@ -26,13 +26,13 @@ export const findItemByUriOrName = (collection, resourceIdentifier, attributeNam
 
     // if a linked representation is handed in (instead of a string) find its self link
     if (_(resourceIdentifier).isObject() && resourceIdentifier.links) {
-        resourceIdentifier = SemanticLink.tryGetUri(resourceIdentifier, attributeNameOrLinkRelation || /self|canonical/);
+        resourceIdentifier = link.getUri(resourceIdentifier, attributeNameOrLinkRelation || /self|canonical/, undefined);
     }
 
     // go through the collection and match the URI against either a link relation or attribute
     return _(collection.items || collection || [])
         .find(item => {
-            return SemanticLink.tryGetUri(item, attributeNameOrLinkRelation || /canonical|self/) === resourceIdentifier ||
+            return link.getUri(item, attributeNameOrLinkRelation || /canonical|self/, undefined) === resourceIdentifier ||
                 item[attributeNameOrLinkRelation || 'name'] === resourceIdentifier;
         });
 };
@@ -60,7 +60,7 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
         return undefined;
     }
 
-    const uri = SemanticLink.tryGetUri(resource, /self|canonical/);
+    const uri = link.getUri(resource, /self|canonical/, undefined);
 
     // if we can't find values to match against return
     if (!uri || !resource[attributeName]) {
@@ -69,7 +69,7 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
 
     // go through the collection and match the URI against either a link relation and attribute
     return _(collection.items || collection || [])
-        .find(item => item[attributeName] === resource[attributeName] && SemanticLink.tryGetUri(item, rel) === uri);
+        .find(item => item[attributeName] === resource[attributeName] && link.getUri(item, rel, undefined) === uri);
 };
 
 /**
@@ -79,7 +79,7 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
  * @param {string|Regexp} attributeNameOrLinkRelation
  */
 export const findItemByUri = (collection, uri, attributeNameOrLinkRelation) =>
-    _(collection.items || collection || []).find(item => SemanticLink.tryGetUri(item, attributeNameOrLinkRelation || /self|canonical/) === uri);
+    _(collection.items || collection || []).find(item => link.getUri(item, attributeNameOrLinkRelation || /self|canonical/) === uri);
 
 /**
  * Finds a resource item in a collection by taking in the item itself and then search on a URI
@@ -90,7 +90,7 @@ export const findItemByUri = (collection, uri, attributeNameOrLinkRelation) =>
  * @return {LinkedRepresentation}
  */
 export const findResourceInCollectionByUri = (collection, representation, attributeNameOrLinkRelation) => {
-    const uri = SemanticLink.tryGetUri(representation, /canonical|self/);
+    const uri = link.getUri(representation, /canonical|self/, undefined);
 
     if (uri) {
         // we need to add self on the end because in the case of an attribute name it won't match against self
@@ -141,7 +141,7 @@ export const differenceCollection = (leftCollection, rightCollection, attributeN
 
     // now iterate either through: collection, an array or guard of empty array
     return _(leftCollection.items || leftCollection || []).reject(item => {
-        const uri = SemanticLink.tryGetUri(item, ['canonical', 'self']);
+        const uri = link.getUri(item, ['canonical', 'self']);
         return findItemByUriOrName(rightCollection, uri, [attributeNameOrLinkRelation, 'canonical', 'self']);
     });
 };
@@ -197,7 +197,7 @@ export const pushResource = (array, resource, attributeNameOrLinkRelation) => {
 
     array = array || [];
 
-    const uri = SemanticLink.tryGetUri(resource, /self|canonical/);
+    const uri = link.getUri(resource, /self|canonical/);
     if (_(array).isArray() && !findItemByUri(array, uri, attributeNameOrLinkRelation)) {
         array.push(resource);
     } else {
@@ -215,7 +215,7 @@ export const pushResource = (array, resource, attributeNameOrLinkRelation) => {
 export const mapUriList = array => {
     return _(array)
         .chain()
-        .map(item => SemanticLink.tryGetUri(item, /self|canonical/))
+        .map(item => link.getUri(item, /self|canonical/), undefined)
         .filter(item => !!item)
         .value();
 };

@@ -1,4 +1,5 @@
-import { _, log } from '../semanticLink';
+import {_} from '../semanticLink';
+import {log} from 'logger';
 
 const wwwAuthenticateHeader = 'www-authenticate';
 
@@ -18,7 +19,7 @@ const wwwAuthenticateHeader = 'www-authenticate';
  */
 class WWWAuthenticate {
 
-    constructor () {
+    constructor() {
         /**
          * The list of known headers in lower case.
          *
@@ -42,7 +43,7 @@ class WWWAuthenticate {
      * Chrome supports it just fine.
      * @private
      */
-    rewriteBrokenFirefoxHeadersAndSelect (headers, selectHeader) {
+    rewriteBrokenFirefoxHeadersAndSelect(headers, selectHeader) {
         let lastKnownHeader; // starts out unknown
         const knownHeaders = this.knownHeaders;
 
@@ -82,7 +83,7 @@ class WWWAuthenticate {
      * @private
      * @return {string|undefined} negotiate type
      */
-    matchNegotiateType (headerValues, negotiateType) {
+    matchNegotiateType(headerValues, negotiateType) {
         negotiateType = negotiateType || 'Resource';
 
         // The split won't pull out additional whitespace. Return the first result
@@ -118,7 +119,7 @@ class WWWAuthenticate {
      * @param {string|'Resource'|'Basic'|'Bearer'} negotiateType type of authentication to parse for
      * @return {string|undefined} negotiate type
      */
-    getAuthenticateUri (response, negotiateType) {
+    getAuthenticateUri(response, negotiateType) {
 
         const w3AuthHeaderValues = response.headers[wwwAuthenticateHeader];
         if (w3AuthHeaderValues) {

@@ -1,7 +1,7 @@
 import _ from './mixins/underscore';
 import {log} from 'logger';
 import { nodMaker } from './NODMaker';
-import SemanticLink from './SemanticLink';
+import * as link from 'semantic-link';
 
 /**
  * Used for provisioning a pooled collection (network of data) based on providing a document (resources). Based on
@@ -34,10 +34,10 @@ export default class Collection {
      * @private
      */
     static resolve (document, resource, options) {
-        if (SemanticLink.matches(document, /self|canonical/)) {
+        if (link.matches(document, /self|canonical/)) {
             (options.resolver || Collection.defaultResolver).add(
-                SemanticLink.getUri(document, /self|canonical/),
-                SemanticLink.getUri(resource, /self|canonical/));
+                link.getUri(document, /self|canonical/),
+                link.getUri(resource, /self|canonical/));
         }
         return resource;
     }
@@ -54,7 +54,7 @@ export default class Collection {
         return nodMaker
             .createCollectionResourceItem(collectionResource, resourceDocument, options)
             .then(createdResource => {
-                log.info(`Pooled: created ${SemanticLink.getUri(createdResource, /self|canonical/)}`);
+                log.info(`Pooled: created ${link.getUri(createdResource, /self|canonical/)}`);
                 return Collection.resolve(resourceDocument, createdResource, options);
             });
     }
@@ -77,20 +77,20 @@ export default class Collection {
             .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
             .then(collectionResource => {
 
-                let parentUri = SemanticLink.getUri(parentResource, /self|canonical/);
+                let parentUri = link.getUri(parentResource, /self|canonical/);
 
                 // strategy one & two: it is simply found map it based on self and/or mappedTitle
                 let existingResource = _(collectionResource).findResourceInCollection(resourceDocument, options.mappedTitle);
 
                 if (existingResource) {
 
-                    log.info(`Pooled: ${collectionName} on ${parentUri} - found: ${SemanticLink.getUri(existingResource, /self|canonical/)}`);
+                    log.info(`Pooled: ${collectionName} on ${parentUri} - found: ${link.getUri(existingResource, /self|canonical/)}`);
                     return Collection.resolve(resourceDocument, existingResource, options);
 
-                } else if (SemanticLink.tryGetUri(resourceDocument, /self|canonical/)) {
+                } else if (link.getUri(resourceDocument, /self|canonical/)) {
 
                     //strategy three: check to see if self is an actual resource anyway and map it if it is, otherwise make
-                    let documentURI = SemanticLink.getUri(resourceDocument, /self|canonical/);
+                    let documentURI = link.getUri(resourceDocument, /self|canonical/);
                     let resolvedUri = (options.resolver || Collection.defaultResolver).resolve(documentURI);
 
                     if (resolvedUri !== documentURI) {

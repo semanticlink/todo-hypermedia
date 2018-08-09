@@ -1,4 +1,4 @@
-import { SemanticLink } from './SemanticLink';
+import * as link from 'semantic-link';
 
 /**
  * A set of comparators for matching resources in the network of data differencer (@link NODDifferencer}
@@ -48,8 +48,8 @@ export default class Comparator {
      * @return {boolean}
      */
     static canonicalOrSelf (lvalue, rvalue) {
-        const lUri = SemanticLink.getUri(lvalue, /self|canonical/);
-        const rUri = SemanticLink.getUri(rvalue, /self|canonical/);
+        const lUri = link.getUri(lvalue, /self|canonical/);
+        const rUri = link.getUri(rvalue, /self|canonical/);
         return !!lUri && lUri === rUri;
     }
 

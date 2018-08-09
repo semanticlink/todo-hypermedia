@@ -1,6 +1,6 @@
 import _ from './collection';
 import { expect } from 'chai';
-import SemanticLink from '../SemanticLink';
+import * as link from 'semantic-link';
 
 describe('Collection mixins', () => {
 
@@ -189,7 +189,7 @@ describe('Collection mixins', () => {
 
             let found = _(collection).findResourceInCollection(resource, 'name');
             expect(found).to.deep.equal(document);
-            expect(SemanticLink.getUri(found, /self/)).not.to.equal(SemanticLink.getUri(resource, /self/));
+            expect(link.getUri(found, /self/)).not.to.equal(link.getUri(resource, /self/));
         });
 
         it('document with self and title returns item in collection', () => {

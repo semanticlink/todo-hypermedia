@@ -4,7 +4,7 @@ import {stateFlagEnum} from './stateFlagEnum';
 import {SparseResource} from './SparseResource';
 import StateFactory from './StateFactory';
 import {resourceMerger} from './ResourceMerger';
-import SemanticLink from './SemanticLink';
+import * as link from 'semantic-link';
 import {log} from 'logger';
 import State from './State';
 
@@ -293,7 +293,7 @@ export default class NODMaker {
                 }
 
                 _(resource[itemsUriListName]).map(uri => {
-                    if (!resource[singletonName].items.find(item => SemanticLink.getUri(item, /canonical|self/) === uri)) {
+                    if (!resource[singletonName].items.find(item => link.getUri(item, /canonical|self/) === uri)) {
                         resource[singletonName].items.splice(resource[singletonName].length, 0, this.makeSparseResourceFromUri(uri, state));
                     }
                 });
@@ -357,11 +357,11 @@ export default class NODMaker {
         let collection = parentResource[collectionResourceName];
 
         if (!collection) {
-            collection = this.makeSparseCollectionResourceFromUri(SemanticLink.tryGetUri(parentResource, collectionRel));
+            collection = this.makeSparseCollectionResourceFromUri(link.getUri(parentResource, collectionRel));
             parentResource[collectionResourceName] = collection;
         }
 
-        let item = _(collection.items).find(item => itemUri === SemanticLink.getUri(item, /self|canonical/));
+        let item = _(collection.items).find(item => itemUri === link.getUri(item, /self|canonical/));
         if (_(item).isEmpty()) {
             item = this.addCollectionResourceItemByUri(collection, itemUri);
         }
@@ -418,7 +418,7 @@ export default class NODMaker {
         const tryResource = StateFactory.tryGet(resource, defaultValue);
 
         if (tryResource === defaultValue) {
-            log.debug(`Using default value on ${SemanticLink.getUri(resource, /self/)}`);
+            log.debug(`Using default value on ${link.getUri(resource, /self/)}`);
             return Promise.resolve(defaultValue);
         } else {
             return tryResource
@@ -468,7 +468,7 @@ export default class NODMaker {
      * @return {Promise} promise contains a {@link LinkedRepresentation}
      */
     getCollectionResourceItem(collection, resource, options) {
-        return this.getCollectionResourceItemByUri(collection, SemanticLink.getUri(resource, /canonical|self/), options);
+        return this.getCollectionResourceItemByUri(collection, link.getUri(resource, /canonical|self/), options);
     }
 
     /**
@@ -513,10 +513,10 @@ export default class NODMaker {
      */
     tryGetSingletonResource(resource, singletonName, rel, defaultValue, options = {}) {
         options = _({}).extend(options, {
-            getUri: SemanticLink.tryGetUri
+            getUri: link.getUri
         });
 
-        if (!SemanticLink.tryGetUri(resource, rel)) {
+        if (!link.getUri(resource, rel, undefined)) {
             log.debug(`Missing uri for rel '${rel}' - resolving with default value`);
             return Promise.resolve(defaultValue);
         }
@@ -587,7 +587,7 @@ export default class NODMaker {
      */
     tryGetNamedCollectionResource(resource, collectionAttribute, rel, options = {}) {
         options = _({}).extend(options, {
-            getUri: SemanticLink.tryGetUri
+            getUri: link.getUri
         });
 
         return this.getNamedCollectionResource(resource, collectionAttribute, rel, options);
@@ -623,7 +623,7 @@ export default class NODMaker {
      */
     tryGetNamedCollectionResourceOnSingletons(singletons, collectionName, rel, options = {}) {
         options = _({}).extend(options, {
-            getUri: SemanticLink.tryGetUri
+            getUri: link.getUri
         });
 
         return _(singletons)
@@ -707,7 +707,7 @@ export default class NODMaker {
             .then((collection) => {
 
                 if (!collection) {
-                    throw new Error(`A collection should have been created ${SemanticLink.getUri(resource, /self|canonical/)} with ${collectionName}`);
+                    throw new Error(`A collection should have been created ${link.getUri(resource, /self|canonical/)} with ${collectionName}`);
                 }
 
                 let itemResource = _(collection).findItemByUriOrName(uri);
@@ -741,7 +741,7 @@ export default class NODMaker {
      */
     tryGetCollectionResourceAndItems(resource, collectionName, rel, options = {}) {
         options = _({}).extend(options, {
-            getUri: SemanticLink.tryGetUri
+            getUri: link.getUri
         });
 
         return this.getNamedCollectionResource(resource, collectionName, rel, options)
@@ -765,7 +765,7 @@ export default class NODMaker {
      */
     tryGetNamedCollectionResourceAndItemsOnCollectionItems(collection, collectionName, rel, options = {}) {
         options = _({}).extend(options, {
-            getUri: SemanticLink.tryGetUri
+            getUri: link.getUri
         });
 
         return _(collection)
@@ -848,7 +848,7 @@ export default class NODMaker {
         });
 
         if (!documentResource) {
-            log.warn(`No document provided to update for resource ${SemanticLink.getUri(resource, /self/)}`);
+            log.warn(`No document provided to update for resource ${link.getUri(resource, /self/)}`);
             return Promise.resolve(resource);
         }
         const mergeStrategy = options.editForm || this.defaultEditFormStrategy;
@@ -857,7 +857,7 @@ export default class NODMaker {
             .then(editForm => {
 
                 if (!editForm) {
-                    log.info(`Resource has no edit form ${SemanticLink.getUri(resource, /self|canonical/)}`);
+                    log.info(`Resource has no edit form ${link.getUri(resource, /self|canonical/)}`);
                     // return Promise.resolve(resource);
                     editForm = {items: []};
                 }
@@ -868,17 +868,17 @@ export default class NODMaker {
                             return this.getResourceState(resource)
                                 .updateResource(resource, NODMaker.toWireRepresentation(merged), options);
                         } else {
-                            log.info(`No update required ${SemanticLink.getUri(resource, /canonical|self/)}`);
+                            log.info(`No update required ${link.getUri(resource, /canonical|self/)}`);
                             return Promise.resolve(resource);
                         }
                     })
                     .catch(err => {
-                        log.error(`Merge error: edit-form on ${SemanticLink.getUri(resource, /self|canonical/)}`, err);
+                        log.error(`Merge error: edit-form on ${link.getUri(resource, /self|canonical/)}`, err);
                     });
             })
             .catch(() => {
                 // with a tryGet we should never get here (alas that is not always the case)
-                log.error(`Unexpected error on 'edit-form': on ${SemanticLink.getUri(resource, /self|canonical/)}`/*, err, resource*/);
+                log.error(`Unexpected error on 'edit-form': on ${link.getUri(resource, /self|canonical/)}`/*, err, resource*/);
             });
     }
 
@@ -904,7 +904,7 @@ export default class NODMaker {
                         .then(createFormResource => mergeStrategy(document, createFormResource, options))
                         .then(mergedResource => {
                             if (_(mergedResource).isEmpty()) {
-                                log.warn(`Unexpected empty item '${SemanticLink.getUri(document, /self|canonical/)}' in '${SemanticLink.getUri(collection, /self|canonical/)}' on mapping '${options.mappedTitle}'`);
+                                log.warn(`Unexpected empty item '${link.getUri(document, /self|canonical/)}' in '${link.getUri(collection, /self|canonical/)}' on mapping '${options.mappedTitle}'`);
                                 return Promise.resolve(collection);
                             }
                             return this.getResourceState(collection)
@@ -914,7 +914,7 @@ export default class NODMaker {
 
                     // // data for uri returns a json array of Uris
                     return this.getResourceState(collection)
-                        .createResource(collection, [SemanticLink.getUri(document, /canonical|self/)], options);
+                        .createResource(collection, [link.getUri(document, /canonical|self/)], options);
                 }
 
             })
@@ -951,7 +951,7 @@ export default class NODMaker {
                 if (itemResource) {
                     return this.deleteResource(itemResource, options);
                 } else {
-                    const reason = `Item not found (${SemanticLink.tryGetUri(item, /self/)}in collection ${SemanticLink.tryGetUri(collection, /self/)}`;
+                    const reason = `Item not found (${link.getUri(item, /self/)}in collection ${link.getUri(collection, /self/)}`;
                     log.error(reason, options);
                     return Promise.reject(reason);
                 }

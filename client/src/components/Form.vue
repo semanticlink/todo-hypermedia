@@ -204,7 +204,6 @@
                         log.debug(`[Form] return [${response.status}] `);
 
                         // on success if updated return to item (204) otherwise go to new (201)
-                        // scope it here otherwise SemanticLink looks to loose scope (??) in the setTimeout
                         const returnUri = response.status === 201
                             ? response.headers.location
                             : getUri(this.representation, 'self');

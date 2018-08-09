@@ -4,7 +4,7 @@ import {makeAbsolute, toSitePath} from './lib/util/UriMapping';
 import SelectTenant from './components/SelectTenant.vue';
 import Admin from './components/Admin.vue';
 import Todo from './components/Todo.vue';
-import {SemanticLink} from 'semanticLink';
+import * as link from 'semantic-link';
 
 Vue.use(VueRouter);
 
@@ -118,7 +118,7 @@ const router = new VueRouter({
     ]
 });
 
-const redirect = (representation, path, query = {}) => router.push({...{path: toSitePath(SemanticLink.getUri(representation, /self/), path)}, ...query});
+const redirect = (representation, path, query = {}) => router.push({...{path: toSitePath(link.getUri(representation, /self/), path)}, ...query});
 
 export const redirectToTenant = (tenantRepresentation, filter) => {
     return redirect(tenantRepresentation, makePrefix(clientPath.Todo), filter);
