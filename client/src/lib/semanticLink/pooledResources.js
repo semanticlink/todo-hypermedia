@@ -1,7 +1,7 @@
 'use strict';
 import {nodMaker} from './NODMaker';
 import Collection from './Collection';
-import log from './Logger';
+import {log} from 'logger';
 
 /**
  * Example pooled resorce implementation

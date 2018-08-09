@@ -79,7 +79,7 @@
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
-    import EventBus, {authConfirmed, authRenewed} from '../lib/util/EventBus';
+    import EventBus, {authConfirmed} from '../lib/util/EventBus';
     import {loader} from '../lib/semanticLink/Loader';
 
     import FormDragDrop from './FormDragDrop.vue';

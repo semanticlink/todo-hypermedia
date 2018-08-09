@@ -1,6 +1,5 @@
 import _ from './mixins/underscore';
-import { link } from './SemanticLink';
-import log from './Logger';
+import {log} from 'logger';
 import { nodMaker } from './NODMaker';
 import SemanticLink from './SemanticLink';
 

@@ -1,5 +1,6 @@
-import {log, nodMaker, SemanticLink} from 'semanticLink';
+import {nodMaker, SemanticLink} from 'semanticLink';
 import {TEXT} from '../lib/form-type-mappings';
+import {log} from 'logger';
 
 /**
  * use the organisation from a provided list (when authenticated)

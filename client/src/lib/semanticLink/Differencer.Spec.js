@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import log from './Logger';
+import {log} from 'logger';
 import Differencer from './Differencer';
 
 describe('NOD Differencer', () => {

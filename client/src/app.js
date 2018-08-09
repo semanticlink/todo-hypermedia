@@ -11,7 +11,7 @@ authService.handleAuthentication();
 // (runtime-only or standalone) has been set in webpack.conf with an alias.
 import Vue from 'vue';
 import router from './router';
-import {LEVEL, setLogLevel} from 'semanticLink';
+import {LogLevel, setLogLevel, log} from 'logger';
 import VueLocalStorage from 'vue-localstorage';
 
 import App from './App.vue';
@@ -34,7 +34,8 @@ Vue.use(Notifications);
  */
 require('./lib/uri-mappings');
 
-setLogLevel(LEVEL.DEBUG);
+setLogLevel(LogLevel.DEBUG);
+log.debug('Set log level to DEBUG');
 
 Vue.config.productionTip = false;
 

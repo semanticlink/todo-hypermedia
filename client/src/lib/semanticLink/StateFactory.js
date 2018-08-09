@@ -1,7 +1,7 @@
 'use strict';
 import State from './State';
 import SemanticLink from './SemanticLink';
-import log from './Logger';
+import {log} from 'logger';
 
 const stateFlagName = Symbol('state');
 

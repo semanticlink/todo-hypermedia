@@ -10,7 +10,7 @@ authService.scheduleRenewal();
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.conf with an alias.
 import Vue from 'vue';
-import {LEVEL, setLogLevel} from 'semanticLink';
+import {LogLevel, setLogLevel, log} from 'logger';
 import VueLocalStorage from 'vue-localstorage';
 
 import Offline from './components/Offline.vue';
@@ -34,7 +34,8 @@ import {setInterceptors} from './lib/http-interceptors';
 
 setInterceptors({queue401s: false});
 
-setLogLevel(LEVEL.DEBUG);
+setLogLevel(LogLevel.DEBUG);
+log.debug('Set log level to DEBUG');
 
 Vue.config.productionTip = false;
 

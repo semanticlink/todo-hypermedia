@@ -19,7 +19,7 @@
 <script>
 
     import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/util/dragAndDropModel';
-    import {log} from '../lib/logger';
+    import {log} from 'logger';
     import EventBus from "../lib/util/EventBus";
 
     export default {

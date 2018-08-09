@@ -1,7 +1,7 @@
 import _ from './mixins/underscore';
 import SparseResource from './SparseResource';
 import {link, SemanticLink} from './SemanticLink';
-import log from './Logger';
+import {log} from 'logger';
 
 /**
  * Processes difference sets (created, update, delete) for between two client-side collections {@Link CollectionRepresentation}

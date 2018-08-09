@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {log} from 'semanticLink';
+import {log} from 'logger';
 import EventBus, {authConfirmed, authRequired, offline, serverError} from './util/EventBus';
 import {httpQueue} from './util/HTTPQueue';
 import * as authorization from 'auth-header';

@@ -1,16 +1,16 @@
-import { expect } from 'chai';
+import {expect} from 'chai';
 import NodMaker from './NODMaker';
-import $log from './Logger';
+import {log} from 'logger';
 import sinon from 'sinon';
 import Link from './SemanticLink';
 import StateFactory from './StateFactory';
-import { loader } from './Loader';
+import {loader} from './Loader';
 
-import { stateFlagEnum } from './stateFlagEnum';
+import {stateFlagEnum} from './stateFlagEnum';
 
-const link = new Link(sinon.stub(), $log);
-const state = new StateFactory(link, $log, loader);
-const nodMaker = new NodMaker(link, $log, state);
+const link = new Link(sinon.stub(), log);
+const state = new StateFactory(link, log, loader);
+const nodMaker = new NodMaker(link, log, state);
 
 /**
  * Increasing counter to create new & unique resource names

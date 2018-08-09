@@ -1,4 +1,4 @@
-import log from './Logger';
+import {log} from 'logger';
 import sinon from 'sinon';
 import { SemanticLink } from './SemanticLink';
 import { expect } from 'chai';

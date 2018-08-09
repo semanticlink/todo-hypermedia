@@ -1,7 +1,7 @@
 'use strict';
 import _ from './mixins/underscore';
 import {link, SemanticLink} from './SemanticLink';
-import log from './Logger';
+import {log} from 'logger';
 import {nodMaker} from './NODMaker';
 import Differencer from './Differencer';
 import axios from 'axios';

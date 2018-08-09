@@ -1,4 +1,4 @@
-import log from '../semanticLink/Logger';
+import {log} from 'logger';
 
 let instance;
 

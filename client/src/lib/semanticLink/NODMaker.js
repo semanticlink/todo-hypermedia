@@ -5,7 +5,7 @@ import {SparseResource} from './SparseResource';
 import StateFactory from './StateFactory';
 import {resourceMerger} from './ResourceMerger';
 import SemanticLink from './SemanticLink';
-import log from './Logger';
+import {log} from 'logger';
 import State from './State';
 
 /**

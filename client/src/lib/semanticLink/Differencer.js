@@ -1,5 +1,5 @@
 import _ from './mixins/underscore';
-import log from './Logger';
+import {log} from 'logger';
 import {Comparator} from './Comparator';
 import SemanticLink from './SemanticLink';
 

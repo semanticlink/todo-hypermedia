@@ -6,7 +6,10 @@ const path = require('path');
 
 module.exports = {
     resolve: {
-        modules: [path.resolve('./src'), "node_modules"],
+        modules: [path.resolve('./src'), 'node_modules'],
+        alias: {
+            logger: 'semantic-link/lib/logger'
+        },
         extensions: ['.ts', '.js'],
     },
     mode: 'development',

@@ -51,13 +51,14 @@
      *
      */
 
-    import { nodMaker, SemanticLink, log } from 'semanticLink';
-    import { mapCompletedToState, mapStateToCompleted } from "../lib/form-type-mappings";
+    import {nodMaker, SemanticLink} from 'semanticLink';
+    import {log} from 'logger';
+    import {mapCompletedToState, mapStateToCompleted} from "../lib/form-type-mappings";
 
     export default {
         props: {
-            collection: { type: Object, required: true },
-            item: { type: Object, required: true }
+            collection: {type: Object, required: true},
+            item: {type: Object, required: true}
         },
         data() {
             return {
@@ -109,7 +110,7 @@
                 this.editItem.state = mapCompletedToState(this.editItem.completed);
 
                 return nodMaker.updateResource(this.item, this.editItem)
-                    // really we should get a copy from the server
+                // really we should get a copy from the server
                     .then(() => this.item.completed = mapStateToCompleted(this.editItem.state))
                     .then(() => this.reset())
                     .catch(err => log.error(err));

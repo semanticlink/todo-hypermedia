@@ -1,5 +1,5 @@
-import { uriMapping } from './util/UriMapping';
-import { log } from 'semanticLink/index';
+import {uriMapping} from './util/UriMapping';
+import {log} from 'logger';
 
 export const apiUri = document.querySelector('HEAD link[rel="api"]').href;
 export const clientUri = window.location.href;

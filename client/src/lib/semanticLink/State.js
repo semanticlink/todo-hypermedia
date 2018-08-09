@@ -3,7 +3,7 @@
 import _ from './mixins/underscore';
 import {stateFlagEnum} from './stateFlagEnum';
 import SparseResource from './SparseResource';
-import log from './Logger';
+import {log} from 'logger';
 import SemanticLink, {link} from './SemanticLink';
 import {loader} from './Loader';
 import StateFactory from './StateFactory';

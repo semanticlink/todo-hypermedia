@@ -64,7 +64,7 @@
 import $ from 'jquery';
 import _ from './mixins/index';
 import axios from 'axios';
-import log from './Logger';
+import {log} from 'logger';
 
 class SemanticLink {
 

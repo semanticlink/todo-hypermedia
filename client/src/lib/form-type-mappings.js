@@ -1,4 +1,4 @@
-import { log } from './logger';
+import {log} from 'logger';
 
 /**
  * Text known input type from the server
@@ -67,4 +67,4 @@ const mapStateToCompleted = state => {
     return state === 'http://example.com/todo/state/complete';
 };
 
-export { mapApiToUiType, mapCompletedToState, mapStateToCompleted, TEXT };
+export {mapApiToUiType, mapCompletedToState, mapStateToCompleted, TEXT};

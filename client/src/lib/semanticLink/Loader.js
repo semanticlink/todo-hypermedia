@@ -1,6 +1,6 @@
 import Bottleneck from 'bottleneck';
 import axios from 'axios';
-import log from './Logger';
+import {log} from 'logger';
 
 const CancelToken = axios.CancelToken;
 const source = CancelToken.source();
@@ -127,7 +127,7 @@ export default class Loader {
      * @param params
      * @return {*}
      */
-    schedule(params){
+    schedule(params) {
         return this._limiter.schedule(params);
     }
 
