@@ -3,26 +3,21 @@ import SparseResource from '../SparseResource';
 import {log} from 'logger';
 
 /**
- *
- * @param {CollectionRepresentation|LinkedRepresentation[]|undefined} collection
+ * Takes a resource and normalises it to a valid iterable. Particularly if you hand in a resource that isn't a
+ * collection then it will return an empty iterable (array).
+ * @param {*|LinkedRepresentation[]|CollectionRepresentation|undefined} objOrCollection takes a collection and returns the items if available
  * @return {LinkedRepresentation[]}
  */
-export const normaliseCollection = collection => {
-    if (!collection) {
+export const normalise = objOrCollection => {
+    if (!objOrCollection) {
+        return [];
+    } else if (Array.isArray(objOrCollection)) {
+        return objOrCollection;
+    } else if (objOrCollection.items) {
+        return objOrCollection.items;
+    } else {
         return [];
     }
-
-    if (collection.items) {
-        return collection.items;
-    }
-
-    // where collection is not LinkedRepresentation[]
-    if (!Array.isArray(collection)) {
-        return [];
-    }
-
-    // else LinkedRepresentation[]
-    return collection;
 };
 
 const isLinkedRepresentation = resource => {
@@ -51,7 +46,7 @@ export const findItemByUriOrName = (collection, resourceIdentifier, attributeNam
     }
 
     // go through the collection and match the URI against either a link relation or attribute
-    return normaliseCollection(collection)
+    return normalise(collection)
         .find(item => link.getUri(item, attributeNameOrLinkRelation || /canonical|self/, undefined) === resourceIdentifier
             || item[attributeNameOrLinkRelation || SparseResource.mappedTitle] === resourceIdentifier);
 };
@@ -87,7 +82,7 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
     }
 
     // go through the collection and match the URI against either a link relation and attribute
-    return normaliseCollection(collection)
+    return normalise(collection)
         .find(item => item[attributeName] === resource[attributeName] && link.getUri(item, rel, undefined) === uri);
 };
 
@@ -98,7 +93,7 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
  * @param {string|RegExp} attributeNameOrLinkRelation
  */
 export const findItemByUri = (collection, uri, attributeNameOrLinkRelation) =>
-    normaliseCollection(collection).find(item => link.getUri(item, attributeNameOrLinkRelation || /self|canonical/) === uri);
+    normalise(collection).find(item => link.getUri(item, attributeNameOrLinkRelation || /self|canonical/) === uri);
 
 /**
  * Finds a resource item in a collection by taking in the item itself and then search on a URI
@@ -159,7 +154,7 @@ export const differenceCollection = (leftCollection, rightCollection, attributeN
     leftCollection = leftCollection || [];
 
     // now iterate either through: collection, an array or guard of empty array
-    return normaliseCollection(leftCollection).filter(item => {
+    return normalise(leftCollection).filter(item => {
         const uri = link.getUri(item, ['canonical', 'self']);
         return !findItemByUriOrName(rightCollection, uri, [attributeNameOrLinkRelation, 'canonical', 'self']);
     });
@@ -243,7 +238,7 @@ export const mapUriList = array => {
  * @returns {boolean}
  */
 export const isCollectionEmpty = collection => {
-    return normaliseCollection(collection).length === 0;
+    return normalise(collection).length === 0;
 };
 
 /**
@@ -252,7 +247,7 @@ export const isCollectionEmpty = collection => {
  * @returns {LinkedRepresentation}
  */
 export const firstItem = collection => {
-    const [head,] = normaliseCollection(collection);
+    const [head,] = normalise(collection);
     return head;
 };
 

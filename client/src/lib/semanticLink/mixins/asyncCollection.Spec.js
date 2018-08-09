@@ -1,5 +1,5 @@
 import 'underscore';
-import _ from './asyncCollection';
+import _ from './index';
 import { expect } from 'chai';
 
 describe('Async collection mixins', () => {
