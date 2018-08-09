@@ -14,6 +14,10 @@ import router from './router';
 import {LogLevel, setLogLevel, log} from 'logger';
 import VueLocalStorage from 'vue-localstorage';
 
+import {uriMapping} from './lib/util/UriMapping';
+import {filter} from 'semantic-link';
+
+
 import App from './App.vue';
 
 import {setJsonWebTokenOnHeaders, setInterceptors} from './lib/http-interceptors';
@@ -29,10 +33,6 @@ import './styles/todo.css';
 Vue.use(BootstrapVue);
 Vue.use(Notifications);
 
-/*
- * Add runtime dependencies
- */
-require('./lib/uri-mappings');
 
 setLogLevel(LogLevel.DEBUG);
 log.debug('Set log level to DEBUG');
@@ -74,12 +74,24 @@ if (AuthService.accessToken) {
 
 
 /**
- * This view sets up the application including the ondemand authentication (login) and
+ * This view sets up the application including the on-demand authentication (login) and
  * the application being offline
  */
 new Vue({
     el: '#app',
     router,
     template: '<App/>',
-    components: {App}
+    components: {App},
+    created(){
+
+        const [api,] = filter('HEAD', 'api');
+        const apiUri = api.href;
+        const clientUri = window.location.href;
+
+        log.info(`Client uri: '${clientUri}'`);
+        log.info(`Api uri: '${apiUri}'`);
+
+        uriMapping(clientUri, apiUri);
+
+    }
 });
