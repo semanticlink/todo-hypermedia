@@ -48,7 +48,7 @@ const clientConfig = {
 
             domain: path.resolve(__dirname, 'src/domain'),
             router: path.resolve(__dirname, 'src/router'),
-            logger: path.resolve(__dirname, 'src/lib/logger'),
+            logger: path.resolve(__dirname, 'node_modules/semantic-link/lib/logger'),
             /*
              * Allow for runtime compiling of vue templates
              */
