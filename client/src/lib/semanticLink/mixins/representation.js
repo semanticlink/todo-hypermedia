@@ -6,8 +6,8 @@ import * as link from 'semantic-link';
  * @param {LinkedRepresentation|string} resourceOrUri
  * @return {string} urlist
  * */
-const makeUri = resourceOrUri => {
-    if (_(resourceOrUri).isString()) {
+export const makeUri = resourceOrUri => {
+    if (typeof resourceOrUri === 'string') {
         return resourceOrUri;
     }
     return link.getUri(resourceOrUri, /canonical|self/);
@@ -18,12 +18,12 @@ const makeUri = resourceOrUri => {
  * @param {LinkedRepresentation[]|LinkedRepresentation|string|string[]} resourcesOrUris
  * @return {string[]} uriList
  * */
-const makeUriList = resourcesOrUris => {
+export const makeUriList = resourcesOrUris => {
 
-    if (_(resourcesOrUris).isString()) {
+    if (typeof resourceOrUri === 'string') {
         return [resourcesOrUris];
-    } else if (_(resourcesOrUris).isArray()) {
-        return _(resourcesOrUris).map(resource => makeUri(resource));
+    } else if (Array.isArray(resourcesOrUris)) {
+        return resourcesOrUris.map(resource => makeUri(resource));
     } else {
         return [makeUri(resourcesOrUris)];
     }
@@ -35,13 +35,13 @@ const makeUriList = resourcesOrUris => {
  * @param {*[]|LinkedRepresentation[]} resource
  * @return {*[]} copy detached
  */
-const detach = resource => {
+export const detach = resource => {
     if (!resource) {
         return [];
     } else if (resource.items) {
-        return _(resource.items).map(item => Object.assign({}, item));
-    } else if (_(resource).isArray()) {
-        return _(resource).map(item => Object.assign({}, item));
+        return resource.items.map(item => Object.assign({}, item));
+    } else if (Array.isArray(resource)) {
+        return resource.map(item => Object.assign({}, item));
     } else {
         return [];
     }
@@ -57,27 +57,23 @@ const detach = resource => {
  * @param {string[]} array
  * @return {string[]}
  */
-const filterCamelToDash = array => _(array)
-    .chain()
-    .filter(item => (/[A-Z]/).test(item))
-    .map(item => item.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase()))
-    .value();
+export const filterCamelToDash = array =>
+    (array || [])
+        .filter(item => (/[A-Z]/).test(item))
+        .map(item => item.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase()));
 
-const camelToDash = array => {
+export const camelToDash = array => {
 
-    if (_(array).isString()) {
+    if (typeof array === 'string') {
         return array.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase());
     }
-    return _(array)
-        .chain()
-        .map(item => item.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase()))
-        .value();
+    return array.map(item => item.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase()));
 };
 
 // TODO: just check that the dash '-' doesn't need escaping (webstorm says it doesn't)
-const dashToCamel = str => str.replace(/(-[a-z])/g, $1 => $1.toUpperCase().replace('-', ''));
+export const dashToCamel = str => str.replace(/(-[a-z])/g, $1 => $1.toUpperCase().replace('-', ''));
 
-function extendResource (obj) {
+export function extendResource (obj) {
     // stolen from https://gist.github.com/kurtmilam/1868955
     let source,
 
@@ -98,7 +94,7 @@ function extendResource (obj) {
                 throw new Error('Trying to combine an object with a non-object (' + propName + ')');
             }
             // Assign for object properties & return for array members
-            obj[propName] = _.extendResource(oProp, sProp);
+            obj[propName] = extendResource(oProp, sProp);
             return obj[propName];
         },
 
@@ -142,19 +138,16 @@ function extendResource (obj) {
  * @param fields
  * @return {*} containing a document
  */
-const mergeByFields = (resource, document, fields) => {
+export const mergeByFields = (resource, document, fields) => {
     let documentToMerge = _(document).pick((key, value) => _(fields).contains(value));
     // do a deep merge into a new document
-    return _({}).extendResource(resource, documentToMerge);
+    return extendResource({}, resource, documentToMerge);
 };
 
-const compactObject = resource => _(resource).omit(val => {
+export const compactObject = resource => _(resource).omit(val => {
     return !!(_.isObject(val) && _.isEmpty(val)) || _.isUndefined(val);
 });
 
-/**
- * @mixin
- */
 export const RepresentationMixins = {
     makeUri,
     makeUriList,
@@ -166,10 +159,3 @@ export const RepresentationMixins = {
     mergeByFields,
     compactObject,
 };
-
-_.mixin(RepresentationMixins);
-
-/**
- * @mixes {RepresentationMixins}
- */
-export default _;

@@ -1,12 +1,12 @@
-import _ from './representation';
-import { expect } from 'chai';
+import * as _ from './representation';
+import {expect} from 'chai';
 
 describe('Representation mixins', () => {
 
     describe('_.extendResource()', () => {
 
         const assertExtendResource = (resource, document) => {
-            let result = _({}).extendResource(resource, document);
+            let result = _.extendResource({}, resource, document);
             expect(result).to.deep.equal(document);
         };
 
@@ -34,23 +34,23 @@ describe('Representation mixins', () => {
         it('should be able to detach an array of objects', () => {
             let resource = {items: [{name: 'i'}]};
             let document = [{name: 'i'}];
-            let result = _(resource.items).detach();
+            let result = _.detach(resource.items);
             expect(result).to.deep.equal(document);
         });
 
         it('should be able to detail a collection of items', () => {
             let resource = {items: [{name: 'i'}]};
             let document = [{name: 'i'}];
-            let result = _(resource).detach();
+            let result = _.detach(resource);
             expect(result).to.deep.equal(document);
         });
 
         it('should return object on null', () => {
-            expect(_(null).detach()).to.deep.equal([]);
+            expect(_.detach(null)).to.deep.equal([]);
         });
 
         it('should return object on undefined', () => {
-            expect(_(null).detach()).to.deep.equal([]);
+            expect(_.detach(undefined)).to.deep.equal([]);
         });
 
     });
@@ -63,7 +63,7 @@ describe('Representation mixins', () => {
 
             let fields = ['name'];
 
-            let result = _(resource).mergeByFields(document, fields);
+            let result = _.mergeByFields(resource, document, fields);
             expect(result).to.deep.equal(document);
             expect(result.name).to.equal('h');
         });
@@ -76,7 +76,7 @@ describe('Representation mixins', () => {
 
                 let fields = ['name', 'textBox'];
 
-                let result = _(resource).mergeByFields(document, fields);
+                let result = _.mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal(document);
             });
 
@@ -86,7 +86,7 @@ describe('Representation mixins', () => {
 
                 let fields = ['name', 'textBox'];
 
-                let result = _(resource).mergeByFields(document, fields);
+                let result = _.mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal(document);
             });
 
@@ -96,7 +96,7 @@ describe('Representation mixins', () => {
 
                 let fields = ['textBox'];
 
-                let result = _(resource).mergeByFields(document, fields);
+                let result = _.mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal({textBox: {width: 5, height: 7}});
             });
 
@@ -106,7 +106,7 @@ describe('Representation mixins', () => {
 
                 let fields = ['textBox'];
 
-                let result = _(resource).mergeByFields(document, fields);
+                let result = _.mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal({name: 'retain', textBox: {width: 5, height: 7}});
             });
         });
@@ -115,80 +115,80 @@ describe('Representation mixins', () => {
 
     describe('_.dashToCamel', () => {
         it('should match dashed', () => {
-            expect(_('question-item').dashToCamel()).to.equal('questionItem');
+            expect(_.dashToCamel('question-item')).to.equal('questionItem');
         });
         it('should leave non-dashed alone', () => {
-            expect(_('questionitem').dashToCamel()).to.equal('questionitem');
+            expect(_.dashToCamel('questionitem')).to.equal('questionitem');
         });
     });
 
     describe('_.filterCamelToDash', () => {
         it('should match camel', () => {
-            expect(_(['questionItem']).filterCamelToDash()).to.deep.equal(['question-item']);
+            expect(_.filterCamelToDash(['questionItem'])).to.deep.equal(['question-item']);
         });
         it('should match camel and all lower', () => {
-            expect(_(['questionItem', 'question']).filterCamelToDash()).to.deep.equal(['question-item']);
+            expect(_.filterCamelToDash(['questionItem', 'question'])).to.deep.equal(['question-item']);
         });
         it('should match just all lower', () => {
-            expect(_(['question']).filterCamelToDash()).to.deep.equal([]);
+            expect(_.filterCamelToDash(['question'])).to.deep.equal([]);
         });
     });
 
     describe('_.camelToDash', () => {
 
         it('should match camel on string and returns string', () => {
-            expect(_('questionItem').camelToDash()).to.equal('question-item');
+            expect(_.camelToDash('questionItem')).to.equal('question-item');
         });
 
         it('should match all lower on string and returns string', () => {
-            expect(_('question').camelToDash()).to.equal('question');
+            expect(_.camelToDash('question')).to.equal('question');
         });
 
         it('should match camel', () => {
-            expect(_(['questionItem']).camelToDash()).to.deep.equal(['question-item']);
+            expect(_.camelToDash(['questionItem'])).to.deep.equal(['question-item']);
         });
 
         it('should match camel and all lower', () => {
-            expect(_(['questionItem', 'question']).camelToDash()).to.deep.equal(['question-item', 'question']);
+            expect(_.camelToDash(['questionItem', 'question'])).to.deep.equal(['question-item', 'question']);
         });
 
         it('should match just all lower', () => {
-            expect(_(['question']).camelToDash()).to.deep.equal(['question']);
+            expect(_.camelToDash(['question'])).to.deep.equal(['question']);
         });
     });
 
     describe('_.compactObject', () => {
 
         it('should do everything at once', () => {
-            expect(_({
+            expect(_.compactObject({
                 keep: 99,
                 takeaway: {},
                 alsotake: undefined,
                 alsoKeep: {o: 1}
-            }).compactObject()).to.deep.equal({keep: 99, alsoKeep: {o: 1}});
+            })).to.deep.equal({keep: 99, alsoKeep: {o: 1}});
         });
         it('should keep numerical fields', () => {
-            expect(_({keep: 99}).compactObject()).to.deep.equal({keep: 99});
+            expect(_.compactObject({keep: 99})).to.deep.equal({keep: 99});
         });
         it('should keep string fields', () => {
-            expect(_({keep: 'string'}).compactObject()).to.deep.equal({keep: 'string'});
+            expect(_.compactObject({keep: 'string'})).to.deep.equal({keep: 'string'});
         });
         it('should keep object fields', () => {
-            expect(_({alsoKeep: {o: 1}}).compactObject()).to.deep.equal({alsoKeep: {o: 1}});
+            expect(_.compactObject({alsoKeep: {o: 1}})).to.deep.equal({alsoKeep: {o: 1}});
         });
         it('should remove empty object fields', () => {
-            expect(_({takeaway: {}}).compactObject()).to.deep.equal({});
+            expect(_.compactObject({takeaway: {}})).to.deep.equal({});
         });
 
         it('should remove undefined fields', () => {
-            expect(_({takeaway: undefined}).compactObject()).to.deep.equal({});
+            expect(_.compactObject({takeaway: undefined})).to.deep.equal({});
         });
     });
 
     describe('_.makeUri', () => {
 
         it('should keep string as uri', () => {
-            expect(_('http://example.com/role/1').makeUri()).to.equal('http://example.com/role/1');
+            expect(_.makeUri('http://example.com/role/1')).to.equal('http://example.com/role/1');
         });
         it('should transform representation to string', () => {
             const resource = {
@@ -197,18 +197,18 @@ describe('Representation mixins', () => {
                     href: 'http://example.com/role/1'
                 }]
             };
-            expect(_(resource).makeUri()).to.equal('http://example.com/role/1');
+            expect(_.makeUri(resource)).to.equal('http://example.com/role/1');
         });
     });
 
     describe('_.makeUriList', () => {
 
         it('should keep string as uri', () => {
-            expect(_('http://example.com/role/1').makeUriList()).to.deep.equal(['http://example.com/role/1']);
+            expect(_.makeUriList('http://example.com/role/1')).to.deep.equal(['http://example.com/role/1']);
         });
         it('should keep an array string as uri', () => {
             const uriList = ['http://example.com/role/1', 'http://example.com/role/2'];
-            expect(_(uriList).makeUriList()).to.deep.equal(uriList);
+            expect(_.makeUriList(uriList)).to.deep.equal(uriList);
         });
         it('should transform representation to string', () => {
             const resource = {
@@ -218,7 +218,7 @@ describe('Representation mixins', () => {
                 }],
                 name: 'Administrator'
             };
-            expect(_(resource).makeUriList()).to.deep.equal(['http://example.com/role/1']);
+            expect(_.makeUriList(resource)).to.deep.equal(['http://example.com/role/1']);
         });
     });
 });
