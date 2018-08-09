@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import NodMaker from './NODMaker';
 import sinon from 'sinon';
-import StateFactory from './StateFactory';
+import State from './State';
 
 import {stateFlagEnum} from './stateFlagEnum';
 
@@ -38,15 +38,15 @@ describe('NOD Maker', () => {
                     const result = nodMaker.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.equal('N');
-                    expect(StateFactory.get(linkedRepresentation).isTracked('name')).to.be.false;
+                    expect(State.get(linkedRepresentation).isTracked('name')).to.be.false;
                 });
 
                 it('Does add a tracked resource into state when attribute of same name does not exist', () => {
                     const result = nodMaker.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.not.be.null;
-                    expect(StateFactory.get(linkedRepresentation).isTracked('name')).to.be.true;
-                    expect(StateFactory.get(result).getStatus()).to.equal(stateFlagEnum.unknown);
+                    expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
+                    expect(State.get(result).getStatus()).to.equal(stateFlagEnum.unknown);
                 });
 
                 it('Makes a new one with defaults', () => {
@@ -75,7 +75,7 @@ describe('NOD Maker', () => {
                     const result = nodMaker.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.equal(feed);
-                    expect(StateFactory.get(linkedRepresentation).isTracked('name')).to.be.false;
+                    expect(State.get(linkedRepresentation).isTracked('name')).to.be.false;
 
                 });
 
@@ -83,8 +83,8 @@ describe('NOD Maker', () => {
                     const result = nodMaker.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.not.be.null;
-                    expect(StateFactory.get(linkedRepresentation).isTracked('name')).to.be.true;
-                    expect(StateFactory.get(result).getStatus()).to.equal(stateFlagEnum.unknown);
+                    expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
+                    expect(State.get(result).getStatus()).to.equal(stateFlagEnum.unknown);
                 });
 
                 it('Makes a new one with defaults including empty items attribute', () => {
@@ -147,8 +147,8 @@ describe('NOD Maker', () => {
 
                     expect(result.links).to.deep.equal([{rel: 'self', href: uri}]);
                     expect(feedRepresentation.items).to.deep.equal([result]);
-                    expect(StateFactory.get(result).getStatus()).not.to.equal(stateFlagEnum.hydrated);
-                    expect(StateFactory.get(result).getStatus()).to.equal(stateFlagEnum.locationOnly);
+                    expect(State.get(result).getStatus()).not.to.equal(stateFlagEnum.hydrated);
+                    expect(State.get(result).getStatus()).to.equal(stateFlagEnum.locationOnly);
                 });
 
                 it('add with defaults', () => {
@@ -171,7 +171,7 @@ describe('NOD Maker', () => {
 
             it('retrieves the resource', () => {
 
-                let stateFactory = sinon.stub(StateFactory, 'get')
+                let stateFactory = sinon.stub(State, 'get')
                     .returns({
                         getResource: () => Promise.resolve({x: 4, links: []})
                     });
@@ -192,7 +192,7 @@ describe('NOD Maker', () => {
 
             it('retrieves the resource when value', () => {
 
-                let stateFactory = sinon.stub(StateFactory, 'tryGet')
+                let stateFactory = sinon.stub(State, 'tryGet')
                     .returns({
                         getResource: () => Promise.resolve({x: 4, links: []})
                     });
@@ -209,7 +209,7 @@ describe('NOD Maker', () => {
 
             it('returns default value when undefined', () => {
 
-                let stateFactory = sinon.stub(StateFactory, 'tryGet')
+                let stateFactory = sinon.stub(State, 'tryGet')
                     .returns(undefined);
 
                 return nodMaker.tryGetResource({}, undefined)

@@ -6,7 +6,8 @@ import SparseResource from './SparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
 import {loader} from './Loader';
-import StateFactory from './StateFactory';
+
+const stateFlagName = Symbol('state');
 
 /**
  * The state of a representation.
@@ -58,6 +59,73 @@ export default class State {
          * Mapped title when creating sparse resources from feed items
          */
         this.mappedTitle = undefined;
+    }
+
+    /**
+     * Make a state object ready to be added to a resource and ensuring that {@link stateFlagName}
+     * keys the object.
+     *
+     * This is a helper function because we can't simply add the {@link State}
+     * object onto the resource using the object literal notation
+     *
+     * @param {stateFlagEnum=} state
+     * @return {{Symbol(state): State}}
+     */
+    static make(state) {
+        const obj = {};
+        obj[stateFlagName] = new State(state);
+        return obj;
+    }
+
+    /**
+     * Get the state object on a resource
+     * @param {*} resource
+     * @return {State}
+     * @throws
+     */
+    static get(resource) {
+        if (!resource) {
+            throw new Error('No resource to find state on');
+        }
+
+        if (!resource[stateFlagName]) {
+            const hrefOrActual = link.getUri(resource, /self|canonical/) || JSON.stringify(resource);
+            throw new Error(`No state found on resource '${hrefOrActual}'`);
+        }
+
+        return resource[stateFlagName];
+    }
+
+    /**
+     * Get the state object on a resource and return the default value (undefined) if not found
+     * @param {*} resource
+     * @param {*=undefined} defaultValue
+     * @return {State|*|undefined}
+     */
+    static tryGet(resource, defaultValue = undefined) {
+        if (!resource) {
+            log.debug('[State] No resource using default');
+            return defaultValue;
+        }
+
+        if (!resource[stateFlagName]) {
+            log.debug('[State] No state on resource using default');
+            return defaultValue;
+        }
+
+        return resource[stateFlagName];
+    }
+
+    /**
+     * Takes the state object off the object (if exists)
+     * @param {*} resource
+     * @return {*}
+     */
+    static delete(resource) {
+        if (resource) {
+            delete resource[stateFlagName];
+        }
+        return resource;
     }
 
     /**
@@ -270,7 +338,7 @@ export default class State {
      */
     static makeSparseResourceOptions(state) {
         return {
-            stateFactory: () => StateFactory.make(state)
+            stateFactory: () => State.make(state)
         };
     }
 

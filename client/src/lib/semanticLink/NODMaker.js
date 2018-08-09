@@ -1,8 +1,6 @@
-'use strict';
 import _ from './mixins/underscore';
 import {stateFlagEnum} from './stateFlagEnum';
 import {SparseResource} from './SparseResource';
-import StateFactory from './StateFactory';
 import {resourceMerger} from './ResourceMerger';
 import * as link from 'semantic-link';
 import {log} from 'logger';
@@ -51,7 +49,7 @@ export default class NODMaker {
      */
 
     static toWireRepresentation(resource) {
-        return StateFactory.delete(resource);
+        return State.delete(resource);
     }
 
     /**
@@ -60,7 +58,7 @@ export default class NODMaker {
      * @return {State}
      */
     getResourceState(resource) {
-        return StateFactory.get(resource);
+        return State.get(resource);
     }
 
     /**
@@ -70,7 +68,7 @@ export default class NODMaker {
      * @return {State}
      */
     tryGetResourceState(resource, defaultValue) {
-        return StateFactory.tryGet(resource, defaultValue);
+        return State.tryGet(resource, defaultValue);
     }
 
     createResourceOnCollection(collection, collectionAttribute, rel, document, options = {}) {
@@ -84,8 +82,8 @@ export default class NODMaker {
      * @param state
      * @return {function():State}
      */
-    defaultStateFactory(state) {
-        return () => StateFactory.make(state);
+    defaultState(state) {
+        return () => State.make(state);
     }
 
     /**
@@ -95,7 +93,7 @@ export default class NODMaker {
      */
     makeSparseResourceOptions(state) {
         return {
-            stateFactory: this.defaultStateFactory(state)
+            stateFactory: this.defaultState(state)
         };
     }
 
@@ -415,7 +413,7 @@ export default class NODMaker {
      * @return {*}
      */
     tryGetResource(resource, defaultValue = undefined, options = {}) {
-        const tryResource = StateFactory.tryGet(resource, defaultValue);
+        const tryResource = State.tryGet(resource, defaultValue);
 
         if (tryResource === defaultValue) {
             log.debug(`Using default value on ${link.getUri(resource, /self/)}`);
@@ -522,7 +520,7 @@ export default class NODMaker {
         }
 
         if (resource[singletonName]) {
-            return this.tryGetResource(resource[singletonName], defaultValue, options)
+            return this.tryGetResource(resource[singletonName], defaultValue, options);
         } else {
             return this.getResourceState(resource)
             // add a sparsely populated resource as a named attribute and return it
@@ -815,7 +813,7 @@ export default class NODMaker {
     defaultEditFormStrategy(resource, documentResource, editForm, options = {}) {
 
         const isTracked = (resource, trackedName) => {
-            const resourceState = StateFactory.tryGet(resource);
+            const resourceState = State.tryGet(resource);
 
             if (resourceState) {
                 return resourceState.isTracked(trackedName);
