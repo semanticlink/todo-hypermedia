@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import _ from './mixins/underscore';
+import _ from './mixins';
 import { resourceMerger } from './ResourceMerger';
 
 let stubbedResource = {

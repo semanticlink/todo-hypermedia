@@ -1,4 +1,4 @@
-import _ from './mixins/underscore';
+import _ from './mixins';
 
 export const makeOptions = (options, obj) => Object.assign({}, options, obj);
 export default makeOptions;

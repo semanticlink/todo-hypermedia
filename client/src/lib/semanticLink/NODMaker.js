@@ -1,4 +1,4 @@
-import _ from './mixins/underscore';
+import _ from './mixins';
 import {stateFlagEnum} from './stateFlagEnum';
 import SparseResource from './SparseResource';
 import {resourceMerger} from './ResourceMerger';

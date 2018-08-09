@@ -1,5 +1,5 @@
 'use strict';
-import _ from './mixins/underscore';
+import _ from './mixins';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 import {nodMaker} from './NODMaker';

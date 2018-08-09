@@ -1,4 +1,4 @@
-import _ from './mixins/underscore';
+import _ from './mixins';
 import SparseResource from './SparseResource';
 import * as link from 'semantic-link';
 import {log} from 'logger';
