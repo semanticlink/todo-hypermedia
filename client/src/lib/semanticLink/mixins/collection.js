@@ -273,15 +273,12 @@ export const clone = arrayOrCollectionItems => {
         }*/
 };
 
-/**
- * @mixin
- */
 export const CollectionMixins = {
     findResourceInCollection,
-    findItemByUri: findResourceInCollectionByUri,
-    findItemByUriOrName: findResourceInCollectionByRelOrAttribute,
+    findResourceInCollectionByUri,
+    findResourceInCollectionByRelOrAttribute,
     findResourceInCollectionByRelAndAttribute,
-    differenceByUriOrName: differenceCollection, // TODO: refactor public method
+    differenceCollection,
     spliceAll,
     pushAll,
     pushResource,

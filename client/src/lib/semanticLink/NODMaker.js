@@ -708,7 +708,7 @@ export default class NODMaker {
                     throw new Error(`A collection should have been created ${link.getUri(resource, /self|canonical/)} with ${collectionName}`);
                 }
 
-                let itemResource = _(collection).findItemByUriOrName(uri);
+                let itemResource = _(collection).findResourceInCollectionByRelOrAttribute(uri);
 
                 if (!itemResource) {
                     itemResource = this.makeResourceFromUriAddedToCollection(collection, uri);

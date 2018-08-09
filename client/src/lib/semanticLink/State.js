@@ -698,7 +698,7 @@ export default class State {
             collection.items = [];
         }
 
-        let resource = _(collection).findItemByUriOrName(itemUri, options.rel);
+        let resource = _(collection).findResourceInCollectionByRelOrAttribute(itemUri, options.rel);
 
         if (!resource) {
             // we don't already know about this resource (but the client does), so so let's

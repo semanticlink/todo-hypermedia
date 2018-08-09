@@ -134,7 +134,7 @@ describe('Collection mixins', () => {
         });
     });
 
-    describe('_.findItemByUriOrName', () => {
+    describe('_.findResourceInCollectionByRelOrAttribute', () => {
         it('document with uri', () => {
             let found = _.findResourceInCollectionByRelOrAttribute(collection, 'http://api.example.com/role/1');
             expect(found).to.deep.equal(document);
