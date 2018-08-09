@@ -67,7 +67,7 @@ export default class State {
      * @private
      */
     resourceExists(resourceName) {
-        return _(this.resources).contains(resourceName);
+        return this.resources.includes(resourceName);
     }
 
     /**
@@ -77,7 +77,7 @@ export default class State {
      * @private
      */
     collectionExists(collectionResourceName) {
-        return _(this.collection).contains(collectionResourceName);
+        return this.collection.includes(collectionResourceName);
     }
 
     /**
