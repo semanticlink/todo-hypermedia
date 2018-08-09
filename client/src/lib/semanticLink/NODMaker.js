@@ -1,6 +1,6 @@
 import _ from './mixins/underscore';
 import {stateFlagEnum} from './stateFlagEnum';
-import {SparseResource} from './SparseResource';
+import SparseResource from './SparseResource';
 import {resourceMerger} from './ResourceMerger';
 import * as link from 'semantic-link';
 import {log} from 'logger';

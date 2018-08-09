@@ -1,4 +1,3 @@
-'use strict';
 import _ from 'underscore';
 
 /**
@@ -134,5 +133,4 @@ class SparseResource {
     }
 }
 
-export { SparseResource };
 export default SparseResource;
