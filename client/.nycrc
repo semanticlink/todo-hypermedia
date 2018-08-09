@@ -1,0 +1,21 @@
+{
+"nyc": {
+    "include": [
+      "**/src/**/*.js"
+    ],
+    "exclude": [
+      "coverage/**/*",
+      "src/**/*.Spec.js",
+      "node_modules/**/*",
+      ".tmp/**/*",
+      "webpack.config{,-test}.js"
+    ],
+    "sourceMap": false,
+    "instrument": false,
+    "all": false,
+    "reporter": [
+          "lcov",
+          "text-summary"
+        ]
+  }
+}
