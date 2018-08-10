@@ -1,10 +1,8 @@
-import {_} from 'semantic-link-cache';
+import {_, loader} from 'semantic-link-cache';
 import axios from 'axios';
-import {getAuthenticationUri, getBearerLinkRelation} from '../lib/http-interceptors';
-import {filter, matches, put, get} from 'semantic-link';
+import {getAuthenticationUri, getBearerLinkRelation} from './http-interceptors';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import {loader} from 'semantic-link-cache';
 
 /**
  * A form has the job to POST to a collection or PUT to an item (this is by convention).
@@ -55,7 +53,7 @@ export default class FormService {
      * @return {boolean}
      */
     static hasSubmitLinkRel(form) {
-        return matches(form, /^submit$/);
+        return link.matches(form, /^submit$/);
     }
 
     /**
@@ -76,7 +74,7 @@ export default class FormService {
          * @return {Function} semantic link function type
          **/
         function verb(form, contextRepresentation) {
-            const [weblink] = filter(form, /^submit$/);
+            const [weblink] = link.filter(form, /^submit$/);
 
             if (weblink) {
                 // if it has a web link type use explicit if know type
@@ -100,7 +98,7 @@ export default class FormService {
                 return link.post;
             } else {
                 log.debug('[Form] using PUT on resource');
-                return put;
+                return link.put;
             }
         }
 
@@ -131,7 +129,7 @@ export default class FormService {
      */
     static loadFormFrom401BearerChallenge(error) {
         return loader.limiter.schedule(() => axios.get(getAuthenticationUri(error)))
-            .then(response => get(response.data, getBearerLinkRelation(error)))
+            .then(response => link.get(response.data, getBearerLinkRelation(error)))
             .then(authenticateCollection => {
                 return loader.limiter.schedule(() => link.get(authenticateCollection.data, /create-form/))
                     .then(authenticateLoginRepresentation => {

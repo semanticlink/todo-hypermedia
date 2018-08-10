@@ -1,5 +1,5 @@
-import { wwwAuthenticate } from './WWWAuthenticate';
-import { expect } from 'chai';
+import * as wwwAuthenticate from './WWWAuthenticate';
+import {expect} from 'chai';
 
 describe('Has Loaded', function () {
     it('Util: wwwAuthenticate', function () {

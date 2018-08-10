@@ -1,7 +1,7 @@
 /* global window document Blob */
 
 // https://stackoverflow.com/questions/13405129/javascript-create-and-save-file
-const saveToFile = (data, filename, type) => {
+export const saveToFile = (data, filename, type) => {
     const file = new Blob([data], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
         window.navigator.msSaveOrOpenBlob(file, filename);
@@ -32,7 +32,7 @@ const saveToFile = (data, filename, type) => {
  *
  * @param {string} str
  */
-const copyToClipboard = str => {
+export const copyToClipboard = str => {
     /**
      * Create a new textarea that has the value to be copied
      * @returns {HTMLTextAreaElement}
@@ -62,5 +62,3 @@ const copyToClipboard = str => {
     cleanup(el);
 
 };
-
-export { saveToFile, copyToClipboard };
