@@ -75,7 +75,7 @@ export const mapWaitAll = (collection, iterator, context) => Promise.all(normali
  *
  * @example
  *
- *  const doc = mapObjectWaitAll(
+ *  const doc = mapAttributeWaitAll(
  *      resource,
  *      (field, fieldname) =>  // some promise call,
  *      dashToCamel
@@ -181,10 +181,9 @@ export const sequentialMapWait = (...promises) => {
 export const AsyncCollectionMixins = {
     waitAll,
     mapWaitAll,
-    mapObjectWaitAll: mapAttributeWaitAll,
+    mapAttributeWaitAll,
     flattenWaitAll,
     mapFlattenWaitAll,
-    reduceWaitAll: sequentialWait,
-    sequentialWaitAll: sequentialWait,
+    sequentialWait,
     sequentialMapWait
 };

@@ -62,7 +62,7 @@ export default class ResourceMerger {
      */
     resolveFields(doc, form, options) {
 
-        return _(doc).mapObjectWaitAll(
+        return _(doc).mapAttributeWaitAll(
             (textUriOrResource, field) => {
 
                 const resolveFieldToFieldByType = (textUriOrResource, formItem, options) => {
@@ -277,7 +277,7 @@ export default class ResourceMerger {
             return Promise.resolve({});
         }
 
-        return _(resource.links).reduceWaitAll(
+        return _(resource.links).sequentialWait(
             (memo, aLink) => {
 
                 const containsLinkRel = (arr, doc, rel) => (_(arr).contains(rel) && !doc[rel]);

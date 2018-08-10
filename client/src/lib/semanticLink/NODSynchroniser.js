@@ -62,14 +62,14 @@ export default class NODSynchroniser {
      * @return {Promise.<void>}
      */
     static tailRecursionThroughStrategies(strategies, options, syncInfos) {
-        return _(strategies).sequentialWaitAll((unusedMemo, strategy) => {
+        return _(strategies).sequentialWait((unusedMemo, strategy) => {
 
             if (options.childStrategyBatchSize === 0 || _(options.childStrategyBatchSize).isUndefined()) {
                 // invoke a parallel strategy when want to go for it
                 return _(syncInfos).mapWaitAll(syncInfo => strategy(syncInfo.resource, syncInfo.document, options));
             } else {
                 // invoke a sequential strategy - and for now, single at a time
-                return _(syncInfos).sequentialWaitAll((unusedMemo2, syncInfo) => strategy(syncInfo.resource, syncInfo.document, options));
+                return _(syncInfos).sequentialWait((unusedMemo2, syncInfo) => strategy(syncInfo.resource, syncInfo.document, options));
             }
 
         });
@@ -395,7 +395,7 @@ export default class NODSynchroniser {
                 return nodMaker
                     .updateResource(resource, resourceDocument, options)
                     .then(() => _(strategies)
-                        .sequentialWaitAll((memo, strategy) => {
+                        .sequentialWait((memo, strategy) => {
                             if (strategy) {
 
                                 if (!_(strategy).isFunction()) {
@@ -540,7 +540,7 @@ export default class NODSynchroniser {
                         return nodMaker
                             .updateResource(singletonResource, parentDocument[singletonName], options)
                             .then(() => _(strategies)
-                                .sequentialWaitAll((memo, strategy) => {
+                                .sequentialWait((memo, strategy) => {
                                     if (strategy) {
 
                                         if (!_(strategy).isFunction()) {
