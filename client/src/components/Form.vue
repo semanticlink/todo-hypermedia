@@ -63,7 +63,7 @@
 </template>
 
 <script>
-    import {mapApiToUiType} from '../lib/form-type-mappings';
+    import {mapApiToUiType} from 'semantic-link-utils/form-type-mappings';
     import {Datetime} from 'vue-datetime';
     import {DateTime as LuxonDateTime} from 'luxon'
     // You need a specific loader for CSS files

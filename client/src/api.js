@@ -2,7 +2,7 @@
  * Intercept incoming authentication callbacks with Tokens on the hash
  *
  */
-import {authService} from './lib/AuthService';
+import {authService} from 'semantic-link-utils/AuthService';
 
 authService.handleAuthentication();
 authService.scheduleRenewal();
@@ -18,8 +18,8 @@ import Login from './components/Login.vue';
 import Resource from './components/Resource.vue';
 import Spinner from './components/Spinner.vue';
 
-import {setJsonWebTokenOnHeaders} from './lib/http-interceptors';
-import AuthService from './lib/AuthService';
+import {setJsonWebTokenOnHeaders} from 'semantic-link-utils/http-interceptors';
+import AuthService from 'semantic-link-utils/AuthService';
 
 import BootstrapVue from 'bootstrap-vue';
 import Notifications from 'vue-notification';
@@ -30,9 +30,11 @@ import 'bootstrap-vue/dist/bootstrap-vue.css';
 Vue.use(BootstrapVue);
 Vue.use(Notifications);
 
-import {setInterceptors} from './lib/http-interceptors';
+import EventBus from './lib/EventBus';
+import {setInterceptors, setEventBus} from 'semantic-link-utils/http-interceptors';
 
 setInterceptors({queue401s: false});
+setEventBus(EventBus);
 
 setLogLevel(LogLevel.Debug);
 log.debug('Set log level to DEBUG');

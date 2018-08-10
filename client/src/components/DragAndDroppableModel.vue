@@ -18,7 +18,7 @@
 
 <script>
 
-    import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/dragAndDropModel';
+    import {dragend, dragenter, dragleave, dragover, dragstart, drop} from 'semantic-link-utils/dragAndDropModel';
     import {log} from 'logger';
     import EventBus from "../lib/EventBus";
 

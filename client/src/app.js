@@ -2,7 +2,7 @@
  * Intercept incoming authentication callbacks with Tokens on the hash
  *
  */
-import {authService} from './lib/AuthService';
+import {authService} from 'semantic-link-utils/AuthService';
 
 authService.handleAuthentication();
 
@@ -14,14 +14,19 @@ import router from './router';
 import {LogLevel, setLogLevel, log} from 'logger';
 import VueLocalStorage from 'vue-localstorage';
 
-import {uriMapping} from './lib/UriMapping';
+import {uriMapping} from 'semantic-link-utils/UriMapping';
 import {filter} from 'semantic-link';
 
 
 import App from './App.vue';
 
-import {setJsonWebTokenOnHeaders, setInterceptors} from './lib/http-interceptors';
-import AuthService from './lib/AuthService';
+import {
+    setJsonWebTokenOnHeaders,
+    setInterceptors,
+    setEventBus
+} from 'semantic-link-utils/http-interceptors';
+import AuthService from 'semantic-link-utils/AuthService';
+import EventBus from './lib/EventBus';
 
 import BootstrapVue from 'bootstrap-vue';
 import Notifications from 'vue-notification';
@@ -32,7 +37,6 @@ import './styles/todo.css';
 
 Vue.use(BootstrapVue);
 Vue.use(Notifications);
-
 
 setLogLevel(LogLevel.Debug);
 log.debug('Set log level to DEBUG');
@@ -67,6 +71,7 @@ Vue.use(apiPlugin);
 Vue.use(VueLocalStorage, {name: 'localStorage'});
 
 setInterceptors({queue401s: false});
+setEventBus(EventBus);
 
 if (AuthService.accessToken) {
     setJsonWebTokenOnHeaders(AuthService.accessToken);
@@ -82,7 +87,7 @@ new Vue({
     router,
     template: '<App/>',
     components: {App},
-    created(){
+    created() {
 
         const [api,] = filter('HEAD', 'api');
         const apiUri = api.href;

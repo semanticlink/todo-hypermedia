@@ -1,6 +1,6 @@
 import {_, loader} from 'semantic-link-cache';
 import axios from 'axios';
-import {getAuthenticationUri, getBearerLinkRelation} from './http-interceptors';
+import {getAuthenticationUri, getBearerLinkRelation} from './semantic-link-utils/http-interceptors';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 

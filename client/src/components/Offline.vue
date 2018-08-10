@@ -14,7 +14,7 @@
 <script>
   import EventBus, { offline, restored, checking } from '../lib/EventBus';
   import axios from 'axios';
-  import { httpQueue } from '../lib/HTTPQueue';
+  import { httpQueue } from 'semantic-link-utils/HTTPQueue';
   import timeago from '../filters/timeago';
 
   /**

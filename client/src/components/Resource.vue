@@ -68,12 +68,12 @@
     import Logout from './Logout.vue';
     import Headers from './Headers.vue';
     import Form from './Form.vue';
-    import {copyToClipboard, saveToFile} from "../lib/raw-helpers";
+    import {copyToClipboard, saveToFile} from "semantic-link-utils/raw-helpers";
     import {LinkedRepresentation, CollectionRepresentation} from 'semantic-link';
     import * as link from 'semantic-link';
     import FormAction from './FormAction.vue';
     import Vue from 'vue';
-    import {fromUriList, makeUriList} from "../lib/dragAndDropModel";
+    import {fromUriList, makeUriList} from "semantic-link-utils/dragAndDropModel";
     import {compare, deepClone} from 'fast-json-patch'
     import bTabs from 'bootstrap-vue/es/components/tabs/tabs';
     import bTab from 'bootstrap-vue/es/components/tabs/tab';

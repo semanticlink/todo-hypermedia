@@ -45,6 +45,7 @@ const clientConfig = {
             // vendor checked in libraries (perhaps we can dependency manage these?
             // we use this library alot so we will treat it like an independent library in the imports
             'semantic-link-cache': path.resolve(__dirname, 'src/lib/semantic-link-cache'),
+            'semantic-link-utils': path.resolve(__dirname, 'src/lib/semantic-link-utils'),
 
             domain: path.resolve(__dirname, 'src/domain'),
             router: path.resolve(__dirname, 'src/router'),

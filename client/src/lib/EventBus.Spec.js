@@ -1,5 +1,7 @@
-import EventBus, { authRequired } from './EventBus';
-import { expect } from 'chai';
+import EventBus from './EventBus';
+import {expect} from 'chai';
+
+const authRequired = 'event:message';
 
 describe('Event Bus', () => {
 

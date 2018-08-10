@@ -8,8 +8,8 @@
 
 <script>
     import EventBus, {authConfirmed} from '../lib/EventBus';
-    import AuthService from '../lib/AuthService';
-    import {clearJsonWebTokenOnHeaders} from "../lib/http-interceptors";
+    import AuthService from 'semantic-link-utils/AuthService';
+    import {clearJsonWebTokenOnHeaders} from "semantic-link-utils/http-interceptors";
 
     /**
      * Logout:

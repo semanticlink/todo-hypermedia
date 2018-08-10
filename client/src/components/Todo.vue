@@ -67,7 +67,7 @@
     import {redirectToTenant} from 'router';
     import TodoItem from './TodoItem.vue';
     import {defaultTodo, getTenant, getTodos} from "domain/todo";
-    import {mapCompletedToState} from "../lib/form-type-mappings";
+    import {mapCompletedToState} from "semantic-link-utils/form-type-mappings";
 
     /**
      * This component displays and allows updates to the todo list

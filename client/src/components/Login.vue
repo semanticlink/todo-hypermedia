@@ -17,9 +17,9 @@
         setJsonWebTokenOnHeaders,
         getAuthenticationRealm,
         API_AUTH0_REALM, renewToken
-    } from '../lib/http-interceptors';
+    } from 'semantic-link-utils/http-interceptors';
     import Form from './Form.vue';
-    import AuthService from "../lib/AuthService";
+    import AuthService from "semantic-link-utils/AuthService";
 
     /**
      * This is a simple boolean 'lock'. When the event is triggered we don't
