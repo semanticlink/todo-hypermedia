@@ -1,11 +1,11 @@
 /* global JSON */
 
-import _ from './mixins';
+import _ from '../mixins/index';
 import {stateFlagEnum} from './stateFlagEnum';
 import SparseResource from './SparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
-import {loader} from './Loader';
+import {loader} from '../Loader';
 
 const stateFlagName = Symbol('state');
 

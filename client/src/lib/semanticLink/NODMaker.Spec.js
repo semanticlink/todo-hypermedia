@@ -1,9 +1,9 @@
 import {expect} from 'chai';
 import NodMaker from './NODMaker';
 import sinon from 'sinon';
-import State from './State';
+import State from './core/State';
 
-import {stateFlagEnum} from './stateFlagEnum';
+import {stateFlagEnum} from './core/stateFlagEnum';
 
 
 const nodMaker = new NodMaker();

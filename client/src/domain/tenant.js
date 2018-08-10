@@ -4,7 +4,7 @@ import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from '../domain/tags';
 import {findResourceInCollection} from 'semanticLink/mixins/collection';
-import {uriMappingResolver} from 'semanticLink/UriMappingResolver';
+import {uriMappingResolver} from 'semanticLink/sync/UriMappingResolver';
 
 
 export const getTenants = root => nodMaker.getNamedCollectionResource(root, 'tenants', /tenants/);

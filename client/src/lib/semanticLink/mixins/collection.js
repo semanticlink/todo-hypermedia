@@ -1,5 +1,5 @@
 import * as link from 'semantic-link';
-import SparseResource from '../SparseResource';
+import SparseResource from '../core/SparseResource';
 import {log} from 'logger';
 
 /**

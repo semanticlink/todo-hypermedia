@@ -6,7 +6,7 @@ import {nodMaker} from './NODMaker';
 import Differencer from './sync/Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';
-import {uriMappingResolver} from './UriMappingResolver';
+import {uriMappingResolver} from './sync/UriMappingResolver';
 
 /**
  * Internal data structure for working out which active to perform on documents.

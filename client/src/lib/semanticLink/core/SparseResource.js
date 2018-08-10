@@ -9,7 +9,7 @@ import _ from 'underscore';
 /**
  * A set of factory methods to create sparse resources
  */
-class SparseResource {
+export default class SparseResource {
 
     /**
      * Default mapped title between feed items and sparse resources
@@ -132,5 +132,3 @@ class SparseResource {
         return collection;
     }
 }
-
-export default SparseResource;
