@@ -1,4 +1,4 @@
-'use strict';
+
 import _ from '../mixins/index';
 import * as link from 'semantic-link';
 import {log} from 'logger';

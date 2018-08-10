@@ -1,6 +1,4 @@
-'use strict';
-import {cache} from 'semantic-link-cache';
-import PooledCollection from 'semantic-link-cache/sync/PooledCollection';
+import {cache, PooledCollection} from 'semantic-link-cache';
 import {log} from 'logger';
 
 

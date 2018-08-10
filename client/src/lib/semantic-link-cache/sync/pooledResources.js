@@ -1,4 +1,4 @@
-'use strict';
+
 import * as cache from '../cache/cache';
 import PooledCollection from './PooledCollection';
 import {log} from 'logger';

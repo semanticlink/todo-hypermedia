@@ -1,7 +1,7 @@
 import {_} from 'semantic-link-cache';
 import {getUri} from 'semantic-link';
 import {log} from 'logger';
-import {pooledTagResourceResolver} from '../domain/tags';
+import {pooledTagResourceResolver} from 'domain/tags';
 import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
 import {uriMappingResolver, sync, cache} from 'semantic-link-cache';
 
