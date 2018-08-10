@@ -1,7 +1,7 @@
 import {_} from 'semanticLink';
 import * as cache from 'semanticLink/cache';
 import {getUri} from 'semantic-link';
-import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
+import {nodSynchroniser} from 'semanticLink/sync';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from '../domain/tags';
 import {findResourceInCollection} from 'semanticLink/mixins/collection';

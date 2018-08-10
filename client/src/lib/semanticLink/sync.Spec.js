@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import sinon from 'sinon';
 import * as link from 'semantic-link';
-import {nodSynchroniser} from './NODSynchroniser';
+import * as sync from './sync';
 import * as cache from './cache';
 import Differencer from './sync/Differencer';
 import axios from 'axios';
@@ -9,10 +9,10 @@ import axios from 'axios';
 global.Element = () => {
 };
 
-describe('NOD Synchroniser', () => {
+describe('Synchroniser', () => {
 
     it('should load sync', () => {
-        expect(nodSynchroniser).to.not.be.null;
+        expect(sync).to.not.be.null;
     });
 
     describe('getSingleton', () => {
@@ -46,7 +46,7 @@ describe('NOD Synchroniser', () => {
             getResource.returns(Promise.resolve(resource));
             tryGetNamedCollectionResource.returns(Promise.resolve(undefined));
 
-            return nodSynchroniser.getUriListOnNamedCollection(resource, 'notifications', /notifications/, uriList, {})
+            return sync.getUriListOnNamedCollection(resource, 'notifications', /notifications/, uriList, {})
                 .then(result => {
                     expect(result).to.be.undefined;
                 });
@@ -101,7 +101,7 @@ describe('NOD Synchroniser', () => {
             const diffUriList = sinon.stub(Differencer, 'diffUriList')
                 .returns(Promise.resolve([]));
 
-            return nodSynchroniser.getUriListOnNamedCollection(resource, 'notifications', /notifications/, uriList, options)
+            return sync.getUriListOnNamedCollection(resource, 'notifications', /notifications/, uriList, options)
                 .then(result => {
                     expect(getResource.called).to.be.true;
                     expect(tryGetNamedCollectionResource.called).to.be.true;
@@ -149,7 +149,7 @@ describe('NOD Synchroniser', () => {
                     }
                 };
 
-                return nodSynchroniser.getUriListOnNamedCollection([], 'notifications', /notifications/, [], options)
+                return sync.getUriListOnNamedCollection([], 'notifications', /notifications/, [], options)
                     .then(() => {
                         expect(options.resolver.add.called).to.be.true;
                         expect(post.called).to.be.true;
@@ -180,7 +180,7 @@ describe('NOD Synchroniser', () => {
                     }
                 };
 
-                return nodSynchroniser.getUriListOnNamedCollection([], 'notifications', /notifications/, [], options)
+                return sync.getUriListOnNamedCollection([], 'notifications', /notifications/, [], options)
                     .then(() => {
                         sinon.assert.callOrder(diffUriList, del, options.resolver.remove);
                         link.delete.restore();
@@ -209,7 +209,7 @@ describe('NOD Synchroniser', () => {
                     }
                 };
 
-                return nodSynchroniser.getUriListOnNamedCollection({link: []}, 'notifications', /notifications/, [], options)
+                return sync.getUriListOnNamedCollection({link: []}, 'notifications', /notifications/, [], options)
                     .then(() => {
                         expect(del.called).to.be.true;
                         Differencer.diffUriList.restore();
@@ -252,7 +252,7 @@ describe('NOD Synchroniser', () => {
                     const diffUriList = sinon.stub(Differencer, 'diffUriList')
                         .callsFake((x, y, options) => Promise.resolve(options.createStrategy([])));
 
-                    return nodSynchroniser.getUriListOnNamedCollection([], 'notifications', /notifications/, [], options)
+                    return sync.getUriListOnNamedCollection([], 'notifications', /notifications/, [], options)
                         .then(() => {
                             expect(options.resolver.add.called).to.be.true;
                             expect(post.called).to.be.true;
@@ -279,7 +279,7 @@ describe('NOD Synchroniser', () => {
                     sinon.stub(Differencer, 'diffUriList')
                         .callsFake((x, y, options) => Promise.resolve(options.deleteStrategy(['item', 'item2'])));
 
-                    return nodSynchroniser.getUriListOnNamedCollection({link: []}, 'notifications', /notifications/, [], options)
+                    return sync.getUriListOnNamedCollection({link: []}, 'notifications', /notifications/, [], options)
                         .then(() => {
                             expect(del.called).to.be.true;
 
