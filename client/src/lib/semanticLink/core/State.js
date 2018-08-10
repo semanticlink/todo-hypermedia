@@ -589,7 +589,7 @@ export default class State {
                      * of a factory injected from a above. One approach is to make this a class and it is available
                      * from the class scope, alternatively, hand in the factory as part of the options.
                      *
-                     * Third option, push this functionality back up to the nodMaker to where it probably belongs
+                     * Third option, push this functionality back up to the cache to where it probably belongs
                      * and hand through explicitly as a callback factory. See {@links this.addResourceByName} below
                      */
                     return this.makeSparseCollectionItemsFromFeed(collection, options.mappedTitle);

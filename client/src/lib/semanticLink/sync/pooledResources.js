@@ -1,5 +1,5 @@
 'use strict';
-import * as cache from '../NODMaker';
+import * as cache from '../cache';
 import PooledCollection from './PooledCollection';
 import {log} from 'logger';
 

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import * as cache from './NODMaker';
+import * as cache from './cache';
 import sinon from 'sinon';
 import State from './core/State';
 

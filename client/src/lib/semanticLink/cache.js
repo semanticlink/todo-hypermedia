@@ -385,13 +385,13 @@ export function addCollectionResourceItemByUri(collection, resourceUri, defaultV
  * @example:
  *
  *   {
-         *       links: [
-         *           {
-         *               rel: 'self',
-         *               href: 'https://example.com/resource'
-         *           }
-         *       ]
-         *   }
+ *       links: [
+ *           {
+ *               rel: 'self',
+ *               href: 'https://example.com/resource'
+ *           }
+ *       ]
+ *   }
  *
  * @param {LinkedRepresentation} resource
  * @param {UtilOptions=} options

@@ -1,5 +1,5 @@
 'use strict';
-import * as cache from '../lib/semanticLink/NODMaker';
+import * as cache from '../lib/semanticLink/cache';
 import PooledCollection from '../lib/semanticLink/sync/PooledCollection';
 import {log} from 'logger';
 
@@ -16,7 +16,7 @@ import {log} from 'logger';
  *      // extend the options with the resolver
  *      options = {...options, ...pooledTagResourcesResolver(tenant)};
  *
- *      return this.nodMaker
+ *      return cache
  *          .getResource(user)
  *          .then(user =>
  *               sync.getResourceInNamedCollection(user, 'todos', /todos/, userDocument, [], options));

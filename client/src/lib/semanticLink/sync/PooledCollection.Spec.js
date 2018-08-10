@@ -1,7 +1,7 @@
 import PooledCollection from './PooledCollection';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import * as cache from '../NODMaker';
+import * as cache from '../cache';
 
 describe('Pooled collection', () => {
 

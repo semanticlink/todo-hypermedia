@@ -1,4 +1,4 @@
-import * as cache from 'semanticLink/NODMaker';
+import * as cache from 'semanticLink/cache';
 import * as link from 'semantic-link';
 import {TEXT} from '../lib/form-type-mappings';
 import {log} from 'logger';

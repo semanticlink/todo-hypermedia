@@ -1,4 +1,5 @@
-import {nodMaker, _} from 'semanticLink';
+import {_} from 'semanticLink';
+import * as cache from 'semanticLink/cache';
 import {getUri} from 'semantic-link';
 import {nodSynchroniser} from 'semanticLink/NODSynchroniser';
 import {log} from 'logger';
@@ -7,20 +8,20 @@ import {findResourceInCollection} from 'semanticLink/mixins/collection';
 import {uriMappingResolver} from 'semanticLink/sync/UriMappingResolver';
 
 
-export const getTenants = root => nodMaker.getNamedCollectionResource(root, 'tenants', /tenants/);
+export const getTenants = root => cache.getNamedCollectionResource(root, 'tenants', /tenants/);
 
-const getTags = root => nodMaker.tryGetCollectionResourceAndItems(root, 'tags', /tags/);
+const getTags = root => cache.tryGetCollectionResourceAndItems(root, 'tags', /tags/);
 
 export const getTenantAndTodos = root => {
     return Promise.all([getTenants(root), getTags(root)])
-        .then(([tenantCollection]) => nodMaker.tryGetNamedCollectionResourceAndItemsOnCollectionItems(tenantCollection, 'users', /users/))
+        .then(([tenantCollection]) => cache.tryGetNamedCollectionResourceAndItemsOnCollectionItems(tenantCollection, 'users', /users/))
         .then(tenantCollectionItems => _(tenantCollectionItems)
             .mapWaitAll(tenant => _(tenant)
-                .mapFlattenWaitAll(user => nodMaker.tryGetCollectionResourceAndItems(user, 'todos', /todos/)))
+                .mapFlattenWaitAll(user => cache.tryGetCollectionResourceAndItems(user, 'todos', /todos/)))
         )
         .then(userTodoCollectionItems => _([].concat(...userTodoCollectionItems))
             .mapWaitAll(userTodo => _(userTodo)
-                .mapWaitAll(todo => nodMaker.tryGetCollectionResourceAndItems(todo, 'tags', /tags/))))
+                .mapWaitAll(todo => cache.tryGetCollectionResourceAndItems(todo, 'tags', /tags/))))
         .then(() => root);
 };
 

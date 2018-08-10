@@ -1,6 +1,6 @@
 import {findResourceInCollection, findResourceInCollectionByUri} from '../mixins/collection';
 import {log} from 'logger';
-import * as cache from '../NODMaker';
+import * as cache from '../cache';
 import * as link from 'semantic-link';
 
 /**
@@ -15,7 +15,7 @@ import * as link from 'semantic-link';
  *
  * @example
  *
- * import * as nodMaker from './NODMaker';
+ * import * as cache from './cache';
  * import PooledCollection from './sync/PooledCollection';
  * import {log} from 'logger';
  *
@@ -34,7 +34,7 @@ import * as link from 'semantic-link';
  *             });
  *
  *     return {
- *         resourceFactory: linkRel => nodMaker.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
+ *         resourceFactory: linkRel => cache.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
  *         resourceResolver: (type) => {
  *
  *             const rels = {

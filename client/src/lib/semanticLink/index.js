@@ -1,7 +1,7 @@
 import * as link from 'semantic-link';
-import * as nodMaker from './NODMaker';
+import * as cache from './cache';
 import {LogLevel as LEVEL, setLogLevel, log} from 'logger';
 import _ from './mixins/index';
 
 
-export { link, nodMaker, _, log, setLogLevel, LEVEL};
+export { link, cache, _, log, setLogLevel, LEVEL};

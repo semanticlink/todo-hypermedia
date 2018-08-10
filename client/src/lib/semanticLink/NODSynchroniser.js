@@ -2,7 +2,7 @@
 import _ from './mixins';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import * as cache from './NODMaker';
+import * as cache from './cache';
 import Differencer from './sync/Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';

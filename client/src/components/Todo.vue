@@ -62,7 +62,8 @@
 
 <script>
 
-    import {_, nodMaker} from 'semanticLink';
+    import {_} from 'semanticLink';
+    import * as cache from 'semanticLink/cache';
     import {log} from 'logger';
     import {redirectToTenant} from 'router';
     import TodoItem from './TodoItem.vue';
@@ -216,7 +217,7 @@
                          item = Object.assign({}, item, {completed: value});
 
                          */
-                        return nodMaker.updateResource(todo, {...todo, state: mapCompletedToState(value)});
+                        return cache.updateResource(todo, {...todo, state: mapCompletedToState(value)});
                     }))
                         .catch(err => log.error(err));
 
@@ -238,8 +239,8 @@
              * Adds the new todo document into the existing todo collection
              */
             addTodo() {
-                return nodMaker.createCollectionResourceItem(this.todoCollection, {...this.newTodo})
-                    .then(todoResource => nodMaker.getResource(todoResource)
+                return cache.createCollectionResourceItem(this.todoCollection, {...this.newTodo})
+                    .then(todoResource => cache.getResource(todoResource)
                         .then(() => this.reset()))
                     .catch(err => log.error(err));
             }
@@ -252,7 +253,7 @@
             removeAllCompleted() {
                 return Promise
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
-                        .map(todo => nodMaker.deleteCollectionItem(this.todoCollection, todo)))
+                        .map(todo => cache.deleteCollectionItem(this.todoCollection, todo)))
                     .catch(err => log.error(err));
             }
             ,
