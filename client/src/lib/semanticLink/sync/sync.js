@@ -1,12 +1,12 @@
 'use strict';
-import _ from './mixins';
+import _ from '../mixins/index';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import * as cache from './cache';
-import Differencer from './sync/Differencer';
+import * as cache from '../cache/cache';
+import Differencer from './Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';
-import {uriMappingResolver} from './sync/UriMappingResolver';
+import {uriMappingResolver} from './UriMappingResolver';
 
 /**
  * Internal data structure for working out which active to perform on documents.

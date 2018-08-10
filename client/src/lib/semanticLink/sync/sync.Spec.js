@@ -2,8 +2,8 @@ import {expect} from 'chai';
 import sinon from 'sinon';
 import * as link from 'semantic-link';
 import * as sync from './sync';
-import * as cache from './cache';
-import Differencer from './sync/Differencer';
+import * as cache from '../cache/cache';
+import Differencer from './Differencer';
 import axios from 'axios';
 
 global.Element = () => {

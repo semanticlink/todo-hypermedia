@@ -1,5 +1,5 @@
 import * as link from 'semantic-link';
-import * as cache from './cache';
+import * as cache from './cache/cache';
 import {LogLevel as LEVEL, setLogLevel, log} from 'logger';
 import _ from './mixins/index';
 

@@ -1,9 +1,9 @@
 import {expect} from 'chai';
 import * as cache from './cache';
 import sinon from 'sinon';
-import State from './core/State';
+import State from './State';
 
-import {stateFlagEnum} from './core/stateFlagEnum';
+import {stateFlagEnum} from './stateFlagEnum';
 
 global.Element = () => {
 };

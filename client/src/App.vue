@@ -15,7 +15,7 @@
     import Spinner from './components/Spinner.vue';
     import Offline from './components/Offline.vue';
     import Login from './components/Login.vue';
-    import * as cache from 'semanticLink/cache';
+    import * as cache from 'semanticLink/cache/cache';
     import * as link from 'semantic-link';
     import {routeName, routePath} from "router";
 

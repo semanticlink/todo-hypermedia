@@ -1,6 +1,6 @@
 import {findResourceInCollection, findResourceInCollectionByUri} from '../mixins/collection';
 import {log} from 'logger';
-import * as cache from '../cache';
+import * as cache from '../cache/cache';
 import * as link from 'semantic-link';
 
 /**

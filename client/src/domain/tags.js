@@ -1,5 +1,5 @@
 'use strict';
-import * as cache from '../lib/semanticLink/cache';
+import * as cache from '../lib/semanticLink/cache/cache';
 import PooledCollection from '../lib/semanticLink/sync/PooledCollection';
 import {log} from 'logger';
 

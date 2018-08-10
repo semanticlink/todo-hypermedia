@@ -63,7 +63,7 @@
 <script>
 
     import {_} from 'semanticLink';
-    import * as cache from 'semanticLink/cache';
+    import * as cache from 'semanticLink/cache/cache';
     import {log} from 'logger';
     import {redirectToTenant} from 'router';
     import TodoItem from './TodoItem.vue';

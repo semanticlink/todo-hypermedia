@@ -1,10 +1,10 @@
-import _ from './mixins';
-import {stateFlagEnum} from './core/stateFlagEnum';
-import SparseResource from './core/SparseResource';
-import {resourceMerger} from './sync/ResourceMerger';
+import _ from '../mixins/index';
+import {stateFlagEnum} from './stateFlagEnum';
+import SparseResource from './SparseResource';
+import {resourceMerger} from '../sync/ResourceMerger';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import State from './core/State';
+import State from './State';
 
 /**
  *
