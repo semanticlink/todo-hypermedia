@@ -47,7 +47,7 @@ export default class Comparator {
      * @param {LinkedRepresentation} rvalue
      * @return {boolean}
      */
-    static canonicalOrSelf (lvalue, rvalue) {
+    static canonicalOrSelf(lvalue, rvalue) {
         const lUri = link.getUri(lvalue, /self|canonical/);
         const rUri = link.getUri(rvalue, /self|canonical/);
         return !!lUri && lUri === rUri;
@@ -59,9 +59,8 @@ export default class Comparator {
      * @param {Link} lvalue
      * @param {Link} rvalue
      * @return {boolean}
-     * @deprecated use title, older implementations required name for backwards compatibility
      */
-    static name (lvalue, rvalue) {
+    static name(lvalue, rvalue) {
         return !!lvalue.name && lvalue.name && lvalue.name === rvalue.name;
     }
 
@@ -71,10 +70,9 @@ export default class Comparator {
      * @param {Link} lvalue
      * @param {Link} rvalue
      * @return {boolean}
+     * @deprecated use name, older implementations required name for backwards compatibility
      */
-    static title (lvalue, rvalue) {
+    static title(lvalue, rvalue) {
         return !!lvalue.title && lvalue.title && lvalue.title === rvalue.title;
     }
 }
-
-export { Comparator };

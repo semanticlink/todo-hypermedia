@@ -1,11 +1,10 @@
 import _ from './mixins';
 import {log} from 'logger';
-import {Comparator} from './Comparator';
+import Comparator from './Comparator';
 import * as link from 'semantic-link';
 
 /**
-
- * @params {Comparator} comparator
+ * TODO: this is probably two classes inheriting the Differencer interface
  */
 export default class Differencer {
 
@@ -261,8 +260,8 @@ export default class Differencer {
      *  - readonly (do you can't create or delete)
      *  - contribute (you can create and link)
      *
-     * @param {*[]} resourceUriList
-     * @param {*[]} documentUriList
+     * @param {UriList} resourceUriList
+     * @param {UriList} documentUriList
      * @param {UtilOptions} options
      * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} containing [syncInfos, created, updated, deleted]
      */
@@ -270,7 +269,7 @@ export default class Differencer {
 
         const createStrategy = options.createStrategy || (uriList => Promise.resolve(uriList));
         const deleteStrategy = options.deleteStrategy || (uriList => Promise.resolve(uriList));
-        const updateStrategy = options.updateStrategy || (uriList => Promise.resolve(uriList));
+        //const updateStrategy = options.updateStrategy || (uriList => Promise.resolve(uriList));
 
         const all = _(resourceUriList)
             .chain()
