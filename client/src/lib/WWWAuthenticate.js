@@ -1,4 +1,4 @@
-import {_} from '../semantic-link-cache';
+import {_} from './semantic-link-cache/index';
 import {log} from 'logger';
 
 const wwwAuthenticateHeader = 'www-authenticate';

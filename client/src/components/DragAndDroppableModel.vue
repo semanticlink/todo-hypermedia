@@ -18,9 +18,9 @@
 
 <script>
 
-    import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/util/dragAndDropModel';
+    import {dragend, dragenter, dragleave, dragover, dragstart, drop} from '../lib/dragAndDropModel';
     import {log} from 'logger';
-    import EventBus from "../lib/util/EventBus";
+    import EventBus from "../lib/EventBus";
 
     export default {
         name: 'drag-and-droppable-model',

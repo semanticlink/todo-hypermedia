@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import {makeAbsolute, toSitePath} from './lib/util/UriMapping';
+import {makeAbsolute, toSitePath} from './lib/UriMapping';
 import SelectTenant from './components/SelectTenant.vue';
 import Admin from './components/Admin.vue';
 import Todo from './components/Todo.vue';

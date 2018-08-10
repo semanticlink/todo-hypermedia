@@ -73,13 +73,13 @@
     import * as link from 'semantic-link';
     import FormAction from './FormAction.vue';
     import Vue from 'vue';
-    import {fromUriList, makeUriList} from "../lib/util/dragAndDropModel";
+    import {fromUriList, makeUriList} from "../lib/dragAndDropModel";
     import {compare, deepClone} from 'fast-json-patch'
     import bTabs from 'bootstrap-vue/es/components/tabs/tabs';
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
-    import EventBus, {authConfirmed} from '../lib/util/EventBus';
+    import EventBus, {authConfirmed} from '../lib/EventBus';
     import {loader} from 'semantic-link-cache';
 
     import FormDragDrop from './FormDragDrop.vue';

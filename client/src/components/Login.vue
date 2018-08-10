@@ -9,7 +9,7 @@
 </template>
 
 <script>
-    import EventBus, {authRequired, authConfirmed} from '../lib/util/EventBus';
+    import EventBus, {authRequired, authConfirmed} from '../lib/EventBus';
     import {log} from 'logger';
     import {
         getAuthenticationScheme,

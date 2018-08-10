@@ -48,7 +48,7 @@
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
-    import EventBus from "../lib/util/EventBus";
+    import EventBus from "../lib/EventBus";
 
 
     export default {

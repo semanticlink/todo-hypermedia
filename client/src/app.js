@@ -14,7 +14,7 @@ import router from './router';
 import {LogLevel, setLogLevel, log} from 'logger';
 import VueLocalStorage from 'vue-localstorage';
 
-import {uriMapping} from './lib/util/UriMapping';
+import {uriMapping} from './lib/UriMapping';
 import {filter} from 'semantic-link';
 
 

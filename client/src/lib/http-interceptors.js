@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {log} from 'logger';
-import EventBus, {authConfirmed, authRequired, offline, serverError} from './util/EventBus';
-import {httpQueue} from './util/HTTPQueue';
+import EventBus, {authConfirmed, authRequired, offline, serverError} from './EventBus';
+import {httpQueue} from './HTTPQueue';
 import * as authorization from 'auth-header';
 
 /**

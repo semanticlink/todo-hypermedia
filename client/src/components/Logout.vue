@@ -7,7 +7,7 @@
 </template>
 
 <script>
-    import EventBus, {authConfirmed} from '../lib/util/EventBus';
+    import EventBus, {authConfirmed} from '../lib/EventBus';
     import AuthService from '../lib/AuthService';
     import {clearJsonWebTokenOnHeaders} from "../lib/http-interceptors";
 

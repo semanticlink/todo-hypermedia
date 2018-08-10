@@ -12,9 +12,9 @@
 </template>
 
 <script>
-  import EventBus, { offline, restored, checking } from '../lib/util/EventBus';
+  import EventBus, { offline, restored, checking } from '../lib/EventBus';
   import axios from 'axios';
-  import { httpQueue } from '../lib/util/HTTPQueue';
+  import { httpQueue } from '../lib/HTTPQueue';
   import timeago from '../filters/timeago';
 
   /**
