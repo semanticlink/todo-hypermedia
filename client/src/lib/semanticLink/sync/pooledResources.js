@@ -1,6 +1,6 @@
 'use strict';
-import {nodMaker} from './NODMaker';
-import PooledCollection from './sync/PooledCollection';
+import {nodMaker} from '../NODMaker';
+import PooledCollection from './PooledCollection';
 import {log} from 'logger';
 
 /**

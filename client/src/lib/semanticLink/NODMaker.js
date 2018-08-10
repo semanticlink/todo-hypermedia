@@ -1,7 +1,7 @@
 import _ from './mixins';
 import {stateFlagEnum} from './stateFlagEnum';
 import SparseResource from './SparseResource';
-import {resourceMerger} from './ResourceMerger';
+import {resourceMerger} from './sync/ResourceMerger';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 import State from './State';

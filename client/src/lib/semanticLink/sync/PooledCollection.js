@@ -1,6 +1,6 @@
-import { findResourceInCollection, findResourceInCollectionByUri } from '../mixins/collection';
+import {findResourceInCollection, findResourceInCollectionByUri} from '../mixins/collection';
 import {log} from 'logger';
-import { nodMaker } from '../NODMaker';
+import {nodMaker} from '../NODMaker';
 import * as link from 'semantic-link';
 
 /**
@@ -13,15 +13,57 @@ import * as link from 'semantic-link';
  *
  * When pooled collection is read-only then no resources may be added from other contexts.
  *
+ * @example
+ *
+ * import {nodMaker} from './NODMaker';
+ * import PooledCollection from './sync/PooledCollection';
+ * import {log} from 'logger';
+ *
+ * export default function (contextResource) {
+ *
+ *     let resolve = (collectionName, collectionRel, type) =>
+ *         (resource, options) => PooledCollection
+ *             .getResourceInNamedCollection(contextResource, collectionName, collectionRel, resource, options)
+ *             .then(document => {
+ *                 if (document) {
+ *                     return document;
+ *                 } else {
+ *                     log.error(`TODO: make new pooled resource: ${type} '${resource.name || ''}'`);
+ *                     return undefined;
+ *                 }
+ *             });
+ *
+ *     return {
+ *         resourceFactory: linkRel => nodMaker.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
+ *         resourceResolver: (type) => {
+ *
+ *             const rels = {
+ *                 role: resolve('roles', /roles/, type),
+ *             };
+ *
+ *             if (rels[type]) {
+ *                 return rels[type];
+ *             } else {
+ *                 log.info(`Unable to resolve pooled resource '${type}', available: [${Object.keys(rels).join(',')}]`);
+ *                 return () => Promise.resolve(undefined);
+ *             }
+ *         }
+ *     };
+ *
+ * }
+ *
  */
 export default class PooledCollection {
 
-    static get defaultResolver () {
+    static get defaultResolver() {
         return {
             resolve: u => u,
-            remove: () => {},
-            add: () => {},
-            update: () => {}
+            remove: () => {
+            },
+            add: () => {
+            },
+            update: () => {
+            }
         };
     }
 
@@ -33,7 +75,7 @@ export default class PooledCollection {
      * @return {*}
      * @private
      */
-    static resolve (document, resource, options) {
+    static resolve(document, resource, options) {
         if (link.matches(document, /self|canonical/)) {
             (options.resolver || PooledCollection.defaultResolver).add(
                 link.getUri(document, /self|canonical/),
@@ -50,7 +92,7 @@ export default class PooledCollection {
      * @return {Promise} containing the created resource
      * @private
      */
-    static makeAndResolveResource (collectionResource, resourceDocument, options) {
+    static makeAndResolveResource(collectionResource, resourceDocument, options) {
         return nodMaker
             .createCollectionResourceItem(collectionResource, resourceDocument, options)
             .then(createdResource => {
@@ -69,7 +111,7 @@ export default class PooledCollection {
      * @param {UtilOptions} options
      * @return {Promise} containing the uri resource {@link LinkedRepresentation}
      */
-    static getResourceInNamedCollection (parentResource, collectionName, collectionRel, resourceDocument, options) {
+    static getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, options) {
 
         options = Object.assign({}, {mappedTitle: 'name'}, options);
 
