@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import * as link from 'semantic-link';
 import {nodSynchroniser} from './NODSynchroniser';
 import {nodMaker} from './NODMaker';
-import Differencer from './Differencer';
+import Differencer from './sync/Differencer';
 import axios from 'axios';
 
 global.Element = () => {
