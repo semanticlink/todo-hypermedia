@@ -1,5 +1,5 @@
 'use strict';
-import {nodMaker} from '../NODMaker';
+import * as cache from '../NODMaker';
 import PooledCollection from './PooledCollection';
 import {log} from 'logger';
 
@@ -23,7 +23,7 @@ export default function (contextResource) {
             });
 
     return {
-        resourceFactory: linkRel => nodMaker.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
+        resourceFactory: linkRel => cache.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
         resourceResolver: (type/*, context */) => {
 
             const rels = {

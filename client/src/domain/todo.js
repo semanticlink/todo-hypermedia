@@ -1,4 +1,4 @@
-import {nodMaker} from 'semanticLink';
+import * as cache from 'semanticLink/NODMaker';
 import * as link from 'semantic-link';
 import {TEXT} from '../lib/form-type-mappings';
 import {log} from 'logger';
@@ -10,10 +10,10 @@ import {log} from 'logger';
  * @returns {Promise<TenantRepresentation>}
  */
 const getTenant = (apiResource, tenantUri) => {
-    return nodMaker
+    return cache
         .getResource(apiResource)
-        .then(apiResource => nodMaker.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
-        .then(tenants => nodMaker.getCollectionResourceItemByUri(tenants, tenantUri));
+        .then(apiResource => cache.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
+        .then(tenants => cache.getCollectionResourceItemByUri(tenants, tenantUri));
 };
 
 /**
@@ -25,8 +25,8 @@ const getTenant = (apiResource, tenantUri) => {
 const getTodos = (apiResource, tenantUri) => {
     log.debug(`Looking for todos in tenant ${tenantUri}`);
 
-    return nodMaker.getSingletonResource(apiResource, 'me', /me/)
-        .then(me => nodMaker.getNamedCollectionResourceAndItems(me, 'todos', /todos/));
+    return cache.getSingletonResource(apiResource, 'me', /me/)
+        .then(me => cache.getNamedCollectionResourceAndItems(me, 'todos', /todos/));
 };
 
 
@@ -41,9 +41,9 @@ const getTodos = (apiResource, tenantUri) => {
  * @returns {Promise<any>}
  */
 const defaultTodo = todoResource => {
-    return nodMaker
+    return cache
         .getResource(todoResource)
-        .then(todoCollection => nodMaker.getSingletonResource(todoCollection, 'createForm', /create-form/))
+        .then(todoCollection => cache.getSingletonResource(todoCollection, 'createForm', /create-form/))
         .catch(() => log.error(`No create form for on '${link.getUri(todoResource, /self/)}'`))
         .then(form => {
             const obj = {};

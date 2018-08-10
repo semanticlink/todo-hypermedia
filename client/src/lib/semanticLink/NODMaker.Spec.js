@@ -1,12 +1,13 @@
 import {expect} from 'chai';
-import NodMaker from './NODMaker';
+import * as cache from './NODMaker';
 import sinon from 'sinon';
 import State from './core/State';
 
 import {stateFlagEnum} from './core/stateFlagEnum';
 
+global.Element = () => {
+};
 
-const nodMaker = new NodMaker();
 
 /**
  * Increasing counter to create new & unique resource names
@@ -24,25 +25,25 @@ const uniqueUri = prefix => prefix || 'http://example.com/' + (++repCount);
 describe('NOD Maker', () => {
     let linkedRepresentation, feedRepresentation;
 
-    describe('Synch: nodMaker simple functions - synchronise', () => {
+    describe('Synch: cache simple functions - synchronise', () => {
 
         describe('Unknown state', () => {
             beforeEach(() => {
-                linkedRepresentation = nodMaker.makeSparseResourceFromUri(uniqueUri());
+                linkedRepresentation = cache.makeSparseResourceFromUri(uniqueUri());
             });
 
             describe('makeUnknownResourceAddedToResource', () => {
 
                 it('Does not add a tracked resource into state when attribute of same name exists', () => {
                     linkedRepresentation.name = 'N';
-                    const result = nodMaker.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
+                    const result = cache.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.equal('N');
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.false;
                 });
 
                 it('Does add a tracked resource into state when attribute of same name does not exist', () => {
-                    const result = nodMaker.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
+                    const result = cache.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.not.be.null;
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
@@ -50,7 +51,7 @@ describe('NOD Maker', () => {
                 });
 
                 it('Makes a new one with defaults', () => {
-                    const result = nodMaker.makeUnknownResourceAddedToResource(linkedRepresentation, 'name', {
+                    const result = cache.makeUnknownResourceAddedToResource(linkedRepresentation, 'name', {
                         attr1: 'value'
                     });
                     expect(result.attr1).to.equal('value');
@@ -65,14 +66,14 @@ describe('NOD Maker', () => {
 
             describe('makeUnknownCollectionAddedToResource', () => {
                 it('Does not add a tracked resource into state when attribute of same name exists', () => {
-                    const feed = nodMaker.makeSparseResourceFromUri(uniqueUri());
+                    const feed = cache.makeSparseResourceFromUri(uniqueUri());
                     feed.items = [
                         {id: uniqueUri(), title: 'a'},
                         {id: uniqueUri(), title: 'b'},
                     ];
                     linkedRepresentation.name = feed;
 
-                    const result = nodMaker.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
+                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.equal(feed);
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.false;
@@ -80,7 +81,7 @@ describe('NOD Maker', () => {
                 });
 
                 it('Does add a tracked resource into state when attribute of same name does not exist', () => {
-                    const result = nodMaker.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
+                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.not.be.null;
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
@@ -88,7 +89,7 @@ describe('NOD Maker', () => {
                 });
 
                 it('Makes a new one with defaults including empty items attribute', () => {
-                    const result = nodMaker.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', {
+                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', {
                         attr1: 'value'
                     });
                     expect(result.attr1).to.equal('value');
@@ -104,7 +105,7 @@ describe('NOD Maker', () => {
                             title: 'bla'
                         }]
                     };
-                    const result = nodMaker.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', defaultValues);
+                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', defaultValues);
                     expect(result.attr1).to.equal('value');
                     expect(result.items.length).to.equal(1);
                     expect(result.items[0].id).to.equal('http://example.com');
@@ -114,17 +115,17 @@ describe('NOD Maker', () => {
 
             describe('makeUnknownResourceAddedToCollection', () => {
                 beforeEach(() => {
-                    feedRepresentation = nodMaker.makeSparseCollectionResourceFromUri(uniqueUri());
+                    feedRepresentation = cache.makeSparseCollectionResourceFromUri(uniqueUri());
                 });
                 it('Does add a new item to the collection', () => {
-                    const result = nodMaker.makeUnknownResourceAddedToCollection(feedRepresentation);
+                    const result = cache.makeUnknownResourceAddedToCollection(feedRepresentation);
 
                     expect(result).to.not.be.null;
                     expect(feedRepresentation.items).to.deep.equal([result]);
                 });
 
                 it('Makes a new one with defaults', () => {
-                    const result = nodMaker.makeUnknownResourceAddedToCollection(feedRepresentation, {
+                    const result = cache.makeUnknownResourceAddedToCollection(feedRepresentation, {
                         extra: 3
                     });
                     expect(result.extra).to.equal(3);
@@ -138,12 +139,12 @@ describe('NOD Maker', () => {
 
             describe('addCollectionResourceItemByUri', () => {
                 beforeEach(() => {
-                    feedRepresentation = nodMaker.makeSparseCollectionResourceFromUri(uniqueUri());
+                    feedRepresentation = cache.makeSparseCollectionResourceFromUri(uniqueUri());
                 });
 
                 it('add', () => {
                     const uri = uniqueUri();
-                    const result = nodMaker.addCollectionResourceItemByUri(feedRepresentation, uri);
+                    const result = cache.addCollectionResourceItemByUri(feedRepresentation, uri);
 
                     expect(result.links).to.deep.equal([{rel: 'self', href: uri}]);
                     expect(feedRepresentation.items).to.deep.equal([result]);
@@ -155,7 +156,7 @@ describe('NOD Maker', () => {
                     const defaultLinked = {
                         extra: 3
                     };
-                    const result = nodMaker.addCollectionResourceItemByUri(feedRepresentation, uniqueUri(), defaultLinked);
+                    const result = cache.addCollectionResourceItemByUri(feedRepresentation, uniqueUri(), defaultLinked);
 
                     expect(result.extra).to.equal(3);
                     expect(result.items).to.be.undefined;
@@ -165,7 +166,7 @@ describe('NOD Maker', () => {
 
     });
 
-    describe('Async: nodMaker get/add resources - async promised-based', () => {
+    describe('Async: cache get/add resources - async promised-based', () => {
 
         describe('getResource', () => {
 
@@ -176,7 +177,7 @@ describe('NOD Maker', () => {
                         getResource: () => Promise.resolve({x: 4, links: []})
                     });
 
-                return nodMaker.getResource({})
+                return cache.getResource({})
                     .then(newResource => {
                         expect(newResource.x).to.equal(4);
                         expect(newResource.links).to.not.be.null;
@@ -197,7 +198,7 @@ describe('NOD Maker', () => {
                         getResource: () => Promise.resolve({x: 4, links: []})
                     });
 
-                return nodMaker.tryGetResource({})
+                return cache.tryGetResource({})
                     .then(newResource => {
                         expect(newResource.x).to.equal(4);
                         expect(newResource.links).to.not.be.null;
@@ -212,7 +213,7 @@ describe('NOD Maker', () => {
                 let stateFactory = sinon.stub(State, 'tryGet')
                     .returns(undefined);
 
-                return nodMaker.tryGetResource({}, undefined)
+                return cache.tryGetResource({}, undefined)
                     .then(newResource => {
                         expect(newResource).not.to.not.be.null;
                         expect(stateFactory.called).to.be.true;

@@ -1,5 +1,5 @@
 'use strict';
-import {nodMaker} from '../lib/semanticLink/NODMaker';
+import * as cache from '../lib/semanticLink/NODMaker';
 import PooledCollection from '../lib/semanticLink/sync/PooledCollection';
 import {log} from 'logger';
 
@@ -39,7 +39,7 @@ export function pooledTagResourceResolver(contextResource) {
             });
 
     return {
-        resourceFactory: linkRel => nodMaker.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
+        resourceFactory: linkRel => cache.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
         resourceResolver: (type/*, context */) => {
 
             const rels = {

@@ -1,6 +1,6 @@
 import {findResourceInCollection, findResourceInCollectionByUri} from '../mixins/collection';
 import {log} from 'logger';
-import {nodMaker} from '../NODMaker';
+import * as cache from '../NODMaker';
 import * as link from 'semantic-link';
 
 /**
@@ -15,7 +15,7 @@ import * as link from 'semantic-link';
  *
  * @example
  *
- * import {nodMaker} from './NODMaker';
+ * import * as nodMaker from './NODMaker';
  * import PooledCollection from './sync/PooledCollection';
  * import {log} from 'logger';
  *
@@ -93,7 +93,7 @@ export default class PooledCollection {
      * @private
      */
     static makeAndResolveResource(collectionResource, resourceDocument, options) {
-        return nodMaker
+        return cache
             .createCollectionResourceItem(collectionResource, resourceDocument, options)
             .then(createdResource => {
                 log.info(`Pooled: created ${link.getUri(createdResource, /self|canonical/)}`);
@@ -115,7 +115,7 @@ export default class PooledCollection {
 
         options = Object.assign({}, {mappedTitle: 'name'}, options);
 
-        return nodMaker
+        return cache
             .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
             .then(collectionResource => {
 

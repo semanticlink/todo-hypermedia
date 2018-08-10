@@ -1,7 +1,7 @@
 import PooledCollection from './PooledCollection';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { nodMaker } from '../NODMaker';
+import * as cache from '../NODMaker';
 
 describe('Pooled collection', () => {
 
@@ -27,7 +27,7 @@ describe('Pooled collection', () => {
         roles: pooledCollection
     };
 
-    sinon.stub(nodMaker, 'getNamedCollectionResource')
+    sinon.stub(cache, 'getNamedCollectionResource')
         .callsFake(() => Promise.resolve(pooledCollection));
 
     describe('strategy one & two: it is simply found map it based on self and/or mappedTitle', () => {
@@ -121,14 +121,14 @@ describe('Pooled collection', () => {
                 name: 'NewRole'
             };
 
-            sinon.stub(nodMaker, 'createCollectionResourceItem')
+            sinon.stub(cache, 'createCollectionResourceItem')
                 .callsFake(() => Promise.resolve(createdResource));
 
             return PooledCollection
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.equal(createdResource);
-                    nodMaker.createCollectionResourceItem.restore();
+                    cache.createCollectionResourceItem.restore();
                 });
 
         });
@@ -161,7 +161,7 @@ describe('Pooled collection', () => {
                 name: 'UtterlyNewRole'
             };
 
-            sinon.stub(nodMaker, 'createCollectionResourceItem')
+            sinon.stub(cache, 'createCollectionResourceItem')
                 .callsFake(() => Promise.resolve(createdResource));
 
             return PooledCollection
@@ -169,7 +169,7 @@ describe('Pooled collection', () => {
                 .then(representation => {
                     expect(representation).to.equal(createdResource);
                     expect(addResolverCalled).to.be.false;
-                    nodMaker.createCollectionResourceItem.restore();
+                    cache.createCollectionResourceItem.restore();
                 });
         });
 

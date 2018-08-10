@@ -51,7 +51,7 @@
      *
      */
 
-    import {nodMaker} from 'semanticLink';
+    import * as cache from 'semanticLink/NODMaker';
     import * as link from 'semantic-link';
     import {log} from 'logger';
     import {mapCompletedToState, mapStateToCompleted} from "../lib/form-type-mappings";
@@ -110,7 +110,7 @@
                 // Fancy ui needs to make bool --> state (yuck)
                 this.editItem.state = mapCompletedToState(this.editItem.completed);
 
-                return nodMaker.updateResource(this.item, this.editItem)
+                return cache.updateResource(this.item, this.editItem)
                 // really we should get a copy from the server
                     .then(() => this.item.completed = mapStateToCompleted(this.editItem.state))
                     .then(() => this.reset())
@@ -121,7 +121,7 @@
              * Flush the delete back through the collection server-side
              */
             remove() {
-                return nodMaker.deleteCollectionItem(this.collection, this.item);
+                return cache.deleteCollectionItem(this.collection, this.item);
             },
 
             /**

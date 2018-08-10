@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import sinon from 'sinon';
 import * as link from 'semantic-link';
 import {nodSynchroniser} from './NODSynchroniser';
-import {nodMaker} from './NODMaker';
+import * as cache from './NODMaker';
 import Differencer from './sync/Differencer';
 import axios from 'axios';
 
@@ -33,9 +33,9 @@ describe('NOD Synchroniser', () => {
 
     xdescribe('getUriListOnNamedCollection', () => {
 
-        const getResource = sinon.stub(nodMaker, 'getResource');
-        const tryGetNamedCollectionResource = sinon.stub(nodMaker, 'tryGetNamedCollectionResource');
-        const getCollectionResourceAndItems = sinon.stub(nodMaker, 'getCollectionResourceAndItems');
+        const getResource = sinon.stub(cache, 'getResource');
+        const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
+        const getCollectionResourceAndItems = sinon.stub(cache, 'getCollectionResourceAndItems');
 
         it('should return undefined on no singleton rel found', () => {
             let uriList = ['http://example.com/question/item/1'];

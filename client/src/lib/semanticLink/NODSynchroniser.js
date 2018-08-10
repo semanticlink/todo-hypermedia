@@ -2,7 +2,7 @@
 import _ from './mixins';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import {nodMaker} from './NODMaker';
+import * as cache from './NODMaker';
 import Differencer from './sync/Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';
@@ -159,12 +159,12 @@ export default class NODSynchroniser {
 
         // check whether to update or create
         if (collectionItemResource && !options.forceCreate) {
-            return nodMaker
+            return cache
             // synchronise the item in the collection from the server
                 .getCollectionResourceItem(collectionResource, collectionItemResource)
                 .then(item => {
                     // and update the resource back to the server and return it
-                    return nodMaker.updateResource(item, resourceDocument, options);
+                    return cache.updateResource(item, resourceDocument, options);
                 })
                 .then(resource => ({
                     resource: resource,
@@ -173,12 +173,12 @@ export default class NODSynchroniser {
                 }));
 
         } else {
-            return nodMaker
+            return cache
             // add the document to the collection a
                 .createCollectionResourceItem(collectionResource, resourceDocument, options)
                 .then(item => {
                     // ensure the resource is returned
-                    return nodMaker.getResource(item);
+                    return cache.getResource(item);
                 })
                 .then(resource => ({
                     resource: resource,
@@ -207,7 +207,7 @@ export default class NODSynchroniser {
          * Delete a resource from the local state cache
          */
         const deleteResourceAndUpdateResolver = (deleteResource) => {
-            return nodMaker
+            return cache
                 .deleteCollectionItem(collectionResource, deleteResource, options)
                 .then(result => {
                     resolver.remove(link.getUri(deleteResource, /self|canonical/));
@@ -221,8 +221,8 @@ export default class NODSynchroniser {
          * real resource in our network.
          */
         const updateResourceAndUpdateResolver = (updateResource, updateDataDocument) => {
-            return nodMaker.getResource(updateResource)
-                .then(updateResource => nodMaker.tryUpdateResource(updateResource, updateDataDocument))
+            return cache.getResource(updateResource)
+                .then(updateResource => cache.tryUpdateResource(updateResource, updateDataDocument))
                 .then(updateResource => {
                     resolver.update(
                         link.getUri(updateDataDocument, /self|canonical/),
@@ -239,7 +239,7 @@ export default class NODSynchroniser {
          * @return {?LinkedRepresentation} the new resource
          */
         const createResourceAndUpdateResolver = (createDataDocument) => {
-            return nodMaker
+            return cache
                 .createCollectionResourceItem(collectionResource, createDataDocument, options)
                 .then(result => {
                     resolver.add(
@@ -268,7 +268,7 @@ export default class NODSynchroniser {
                         [itemUri]);
                 }
             });
-            return nodMaker
+            return cache
                 .deleteCollectionItem(collectionResource, deleteResource, options)
                 .then(result => {
                     resolver.remove(link.getUri(deleteResource, /self|canonical/));
@@ -294,7 +294,7 @@ export default class NODSynchroniser {
          */
         const addContributeOnlyResourceAndUpdateResolver = (createDataDocument) => {
 
-            return nodMaker
+            return cache
                 .createCollectionResourceItem(collectionResource, createDataDocument, options)
                 .then(result => {
                     resolver.add(
@@ -390,9 +390,9 @@ export default class NODSynchroniser {
     getResource(resource, resourceDocument, strategies, options = {}) {
         log.debug(`[Sync] resource ${link.getUri(resource, /self/)}`);
 
-        return nodMaker.getResource(resource, options)
+        return cache.getResource(resource, options)
             .then(resource => {
-                return nodMaker
+                return cache
                     .updateResource(resource, resourceDocument, options)
                     .then(() => _(strategies)
                         .sequentialWait((memo, strategy) => {
@@ -425,7 +425,7 @@ export default class NODSynchroniser {
 
         log.debug(`[Sync] collection ${link.getUri(parentResource, /self/)} with '${link.getUri(resourceDocument, /self/) || resourceDocument.name}'`);
 
-        return nodMaker
+        return cache
             .getCollectionResource(parentResource, _({}).defaults(options, {mappedTitle: 'name'}))
             .then(collectionResource => this.syncResourceInCollection(collectionResource, resourceDocument, options))
             .then(NODSynchroniser.syncInfos(strategies, options));
@@ -447,7 +447,7 @@ export default class NODSynchroniser {
 
         options = {...options, ...{mappedTitle: 'name'}};
 
-        return nodMaker
+        return cache
             .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
             .then(collectionResource => {
 
@@ -459,7 +459,7 @@ export default class NODSynchroniser {
                 return this.synchroniseCollection(collectionResource, collectionDocument, options)
                 // returns [infos, createResults, updateItems, deleteItems], we'll just have 'infos'
                     .then(([syncInfos]) => {
-                        return nodMaker
+                        return cache
                         // populate the potentially sparse collection - we need to ensure that
                         // any existing ones (old) are not stale and that any just created (sparse)
                         // are hydrated
@@ -503,7 +503,7 @@ export default class NODSynchroniser {
 
         log.debug(`[Sync] resource '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
 
-        return nodMaker
+        return cache
         // ensure that the collection is added to the parent resource
             .getNamedCollectionResource(parentResource, collectionName, collectionRel, Object.assign({}, options, {mappedTitle: 'name'}))
             .then(collectionResource => this.syncResourceInCollection(collectionResource, resourceDocument, options))
@@ -528,16 +528,16 @@ export default class NODSynchroniser {
 
         log.debug(`[Sync] singleton '${singletonName}' on ${link.getUri(parentResource, /self/)}`);
 
-        return nodMaker
+        return cache
             .getResource(parentResource)
-            .then(resource => nodMaker
+            .then(resource => cache
                 .tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options)
                 .then(singletonResource => {
                     if (!singletonResource) {
                         log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${link.getUri(parentResource, /self/)}`);
                         return Promise.resolve(resource);
                     } else {
-                        return nodMaker
+                        return cache
                             .updateResource(singletonResource, parentDocument[singletonName], options)
                             .then(() => _(strategies)
                                 .sequentialWait((memo, strategy) => {
@@ -703,9 +703,9 @@ export default class NODSynchroniser {
 
         log.debug(`[Sync] uriList '${uriListName}' on ${link.getUri(parentResource, /self/)}`);
 
-        return nodMaker
+        return cache
             .getResource(parentResource)
-            .then(resource => nodMaker
+            .then(resource => cache
                 .tryGetNamedCollectionResource(resource, uriListName, uriListRel, options)
                 .then(collection => {
                     if (!collection) {
@@ -717,7 +717,7 @@ export default class NODSynchroniser {
                         // note discarding synch infos (not sure why)
                             .then(() => {
                                 options = {...options, forceLoad: true};
-                                return nodMaker.getCollectionResourceAndItems(collection, options);
+                                return cache.getCollectionResourceAndItems(collection, options);
                             });
                     }
                 }));
@@ -737,9 +737,9 @@ export default class NODSynchroniser {
     patchUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {
 
         log.debug(`[Sync] uriList '${uriListName}' on ${link.getUri(parentResource, /self/)} [${[uriList].join(',')}]`);
-        return nodMaker
+        return cache
             .getResource(parentResource)
-            .then(resource => nodMaker
+            .then(resource => cache
                 .tryGetNamedCollectionResource(resource, uriListName, uriListRel, options)
                 .then(collection => {
                     if (!collection) {
@@ -751,11 +751,11 @@ export default class NODSynchroniser {
                             .then(() => {
                                 // now make it so and the server should pay nicely and accept all the changes
                                 log.debug('[Sync] update collection with uri-list');
-                                return nodMaker
+                                return cache
                                     .getSingletonResource(collection, 'editForm', /edit-form/, options)
                                     .then(form => put(form, /submit/, 'text/uri-list', uriList.join('\n')));
                             })
-                            .then(() => nodMaker.getCollectionResourceAndItems(collection, {...options, ...{forceLoad: true}}));
+                            .then(() => cache.getCollectionResourceAndItems(collection, {...options, ...{forceLoad: true}}));
                     }
                 }));
     }

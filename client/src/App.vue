@@ -15,7 +15,7 @@
     import Spinner from './components/Spinner.vue';
     import Offline from './components/Offline.vue';
     import Login from './components/Login.vue';
-    import {nodMaker} from 'semanticLink';
+    import * as cache from 'semanticLink/NODMaker';
     import * as link from 'semantic-link';
     import {routeName, routePath} from "router";
 
@@ -62,7 +62,7 @@
              *
              * @type {ApiRepresentation}
              */
-            this.$root.$api = this.$root.$api || nodMaker.makeSparseResourceFromUri(link.getUri('HEAD', 'api'));
+            this.$root.$api = this.$root.$api || cache.makeSparseResourceFromUri(link.getUri('HEAD', 'api'));
 
         }
     };
