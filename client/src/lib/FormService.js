@@ -1,10 +1,10 @@
-import {_} from 'semanticLink';
+import {_} from 'semantic-link-cache';
 import axios from 'axios';
 import {getAuthenticationUri, getBearerLinkRelation} from '../lib/http-interceptors';
 import {filter, matches, put, get} from 'semantic-link';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import {loader} from './semanticLink/Loader';
+import {loader} from 'semantic-link-cache';
 
 /**
  * A form has the job to POST to a collection or PUT to an item (this is by convention).

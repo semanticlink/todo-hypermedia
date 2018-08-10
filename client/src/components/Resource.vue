@@ -80,7 +80,7 @@
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
     import EventBus, {authConfirmed} from '../lib/util/EventBus';
-    import {loader} from '../lib/semanticLink/Loader';
+    import {loader} from 'semantic-link-cache';
 
     import FormDragDrop from './FormDragDrop.vue';
 

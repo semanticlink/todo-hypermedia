@@ -1,4 +1,4 @@
-import * as cache from 'semanticLink/cache/cache';
+import {cache} from 'semantic-link-cache';
 import * as link from 'semantic-link';
 import {TEXT} from '../lib/form-type-mappings';
 import {log} from 'logger';

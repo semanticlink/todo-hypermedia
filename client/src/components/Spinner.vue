@@ -14,10 +14,11 @@
 
 <script>
 
-    import Loader, {loader} from '../lib/semanticLink/Loader';
+    import {loader, LoaderEvent} from 'semantic-link-cache';
     import bLink from 'bootstrap-vue/src/components/link/link';
     import SimpleSpinner from 'vue-simple-spinner/src/components/Spinner.vue'
-    import {_} from 'semanticLink';
+    import {_} from 'semantic-link-cache';
+
     /**
      * This is a simple work-in-progress demonstration of attached a "load centre".
      *
@@ -59,12 +60,12 @@
         },
         created() {
 
-            loader.limiter.on(Loader.event.DEBUG, () => {
+            loader.limiter.on(LoaderEvent.DEBUG, () => {
                 this.itemsQueued = 1;
                 // let's not update too often
                 _.debounce(this.readQueues, 200, true);
             });
-            loader.limiter.on(Loader.event.IDLE, () => {
+            loader.limiter.on(LoaderEvent.IDLE, () => {
                 this.itemsQueued = 0;
             })
         },

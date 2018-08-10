@@ -1,4 +1,4 @@
-import {_} from 'semanticLink';
+import {_} from 'semantic-link-cache';
 
 /**
  * modified from http://jsfiddle.net/i_woody/cnL5T/

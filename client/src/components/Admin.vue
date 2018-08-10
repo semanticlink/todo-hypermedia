@@ -38,7 +38,7 @@
 </template>
 
 <script>
-    import {_} from 'semanticLink';
+    import {_} from 'semantic-link-cache';
     import {getUri} from 'semantic-link';
     import {log} from 'logger';
     import {redirectToTenant} from "router";

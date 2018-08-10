@@ -1,11 +1,9 @@
-import {_} from 'semanticLink';
-import * as cache from 'semanticLink/cache/cache';
+import {_} from 'semantic-link-cache';
 import {getUri} from 'semantic-link';
-import {nodSynchroniser} from 'semanticLink/sync/sync';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from '../domain/tags';
-import {findResourceInCollection} from 'semanticLink/mixins/collection';
-import {uriMappingResolver} from 'semanticLink/sync/UriMappingResolver';
+import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
+import {uriMappingResolver, sync, cache} from 'semantic-link-cache';
 
 
 export const getTenants = root => cache.getNamedCollectionResource(root, 'tenants', /tenants/);
@@ -27,23 +25,23 @@ export const getTenantAndTodos = root => {
 
 
 const syncUsersStrategy = (tenant, aTenant, strategies, options) => {
-    return nodSynchroniser.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options)
+    return sync.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options)
         .catch(log.error);
 };
 
 const syncTodosStrategy = (user, aUser, strategies, options) => {
-    return nodSynchroniser.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options)
+    return sync.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options)
         .catch(log.error);
 };
 
 const syncTagsStrategy = (todo, aTodo, root, options) => {
-    return nodSynchroniser.getNamedCollection(todo, 'tags', /tags/, aTodo, [], options)
+    return sync.getNamedCollection(todo, 'tags', /tags/, aTodo, [], options)
         .catch(log.error);
 };
 
 
 function syncTenant(tenantRepresentation, aTenant, root, options) {
-    return nodSynchroniser.getResource(
+    return sync.getResource(
         tenantRepresentation,
         aTenant,
         [
@@ -83,7 +81,7 @@ export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
 };
 
 const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) => {
-    return nodSynchroniser.getResourceInCollection(tenantCollection, aTenant, strategies, options)
+    return sync.getResourceInCollection(tenantCollection, aTenant, strategies, options)
         .catch(log.error);
 };
 

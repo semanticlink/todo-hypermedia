@@ -11,7 +11,7 @@
 </template>
 
 <script>
-    import {_} from 'semanticLink';
+    import {_} from 'semantic-link-cache';
     import {log} from 'logger';
     import {redirectToTenant} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'

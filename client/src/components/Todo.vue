@@ -62,8 +62,8 @@
 
 <script>
 
-    import {_} from 'semanticLink';
-    import * as cache from 'semanticLink/cache/cache';
+    import {_} from 'semantic-link-cache';
+    import {cache} from 'semantic-link-cache';
     import {log} from 'logger';
     import {redirectToTenant} from 'router';
     import TodoItem from './TodoItem.vue';
