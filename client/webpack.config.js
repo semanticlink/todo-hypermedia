@@ -44,7 +44,7 @@ const clientConfig = {
         alias: {
             // vendor checked in libraries (perhaps we can dependency manage these?
             // we use this library alot so we will treat it like an independent library in the imports
-            'semantic-link-cache': path.resolve(__dirname, 'src/lib/semanticLink'),
+            'semantic-link-cache': path.resolve(__dirname, 'src/lib/semantic-link-cache'),
 
             domain: path.resolve(__dirname, 'src/domain'),
             router: path.resolve(__dirname, 'src/router'),
