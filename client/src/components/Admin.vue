@@ -48,7 +48,7 @@
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
-    import EventBus from "../lib/EventBus";
+    import eventBus from "semantic-link-utils/EventBus";
 
 
     export default {
@@ -127,7 +127,7 @@
             },
             hydrateTenant: function () {
                 getTenantAndTodos(this.$root.$api)
-                    .then(() => EventBus.$emit('resource:ready'))
+                    .then(() => eventBus.$emit('resource:ready'))
                     .catch(err => {
                         this.$notify({type: 'error', title: 'Could not load up the tenant'});
                         log.error(err);

@@ -253,6 +253,7 @@ export default class AuthService {
      */
     renewToken() {
         return new Promise((resolve, reject) => {
+            log.debug('[AuthService] attempting renewal');
             this.auth0.checkSession(
                 {
                     //audience: AuthService.clientConfiguration.audience
@@ -277,19 +278,24 @@ export default class AuthService {
     /**
      * Adds a timer to renew the login
      *
-     * @return {Promise<AuthResult>}
+     *  // TODO: deal with this as a sliding window
+     *  // TODO: deal with retries on failure (and having a different window to retry (eg half of available time)
+     *
      */
     scheduleRenewal() {
 
         return new Promise((resolve, reject) => {
 
-            const service = this;
-            //TODO: deal with this as a sliding window
             const delay = AuthService.tokenExpiresAt - Date.now();
             if (delay > 0) {
-                tokenRenewalTimeout = setTimeout(function () {
-                    return service.renewToken()
-                        .then(resolve)
+                log.debug(`[AuthService] setting renewal ${Math.floor(delay / 60000)} minutes: ${new Date(AuthService.tokenExpiresAt)}`);
+                tokenRenewalTimeout = setTimeout(() => {
+                    log.debug('[AuthService] attempting scheduled renewal');
+                    return this.renewToken()
+                        .then(() => {
+                            this.scheduleRenewal();
+                            return resolve();
+                        })
                         .catch(reject);
                 }, delay);
             }
@@ -330,7 +336,10 @@ export default class AuthService {
      * and so we can't leave this up to the router. We must intercept and stop the process which means
      * closing the window.
      *
-     * TODO: this may need to be promised if it ever returns something
+     * @example Intercept incoming authentication callbacks with Tokens on the hash (initialise code)
+     *
+     * import {authService} from 'semantic-link-utils/AuthService';
+     * authService.handleAuthentication();
      *
      */
     handleAuthentication() {
@@ -338,13 +347,16 @@ export default class AuthService {
         this.auth0.parseHash((/** @type {AuthHandleAuthenticationError}*/err, /** @type {AuthResult} */authResult) => {
 
             //ignore the err because handleAuthentication is called on all entries to the site
-
             if (err) {
                 log.warn(`[Auth] ${err.error}: ${err.errorMessage}`);
             }
 
             if (authResult) {
+                log.debug('[AuthService] authentication confirmed');
                 this.close(authResult);
+            } else {
+                log.debug('[AuthService] authentication already exists');
+                this.scheduleRenewal();
             }
 
         });
@@ -374,7 +386,6 @@ export default class AuthService {
      */
     static setSession(authResult) {
         // Set the time that the access token will expire at
-        // TODO: poor desing to renew at expiry time. Needs a sliding window
         const expiresAt = (authResult.expiresIn * 1000) + new Date().getTime();
         localStorage.setItem(KEY.ACCESS_TOKEN, authResult.accessToken);
         localStorage.setItem(KEY.ID_TOKEN, authResult.idToken);

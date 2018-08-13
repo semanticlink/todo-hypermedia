@@ -79,7 +79,8 @@
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
-    import EventBus, {authConfirmed} from '../lib/EventBus';
+    import {eventBus} from 'semantic-link-utils/EventBus';
+    import {authConfirmed} from 'semantic-link-utils/authEvent';
     import {loader} from 'semantic-link-cache';
 
     import FormDragDrop from './FormDragDrop.vue';
@@ -142,7 +143,9 @@
             //
             // After (re)authentication load up the representation (we could have just redirected)
 
-            EventBus.$on(authConfirmed, this.getRepresentation);
+
+            eventBus.$on(authConfirmed, this.getRepresentation);
+
 
             /////////////////////////////
             //
@@ -371,9 +374,9 @@
              */
             getRepresentation() {
 
-                log.warn('Fetching representation ');
+                log.debug(`[Resource] Fetching representation ${this.apiUri}`);
 
-                return loader.schedule(() => axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}}))
+                return loader.limiter.schedule({id: this.apiUri}, () => axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}}))
                     .then(/** @type {AxiosResponse} */response => {
                         this.responseHeaders = response.headers;
                         this.representation = response.data;
@@ -463,16 +466,22 @@
                     })
                     .catch(/** @type {AxiosError} */error => {
 
-                        this.responseHeaders = error.response.headers;
-                        this.requestHeaders = error.response.config.headers;
+                        if (error.response){
+                            this.responseHeaders = error.response.headers;
+                            this.requestHeaders = error.response.config.headers;
 
-                        this.htmlRepresentation = `<div>${error.response.statusText}</div>`;
+                            this.htmlRepresentation = `<div>${error.response.statusText}</div>`;
 
-                        this.$notify({
-                            title: 'Error',
-                            text: error.response.statusText,
-                            type: 'error'
-                        })
+                            this.$notify({
+                                title: 'Error',
+                                text: error.response.statusText,
+                                type: 'error'
+                            })
+                        } else {
+                            log.error(`[Resource] likely developer error ${error}`);
+                        }
+
+
                     });
             },
             onUpdated() {

@@ -2,81 +2,8 @@ import axios from 'axios';
 import {log} from 'logger';
 import {httpQueue} from './HTTPQueue';
 import * as authorization from 'auth-header';
-
-/**
- * @class EventBus
- * @property $on
- * @property $emit
- * @property $off
- */
-
-/**
- * Currently the interface of this is based on Vue
- * @type {EventBus}
- */
-let EventBus;
-
-/**
- * Inject an {@link EventBus} to be used
- * @param eventBus
- * @return {*}
- */
-export const setEventBus = eventBus => EventBus = eventBus;
-
-
-/**
- * *********************
- *
- * Event messages that we are registering globally
- *
- * *********************
- */
-
-/**
- * HTTP response 401 not authorised. This event should be triggered when an http call returns a 401 response.
- * This should be handled with on-demand authentication and then the original request retried. Any requests
- * in between are to be queued in the meantime.
- *
- * @type {string}
- */
-export const authRequired = 'event:auth-required';
-
-/**
- * HTTP response 401 not authorised. This event should be triggered once the user has made successfully authenticated.
- *
- * @type {string}
- */
-export const authConfirmed = 'event:auth-confirmed';
-
-/**
- * The browser cannot find an connection out to the internet.
- *
- * @type {string}
- */
-export const offline = 'event:http-offline';
-
-/**
- * We are waiting for the browser to become online again. This is mostly used when there is a dialog
- * alerting the user that we are waiting for the http connection to come back.
- *
- * @type {string}
- */
-export const checking = 'event:http-checking';
-
-/**
- * After the http has gone offline this event follows when it comes back online and the queue of requests
- * is attempted.
- *
- * @type {string}
- */
-export const restored = 'event:http-restored';
-
-/**
- * HTTP response 500 (internal server error). This event should be triggered when there is a server error.
- *
- * @type {string}
- */
-export const serverError = 'event:http-500';
+import {authConfirmed, authRequired, offline, serverError} from './authEvent';
+import {eventBus} from './EventBus';
 
 
 /**
@@ -137,8 +64,8 @@ export const setInterceptors = options => {
 
                 const promise = Promise.resolve(error);
                 httpQueue.pushToBuffer(error.config, promise);
-                if (EventBus) {
-                    EventBus.$emit(offline, error);
+                if (eventBus) {
+                    eventBus.$emit(offline, error);
                 } else {
                     log.warn('[Network] Event bus not created');
                 }
@@ -157,8 +84,8 @@ export const setInterceptors = options => {
         error => {
             if (error.response && 500 === error.response.status) {
                 const promise = Promise.resolve(error);
-                if (EventBus) {
-                    EventBus.$emit(serverError, error);
+                if (eventBus) {
+                    eventBus.$emit(serverError, error);
                 } else {
                     log.warn('[Network] Event bus not created');
                 }
@@ -187,13 +114,13 @@ export const setInterceptors = options => {
 
                 return new Promise((resolve, reject) => {
 
-                    if (EventBus) {
+                    if (eventBus) {
                         // this event starts the process of logging in and MUST be handled
-                        EventBus.$emit(authRequired, error);
+                        eventBus.$emit(authRequired, error);
 
                         // the event handling the login MUST then trigger this event to be caught
                         // eg EventBus.$emit(authConfirmed)
-                        EventBus.$on(authConfirmed, () => {
+                        eventBus.$on(authConfirmed, () => {
 
                             log.debug('[Authentication] login confirmed (http-interceptor)');
                             httpQueue.retryAll()
@@ -212,6 +139,8 @@ export const setInterceptors = options => {
         });
 };
 
+let jwtInterceptor;
+
 /**
  * Set the bearer token in the headers for this axios instance
  */
@@ -221,17 +150,17 @@ export const setJsonWebTokenOnHeaders = (token) => {
         log.info('[Authentication] no access token found');
     }
 
+    clearJsonWebTokenOnHeaders();
+
     log.debug(`[Authentication] setting token on www-authenicate header interceptor scheme '${JWT}'`);
 
-    axios.interceptors.request.use(
+    jwtInterceptor = axios.interceptors.request.use(
         config => {
             config.withCredentials = true;
             config.headers[AUTHORIZATION_HEADER] = authorization.format({scheme: JWT, token: token});
             return config;
         },
         err => Promise.reject(err));
-    return Promise.resolve();
-
 };
 
 /**
@@ -241,15 +170,12 @@ export const clearJsonWebTokenOnHeaders = () => {
 
     log.debug('[Authentication] clearing access token');
 
-    axios.interceptors.request.use(
-        config => {
-            delete config.withCredentials;
-            delete config.headers[AUTHORIZATION_HEADER];
-            return config;
-        },
-        err => Promise.reject(err));
-    return Promise.resolve();
-
+    if (jwtInterceptor) {
+        log.debug('[Authentication] clear jwt token');
+        axios.interceptors.request.eject(jwtInterceptor);
+    } else {
+        log.debug('[Authentication] no access token to clear');
+    }
 };
 
 /**

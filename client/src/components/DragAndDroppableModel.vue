@@ -20,7 +20,7 @@
 
     import {dragend, dragenter, dragleave, dragover, dragstart, drop} from 'semantic-link-utils/dragAndDropModel';
     import {log} from 'logger';
-    import EventBus from "../lib/EventBus";
+    import eventBus from "semantic-link-utils/EventBus";
 
     export default {
         name: 'drag-and-droppable-model',
@@ -83,7 +83,7 @@
         mounted() {
             if (this.async) {
                 const vm = this;
-                EventBus.$on('resource:ready', () => {
+                eventBus.$on('resource:ready', () => {
                     vm.$refs.draggable.setAttribute('draggable', true);
                 })
             } else {

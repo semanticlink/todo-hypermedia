@@ -9,14 +9,16 @@
 </template>
 
 <script>
-    import EventBus, {authRequired, authConfirmed} from '../lib/EventBus';
+    import {eventBus} from 'semantic-link-utils/EventBus';
+    import {authRequired, authConfirmed} from 'semantic-link-utils/authEvent';
     import {log} from 'logger';
     import {
         getAuthenticationScheme,
         JWT,
         setJsonWebTokenOnHeaders,
         getAuthenticationRealm,
-        API_AUTH0_REALM, renewToken
+        API_AUTH0_REALM,
+        renewToken
     } from 'semantic-link-utils/http-interceptors';
     import Form from './Form.vue';
     import AuthService from "semantic-link-utils/AuthService";
@@ -48,7 +50,7 @@
             };
         },
         mounted() {
-            EventBus.$on(authRequired, this.loginRequired);
+            eventBus.$on(authRequired, this.loginRequired);
         },
         methods: {
             /**
@@ -141,7 +143,7 @@
                 isPerformingAuthentication = false;
                 this.authenticated = true;
 
-                EventBus.$emit(authConfirmed);
+                eventBus.$emit(authConfirmed);
 
             },
             /**
@@ -151,11 +153,10 @@
             onFailure(error) {
 
                 // TODO: does this need trigger log in again?
-                // EventBus.$on(loginRequired, this.loginRequired);
-
-                this.error('This is a major error. Please give up.');
+                // eventBus.$on(loginRequired, this.loginRequired);
 
                 log.error(error);
+
                 this.$notify({
                     title: 'An error means that the login process won\'t work',
                     text: error.message,

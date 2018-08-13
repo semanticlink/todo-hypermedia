@@ -2,7 +2,7 @@
  * Intercept incoming authentication callbacks with Tokens on the hash
  *
  */
-import {authService} from 'semantic-link-utils/AuthService';
+import AuthService, {authService} from 'semantic-link-utils/AuthService';
 
 authService.handleAuthentication();
 
@@ -17,15 +17,10 @@ import VueLocalStorage from 'vue-localstorage';
 import {uriMapping} from 'semantic-link-utils/UriMapping';
 import {filter} from 'semantic-link';
 
-
 import App from './App.vue';
 
-import {
-    setJsonWebTokenOnHeaders,
-    setInterceptors,
-    setEventBus
-} from 'semantic-link-utils/http-interceptors';
-import AuthService from 'semantic-link-utils/AuthService';
+import {setJsonWebTokenOnHeaders, setInterceptors} from 'semantic-link-utils/http-interceptors';
+import {setEventBus} from 'semantic-link-utils/EventBus';
 import EventBus from './lib/EventBus';
 
 import BootstrapVue from 'bootstrap-vue';
@@ -39,7 +34,7 @@ Vue.use(BootstrapVue);
 Vue.use(Notifications);
 
 setLogLevel(LogLevel.Debug);
-log.debug('Set log level to DEBUG');
+log.debug('[App] Set log level to DEBUG');
 
 Vue.config.productionTip = false;
 
@@ -72,11 +67,7 @@ Vue.use(VueLocalStorage, {name: 'localStorage'});
 
 setInterceptors({queue401s: false});
 setEventBus(EventBus);
-
-if (AuthService.accessToken) {
-    setJsonWebTokenOnHeaders(AuthService.accessToken);
-}
-
+setJsonWebTokenOnHeaders(AuthService.accessToken);
 
 /**
  * This view sets up the application including the on-demand authentication (login) and
@@ -93,8 +84,8 @@ new Vue({
         const apiUri = api.href;
         const clientUri = window.location.href;
 
-        log.info(`Client uri: '${clientUri}'`);
-        log.info(`Api uri: '${apiUri}'`);
+        log.info(`[App] Client uri: '${clientUri}'`);
+        log.info(`[App] Api uri: '${apiUri}'`);
 
         uriMapping(clientUri, apiUri);
 

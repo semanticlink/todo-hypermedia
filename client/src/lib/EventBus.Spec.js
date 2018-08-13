@@ -1,32 +1,75 @@
 import EventBus from './EventBus';
 import {expect} from 'chai';
+import {eventBus, setEventBus} from './semantic-link-utils/EventBus';
 
 const authRequired = 'event:message';
 
 describe('Event Bus', () => {
 
-    it('should be able to subscribe to event', () => {
+    describe('Vue', () => {
 
-        return new Promise(pass => {
-            EventBus.$on(authRequired, () => {
-                pass();
+        it('should be able to subscribe to event', () => {
+
+            return new Promise(pass => {
+                EventBus.$on(authRequired, () => {
+                    EventBus.$off(authRequired);
+                    pass();
+                });
+
+                EventBus.$emit(authRequired);
+
             });
 
-            EventBus.$emit(authRequired);
+        });
+
+        it('should be able to subscribe to event with args', () => {
+
+            return new Promise(pass => {
+                EventBus.$on(authRequired, val => {
+                    EventBus.$off(authRequired);
+                    expect(val).to.equal('test');
+                    pass();
+                });
+
+                EventBus.$emit(authRequired, 'test');
+            });
 
         });
 
     });
 
-    it('should be able to subscribe to event with args', () => {
+    describe('Event Bus implementation', () => {
 
-        return new Promise(pass => {
-            EventBus.$on(authRequired, val => {
-                expect(val).to.equal('test');
-                pass();
+        before(() => {
+            setEventBus(EventBus);
+        });
+
+        it('should be able to subscribe to event', () => {
+
+            return new Promise(pass => {
+                eventBus.$on(authRequired, () => {
+                    EventBus.$off(authRequired);
+                    pass();
+                });
+
+                eventBus.$emit(authRequired);
+
             });
 
-            EventBus.$emit(authRequired, 'test');
+        });
+
+        it('should be able to subscribe to event with args', () => {
+
+            return new Promise(pass => {
+                eventBus.$on(authRequired, val => {
+                    EventBus.$off(authRequired);
+                    expect(val).to.equal('test');
+                    pass();
+                });
+
+                eventBus.$emit(authRequired, 'test');
+            });
+
         });
 
     });

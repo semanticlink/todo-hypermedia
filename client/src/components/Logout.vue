@@ -7,9 +7,10 @@
 </template>
 
 <script>
-    import EventBus, {authConfirmed} from '../lib/EventBus';
+    import {eventBus} from 'semantic-link-utils/EventBus';
     import AuthService from 'semantic-link-utils/AuthService';
     import {clearJsonWebTokenOnHeaders} from "semantic-link-utils/http-interceptors";
+    import {authConfirmed} from 'semantic-link-utils/authEvent';
 
     /**
      * Logout:
@@ -38,7 +39,7 @@
             };
         },
         mounted() {
-            EventBus.$on(authConfirmed, this.loginConfirmed);
+            eventBus.$on(authConfirmed, this.loginConfirmed);
             this.loginConfirmed();
         },
         methods: {
