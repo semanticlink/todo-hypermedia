@@ -6,7 +6,7 @@
   "productName": "Demo",
   "license": "UNLICENSED",
   "scripts": {
-    "clean": "rimraf ./dist",
+    "clean": "rimraf ./dist ./.nyc_output ./coverage",
     "dev": "webpack-dev-server --mode development --open --config webpack.dev.js --hot",
     "test": "mocha-webpack  \"src/lib/**/*.Spec.{js,ts}\"",
     "test-watch": "mocha-webpack --watch  \"src/lib/**/*.Spec.{js,ts}\"",
