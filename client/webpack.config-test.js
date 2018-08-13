@@ -1,17 +1,13 @@
+/* global require */
+const merge = require('webpack-merge');
+const common = require('./webpack.common.js');
+
 /**
  * @see https://github.com/zinserjan/mocha-webpack/blob/v2.0.0-beta.0/docs/installation/webpack-configuration.md
  * @see https://github.com/zinserjan/mocha-webpack-example/blob/master/webpack.config-test.js
  */
-const path = require('path');
 
-module.exports = {
-    resolve: {
-        modules: [path.resolve('./src'), 'node_modules'],
-        alias: {
-            logger: 'semantic-link/lib/logger'
-        },
-        extensions: ['.ts', '.js'],
-    },
+module.exports =  merge(common, {
     mode: 'development',
     module: {
         rules: [
@@ -21,25 +17,6 @@ module.exports = {
              */
             {test: /\.scss$/, loader: 'null-loader'},
             {test: /\.css$/, loader: 'null-loader'},
-
-            {
-                test: /.js$/,
-                exclude: /node_modules/,
-                loader: 'babel-loader',
-            },
-            // {
-            //   test: /.js$/,
-            //   exclude: /(node_modules|bower_components)/,
-            //   loader: 'eslint-loader',
-            // },
-            {
-                test: /\.ts$/,
-                exclude: /node_modules/,
-                loaders: [
-                    'ts-loader'
-                ]
-            },
-
         ]
     },
     output: {
@@ -49,4 +26,4 @@ module.exports = {
     },
     target: 'node',  // webpack should compile node compatible code
     devtool: 'inline-cheap-module-source-map'
-};
+});

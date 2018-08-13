@@ -7,12 +7,12 @@
   "license": "UNLICENSED",
   "scripts": {
     "clean": "rimraf ./dist",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --mode development --open --hot",
+    "dev": "webpack-dev-server --mode development --open --config webpack.dev.js --hot",
     "test": "mocha-webpack  \"src/lib/**/*.Spec.{js,ts}\"",
     "test-watch": "mocha-webpack --watch  \"src/lib/**/*.Spec.{js,ts}\"",
     "cover": "nyc npm run test",
-    "build": "webpack --mode development --progress --hide-modules",
-    "dist": "webpack --mode production --colors false --progress false"
+    "build": "webpack --mode development --config webpack.dev.js --progress --hide-modules",
+    "dist": "webpack --mode production --config webpack.prod.js --colors false --progress false"
   },
   "dependencies": {
     "auth-header": "^0.3.1",
@@ -42,12 +42,14 @@
     "babel-loader": "^7.1.4",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
+    "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.1",
     "cross-env": "^5.1.6",
     "eslint": "^4.19.1",
     "eslint-plugin-mocha": "^5.0.0",
     "eslint-plugin-react": "^7.8.2",
     "fast-json-patch": "^2.0.6",
+    "html-webpack-plugin": "^3.2.0",
     "mocha": "^5.2.0",
     "mocha-webpack": "^2.0.0-beta.0",
     "node-sass": "^4.9.0",
