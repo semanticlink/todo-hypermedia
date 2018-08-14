@@ -31,6 +31,8 @@ export default class Loader {
 
         this._limiter = Loader.limiterFactory(options);
 
+        this.requests = {};
+
         /**
          *
          * @type {CancelTokenStatic}
@@ -129,6 +131,60 @@ export default class Loader {
      */
     schedule(params) {
         return this._limiter.schedule(params);
+    }
+
+    /**
+     * This method wraps the limiter scheduler because it cannot deal with multiple requests at the same time on
+     * the same 'id'. This queues up subsequent requests and then resolves them upon the original request.
+     *
+     * Note: this is a naive implementation of queue clearing.
+     *
+     * TODO: cancelled promises need to be cleared out of this queue too
+     *
+     * @param {AxiosRequestConfig} config
+     * @return {Promise<AxiosResponse>}
+     */
+    request(config) {
+
+        const id = config.url;
+
+        if (!this.requests[id]) {
+
+            const p = new Promise((resolve, reject) => {
+
+                this.schedule({id: config.url}, config)
+                    .then(result => {
+                        log.debug(`[RequestResolver] resolved '${id}' (${this.requests[id].promises.length} subsequent requests)`);
+
+                        // resolving with chain through to the subsequent requests
+                        resolve(result);
+
+                        // clean up the requests
+                        delete this.requests[id];
+                    })
+                    .catch(reject);
+            });
+
+            this.requests[id] = {
+                request: p,
+                promises: []
+            };
+
+            log.debug(`[RequestResolver] add key '${id}'`);
+            return p;
+        } else {
+
+            // construct an array of promises that will be resolved with the original request value
+            const p = new Promise((resolve, reject) => {
+                this.requests[id].request
+                    .then(resolve)
+                    .catch(reject);
+            });
+            this.requests[id].promises.push(p);
+            log.debug(`[RequestResolver] queued '${id}' (${this.requests[id].promises.length} in queue)`);
+            return p;
+        }
+
     }
 
     /**
