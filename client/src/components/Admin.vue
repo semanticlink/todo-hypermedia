@@ -41,14 +41,14 @@
     import {_} from 'semantic-link-cache';
     import {getUri} from 'semantic-link';
     import {log} from 'logger';
-    import {redirectToTenant} from "router";
+    import {redirectToTenant} from 'router';
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
     import {getTenantAndTodos, getTenants, createOrUpdateUsersOnTenant, createTenantOnRoot} from '../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
-    import eventBus from "semantic-link-utils/EventBus";
+    import {eventBus} from 'semantic-link-utils/EventBus';
 
 
     export default {
