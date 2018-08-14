@@ -128,10 +128,12 @@ export default class FormService {
      * @returns {Promise<AxiosResponse<LinkedRepresentation[]>>}
      */
     static loadFormFrom401BearerChallenge(error) {
-        return loader.limiter.schedule(() => axios.get(getAuthenticationUri(error)))
+        const uri = getAuthenticationUri(error);
+        return loader.schedule(uri, () => axios.get(uri))
             .then(response => link.get(response.data, getBearerLinkRelation(error)))
             .then(authenticateCollection => {
-                return loader.limiter.schedule(() => link.get(authenticateCollection.data, /create-form/))
+                const uri = link.getUri(authenticateCollection.data, /create-form/);
+                return loader.schedule(uri, () => link.get(authenticateCollection.data, /create-form/))
                     .then(authenticateLoginRepresentation => {
                         return [
                             authenticateLoginRepresentation.data,

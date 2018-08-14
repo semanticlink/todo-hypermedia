@@ -376,7 +376,7 @@
 
                 log.debug(`[Resource] Fetching representation ${this.apiUri}`);
 
-                return loader.limiter.schedule({id: this.apiUri}, () => axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}}))
+                return loader.schedule(this.apiUri, () => axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}}))
                     .then(/** @type {AxiosResponse} */response => {
                         this.responseHeaders = response.headers;
                         this.representation = response.data;
@@ -466,7 +466,7 @@
                     })
                     .catch(/** @type {AxiosError} */error => {
 
-                        if (error.response){
+                        if (error.response) {
                             this.responseHeaders = error.response.headers;
                             this.requestHeaders = error.response.config.headers;
 

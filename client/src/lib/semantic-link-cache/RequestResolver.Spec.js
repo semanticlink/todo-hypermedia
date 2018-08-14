@@ -7,6 +7,8 @@ describe('Add a request', () => {
 
     let loader;
 
+    const action = () => Promise.resolve();
+
     beforeEach(() => {
         loader = new Loader();
         expect(loader.requests).to.be.empty;
@@ -14,27 +16,27 @@ describe('Add a request', () => {
 
     it('should amke a single request passing through the id and config and clear the queue', () => {
 
-        const config = {url: 1};
+        const id = 1;
 
-        const caller = sinon.stub(loader, 'schedule');
-        caller.withArgs({id: config.url}, config).returns(Promise.resolve(true));
+        const caller = sinon.stub(loader.limiter, 'schedule');
+        caller.returns(Promise.resolve(true));
 
         return loader
-            .request(config)
+            .schedule(id, action)
             .then(result => {
                 log.debug('Result done');
                 expect(result).to.equal(true);
                 expect(caller.callCount).to.equal(1);
-                expect(loader.requests[config]).to.be.undefined;
+                expect(loader.requests[id]).to.be.undefined;
                 caller.restore();
             });
     });
 
     it('should only make one schedule request across the same id', () => {
 
-        const config = {url: 1};
+        const id = 1;
 
-        const caller = sinon.stub(loader, 'schedule');
+        const caller = sinon.stub(loader.limiter, 'schedule');
         caller.returns(
             new Promise(resolve => {
                 setTimeout(() => resolve({response: true}), 20);
@@ -43,9 +45,9 @@ describe('Add a request', () => {
 
         return Promise.all(
             [
-                loader.request(config),
-                loader.request(config),
-                loader.request(config),
+                loader.schedule(id, action),
+                loader.schedule(id, action),
+                loader.schedule(id, action),
             ])
             .then(([first, second, third]) => {
                 log.debug('Result done');
@@ -53,7 +55,7 @@ describe('Add a request', () => {
                 expect(second.response).to.equal(true);
                 expect(third.response).to.equal(true);
                 expect(caller.callCount).to.equal(1);
-                expect(loader.requests[config]).to.be.undefined;
+                expect(loader.requests[id]).to.be.undefined;
                 caller.restore();
 
             });
@@ -64,7 +66,7 @@ describe('Add a request', () => {
 
     it('should make one request per unique id across multiple requests', () => {
 
-        const caller = sinon.stub(loader, 'schedule');
+        const caller = sinon.stub(loader.limiter, 'schedule');
         caller.returns(
             new Promise(resolve => {
                 setTimeout(() => resolve({response: true}), 20);
@@ -73,12 +75,12 @@ describe('Add a request', () => {
 
         return Promise.all(
             [
-                loader.request({url: 1}),
-                loader.request({url: 1}),
-                loader.request({url: 2}),
-                loader.request({url: 3}),
-                loader.request({url: 2}),
-                loader.request({url: 3}),
+                loader.schedule(1, action),
+                loader.schedule(1, action),
+                loader.schedule(2, action),
+                loader.schedule(3, action),
+                loader.schedule(3, action),
+                loader.schedule(2, action),
             ])
             .then(([first, second, third, fourth, fifth, sixth]) => {
                 log.debug('Result done');
