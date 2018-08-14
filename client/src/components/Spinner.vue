@@ -79,6 +79,7 @@
             },
             cancel() {
                 loader.clearAll();
+                this.itemsQueued = 0;
             }
         }
     }
