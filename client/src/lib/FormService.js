@@ -129,11 +129,11 @@ export default class FormService {
      */
     static loadFormFrom401BearerChallenge(error) {
         const uri = getAuthenticationUri(error);
-        return loader.schedule(uri, () => axios.get(uri))
+        return loader.schedule(uri, axios.get, uri)
             .then(response => link.get(response.data, getBearerLinkRelation(error)))
             .then(authenticateCollection => {
                 const uri = link.getUri(authenticateCollection.data, /create-form/);
-                return loader.schedule(uri, () => link.get(authenticateCollection.data, /create-form/))
+                return loader.schedule(uri, link.get, authenticateCollection.data, /create-form/)
                     .then(authenticateLoginRepresentation => {
                         return [
                             authenticateLoginRepresentation.data,

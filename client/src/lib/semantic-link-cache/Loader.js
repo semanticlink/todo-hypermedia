@@ -126,22 +126,26 @@ export default class Loader {
      * This method wraps the limiter scheduler because it cannot deal with multiple requests at the same time on
      * the same 'id'. This queues up subsequent requests and then resolves them upon the original request.
      *
+     * This is primarily used for GET requests.
+     *
      * Note: this is a naive implementation of queue clearing.
      *
      * TODO: cancelled promises need to be cleared out of this queue too
      *
      * @see https://github.com/SGrondin/bottleneck/issues/68
+     *
      * @param {string} id
      * @param {PromiseLike<T>} action
+     * @param {*[]} args
      * @return {Promise<AxiosResponse>}
      */
-    schedule(id, action) {
+    schedule(id, action, ...args) {
 
         if (!this.requests[id]) {
 
             const p = new Promise((resolve, reject) => {
 
-                this._limiter.schedule({id}, action)
+                this._limiter.schedule({id}, action, ...args)
                     .then(result => {
                         log.debug(`[Loader] resolved '${id}' (${this.requests[id].promises.length} subsequent requests)`);
 
@@ -174,6 +178,20 @@ export default class Loader {
             return p;
         }
 
+    }
+
+    /**
+     * This method wraps the limiter scheduler.
+     *
+     * This is primarily used for POST, PUT, PATCH, DELETE requests
+     *
+     * @param {PromiseLike<T>} action
+     * @param {*[]} args
+
+     * @return {*}
+     */
+    submit(action, ...args) {
+        return this._limiter.schedule(action, ...args);
     }
 
     /**

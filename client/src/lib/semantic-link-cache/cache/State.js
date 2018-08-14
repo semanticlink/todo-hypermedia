@@ -739,7 +739,7 @@ export default class State {
 
         log.debug(`[State] start create resource ${uri}`);
 
-        return loader.limiter.schedule({id: uri}, postFactory, resource, data)
+        return loader.limiter.submit(postFactory, resource, data)
             .then(response => {
 
                 const resourceUri = response.headers.location;
@@ -785,7 +785,7 @@ export default class State {
         const id = link.getUri(resource, /self/);
         log.debug(`[State] [PUT] ${id}`);
 
-        return loader.limiter.schedule({id}, putFactory, resource, data)
+        return loader.submit(putFactory, resource, data)
             .then(response => {
                 this.status = stateFlagEnum.hydrated;
                 this.retrieved = new Date();
@@ -859,8 +859,7 @@ export default class State {
             log.warn(`Unexpected state on deletion ${uri}`);
         }
 
-        const id = link.getUri(item, /self/);
-        return loader.limiter.schedule({id}, deleteFactory, item)
+        return loader.submit(deleteFactory, item)
             .then(() => {
                 this.status = stateFlagEnum.deleted;
                 log.info(`[State] Resource  for delete'${uri}' ${status.toString()} `);

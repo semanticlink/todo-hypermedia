@@ -96,7 +96,7 @@
              */
             update(data) {
                 const uriList = this.map(data, this.representation);
-                link.get(this.representation, this.rel, this.mediaType)
+                loader.schedule(link.getUri(this.representation, this.rel), link.get, this.representation, this.rel, this.mediaType)
                     .then(response => link[this.method.toLowerCase()](response.data, 'submit', this.mediaType, uriList))
                     .then(/** @type {AxiosResponse} */response => {
                         this.$notify({

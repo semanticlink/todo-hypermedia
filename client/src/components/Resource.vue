@@ -293,7 +293,7 @@
              * @param {?string} type media type
              */
             getForm(rel, type) {
-                loader.schedule(() => link.get(this.representation, rel, type))
+                loader.schedule(link.getUri(this.representation, rel), link.get, this.representation, rel, type)
                     .then(/** @type {AxiosResponse} */response => {
                         this.formRepresentation = response.data;
                     });
@@ -310,7 +310,7 @@
              */
             tryDelete(rel) {
 
-                return loader.schedule(() => link.delete(this.representation, rel))
+                return loader.submit(link.delete, this.representation, rel)
                     .then(/** @type {AxiosResponse|Error} */response => {
 
                         // appropriate repsonses from a deleted resource
@@ -323,7 +323,7 @@
                             }
 
                             // check that it has in fact been deleted
-                            return loader.schedule(() => link.get(this.representation, /^self$/))
+                            return loader.schedule(link.getUri(this.representation, /^self$/), link.get, this.representation, /^self$/)
                             // it is an error if it succeeds
                                 .then(() => this.$notify({
                                     type: 'error',
@@ -376,7 +376,7 @@
 
                 log.debug(`[Resource] Fetching representation ${this.apiUri}`);
 
-                return loader.schedule(this.apiUri, () => axios.get(this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}}))
+                return loader.schedule(this.apiUri, axios.get, this.apiUri, {reponseHeaders: {'Accept': this.defaultAccept}})
                     .then(/** @type {AxiosResponse} */response => {
                         this.responseHeaders = response.headers;
                         this.representation = response.data;

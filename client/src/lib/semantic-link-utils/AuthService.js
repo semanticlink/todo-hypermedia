@@ -2,6 +2,7 @@ import auth0 from 'auth0-js';
 import {log} from 'logger';
 import axios from 'axios';
 import {getAuthenticationUri} from './http-interceptors';
+import {loader} from 'semantic-link-cache/Loader';
 
 
 /**
@@ -496,7 +497,7 @@ export default class AuthService {
      */
     static loadFrom401JsonWebTokenChallenge(error) {
         let authenticationConfigurationUri = getAuthenticationUri(error);
-        return axios.get(authenticationConfigurationUri);
+        return loader.schedule(authenticationConfigurationUri, axios.get, authenticationConfigurationUri);
     }
 
     /**

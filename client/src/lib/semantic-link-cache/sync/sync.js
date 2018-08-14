@@ -1,4 +1,3 @@
-
 import _ from '../mixins/index';
 import * as link from 'semantic-link';
 import {log} from 'logger';
@@ -7,6 +6,7 @@ import Differencer from './Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';
 import {uriMappingResolver} from './UriMappingResolver';
+import {loader} from 'semantic-link-cache/Loader';
 
 /**
  * Internal data structure for working out which active to perform on documents.
@@ -573,10 +573,11 @@ export function synchroniseUriList(collection, documentUriList, options = {}) {
      */
 
     const createUriListAndUpdateResolver = uriList => {
-        return link.post(collection, /self/, 'text/uri-list', toUriListMimeTypeFormat(uriList))
+        return loader.submit(link.post, collection, /self/, 'text/uri-list', toUriListMimeTypeFormat(uriList))
             .then(response => {
                 if (response.status === 201) {
-                    return axios.get(response.headers().location);
+                    const url = response.headers().location;
+                    return loader.schedule(url, axios.get, url);
                 } else {
                     return Promise.reject(new Error(`Unable to create resources '${uriList.join(',')}'`));
                 }
@@ -584,11 +585,12 @@ export function synchroniseUriList(collection, documentUriList, options = {}) {
             .catch(response => {
                 if (response.status === 415) {
                     log.info('Trying to create again');
-                    return link.post(collection, /self/, 'application/json', uriList)
+                    return loader.submit(link.post, collection, /self/, 'application/json', uriList)
                         .then(response => {
                             if (response.status === 201) {
-                                log.debug('[Sync] Created');
-                                return axios.get(response.headers().location);
+                                const url = response.headers().location;
+                                log.debug(`[Sync] Created ${url}`);
+                                return loader.schedule(url, axios.get, url);
                             } else {
                                 return Promise.reject(new Error(`Unable to create resources '${uriList.join(',')}'`));
                             }
@@ -617,7 +619,7 @@ export function synchroniseUriList(collection, documentUriList, options = {}) {
     };
 
     const deleteUriListAndUpdateResolver = uriList => {
-        return link.delete(collection, /self/, 'text/uri-list', toUriListMimeTypeFormat(uriList))
+        return loader.submit(link.delete, collection, /self/, 'text/uri-list', toUriListMimeTypeFormat(uriList))
             .then(response => {
 
                 if (response.status === 200 || response.status === 204) {
@@ -633,7 +635,7 @@ export function synchroniseUriList(collection, documentUriList, options = {}) {
             .catch(response => {
                 if (response.status === 415) {
                     log.info('Trying to delete again');
-                    return link.delete(collection, /self/, 'application/json', uriList)
+                    return loader.submit(link.delete, collection, /self/, 'application/json', uriList)
                         .then(response => {
 
                             if (response.status === 200 || response.status === 204) {
