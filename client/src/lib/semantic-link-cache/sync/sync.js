@@ -48,16 +48,26 @@ const defaultResolver = {
  * Default resource finder assumes that resources are in a collection via the 'items' attribute/array.
  * @return {function(CollectionRepresentation=, LinkedRepresentation=): LinkedRepresentation}
  */
-const defaultfindResourceInCollectionStrategy = (collectionResource, resourceDocument) => _(collectionResource).findResourceInCollection(resourceDocument);
+const defaultFindResourceInCollectionStrategy = (collectionResource, resourceDocument) => _(collectionResource).findResourceInCollection(resourceDocument);
 
 /**
  *
+ * Iterate (sequentially move) through all the strategies. However, each strategy can make many calls itself based
+ * on the change sets required (syncInfos). The calls can be processed either all at once (parallel using a map wait all
+ * which is implemented as a Promise.all) or one at a time (sequentially, note there is no partial batching).
+ *
+ * The approach is set using {@link UtilOptions.childStrategyBatchSize} when non-zero (defined)
+ *
+ * When syncing a tree/graph, each path of resources is sync'd via a set of strategies. The syncInfo is the state action
+ * (update, create, delete) on the resource and the strategy is how resources are traversed.
+ *
  * @param strategies
- * @param options
+ * @param {UtilOptions} options
  * @param syncInfos
  * @return {Promise.<void>}
+ * @private
  */
-export function tailRecursionThroughStrategies(strategies, options, syncInfos) {
+function tailRecursionThroughStrategies(strategies, options, syncInfos) {
     return _(strategies).sequentialWait((unusedMemo, strategy) => {
 
         if (options.childStrategyBatchSize === 0 || _(options.childStrategyBatchSize).isUndefined()) {
@@ -76,8 +86,9 @@ export function tailRecursionThroughStrategies(strategies, options, syncInfos) {
  * @param {*[]} strategies
  * @param {UtilOptions} options
  * @return {function(syncInfo:SyncInfo):Promise.<LinkedRepresentation>} containing the representation (@link LinkedRepresentation}
+ * @private
  */
-export function syncInfos(strategies, options) {
+function syncInfos(strategies, options) {
     return syncInfo =>
         tailRecursionThroughStrategies(strategies, options, [syncInfo])
             .then(() => syncInfo.resource);
@@ -146,9 +157,9 @@ export function toUriListMimeTypeFormat(uriList) {
  * @return {Promise.<SyncInfo>} contains a syncInfo
  * @private
  */
-export function syncResourceInCollection(collectionResource, resourceDocument, options = {}) {
+function syncResourceInCollection(collectionResource, resourceDocument, options = {}) {
 
-    const findResourceInCollectionStrategy = options.findResourceInCollectionStrategy || defaultfindResourceInCollectionStrategy;
+    const findResourceInCollectionStrategy = options.findResourceInCollectionStrategy || defaultFindResourceInCollectionStrategy;
 
     // locate the document in the collection items
     const collectionItemResource = findResourceInCollectionStrategy(collectionResource, resourceDocument);
@@ -192,7 +203,7 @@ export function syncResourceInCollection(collectionResource, resourceDocument, o
  * @returns {Promise}
  * @private
  */
-export function synchroniseCollection(collectionResource, collectionDocument, options = {}) {
+function synchroniseCollection(collectionResource, collectionDocument, options = {}) {
 
     /**
      * @type {SyncResolver}
@@ -422,7 +433,7 @@ export function getResourceInCollection(parentResource, resourceDocument, strate
     log.debug(`[Sync] collection ${link.getUri(parentResource, /self/)} with '${resourceDocument.name}'`);
 
     return cache
-        .getCollectionResource(parentResource, options /*_({}).defaults(options, {mappedTitle: 'name'})*/)
+        .getCollectionResource(parentResource, options)
         .then(collectionResource => syncResourceInCollection(collectionResource, resourceDocument, options))
         .then(syncInfos(strategies, options));
 }
@@ -559,7 +570,7 @@ export function getSingleton(parentResource, singletonName, singletonRel, parent
  * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} syncInfos
  * @private
  */
-export function synchroniseUriList(collection, documentUriList, options = {}) {
+function synchroniseUriList(collection, documentUriList, options = {}) {
 
     const uriListResolver = options.uriListResolver || defaultUriListResolver;
 
