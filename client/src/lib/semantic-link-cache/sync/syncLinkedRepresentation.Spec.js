@@ -57,7 +57,6 @@ describe('Synchroniser', () => {
             ]
         };
 
-
         it('should not need updates when the same', () => {
 
             const get = sinon.stub();
@@ -148,41 +147,7 @@ describe('Synchroniser', () => {
                 });
 
         });
-    });
 
-    describe('getCollectionInNamedCollection', () => {
-
-        xit('should not need update when the same ', () => {
-
-            const get = sinon.stub();
-            const post = sinon.stub();
-            const put = sinon.stub();
-            const del = sinon.stub();
-
-            const document = {};
-
-            const sparseCollection = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
-
-            return sync.getCollectionInNamedCollection(sparseCollection, document, [], {
-                getFactory: get,
-                postFactory: post,
-                putFactory: put,
-                deleteFactory: del
-            })
-                .then(result => {
-                    expect(result).to.not.be.undefined;
-                    expect(get.callCount).to.eq(2);
-                    expect(put.callCount).to.eq(1);
-                    expect(post.callCount).to.eq(0);
-                    expect(del.callCount).to.eq(0);
-                });
-
-        });
-
-    });
-
-    describe('getResourceInNamedCollection', () => {
-        // TODO
     });
 
     describe('getResourceInCollection', () => {
@@ -240,6 +205,8 @@ describe('Synchroniser', () => {
 
             const get = sinon.stub();
             const post = sinon.stub();
+            const put = sinon.stub();
+            const del = sinon.stub();
 
             get.onCall(0).callsFake(() => {
                 log.info('[Test] GET collection');
@@ -263,16 +230,221 @@ describe('Synchroniser', () => {
 
             const coll = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
 
-            return sync.getResourceInCollection(coll, document, [], {getFactory: get, postFactory: post})
+            return sync.getResourceInCollection(coll, document, [], {
+                getFactory: get,
+                postFactory: post,
+                putFactory: put,
+                deleteFactory: del
+            })
                 .then(result => {
                     expect(result).to.not.be.undefined;
                     expect(get.callCount).to.eq(3);
                     expect(post.callCount).to.eq(1);
+                    expect(put.callCount).to.eq(0);
+                    expect(del.callCount).to.eq(0);
                 });
 
         });
 
+    });
 
+
+    describe('getResourceInNameCollection', () => {
+
+        it('should update when the document matches an item and an attribute is different', () => {
+
+            const parent = {
+                links: [
+                    {
+                        rel: 'self',
+                        href: 'https://api.example.com/user/f58c6dd2a5'
+                    },
+                    {
+                        rel: 'todos',
+                        href: 'https://api.example.com/user/tenant/90a936d4a3/todo'
+                    },
+                ],
+                name: 'test',
+                email: 'test@rewire.nz'
+            };
+            const namedCollection = {
+                links: [
+                    {
+                        rel: 'self',
+                        href: 'https://api.example.com/user/tenant/90a936d4a3/todo'
+                    },
+                    {
+                        rel: 'create-form',
+                        href: 'https://api.example.com/todo/form/create'
+                    }
+                ],
+                items: [
+                    {
+                        id: 'https://api.example.com/todo/4bf1d09bb0',
+                        title: 'One Todo'
+                    },
+                    {
+                        id: 'https://api.example.com/todo/a3e0ce2e0d',
+                        title: 'Two Todo (tag)'
+                    }
+                ]
+            };
+            const matchedItem =
+                {
+                    links: [
+                        {
+                            rel: 'self',
+                            href: 'https://api.example.com/todo/a3e0ce2e0d'
+                        },
+                        {
+                            rel: 'edit-form',
+                            href: 'https://api.example.com/todo/form/edit'
+                        }
+                    ],
+                    name: 'Two Todo (tag)',
+                    state: 'http://example.com/todo/state/complete',
+                    due: '0001-01-01T11:40:00+11:40'
+                };
+            const document = {
+                links: [
+                    {
+                        rel: 'self',
+                        href: 'https://api.example.com/todo/a3e0ce2e0d'
+                    },
+                    {
+                        rel: 'edit-form',
+                        href: 'https://api.example.com/todo/form/edit'
+                    }
+                ],
+                name: 'Two Todo (tag) [Updated]',
+                state: 'http://example.com/todo/state/complete',
+                due: '0001-01-01T11:40:00+11:40'
+            };
+            const editForm = {
+                links: [
+                    {
+                        rel: 'self',
+                        href: 'https://api.example.com/todo/form/edit'
+                    }
+                ],
+                items: [
+                    {
+                        type: 'http://types/text',
+                        name: 'name',
+                        required: true,
+                        description: 'The title of the page'
+                    },
+                    {
+                        type: 'http://types/select',
+                        name: 'state',
+                        description: 'A todo can only toggle between open and complete.',
+                        items: [
+                            {
+                                type: 'http://types/enum',
+                                value: 'http://example.com/todo/state/complete',
+                                label: 'Completed',
+                                name: 'completed',
+                                description: 'The todo has been completed'
+                            },
+                            {
+                                type: 'http://types/enum',
+                                value: 'http://example.com/todo/state/open',
+                                label: 'Open',
+                                name: 'open',
+                                description: 'The todo has been opened'
+                            }
+                        ]
+                    },
+                    {
+                        type: 'http://types/datetime',
+                        name: 'due',
+                        description: 'The UTC date the todo is due'
+                    }
+                ]
+            };
+
+            const get = sinon.stub();
+            const post = sinon.stub();
+            const put = sinon.stub();
+            const del = sinon.stub();
+
+            get.onCall(0).callsFake(() => {
+                log.info('[Test] GET named collection');
+                return Promise.resolve({data: namedCollection});
+            });
+            get.onCall(1).callsFake(() => {
+                log.info('[Test] GET item from collection');
+                return Promise.resolve({data: matchedItem});
+            });
+
+            get.onCall(2).callsFake(() => {
+                log.info('[Test] GET edit form');
+                return Promise.resolve({data: editForm});
+            });
+
+            put.onFirstCall().callsFake(() => {
+                log.info('[Test] PUT document');
+                return Promise.resolve({});
+            });
+
+            const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
+
+            return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, document, [], {
+                getFactory: get,
+                postFactory: post,
+                putFactory: put,
+                deleteFactory: del
+            })
+                .then(result => {
+                    expect(result).to.not.be.undefined;
+                    expect(get.callCount).to.eq(3);
+                    expect(put.callCount).to.eq(1);
+                    expect(post.callCount).to.eq(0);
+                    expect(del.callCount).to.eq(0);
+                });
+
+        });
+
+    });
+
+
+    describe('getCollectionInNamedCollection', () => {
+
+        xit('should not need update when the same ', () => {
+
+            const get = sinon.stub();
+            const post = sinon.stub();
+            const put = sinon.stub();
+            const del = sinon.stub();
+
+            const document = {};
+
+            const sparseCollection = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
+
+            return sync.getCollectionInNamedCollection(sparseCollection, document, [], {
+                getFactory: get,
+                postFactory: post,
+                putFactory: put,
+                deleteFactory: del
+            })
+                .then(result => {
+                    expect(result).to.not.be.undefined;
+                    expect(get.callCount).to.eq(2);
+                    expect(put.callCount).to.eq(1);
+                    expect(post.callCount).to.eq(0);
+                    expect(del.callCount).to.eq(0);
+                });
+
+        });
+
+    });
+
+    describe('getNamedCollectionInNamedCollection', () => {
+        // TODO
+    });
+
+    describe('getSingleton', () => {
+        // TODO
     });
 
 });
