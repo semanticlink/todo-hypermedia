@@ -12,6 +12,7 @@
     "test-watch": "mocha-webpack --watch --opts mocha-webpack.opts",
     "jest": "jest --config=jest.config.js",
     "jest-watch": "jest --watch --config=jest.config.js",
+    "jest-clear-cache": "jest --clearCache",
     "cover": "nyc npm run test",
     "build": "webpack --mode development --config webpack.dev.js --progress --hide-modules",
     "dist": "webpack --mode production --config webpack.prod.js --colors false --progress false"
