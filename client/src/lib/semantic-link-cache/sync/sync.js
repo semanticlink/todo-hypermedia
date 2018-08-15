@@ -387,7 +387,18 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
 }
 
 /**
- * Retrieves a resource and synchronises (its attributes)
+ * Retrieves a resource and synchronises (its attributes) from the document
+ *
+ * @example
+ *
+ *     Resource               Document
+ *
+ *                  sync
+ *     +-----+                +-----+
+ *     |     |  <-----------+ |     |
+ *     |     |                |     |
+ *     +-----+                +-----+
+ *
  * @param {LinkedRepresentation} resource
  * @param {*} resourceDocument
  * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
@@ -420,7 +431,21 @@ export function getResource(resource, resourceDocument, strategies, options = {}
 }
 
 /**
- * Retrieves a resource from a named collection on a resource.
+ * Retrieves a resource item from a resource collection and synchronises (its attributes) from the document.
+ *
+ * @example
+ *
+ *     resource
+ *     Collection         Document
+ *
+ *     +-----+
+ *     |     |
+ *     |     |
+ *     +-----+    sync
+ *         X                +---+
+ *         X  <-----------+ | x |
+ *         X                +---+
+ *           items
  *
  * @param {LinkedRepresentation} parentResource
  * @param {*} resourceDocument
@@ -438,8 +463,67 @@ export function getResourceInCollection(parentResource, resourceDocument, strate
         .then(syncInfos(strategies, options));
 }
 
+
 /**
- * Retrieves the named collection and then synchronises with the provided collection document.
+ * Retrieves a parent resource and its named collection with items (sparsely populated), finds the item in that
+ * collection and then synchronises (its attributes) with the document.
+ *
+ *  @example
+ *
+ *      parent      resource
+ *      Resource    Collection        Document
+ *
+ *      +----------+
+ *      |          |
+ *      |          +-----+
+ *      |     Named|     |
+ *      |          |     |
+ *      |          +-----+    sync
+ *      |          |   X                +---+
+ *      |          |   X  <-----------+ | x |
+ *      +----------+   X                +---+
+ *      items
+ *
+ * @param {LinkedRepresentation} parentResource
+ * @param {string} collectionName
+ * @param {string|RegExp|string[]|RegExp[]} collectionRel
+ * @param {*} resourceDocument
+ * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {UtilOptions} options
+ * @return {Promise} containing the resource {@link LinkedRepresentation}
+ */
+export function getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, strategies, options = {}) {
+
+    log.debug(`[Sync] resource '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
+
+    return cache
+    // ensure that the collection is added to the parent resource
+        .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
+        .then(collectionResource => syncResourceInCollection(collectionResource, resourceDocument, options))
+        .then(syncInfos(strategies, options));
+}
+
+/**
+ * Retrieves a parent resource and its named collection with items (sparsely populated), then synchronises the
+ * collection items where each item may be updated (its attributes), a new item created or an item removed.
+ *
+ * This method is used when you have context of one parent and the document collection  (see {@link getNamedCollectionInNamedCollection})
+ *
+ *  @example
+ *
+ *       parent     resource              document
+ *      Resource   Collection            Collection
+ *
+ *     +----------+
+ *     |          |            sync
+ *     |          +-----+                +-----+
+ *     |     Named|     |  <-----------+ |     |
+ *     |          |     |                |     |
+ *     |          +-----+                +-----+
+ *     |          |   X                     X
+ *     |          |   X items               X items
+ *     +----------+   X                     X
+ *
  * @param {LinkedRepresentation} parentResource
  * @param {string} collectionName
  * @param {string|RegExp|string[]|RegExp[]} collectionRel
@@ -481,7 +565,26 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
 }
 
 /**
- * Retrieves the named collection and then synchronises with the provided named collection document in the provided parent document.
+ * Retrieves a parent resource and its named collection with items (sparsely populated), then given the
+ * parent document which has document collection items it synchronises the items where each item may be
+ * updated (its attributes), a new item created or an item removed.
+ *
+ * This method is used when you have parent contexts for both collections (see {@link getCollectionInNamedCollection})
+ *
+ * @example
+ *
+ *     parent      resource             document    parent
+ *     Resource    Collection           Collection  Document
+ *
+ *     +----------+                            +----------+
+ *     |          |            sync            |          |
+ *     |          +-----+                +-----+          |
+ *     |     Named|     |  <-----------+ |     |          |
+ *     |          |     |                |     |          |
+ *     |          +-----+                +-----+          |
+ *     |          |   X                     X  |          |
+ *     |          |   X items         items X  |          |
+ *     +----------+   X                     X  +----------+
  *
  * @param {LinkedRepresentation} parentResource
  * @param {string} collectionName
@@ -491,35 +594,32 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
  * @param {UtilOptions} options
  * @return {Promise} containing the collection {@link CollectionRepresentation}
  */
-export function getNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies, options) {
+export function getNamedCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies, options) {
     return getCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument[collectionName], strategies, options);
 }
 
 /**
- * Retrieves a resource from a named collection on a resource and then synchronises.
- *
- * @param {LinkedRepresentation} parentResource
- * @param {string} collectionName
- * @param {string|RegExp|string[]|RegExp[]} collectionRel
- * @param {*} resourceDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
- * @param {UtilOptions} options
- * @return {Promise} containing the resource {@link LinkedRepresentation}
- */
-export function getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, strategies, options = {}) {
-
-    log.debug(`[Sync] resource '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
-
-    return cache
-    // ensure that the collection is added to the parent resource
-        .getNamedCollectionResource(parentResource, collectionName, collectionRel, options/*Object.assign({}, options, {mappedTitle: 'name'})*/)
-        .then(collectionResource => syncResourceInCollection(collectionResource, resourceDocument, options))
-        .then(syncInfos(strategies, options));
-}
-
-/**
  * Retrieves a singleton resource on a parent resource and updates based on a singleton
- * of the same name in the given document
+ * of the same name in the given parent document
+ *
+ * @example
+ *
+ *
+ *     parent     singleton           singleton   parent
+ *     Resource    Resource            Document   Document
+ *
+ *     +----------+                            +---------+
+ *     |          |            sync            |         |
+ *     |          +-----+                +-----+         |
+ *     |     Named|     |  <-----------+ |     |Named    |
+ *     |          |     |                |     |         |
+ *     |          +-----+                +-----+         |
+ *     |          |                            |         |
+ *     |          |                       ^    |         |
+ *     +----------+                       |    +---------+
+ *                                        |
+ *                                        +
+ *                                        looks for
  *
  * @param {LinkedRepresentation} parentResource
  * @param {string} singletonName

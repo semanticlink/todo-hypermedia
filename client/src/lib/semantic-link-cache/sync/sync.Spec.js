@@ -146,13 +146,40 @@ describe('Synchroniser', () => {
                     expect(result).to.not.be.undefined;
                     expect(get.callCount).to.eq(2);
                     expect(put.callCount).to.eq(1);
+                    expect(post.callCount).to.eq(0);
+                    expect(del.callCount).to.eq(0);
                 });
 
         });
     });
 
-    describe('getNamedCollection', () => {
-        // TODO
+    describe('getCollectionInNamedCollection', () => {
+
+        it('should not need update when the same ', () => {
+
+            const get = sinon.stub();
+            const post = sinon.stub();
+            const put = sinon.stub();
+            const del = sinon.stub();
+
+            const sparseCollection = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
+
+            return sync.getCollectionInNamedCollection(sparseCollection, document, [], {
+                getFactory: get,
+                postFactory: post,
+                putFactory: put,
+                deleteFactory: del
+            })
+                .then(result => {
+                    expect(result).to.not.be.undefined;
+                    expect(get.callCount).to.eq(2);
+                    expect(put.callCount).to.eq(1);
+                    expect(post.callCount).to.eq(0);
+                    expect(del.callCount).to.eq(0);
+                });
+
+        });
+
     });
 
     describe('getResourceInNamedCollection', () => {

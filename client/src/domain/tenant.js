@@ -25,15 +25,15 @@ export const getTenantAndTodos = root => {
 
 
 const syncUsersStrategy = (tenant, aTenant, strategies, options) => {
-    return sync.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
+    return sync.getNamedCollectionInNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
 };
 
 const syncTodosStrategy = (user, aUser, strategies, options) => {
-    return sync.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
+    return sync.getNamedCollectionInNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
 };
 
 const syncTagsStrategy = (todo, aTodo, root, options) => {
-    return sync.getNamedCollection(todo, 'tags', /tags/, aTodo, [], options);
+    return sync.getNamedCollectionInNamedCollection(todo, 'tags', /tags/, aTodo, [], options);
 };
 
 
