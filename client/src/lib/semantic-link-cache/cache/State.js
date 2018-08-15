@@ -466,22 +466,6 @@ export default class State {
 
         let id = link.getUri(resource, rel);
 
-        /*
-        /!**
-         * Currently, the same job is dropped if duplicated. However, what we want to
-         * route the same request to multiple sources. This does not currently look possible.
-         * In other words, we can't have multiple returns from a single id.
-         *
-         * @see https://github.com/SGrondin/bottleneck/issues/68
-         *
-         * TODO: don't recreate the jobs, need to put in a mechanism to solve this problem
-         *!/
-        if (loader.limiter.jobStatus(id) != null) {
-            log.debug(`[State] job id '${id}' already exists`);
-            id += Date.now().toString();
-        }
-        */
-
         return loader.schedule(id, getFactory, resource, rel, loader.cancellable)
             .then(response => {
 
