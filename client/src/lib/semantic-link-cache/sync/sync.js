@@ -157,7 +157,7 @@ export function syncResourceInCollection(collectionResource, resourceDocument, o
     if (collectionItemResource && !options.forceCreate) {
         return cache
         // synchronise the item in the collection from the server
-            .getCollectionResourceItem(collectionResource, collectionItemResource)
+            .getCollectionResourceItem(collectionResource, collectionItemResource, options)
             .then(item => {
                 // and update the resource back to the server and return it
                 return cache.updateResource(item, resourceDocument, options);
@@ -174,7 +174,7 @@ export function syncResourceInCollection(collectionResource, resourceDocument, o
             .createCollectionResourceItem(collectionResource, resourceDocument, options)
             .then(item => {
                 // ensure the resource is returned
-                return cache.getResource(item);
+                return cache.getResource(item, options);
             })
             .then(resource => ({
                 resource: resource,
@@ -419,11 +419,11 @@ export function getResource(resource, resourceDocument, strategies, options = {}
  */
 export function getResourceInCollection(parentResource, resourceDocument, strategies, options = {}) {
 
-    log.debug(`[Sync] collection ${link.getUri(parentResource, /self/)} with '${link.getUri(resourceDocument, /self/) || resourceDocument.name}'`);
+    log.debug(`[Sync] collection ${link.getUri(parentResource, /self/)} with '${resourceDocument.name}'`);
 
     return cache
-        .getCollectionResource(parentResource, _({}).defaults(options, {mappedTitle: 'name'}))
-        .then(collectionResource => this.syncResourceInCollection(collectionResource, resourceDocument, options))
+        .getCollectionResource(parentResource, options /*_({}).defaults(options, {mappedTitle: 'name'})*/)
+        .then(collectionResource => syncResourceInCollection(collectionResource, resourceDocument, options))
         .then(syncInfos(strategies, options));
 }
 
@@ -441,7 +441,7 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
 
     log.debug(`[Sync] collection '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
 
-    options = {...options, ...{mappedTitle: 'name'}};
+    //options = {...options, ...{mappedTitle: 'name'}};
 
     return cache
         .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
@@ -452,7 +452,7 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
                 return Promise.resolve(parentResource);
             }
             // in the context of the collection, synchronise the collection part of the document
-            return this.synchroniseCollection(collectionResource, collectionDocument, options)
+            return synchroniseCollection(collectionResource, collectionDocument, options)
             // returns [infos, createResults, updateItems, deleteItems], we'll just have 'infos'
                 .then(([syncInfos]) => {
                     return cache
@@ -481,7 +481,7 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
  * @return {Promise} containing the collection {@link CollectionRepresentation}
  */
 export function getNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies, options) {
-    return this.getCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument[collectionName], strategies, options);
+    return getCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument[collectionName], strategies, options);
 }
 
 /**
@@ -501,8 +501,8 @@ export function getResourceInNamedCollection(parentResource, collectionName, col
 
     return cache
     // ensure that the collection is added to the parent resource
-        .getNamedCollectionResource(parentResource, collectionName, collectionRel, Object.assign({}, options, {mappedTitle: 'name'}))
-        .then(collectionResource => this.syncResourceInCollection(collectionResource, resourceDocument, options))
+        .getNamedCollectionResource(parentResource, collectionName, collectionRel, options/*Object.assign({}, options, {mappedTitle: 'name'})*/)
+        .then(collectionResource => syncResourceInCollection(collectionResource, resourceDocument, options))
         .then(syncInfos(strategies, options));
 }
 
@@ -711,7 +711,7 @@ export function getUriListOnNamedCollection(parentResource, uriListName, uriList
                     return Promise.resolve(undefined);
                 } else {
 
-                    return this.synchroniseUriList(collection, uriList, options)
+                    return synchroniseUriList(collection, uriList, options)
                     // note discarding synch infos (not sure why)
                         .then(() => {
                             options = {...options, forceLoad: true};
@@ -745,7 +745,7 @@ export function patchUriListOnNamedCollection(parentResource, uriListName, uriLi
                     return Promise.resolve(undefined);
                 } else {
                     // make all the necessary changes to create and remove individual uri
-                    return this.synchroniseUriList(collection, uriList, options)
+                    return synchroniseUriList(collection, uriList, options)
                         .then(() => {
                             // now make it so and the server should pay nicely and accept all the changes
                             log.debug('[Sync] update collection with uri-list');

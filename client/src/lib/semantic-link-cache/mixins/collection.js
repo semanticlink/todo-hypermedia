@@ -53,6 +53,8 @@ export const findResourceInCollection = (collection, representation, attributeNa
     const itemByUri = findResourceInCollectionByRel(collection, representation, attributeNameOrLinkRelation);
     if (itemByUri) {
         return itemByUri;
+    } else {
+        log.debug(`No match on collection ${link.getUri(collection, /self/)} no match against on rel '${attributeNameOrLinkRelation}'`);
     }
 
     const name = representation[SparseResource.mappedTitle];
@@ -60,8 +62,13 @@ export const findResourceInCollection = (collection, representation, attributeNa
         const itemByName = findResourceInCollectionByRelOrAttribute(collection, name, SparseResource.mappedTitle);
         if (itemByName) {
             return itemByName;
+        } else {
+            log.debug(`No match on collection ${link.getUri(collection, /self/)} on attribute '${SparseResource.mappedTitle}'`);
         }
+    } else {
+        log.debug(`No match on collection ${link.getUri(collection, /self/)} no attribute '${SparseResource.mappedTitle}'`);
     }
+
 };
 
 /**
@@ -81,7 +88,11 @@ export const findResourceInCollectionByRel = (collection, representation, attrib
         const itemByUri = findResourceInCollectionByRelOrAttribute(collection, uri, [attributeNameOrLinkRelation, /self|canonical/]);
         if (itemByUri) {
             return itemByUri;
+        } else {
+            log.debug(`Try search representation for collection ${link.getUri(collection, /self/)}`);
         }
+    } else {
+        log.debug(`No match on collection ${link.getUri(collection, /self/)} on what looks like a Document`);
     }
 };
 
@@ -106,20 +117,28 @@ export const findResourceInCollectionByRelAndAttribute = (collection, resource, 
 
     // if its not a resource return
     if (!isLinkedRepresentation(resource)) {
+        log.debug(`No match on collection ${link.getUri(collection, /self/)} no resource to match against`);
         // this is not a resource
         return undefined;
     }
 
-    const uri = link.getUri(resource, /self|canonical/, undefined);
+    const uri = link.getUri(resource, /self|canonical/);
 
     // if we can't find values to match against return
     if (!uri || !resource[attributeName]) {
+        log.debug(`No match on collection ${link.getUri(collection, /self/)} no match against on self '${uri}' or attribute '${attributeName}'`);
         return undefined;
     }
 
     // go through the collection and match the URI against either a link relation and attribute
-    return normalise(collection)
-        .find(item => item[attributeName] === resource[attributeName] && link.getUri(item, rel, undefined) === uri);
+    const result = normalise(collection)
+        .find(item => item[attributeName] === resource[attributeName] && link.getUri(item, rel) === uri);
+
+    if (!result) {
+        log.debug(`No match on collection ${link.getUri(collection, /self/)} on BOTH self '${uri}' AND attribute '${attributeName}'`);
+    }
+
+    return result;
 };
 
 /**
@@ -141,13 +160,23 @@ export const findResourceInCollectionByRelOrAttribute = (collection, resourceIde
 
     // if a linked representation is handed in (instead of a string) find its self link
     if (isLinkedRepresentation(resourceIdentifier)) {
-        resourceIdentifier = link.getUri(resourceIdentifier, attributeNameOrLinkRelation || /self|canonical/, undefined);
+        resourceIdentifier = link.getUri(resourceIdentifier, attributeNameOrLinkRelation || /self|canonical/);
+
+        if (resourceIdentifier) {
+            log.debug(`Using ${resourceIdentifier}`);
+        }
     }
 
     // go through the collection and match the URI against either a link relation or attribute
-    return normalise(collection)
-        .find(item => link.getUri(item, attributeNameOrLinkRelation || /canonical|self/, undefined) === resourceIdentifier
-            || item[attributeNameOrLinkRelation || SparseResource.mappedTitle] === resourceIdentifier);
+    const result = normalise(collection).find(item =>
+        link.getUri(item, attributeNameOrLinkRelation || /canonical|self/) === resourceIdentifier
+        || item[attributeNameOrLinkRelation || SparseResource.mappedTitle] === resourceIdentifier);
+
+    if (!result) {
+        log.debug(`No resource '${resourceIdentifier}' found in collection '${link.getUri(collection, /self/)}'`);
+    }
+
+    return result;
 };
 
 /**

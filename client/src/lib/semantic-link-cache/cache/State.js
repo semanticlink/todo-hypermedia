@@ -6,6 +6,7 @@ import SparseResource from './SparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
 import {loader} from '../Loader';
+import {findResourceInCollection} from '../mixins/collection';
 
 const stateFlagName = Symbol('state');
 
@@ -166,7 +167,7 @@ export default class State {
      * @private
      */
     static cacheBust(status, options) {
-        return options.forceLoad && status === stateFlagEnum.hydrated;
+        return options.forceLoad &&this.status === stateFlagEnum.hydrated;
     }
 
     /**
@@ -289,8 +290,8 @@ export default class State {
         }
         const representation = linkedRepresentationFactory();
 
-        // only add to the collection if it doesn't alread exist
-        if (!_(collection).findResourceInCollection(representation)) {
+        // only add to the collection if it doesn't already exist
+        if (!findResourceInCollection(collection, representation)) {
             collection.items.push(representation);
         } else {
             log.info(`Resource ${link.getUri(representation, /self/)} already exists in collection ${link.getUri(collection, /self/)}`);
@@ -450,10 +451,10 @@ export default class State {
         const uri = (options.getUri || link.getUri)(resource, rel);
 
         // uri may be undefined on a link.getUri
-        if (!uri || status === stateFlagEnum.virtual) {
-            log.info(`Resource is client-side only and will not be fetched ${uri} ${status.toString()}`);
+        if (!uri || this.status === stateFlagEnum.virtual) {
+            log.info(`Resource is client-side only and will not be fetched ${uri} ${this.status.toString()}`);
             return Promise.resolve(resource);
-        } else if (this.status === stateFlagEnum.deleted || status === stateFlagEnum.deleteInProgress) {
+        } else if (this.status === stateFlagEnum.deleted || this.status === stateFlagEnum.deleteInProgress) {
             return Promise.reject(`Resource is deleted ${uri}`);
         } else if (this.status === stateFlagEnum.forbidden) {
             // TODO: enhance forbidden strategy as needed currently assumes forbidden access doesn't change per session
@@ -505,7 +506,7 @@ export default class State {
                 // @see https://github.com/SGrondin/bottleneck#debugging-your-application
 
                 if (err.status === 403) {
-                    log.debug(`[State] Request error ${err.status} ${err.statusText} '${uri}'`);
+                    log.debug(`[State] Request forbidden ${err.status} ${err.statusText} '${uri}'`);
                     // save the across-the-wire meta data so we can check for collisions/staleness
                     this.status = stateFlagEnum.forbidden;
                     // when was it retrieved
@@ -739,7 +740,7 @@ export default class State {
 
         log.debug(`[State] start create resource ${uri}`);
 
-        return loader.limiter.submit(postFactory, resource, data)
+        return loader.submit(postFactory, resource, data)
             .then(response => {
 
                 const resourceUri = response.headers.location;
@@ -747,7 +748,7 @@ export default class State {
                     log.error(`[State] Create failed to return new resource location for ${uri} [${Object.keys(options).map(o => o).join(',')}]`);
                     return Promise.resolve(undefined);
                 }
-                return this.getResource(State.makeFromUri(resourceUri));
+                return this.getResource(State.makeFromUri(resourceUri), options);
             })
             .catch(/** @type {Error|BottleneckError|AxiosError} */response => {
 
@@ -777,7 +778,7 @@ export default class State {
      */
     updateResource(resource, data, options = {}) {
 
-        this.previousStatus = status;
+        this.previousStatus = this.status;
         let uri = link.getUri(resource, /self/);
 
         let putFactory = options.putFactory || State.defaultPutFactory;
@@ -828,7 +829,7 @@ export default class State {
      */
     deleteResource(item, options = {}) {
 
-        this.previousStatus = status;
+        this.previousStatus =this.status;
 
         let deleteFactory = options.deleteFactory || State.defaultDeleteFactory;
 

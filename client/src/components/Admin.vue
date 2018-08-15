@@ -109,8 +109,8 @@
                 tenantDocument.name = `${tenantDocument.name || 'New tenant'} (${Date.now() % 1000000})`;
                 tenantDocument.code = `${Date.now() % 1000000}.${tenantDocument.code }`;
                 if ('links' in tenantDocument) {
-                    tenantDocument.links[0].href = ''; // remove the self link
-                }
+                    delete tenantDocument.links;
+                 }
 
                 this.$notify('Starting create new tenant');
 

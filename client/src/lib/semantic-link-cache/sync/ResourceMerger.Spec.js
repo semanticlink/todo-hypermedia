@@ -1,7 +1,10 @@
-import { expect } from 'chai';
+import {expect} from 'chai';
 import sinon from 'sinon';
 import _ from '../mixins/index';
-import { resourceMerger } from './ResourceMerger';
+import {resourceMerger} from './ResourceMerger';
+
+global.Element = () => {
+};
 
 let stubbedResource = {
     isTracked: () => {

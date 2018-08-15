@@ -22,7 +22,7 @@ let repCount = 1;
  */
 const uniqueUri = prefix => prefix || 'http://example.com/' + (++repCount);
 
-describe('NOD Maker', () => {
+describe('Cache', () => {
     let linkedRepresentation, feedRepresentation;
 
     describe('Synch: cache simple functions - synchronise', () => {

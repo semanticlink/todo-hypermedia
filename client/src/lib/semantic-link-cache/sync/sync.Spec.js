@@ -5,6 +5,7 @@ import * as sync from './sync';
 import * as cache from '../cache/cache';
 import Differencer from './Differencer';
 import axios from 'axios';
+import {log} from 'semantic-link/lib/logger';
 
 global.Element = () => {
 };
@@ -28,16 +29,110 @@ describe('Synchroniser', () => {
     });
 
     describe('getResourceInCollection', () => {
-        // TODO
+
+        it('should sync a document into a collection', () => {
+
+            const document = {
+                name: 'Rewire NZ (copy)',
+                code: 'copy.rewire.example.nz',
+                description: 'A sample tenant (company/organisation)',
+            };
+            const collection = {
+                links: [
+                    {
+                        rel: 'self',
+                        href: 'https://api.example.com/tenant'
+                    },
+                    {
+                        rel: 'up',
+                        href: 'https://api.example.com/'
+                    },
+                    {
+                        rel: 'create-form',
+                        href: 'https://api.example.com/tenant/form/create'
+                    },
+                    {
+                        rel: 'search',
+                        href: 'https://api.example.com/tenant/form/search'
+                    }
+                ],
+                items: []
+            };
+            const createForm = {
+                links: [
+                    {
+                        rel: 'self',
+                        href: 'https://api.example.com/tenant/form/create'
+                    },
+                    {
+                        rel: 'submit',
+                        href: 'https://api.example.com/tenant'
+                    }
+                ],
+                items: [
+                    {
+                        type: 'http://types/text',
+                        name: 'code',
+                        required: true,
+                        description: 'The unique name in domain name format'
+                    },
+                    {
+                        type: 'http://types/text',
+                        name: 'name',
+                        description: 'The name of the tenant to be shown on the screen'
+                    },
+                    {
+                        type: 'http://types/text',
+                        name: 'description',
+                        description: 'Other details about the organisation'
+                    }
+                ]
+            };
+
+            const get = sinon.stub();
+            const post = sinon.stub();
+
+            get.onCall(0).callsFake(() => {
+                log.info('[Test] GET collection');
+                return Promise.resolve({data: collection});
+            });
+            get.onCall(1).callsFake(() => {
+                log.info('[Test] GET create form');
+                return Promise.resolve({data: createForm});
+            });
+
+            post.onFirstCall().callsFake(() => {
+                log.info('[Test] POST document');
+                return Promise.resolve({headers: {location: 'https://api.example.com/tenant/XXXX'}});
+            });
+
+            get.onCall(2).callsFake(() => {
+                log.info('[Test] GET created document');
+                return Promise.resolve({data: document});
+            });
+
+
+            const coll = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
+
+            return sync.getResourceInCollection(coll, document, [], {getFactory: get, postFactory: post})
+                .then(result => {
+                    expect(result).to.not.be.undefined;
+                    expect(get.callCount).to.eq(3);
+                    expect(post.callCount).to.eq(1);
+                });
+
+        });
+
+
     });
 
     xdescribe('getUriListOnNamedCollection', () => {
 
-        const getResource = sinon.stub(cache, 'getResource');
-        const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
-        const getCollectionResourceAndItems = sinon.stub(cache, 'getCollectionResourceAndItems');
 
         it('should return undefined on no singleton rel found', () => {
+            const getResource = sinon.stub(cache, 'getResource');
+            const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
+
             let uriList = ['http://example.com/question/item/1'];
             let resource = {
                 links: [{rel: 'notifications', href: ''}]
@@ -53,6 +148,10 @@ describe('Synchroniser', () => {
         });
 
         it('should be able to add a single url', () => {
+            const getResource = sinon.stub(cache, 'getResource');
+            const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
+            const getCollectionResourceAndItems = sinon.stub(cache, 'getCollectionResourceAndItems');
+
 
             let uriList = ['http://example.com/question/item/1'];
 
@@ -116,6 +215,11 @@ describe('Synchroniser', () => {
         describe('resolvers', () => {
 
             beforeEach(() => {
+
+                const getResource = sinon.stub(cache, 'getResource');
+                const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
+                const getCollectionResourceAndItems = sinon.stub(cache, 'getCollectionResourceAndItems');
+
                 getResource.returns(Promise.resolve());
                 tryGetNamedCollectionResource.returns(Promise.resolve({singleton: ''}));
                 getCollectionResourceAndItems.returns(Promise.resolve());

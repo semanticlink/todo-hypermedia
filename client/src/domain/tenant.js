@@ -25,18 +25,15 @@ export const getTenantAndTodos = root => {
 
 
 const syncUsersStrategy = (tenant, aTenant, strategies, options) => {
-    return sync.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options)
-        .catch(log.error);
+    return sync.getNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
 };
 
 const syncTodosStrategy = (user, aUser, strategies, options) => {
-    return sync.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options)
-        .catch(log.error);
+    return sync.getNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
 };
 
 const syncTagsStrategy = (todo, aTodo, root, options) => {
-    return sync.getNamedCollection(todo, 'tags', /tags/, aTodo, [], options)
-        .catch(log.error);
+    return sync.getNamedCollection(todo, 'tags', /tags/, aTodo, [], options);
 };
 
 
@@ -81,8 +78,7 @@ export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
 };
 
 const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) => {
-    return sync.getResourceInCollection(tenantCollection, aTenant, strategies, options)
-        .catch(log.error);
+    return sync.getResourceInCollection(tenantCollection, aTenant, strategies, options);
 };
 
 export const createTenantOnRoot = (root, aTenant, options) => {
@@ -95,7 +91,7 @@ export const createTenantOnRoot = (root, aTenant, options) => {
 
     return getTenants(root)
         .then(tenantCollection => {
-            log.debug('[Tenant] root loaded');
+            log.debug(`[Tenant] root loaded ${getUri(tenantCollection, /self/)}`);
             return syncTenantStrategy(
                 tenantCollection,
                 aTenant,

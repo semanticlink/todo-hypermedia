@@ -113,7 +113,7 @@ export default class PooledCollection {
      */
     static getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, options) {
 
-        options = Object.assign({}, {mappedTitle: 'name'}, options);
+        //options = Object.assign({}, {mappedTitle: 'name'}, options);
 
         return cache
             .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)

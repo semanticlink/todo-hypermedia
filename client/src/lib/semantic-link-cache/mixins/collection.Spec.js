@@ -2,6 +2,10 @@ import * as _ from './collection';
 import {expect} from 'chai';
 import * as link from 'semantic-link';
 
+global.Element = () => {
+};
+
+
 describe('Collection mixins', () => {
 
     let document = {
@@ -150,9 +154,9 @@ describe('Collection mixins', () => {
             expect(found).to.deep.equal(document);
         });
 
-        it('document with name', () => {
-            let found = _.findResourceInCollectionByRelOrAttribute(collection, 'Admin', 'title');
-            expect(found).not.to.deep.equal(document);
+        it('document with title not found', () => {
+            let notFound = _.findResourceInCollectionByRelOrAttribute(collection, 'Admin', 'title');
+            expect(notFound).to.be.undefined;
         });
 
         it('document with default attribute title returns not found as undefined', () => {

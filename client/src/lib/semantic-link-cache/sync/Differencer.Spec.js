@@ -2,6 +2,12 @@ import {expect} from 'chai';
 import {log} from 'logger';
 import Differencer from './Differencer';
 
+/**
+ * semantic link library has a DOM dependency that we are faking out
+ */
+global.Element = () => {
+};
+
 describe('NOD Differencer', () => {
     const strategy = (method) => {
         return x => {
@@ -33,14 +39,6 @@ describe('NOD Differencer', () => {
     };
 
     describe('Collections', () => {
-
-        /**
-         * semantic link library has a DOM dependency that we are faking out
-         */
-        before(() => {
-            global.Element = () => {
-            };
-        });
 
         xdescribe('Match on default comparator of link relation self', () => {
 
