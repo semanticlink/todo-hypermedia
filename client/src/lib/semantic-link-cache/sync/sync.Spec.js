@@ -44,17 +44,9 @@ describe('Synchroniser', () => {
                         href: 'https://api.example.com/tenant'
                     },
                     {
-                        rel: 'up',
-                        href: 'https://api.example.com/'
-                    },
-                    {
                         rel: 'create-form',
                         href: 'https://api.example.com/tenant/form/create'
                     },
-                    {
-                        rel: 'search',
-                        href: 'https://api.example.com/tenant/form/search'
-                    }
                 ],
                 items: []
             };
