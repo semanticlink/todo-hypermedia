@@ -1,77 +1,73 @@
 import EventBus from './EventBus';
 import {expect} from 'chai';
-import {eventBus, setEventBus} from './semantic-link-utils/EventBus';
+import {eventBus, setEventBus} from 'semantic-link-utils/EventBus';
 
 const authRequired = 'event:message';
 
-describe('Event Bus', () => {
 
-    describe('Vue', () => {
+describe('Vue', () => {
 
-        it('should be able to subscribe to event', () => {
+    it('should be able to subscribe to event', () => {
 
-            return new Promise(pass => {
-                EventBus.$on(authRequired, () => {
-                    EventBus.$off(authRequired);
-                    pass();
-                });
-
-                EventBus.$emit(authRequired);
-
+        return new Promise(pass => {
+            EventBus.$on(authRequired, () => {
+                EventBus.$off(authRequired);
+                pass();
             });
 
-        });
-
-        it('should be able to subscribe to event with args', () => {
-
-            return new Promise(pass => {
-                EventBus.$on(authRequired, val => {
-                    EventBus.$off(authRequired);
-                    expect(val).to.equal('test');
-                    pass();
-                });
-
-                EventBus.$emit(authRequired, 'test');
-            });
+            EventBus.$emit(authRequired);
 
         });
 
     });
 
-    describe('Event Bus implementation', () => {
+    it('should be able to subscribe to event with args', () => {
 
-        before(() => {
-            setEventBus(EventBus);
-        });
-
-        it('should be able to subscribe to event', () => {
-
-            return new Promise(pass => {
-                eventBus.$on(authRequired, () => {
-                    EventBus.$off(authRequired);
-                    pass();
-                });
-
-                eventBus.$emit(authRequired);
-
+        return new Promise(pass => {
+            EventBus.$on(authRequired, val => {
+                EventBus.$off(authRequired);
+                expect(val).to.equal('test');
+                pass();
             });
 
-        });
-
-        it('should be able to subscribe to event with args', () => {
-
-            return new Promise(pass => {
-                eventBus.$on(authRequired, val => {
-                    EventBus.$off(authRequired);
-                    expect(val).to.equal('test');
-                    pass();
-                });
-
-                eventBus.$emit(authRequired, 'test');
-            });
-
+            EventBus.$emit(authRequired, 'test');
         });
 
     });
 
 });
+
+describe('Event Bus implementation', () => {
+
+    setEventBus(EventBus);
+
+    it('should be able to subscribe to event', () => {
+
+        return new Promise(pass => {
+            eventBus.$on(authRequired, () => {
+                EventBus.$off(authRequired);
+                pass();
+            });
+
+            eventBus.$emit(authRequired);
+
+        });
+
+    });
+
+    it('should be able to subscribe to event with args', () => {
+
+        return new Promise(pass => {
+            eventBus.$on(authRequired, val => {
+                EventBus.$off(authRequired);
+                expect(val).to.equal('test');
+                pass();
+            });
+
+            eventBus.$emit(authRequired, 'test');
+        });
+
+    });
+
+});
+

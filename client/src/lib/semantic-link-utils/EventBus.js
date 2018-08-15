@@ -1,4 +1,4 @@
-import {log} from "semantic-link/lib/logger";
+import {log} from 'semantic-link/lib/logger';
 
 /**
  * Event bus that can be implemented per client-side framework. EventBus allows publish-subscribe-style
@@ -81,6 +81,7 @@ import {log} from "semantic-link/lib/logger";
  *
  */
 
+/*
 
 export default interface EventBus {
 
@@ -90,19 +91,20 @@ export default interface EventBus {
 
     $off(event: string, callback: Function): void
 }
+*/
 
 /**
  * Currently the interface of this is based on Vue
  * @type {EventBus}
  */
-export let eventBus: EventBus;
+export let eventBus;
 
 /**
  * Inject an {@link EventBus} to be used
  * @param {EventBus} instance
  * @return {*}
  */
-export const setEventBus = (instance: EventBus) => {
+export const setEventBus = (instance) => {
     log.debug('[EventBus] Set event bus');
     eventBus = instance;
 };

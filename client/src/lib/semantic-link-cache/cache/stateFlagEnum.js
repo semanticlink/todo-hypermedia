@@ -3,8 +3,11 @@
  *
  * TODO: paging is not catered for
  *
+ * @class stateFlagEnum
+ * @readonly
+ * @enum {number}
  */
-export enum stateFlagEnum {
+export const stateFlagEnum = {
     /**
      * The resource is known to exist but the URI of the resource
      * is not known. None of the attribute values will be known.
@@ -15,7 +18,7 @@ export enum stateFlagEnum {
      *
      * //TODO: expand on this poor explanation
      */
-    unknown = 'unknown',
+    unknown: Symbol('unknown'),
     /**
      * The resource only has a link relation 'self' with the URI
      * of the resource. None of the attribute values will be known.
@@ -28,7 +31,7 @@ export enum stateFlagEnum {
      *   }
      * }
      */
-    locationOnly = 'locationOnly',
+    locationOnly: Symbol('locationOnly'),
     /**
      * This state is **only** available for a **feedItem** resource (ie on a
      * collection `items` attribute that has been
@@ -69,37 +72,37 @@ export enum stateFlagEnum {
      * Note: in this example, the collection resource state is `hydrated`
      *
      */
-    feedOnly = 'feedOnly',
+    feedOnly: Symbol('feedOnly'),
     /**
      * The resource has been retrieved from the server (and is synchronised). At
      * this point, there is over-the-wire response headers in {@link headers}
      */
-    hydrated = 'hydrated',
+    hydrated: Symbol('hydrated'),
     /**
      * The resource has been marked as ready to be deleted. At this point, updates
      * should not be made
      */
-    deleteInProgress = 'deleteInProgress',
+    deleteInProgress: Symbol('deleteInProgress'),
     /**
      * The resource has successfully been deleted on the server and is ready for
      * garbage collection
      */
-    deleted = 'deleted',
+    deleted: Symbol('deleted'),
 
     /**
      * The resource has been tried to be accessed and is disallowed
      */
-    forbidden = 'forbidden',
+    forbidden: Symbol('forbidden'),
     /**
      * This resource is a client-side artifact which is a place holder for other resources. As such, there
      * is no server-side resource to tbe retrieved. It is used rarely and is more of the group of
      * unknown, locationOnly - however, we know that we will never retrieve it unlike unknown where it may
      * or may not be update with a location.
      */
-    virtual = 'virtual',
+    virtual: Symbol('virtual'),
     /**
      * The client-side artifact has been marked as stale and next time should be retrieved. This is likely
      * to happen when collection item has been deleted, the collection should be marked as stale.
      */
-    stale = 'stale',
-}
+    stale: Symbol('stale'),
+};
