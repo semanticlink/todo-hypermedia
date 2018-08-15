@@ -1,13 +1,13 @@
 /* global require */
-const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
+const path = require('path');
+var nodeExternals = require('webpack-node-externals');
 
 /**
  * @see https://github.com/zinserjan/mocha-webpack/blob/v2.0.0-beta.0/docs/installation/webpack-configuration.md
  * @see https://github.com/zinserjan/mocha-webpack-example/blob/master/webpack.config-test.js
  */
 
-module.exports =  merge(common, {
+module.exports = {
     mode: 'development',
     module: {
         rules: [
@@ -17,6 +17,18 @@ module.exports =  merge(common, {
              */
             {test: /\.scss$/, loader: 'null-loader'},
             {test: /\.css$/, loader: 'null-loader'},
+            {
+                // Only run `.js` files through Babel
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader'
+            },
+            {
+
+                test: /\.tsx?$/,
+                exclude: /node_modules/,
+                loader: 'ts-loader'
+            },
         ]
     },
     output: {
@@ -25,5 +37,28 @@ module.exports =  merge(common, {
         devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
     },
     target: 'node',  // webpack should compile node compatible code
-    devtool: 'inline-cheap-module-source-map'
-});
+    devtool: 'source-map',
+    // externals: [nodeExternals()],
+    resolve: {
+        alias: {
+            // vendor checked in libraries (perhaps we can dependency manage these?
+            // we use this library a lot so we will treat it like an independent library in the imports
+            'semantic-link-cache': path.resolve(__dirname, 'src/lib/semantic-link-cache'),
+            'semantic-link-utils': path.resolve(__dirname, 'src/lib/semantic-link-utils'),
+
+            domain: path.resolve(__dirname, 'src/domain'),
+            router: path.resolve(__dirname, 'src/router'),
+            logger: path.resolve(__dirname, 'node_modules/semantic-link/lib/logger'),
+        },
+        extensions: [
+            /**
+             * Plain old javascript (well, es6+)
+             */
+            '.js',
+            /**
+             * typescript
+             */
+            '.ts'
+        ]
+    }
+};

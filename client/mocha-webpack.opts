@@ -1,3 +1,8 @@
 --webpack-config webpack.config-test.js
---glob *.Spec.{js,ts}
+--require mocha-setup.js
+--timeout 0
+--inline-diffs
 --recursive
+--glob *.Spec.{js,ts}
+--full-trace
+src/**/*.Spec.{js,ts}
