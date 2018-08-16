@@ -305,6 +305,26 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
  */
 
 /**
+ * Recurse through all the strategies passing through the resources.
+ *
+ * @param {LinkedRepresentation} resource
+ * @param {LinkedRepresentation} resourceDocument
+ * @param {*[]} strategies
+ * @param {UtilOptions} options
+ * @return {function():Promise.<void>} callback function to be attached onto a Promise.then
+ * @private
+ */
+function syncResources(resource, resourceDocument, strategies, options) {
+    return () => _(strategies).sequentialWait(
+        (memo, strategy) => {
+            if (strategy && _(strategy).isFunction()) {
+                return strategy(resource, resourceDocument, options);
+            }
+            log.warn('[Sync] Calling function has not handed in correct strategy and will not provision');
+        });
+}
+
+/**
  * Retrieves a resource and synchronises (its attributes) from the document
  *
  * Note: this is used for syncing two documents through their parents see {@link getSingleton}
@@ -330,25 +350,9 @@ export function getResource(resource, resourceDocument, strategies, options = {}
     log.debug(`[Sync] resource ${link.getUri(resource, /self/)}`);
 
     return cache.getResource(resource, options)
-        .then(resource => {
-            return cache
-                .updateResource(resource, resourceDocument, options)
-                .then(() => _(strategies)
-                    .sequentialWait((memo, strategy) => {
-                        if (strategy) {
-
-                            if (!_(strategy).isFunction()) {
-                                log.warn('[Sync] Calling function has not handed in correct strategy and will not provision');
-                                return Promise.resolve({});
-                            }
-                            return strategy(resource, resourceDocument, options);
-                        }
-                        return Promise.resolve({});
-                    })
-                    // TODO: not understood
-                    .catch(err => log.warn(`Empty object ${link.getUri(err, /self/)}`))
-                );
-        });
+        .then(resource => cache.updateResource(resource, resourceDocument, options))
+        .then(syncResources(resource, resourceDocument, strategies, options))
+        .then(() => resource);
 }
 
 /**
@@ -393,24 +397,15 @@ export function getSingleton(parentResource, singletonName, singletonRel, parent
 
     return cache
         .getResource(parentResource)
-        .then(resource => cache
-            .tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options)
-            .then(singletonResource => {
-                if (singletonResource) {
-                    return cache
-                        .updateResource(singletonResource, parentDocument[singletonName], options)
-                        .then(() => _(strategies)
-                            .sequentialWait((memo, strategy) => {
-                                if (strategy && _(strategy).isFunction()) {
-                                    return strategy(singletonResource, parentDocument[singletonName], options);
-                                } else {
-                                    log.warn(`[Sync] Calling function has not handed in correct strategy and will not provision '${singletonName}'`, options);
-                                }
-                            }));
-                } else {
-                    log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${link.getUri(parentResource, /self/)}`);
-                }
-            }))
+        .then(resource => cache.tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options))
+        .then(singletonResource => {
+            if (singletonResource) {
+                return cache.updateResource(singletonResource, parentDocument[singletonName], options)
+                    .then(syncResources(singletonResource, parentDocument[singletonName], strategies, options));
+            } else {
+                log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${link.getUri(parentResource, /self/)}`);
+            }
+        })
         .then(() => parentResource);
 }
 
