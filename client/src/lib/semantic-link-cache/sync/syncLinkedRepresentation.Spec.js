@@ -792,17 +792,51 @@ describe('Synchroniser', () => {
         });
 
         describe('getNamedCollectionInNamedCollection', () => {
-            // TODO
 
-            /*
-            const noChangeParentCollection = {
+            /**
+             * This method chains {@link sync.getCollectionInNamedCollection} so one test around it is good
+             * enough to show that it parents correctly
+             */
+
+            it('should not update when the collections (all items) are the same', () => {
+
+                const noChangeParentCollection = {
                     ...parent,
                     todos: {
                         ...namedCollection,
                         items: [itemOne, itemTwo]
                     }
                 };
-             */
+
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
+                });
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET item 1 from collection');
+                    return Promise.resolve({data: itemOne});
+                });
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET item 2 from collection');
+                    return Promise.resolve({data: itemTwo});
+                });
+                get.onCall(3).callsFake(() => {
+                    log.info('[Test] GET edit form');
+                    return Promise.resolve({data: editForm});
+                });
+
+                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+                return sync.getNamedCollectionInNamedCollection(hydratedParent, 'todos', /todos/, noChangeParentCollection, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(4);
+                        expect(put.callCount).to.eq(0);
+                        expect(post.callCount).to.eq(0);
+                        expect(del.callCount).to.eq(0);
+                    });
+
+            });
         });
     });
 
