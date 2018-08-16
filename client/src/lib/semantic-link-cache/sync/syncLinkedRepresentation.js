@@ -535,11 +535,9 @@ export function getNamedCollectionInNamedCollection(parentResource, collectionNa
  * @param {*} parentDocument
  * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
  * @param {UtilOptions} options
- * @return {Promise} containing the collection {@link CollectionRepresentation}
+ * @return {Promise} containing the parent {@link LinkedRepresentation}
  */
 export function getSingleton(parentResource, singletonName, singletonRel, parentDocument, strategies, options = {}) {
-
-    options = _({}).defaults(options, {mappedTitle: 'name'});
 
     log.debug(`[Sync] singleton '${singletonName}' on ${link.getUri(parentResource, /self/)}`);
 
@@ -548,24 +546,20 @@ export function getSingleton(parentResource, singletonName, singletonRel, parent
         .then(resource => cache
             .tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options)
             .then(singletonResource => {
-                if (!singletonResource) {
-                    log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${link.getUri(parentResource, /self/)}`);
-                    return Promise.resolve(resource);
-                } else {
+                if (singletonResource) {
                     return cache
                         .updateResource(singletonResource, parentDocument[singletonName], options)
                         .then(() => _(strategies)
                             .sequentialWait((memo, strategy) => {
-                                if (strategy) {
-
-                                    if (!_(strategy).isFunction()) {
-                                        log.warn(`[Sync] Calling function has not handed in correct strategy and will not provision '${singletonName}'`, options);
-                                        return Promise.resolve({});
-                                    }
+                                if (strategy && _(strategy).isFunction()) {
                                     return strategy(singletonResource, parentDocument[singletonName], options);
+                                } else {
+                                    log.warn(`[Sync] Calling function has not handed in correct strategy and will not provision '${singletonName}'`, options);
                                 }
-                                return Promise.resolve({});
                             }));
+                } else {
+                    log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${link.getUri(parentResource, /self/)}`);
                 }
-            }));
+            }))
+        .then(() => parentResource);
 }

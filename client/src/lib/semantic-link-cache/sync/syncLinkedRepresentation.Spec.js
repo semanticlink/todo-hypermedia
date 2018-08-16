@@ -842,7 +842,170 @@ describe('Synchroniser', () => {
 
 
     describe('getSingleton', () => {
-        // TODO
+
+        const parent = {
+            links: [
+                {
+                    rel: 'self',
+                    href: 'https://api.example.com/tenant/90a936d4a3'
+                },
+                {
+                    rel: 'user',
+                    href: 'https://api.example.com/user/5'
+                },
+                {
+                    rel: 'edit-form',
+                    href: 'https://api.example.com/tenant/form/edit'
+                }
+            ],
+            code: 'rewire.example.nz',
+            name: 'Rewire NZ',
+            description: 'A sample tenant (company/organisation)'
+        };
+        const editForm = {
+            links: [
+                {
+                    rel: 'self',
+                    href: 'https://api.example.com/user/form/edit'
+                }
+            ],
+            items: [
+                {
+                    type: 'http://types/text/email',
+                    name: 'email',
+                    required: true,
+                    description: 'The email address of the user'
+                },
+                {
+                    type: 'http://types/text',
+                    name: 'name',
+                    required: true,
+                    description: 'The name of the user to be shown on the screen'
+                },
+                {
+                    type: 'http://types/select',
+                    multiple: true,
+                    name: 'externalId',
+                    description: 'The third-party id fo the user (eg \'auth0|xxxxx\')',
+                    items: null
+                }
+            ]
+        };
+
+        const resource = {
+            links: [
+                {
+                    rel: 'self',
+                    href: 'https://api.example.com/user/f58c6dd2a5'
+                },
+                {
+                    rel: 'edit-form',
+                    href: 'https://api.example.com/user/form/edit'
+                },
+            ],
+            email: 'test@rewire.example.nz',
+            name: 'test',
+        };
+
+        let get;
+        let post;
+        let put;
+        let del;
+        let options;
+
+        beforeEach(() => {
+            get = sinon.stub();
+            post = sinon.stub();
+            put = sinon.stub();
+            del = sinon.stub();
+
+            options = {
+                getFactory: get,
+                postFactory: post,
+                putFactory: put,
+                deleteFactory: del
+            };
+        });
+
+        afterEach(() => {
+            get.reset();
+            post.reset();
+            put.reset();
+            del.reset();
+        });
+
+        it('should not update when attributes on singleton are same', function () {
+
+            const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+            const noChangeParent = {
+                ...parent,
+                user: resource
+            };
+
+            get.onCall(0).callsFake(() => {
+                log.info('[Test] GET named resource (singleton)');
+                return Promise.resolve({data: resource});
+            });
+
+            get.onCall(1).callsFake(() => {
+                log.info('[Test] GET edit form');
+                return Promise.resolve({data: editForm});
+            });
+
+            return sync.getSingleton(hydratedParent, 'user', /user/, noChangeParent, [], options)
+                .then(result => {
+                    expect(result).to.not.be.undefined;
+                    expect(get.callCount).to.eq(2);
+                    expect(put.callCount).to.eq(0);
+                    expect(post.callCount).to.eq(0);
+                    expect(del.callCount).to.eq(0);
+                    expect(result).to.deep.eq(hydratedParent);
+                });
+
+        });
+
+        it('should update when attributes on singleton are different', function () {
+
+            const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+            const updatedUser = {
+                ...resource,
+                name: 'updated'
+            };
+            const changedSingletonOnParent = {
+                ...parent,
+                user: updatedUser
+            };
+
+            get.onCall(0).callsFake(() => {
+                log.info('[Test] GET named resource (singleton)');
+                return Promise.resolve({data: resource});
+            });
+
+            get.onCall(1).callsFake(() => {
+                log.info('[Test] GET edit form');
+                return Promise.resolve({data: editForm});
+            });
+
+            put.onCall(0).callsFake(() => {
+                log.info('[Test] PUT updated resource');
+                return Promise.resolve({});
+            });
+
+            return sync.getSingleton(hydratedParent, 'user', /user/, changedSingletonOnParent, [], options)
+                .then(result => {
+                    expect(result).to.not.be.undefined;
+                    expect(get.callCount).to.eq(2);
+                    expect(put.callCount).to.eq(1);
+                    expect(post.callCount).to.eq(0);
+                    expect(del.callCount).to.eq(0);
+                    expect(result).to.deep.eq(hydratedParent);
+                });
+
+        });
+
+
     });
 
 });
