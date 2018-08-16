@@ -24,21 +24,20 @@ export const getTenantAndTodos = root => {
 };
 
 
-const syncUsersStrategy = (tenant, aTenant, strategies, options) => {
-    return sync.getNamedCollectionInNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
-};
+const syncUsersStrategy = (tenant, aTenant, strategies, options) =>
+    sync.getNamedCollectionInNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
 
-const syncTodosStrategy = (user, aUser, strategies, options) => {
-    return sync.getNamedCollectionInNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
-};
+const syncTodosStrategy = (user, aUser, strategies, options) =>
+    sync.getNamedCollectionInNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
 
-const syncTagsStrategy = (todo, aTodo, root, options) => {
-    return sync.getNamedCollectionInNamedCollection(todo, 'tags', /tags/, aTodo, [], options);
-};
+const syncTagsStrategy = (todo, aTodo, root, options) =>
+    sync.getNamedCollectionInNamedCollection(todo, 'tags', /tags/, aTodo, [], options);
 
+const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) =>
+    sync.getResourceInCollection(tenantCollection, aTenant, strategies, options);
 
-function syncTenant(tenantRepresentation, aTenant, root, options) {
-    return sync.getResource(
+const syncTenant = (tenantRepresentation, aTenant, root, options) =>
+    sync.getResource(
         tenantRepresentation,
         aTenant,
         [
@@ -57,7 +56,6 @@ function syncTenant(tenantRepresentation, aTenant, root, options) {
                 options)
         ],
         options);
-}
 
 /**
  * Takes a tenant and updates on the collection
@@ -75,10 +73,6 @@ export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
     log.debug(`Update tenant ${tenantRepresentation.name} --> ${getUri(tenantRepresentation, 'self')}`);
 
     return syncTenant(tenantRepresentation, aTenant, root, options);
-};
-
-const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) => {
-    return sync.getResourceInCollection(tenantCollection, aTenant, strategies, options);
 };
 
 export const createTenantOnRoot = (root, aTenant, options) => {
