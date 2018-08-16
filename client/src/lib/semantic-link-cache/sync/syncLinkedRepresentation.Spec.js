@@ -3,6 +3,7 @@ import sinon from 'sinon';
 import * as sync from './syncLinkedRepresentation';
 import * as cache from '../cache/cache';
 import {log} from 'logger';
+import {stateFlagEnum} from 'semantic-link-cache/cache/stateFlagEnum';
 
 global.Element = () => {
 };
@@ -248,8 +249,7 @@ describe('Synchroniser', () => {
 
     });
 
-
-    describe('getResourceInNamedCollection', () => {
+    describe('Named Collection', function () {
 
         const parent = {
             links: [
@@ -286,6 +286,35 @@ describe('Synchroniser', () => {
                     title: 'Two Todo (tag)'
                 }
             ]
+        };
+        const itemOne = {
+            links: [
+                {
+                    rel: 'self',
+                    href: 'https://api.example.com/todo/4bf1d09bb0'
+                },
+                {
+                    rel: 'edit-form',
+                    href: 'https://api.example.com/todo/form/edit'
+                }
+            ],
+            name: 'One Todo',
+            due: '0001-01-01T11:40:00+11:40'
+        };
+        const itemTwo = {
+            links: [
+                {
+                    rel: 'self',
+                    href: 'https://api.example.com/todo/a3e0ce2e0d'
+                },
+                {
+                    rel: 'edit-form',
+                    href: 'https://api.example.com/todo/form/edit'
+                }
+            ],
+            name: 'Two Todo (tag)',
+            state: 'http://example.com/todo/state/complete',
+            due: '0001-01-01T11:40:00+11:40'
         };
         const editForm = {
             links: [
@@ -392,213 +421,391 @@ describe('Synchroniser', () => {
             };
         });
 
-        it('should not update when the document is the same', () => {
+        afterEach(() => {
+            get.reset();
+            post.reset();
+            put.reset();
+            del.reset();
+        });
 
-            const matchedItem = {
-                links: [
-                    {
-                        rel: 'self',
-                        href: 'https://api.example.com/todo/a3e0ce2e0d'
-                    },
-                    {
-                        rel: 'edit-form',
-                        href: 'https://api.example.com/todo/form/edit'
-                    }
-                ],
-                name: 'Two Todo (tag)',
-                state: 'http://example.com/todo/state/complete',
-                due: '0001-01-01T11:40:00+11:40'
-            };
-            const noChangeDocument = {
-                links: [
-                    {
-                        rel: 'self',
-                        href: 'https://api.example.com/todo/a3e0ce2e0d'
-                    },
-                    {
-                        rel: 'edit-form',
-                        href: 'https://api.example.com/todo/form/edit'
-                    }
-                ],
-                name: 'Two Todo (tag)',
-                state: 'http://example.com/todo/state/complete',
-                due: '0001-01-01T11:40:00+11:40'
-            };
+        describe('getResourceInNamedCollection', () => {
 
-            get.onCall(0).callsFake(() => {
-                log.info('[Test] GET named collection');
-                return Promise.resolve({data: namedCollection});
-            });
-            get.onCall(1).callsFake(() => {
-                log.info('[Test] GET item from collection');
-                return Promise.resolve({data: matchedItem});
-            });
+            it('should not update when the document is the same', () => {
 
-            get.onCall(2).callsFake(() => {
-                log.info('[Test] GET edit form');
-                return Promise.resolve({data: editForm});
-            });
+                const matchedItem = {
+                    links: [
+                        {
+                            rel: 'self',
+                            href: 'https://api.example.com/todo/a3e0ce2e0d'
+                        },
+                        {
+                            rel: 'edit-form',
+                            href: 'https://api.example.com/todo/form/edit'
+                        }
+                    ],
+                    name: 'Two Todo (tag)',
+                    state: 'http://example.com/todo/state/complete',
+                    due: '0001-01-01T11:40:00+11:40'
+                };
+                const noChangeDocument = itemTwo;
 
-            put.onFirstCall().callsFake(() => {
-                log.info('[Test] PUT document');
-                return Promise.resolve({});
-            });
-
-            const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
-
-            return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, noChangeDocument, [], options)
-                .then(result => {
-                    expect(result).to.not.be.undefined;
-                    expect(get.callCount).to.eq(3);
-                    expect(put.callCount).to.eq(0);
-                    expect(post.callCount).to.eq(0);
-                    expect(del.callCount).to.eq(0);
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
                 });
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET item from collection');
+                    return Promise.resolve({data: matchedItem});
+                });
+
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET edit form');
+                    return Promise.resolve({data: editForm});
+                });
+
+                put.onCall(0).callsFake(() => {
+                    log.info('[Test] PUT document');
+                    return Promise.resolve({});
+                });
+
+                const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
+
+                return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, noChangeDocument, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(3);
+                        expect(put.callCount).to.eq(0);
+                        expect(post.callCount).to.eq(0);
+                        expect(del.callCount).to.eq(0);
+                    });
+
+            });
+
+            it('should update when the document matches an item and an attribute is different', () => {
+
+                const matchedItem = {
+                    links: [
+                        {
+                            rel: 'self',
+                            href: 'https://api.example.com/todo/a3e0ce2e0d'
+                        },
+                        {
+                            rel: 'edit-form',
+                            href: 'https://api.example.com/todo/form/edit'
+                        }
+                    ],
+                    name: 'Two Todo (tag)',
+                    state: 'http://example.com/todo/state/complete',
+                    due: '0001-01-01T11:40:00+11:40'
+                };
+                const changedDocument = {
+                    links: [
+                        {
+                            rel: 'self',
+                            href: 'https://api.example.com/todo/a3e0ce2e0d'
+                        },
+                        {
+                            rel: 'edit-form',
+                            href: 'https://api.example.com/todo/form/edit'
+                        }
+                    ],
+                    name: 'Two Todo (tag) [Updated]',
+                    state: 'http://example.com/todo/state/complete',
+                    due: '0001-01-01T11:40:00+11:40'
+                };
+
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
+                });
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET item from collection');
+                    return Promise.resolve({data: matchedItem});
+                });
+
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET edit form');
+                    return Promise.resolve({data: editForm});
+                });
+
+                put.onFirstCall().callsFake(() => {
+                    log.info('[Test] PUT document');
+                    return Promise.resolve({});
+                });
+
+                const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
+
+                return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, changedDocument, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(3);
+                        expect(put.callCount).to.eq(1);
+                        expect(post.callCount).to.eq(0);
+                        expect(del.callCount).to.eq(0);
+                    });
+
+            });
+
+            it('should add when the document is not found in collection', () => {
+
+                const newDocument = {
+                    name: 'Brand new',
+                    state: 'http://example.com/todo/state/complete',
+                    due: '0001-01-01T11:40:00+11:40'
+                };
+
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
+                });
+
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET create form');
+                    return Promise.resolve({data: createForm});
+                });
+
+                post.onCall(0).callsFake(() => {
+                    log.info('[Test] PUT document');
+                    return Promise.resolve({headers: {location: 'https://api.example.com/todo/new'}});
+                });
+
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET edit form');
+                    return Promise.resolve({data: createForm});
+                });
+
+                const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
+
+                return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, newDocument, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(3);
+                        expect(put.callCount).to.eq(0);
+                        expect(post.callCount).to.eq(1);
+                        expect(del.callCount).to.eq(0);
+                    });
+            });
 
         });
 
-        it('should update when the document matches an item and an attribute is different', () => {
+        describe('getCollectionInNamedCollection', () => {
 
-            const matchedItem = {
-                links: [
-                    {
-                        rel: 'self',
-                        href: 'https://api.example.com/todo/a3e0ce2e0d'
-                    },
-                    {
-                        rel: 'edit-form',
-                        href: 'https://api.example.com/todo/form/edit'
-                    }
-                ],
-                name: 'Two Todo (tag)',
-                state: 'http://example.com/todo/state/complete',
-                due: '0001-01-01T11:40:00+11:40'
-            };
-            const changedDocument = {
-                links: [
-                    {
-                        rel: 'self',
-                        href: 'https://api.example.com/todo/a3e0ce2e0d'
-                    },
-                    {
-                        rel: 'edit-form',
-                        href: 'https://api.example.com/todo/form/edit'
-                    }
-                ],
-                name: 'Two Todo (tag) [Updated]',
-                state: 'http://example.com/todo/state/complete',
-                due: '0001-01-01T11:40:00+11:40'
-            };
+            it('should not update when the collections (all items) are the same', () => {
 
-            get.onCall(0).callsFake(() => {
-                log.info('[Test] GET named collection');
-                return Promise.resolve({data: namedCollection});
-            });
-            get.onCall(1).callsFake(() => {
-                log.info('[Test] GET item from collection');
-                return Promise.resolve({data: matchedItem});
-            });
+                const noChangeCollection = {
+                    ...namedCollection,
+                    items: [itemOne, itemTwo]
+                };
 
-            get.onCall(2).callsFake(() => {
-                log.info('[Test] GET edit form');
-                return Promise.resolve({data: editForm});
-            });
-
-            put.onFirstCall().callsFake(() => {
-                log.info('[Test] PUT document');
-                return Promise.resolve({});
-            });
-
-            const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
-
-            return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, changedDocument, [], options)
-                .then(result => {
-                    expect(result).to.not.be.undefined;
-                    expect(get.callCount).to.eq(3);
-                    expect(put.callCount).to.eq(1);
-                    expect(post.callCount).to.eq(0);
-                    expect(del.callCount).to.eq(0);
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
                 });
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET item 1 from collection');
+                    return Promise.resolve({data: itemOne});
+                });
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET item 2 from collection');
+                    return Promise.resolve({data: itemTwo});
+                });
+                get.onCall(3).callsFake(() => {
+                    log.info('[Test] GET edit form');
+                    return Promise.resolve({data: editForm});
+                });
+
+                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+                return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, noChangeCollection, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(4);
+                        expect(put.callCount).to.eq(0);
+                        expect(post.callCount).to.eq(0);
+                        expect(del.callCount).to.eq(0);
+                    });
+
+            });
+
+            it('should update when the document matches an item and an attribute is different', () => {
+
+                const oneItemChangedInCollection = {
+                    ...namedCollection,
+                    items: [
+                        itemOne,
+                        {
+                            links: [
+                                {
+                                    rel: 'self',
+                                    href: 'https://api.example.com/todo/a3e0ce2e0d'
+                                },
+                                {
+                                    rel: 'edit-form',
+                                    href: 'https://api.example.com/todo/form/edit'
+                                }
+                            ],
+                            name: 'Two Todo (tag) [Updated]',
+                            state: 'http://example.com/todo/state/complete',
+                            due: '0001-01-01T11:40:00+11:40'
+                        }]
+                };
+
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
+                });
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET item 1 from collection');
+                    return Promise.resolve({data: itemOne});
+                });
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET item 2 from collection');
+                    return Promise.resolve({data: itemTwo});
+                });
+
+                get.onCall(3).callsFake(() => {
+                    log.info('[Test] GET edit form 1');
+                    return Promise.resolve({data: editForm});
+                });
+                get.onCall(4).callsFake(() => {
+                    log.info('[Test] GET edit form 2');
+                    return Promise.resolve({data: editForm});
+                });
+
+                put.onCall(0).callsFake(() => {
+                    log.info('[Test] PUT document');
+                    return Promise.resolve({});
+                });
+
+                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+                return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemChangedInCollection, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(4);
+                        expect(put.callCount).to.eq(1);
+                        expect(post.callCount).to.eq(0);
+                        expect(del.callCount).to.eq(0);
+                    });
+            });
+
+            it('should add when the document is not found in collection', () => {
+
+                const newItem = {
+                    name: 'New One',
+                    state: 'http://example.com/todo/state/open',
+                    due: '0001-01-01T11:40:00+11:40'
+                };
+
+                const oneItemAddedInCollection = {
+                    ...namedCollection,
+                    items: [
+                        itemOne,
+                        itemTwo,
+                        newItem]
+                };
+
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
+                });
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET item 1 from collection');
+                    return Promise.resolve({data: itemOne});
+                });
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET item 2 from collection');
+                    return Promise.resolve({data: itemTwo});
+                });
+
+                get.onCall(3).callsFake(() => {
+                    log.info('[Test] GET edit form 1');
+                    return Promise.resolve({data: editForm});
+                });
+                get.onCall(4).callsFake(() => {
+                    log.info('[Test] GET edit form 2');
+                    return Promise.resolve({data: editForm});
+                });
+
+                post.onCall(0).callsFake(() => {
+                    log.info('[Test] POST document');
+                    return Promise.resolve({headers: {location: 'https://api.example.com/todo/newOne934875'}});
+                });
+                get.onCall(5).callsFake(() => {
+                    log.info('[Test] GET new item');
+                    return Promise.resolve({data: newItem});
+                });
+
+
+                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+                return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemAddedInCollection, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(6);
+                        expect(put.callCount).to.eq(0);
+                        expect(post.callCount).to.eq(1);
+                        expect(del.callCount).to.eq(0);
+                    });
+            });
+
+
+            it('should delete when a document is not found in collection', () => {
+
+                const oneItemRemovedInCollection = {
+                    ...namedCollection,
+                    items: [itemOne]
+                };
+
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named collection');
+                    return Promise.resolve({data: namedCollection});
+                });
+
+                del.onCall(0).callsFake(() => {
+                    log.info('[Test] Delete document');
+                    return Promise.resolve({});
+                });
+
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET item 1 from collection');
+                    return Promise.resolve({data: itemOne});
+                });
+
+                get.onCall(2).callsFake(() => {
+                    log.info('[Test] GET edit form');
+                    return Promise.resolve({data: editForm});
+                });
+
+                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+                return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemRemovedInCollection, [], options)
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(3);
+                        expect(put.callCount).to.eq(0);
+                        expect(post.callCount).to.eq(0);
+                        expect(del.callCount).to.eq(1);
+                    });
+            });
 
         });
 
-        it('should add when the document is not found in collection', () => {
+        describe('getNamedCollectionInNamedCollection', () => {
+            // TODO
 
-            const newDocument = {
-                name: 'Brand new',
-                state: 'http://example.com/todo/state/complete',
-                due: '0001-01-01T11:40:00+11:40'
-            };
-
-            get.onCall(0).callsFake(() => {
-                log.info('[Test] GET named collection');
-                return Promise.resolve({data: namedCollection});
-            });
-
-            get.onCall(1).callsFake(() => {
-                log.info('[Test] GET create form');
-                return Promise.resolve({data: createForm});
-            });
-
-            post.onCall(0).callsFake(() => {
-                log.info('[Test] PUT document');
-                return Promise.resolve({headers: {location: 'https://api.example.com/todo/new'}});
-            });
-
-            get.onCall(2).callsFake(() => {
-                log.info('[Test] GET edit form');
-                return Promise.resolve({data: createForm});
-            });
-
-            const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
-
-            return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, newDocument, [], options)
-                .then(result => {
-                    expect(result).to.not.be.undefined;
-                    expect(get.callCount).to.eq(3);
-                    expect(put.callCount).to.eq(0);
-                    expect(post.callCount).to.eq(1);
-                    expect(del.callCount).to.eq(0);
-                });
+            /*
+            const noChangeParentCollection = {
+                    ...parent,
+                    todos: {
+                        ...namedCollection,
+                        items: [itemOne, itemTwo]
+                    }
+                };
+             */
         });
-
     });
 
-
-    describe('getCollectionInNamedCollection', () => {
-
-        xit('should not need update when the same ', () => {
-
-            const get = sinon.stub();
-            const post = sinon.stub();
-            const put = sinon.stub();
-            const del = sinon.stub();
-
-            const document = {};
-
-            const sparseCollection = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
-
-            return sync.getCollectionInNamedCollection(sparseCollection, document, [], {
-                getFactory: get,
-                postFactory: post,
-                putFactory: put,
-                deleteFactory: del
-            })
-                .then(result => {
-                    expect(result).to.not.be.undefined;
-                    expect(get.callCount).to.eq(2);
-                    expect(put.callCount).to.eq(1);
-                    expect(post.callCount).to.eq(0);
-                    expect(del.callCount).to.eq(0);
-                });
-
-        });
-
-    });
-
-    describe('getNamedCollectionInNamedCollection', () => {
-        // TODO
-    });
 
     describe('getSingleton', () => {
         // TODO

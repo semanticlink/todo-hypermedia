@@ -115,7 +115,7 @@ export default class Differencer {
 
         const createStrategy = options.createStrategy || (item => Promise.resolve(item));
         const updateStrategy = options.updateStrategy ||
-            ((itemResource, itemDocument) => Promise.resolve([itemResource, itemDocument]));
+            ((itemResource, itemDocument, options) => Promise.resolve([itemResource, itemDocument, options]));
         const deleteStrategy = options.deleteStrategy || (item => Promise.resolve(item));
 
         // provide a default comparator and normalise a single comparator to an array of comparators
@@ -129,6 +129,13 @@ export default class Differencer {
          * @type {Array.<LinkedRepresentation, LinkedRepresentation>}
          */
         let updateItems = [];
+
+        if (!collectionResource.items) {
+            throw new Error(`[Differencer] collection resource '${link.getUri(collectionResource, /self/)}' has no items`);
+        }
+        if (!collectionDocument.items) {
+            throw new Error(`[Differencer] collection document '${link.getUri(collectionDocument, /self/)}' has no items`);
+        }
 
         // clone the items
         /** @type {LinkedRepresentation[]} items from the collectionResource */

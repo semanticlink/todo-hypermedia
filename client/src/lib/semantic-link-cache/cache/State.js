@@ -847,7 +847,7 @@ export default class State {
         return loader.submit(deleteFactory, item)
             .then(() => {
                 this.status = stateFlagEnum.deleted;
-                log.info(`[State] Resource  for delete'${uri}' ${status.toString()} `);
+                log.info(`[State] Resource  for delete'${uri}' ${this.status.toString()} `);
                 return item;
             })
             .catch(response => {
@@ -858,14 +858,14 @@ export default class State {
                 if (response.status === 403) {
 
                     this.status = stateFlagEnum.forbidden;
-                    log.debug(`Resource forbidden '${uri}' ${status.toString()}`);
+                    log.debug(`Resource forbidden '${uri}' ${this.status.toString()}`);
 
                     return Promise.resolve(item);
 
                 } else if (response.status === 404 || response.status === 405) {
 
                     this.status = this.previousStatus;
-                    log.debug(`Resource not found ${uri} ${status.toString()} [${Object.keys(options).map(o => o).join(',')}]`);
+                    log.debug(`Resource not found ${uri} ${this.status.toString()} [${Object.keys(options).map(o => o).join(',')}]`);
 
                     return Promise.resolve(item);
 

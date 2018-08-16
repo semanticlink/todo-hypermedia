@@ -138,8 +138,8 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
      * real resource in our network.
      */
     const updateResourceAndUpdateResolver = (updateResource, updateDataDocument) => {
-        return cache.getResource(updateResource)
-            .then(updateResource => cache.tryUpdateResource(updateResource, updateDataDocument))
+        return cache.getResource(updateResource, options)
+            .then(updateResource => cache.tryUpdateResource(updateResource, updateDataDocument, options))
             .then(updateResource => {
                 resolver.update(
                     link.getUri(updateDataDocument, /self|canonical/),
@@ -445,8 +445,6 @@ export function getResourceInNamedCollection(parentResource, collectionName, col
 export function getCollectionInNamedCollection(parentResource, collectionName, collectionRel, collectionDocument, strategies, options = {}) {
 
     log.debug(`[Sync] collection '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
-
-    //options = {...options, ...{mappedTitle: 'name'}};
 
     return cache
         .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
