@@ -5,10 +5,58 @@ import * as cache from '../cache/cache';
 import {log} from 'logger';
 import {stateFlagEnum} from 'semantic-link-cache/cache/stateFlagEnum';
 
+// needed for semantic link library has a DOM dependency
 global.Element = () => {
 };
 
 describe('Synchroniser', () => {
+
+    /**
+     * These are very broad tests that work through the library stack but
+     * don't make calls across the wire. The purpose is to check that the sync
+     * code works through the correct loading, differencing and merging based
+     * on updates, creates, no changes and deletes.
+     *
+     * These tests are also important because they check that the 'options'
+     * are passed all the way through the stack (eg the factories). The options
+     * in this case also allow us to avoid using mock interceptors.
+     *
+     * These tests are written reasonably verbosely so that you can reason
+     * about the order of calls and the values of the payload.
+     *
+     * Note also, use the test console output to reason about the order of actions
+     * including the output from the stubs each of which log output for reasoning.
+     *
+     * Below are the stubs across-the-wire calls stubs that we return results and
+     * check for calls. Currently, we don't check call ordering/dependency.
+     */
+
+    let get;
+    let post;
+    let put;
+    let del;
+    let options;
+
+    beforeEach(() => {
+        get = sinon.stub();
+        post = sinon.stub();
+        put = sinon.stub();
+        del = sinon.stub();
+
+        options = {
+            getFactory: get,
+            postFactory: post,
+            putFactory: put,
+            deleteFactory: del
+        };
+    });
+
+    afterEach(() => {
+        get.reset();
+        post.reset();
+        put.reset();
+        del.reset();
+    });
 
     it('should load sync', () => {
         expect(sync).to.not.be.null;
@@ -60,11 +108,6 @@ describe('Synchroniser', () => {
 
         it('should not need updates when the same', () => {
 
-            const get = sinon.stub();
-            const post = sinon.stub();
-            const put = sinon.stub();
-            const del = sinon.stub();
-
             const document = resource;
 
             get.onCall(0).callsFake(() => {
@@ -78,12 +121,7 @@ describe('Synchroniser', () => {
 
             const sparseResource = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant/90a936d4a3');
 
-            return sync.getResource(sparseResource, document, [], {
-                getFactory: get,
-                postFactory: post,
-                putFactory: put,
-                deleteFactory: del
-            })
+            return sync.getResource(sparseResource, document, [], options)
                 .then(result => {
                     expect(result).to.not.be.undefined;
                     expect(get.callCount).to.eq(2);
@@ -204,11 +242,6 @@ describe('Synchroniser', () => {
                 ]
             };
 
-            const get = sinon.stub();
-            const post = sinon.stub();
-            const put = sinon.stub();
-            const del = sinon.stub();
-
             get.onCall(0).callsFake(() => {
                 log.info('[Test] GET collection');
                 return Promise.resolve({data: collection});
@@ -217,26 +250,18 @@ describe('Synchroniser', () => {
                 log.info('[Test] GET create form');
                 return Promise.resolve({data: createForm});
             });
-
             post.onFirstCall().callsFake(() => {
                 log.info('[Test] POST document');
                 return Promise.resolve({headers: {location: 'https://api.example.com/tenant/XXXX'}});
             });
-
             get.onCall(2).callsFake(() => {
                 log.info('[Test] GET created document');
                 return Promise.resolve({data: document});
             });
 
-
             const coll = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
 
-            return sync.getResourceInCollection(coll, document, [], {
-                getFactory: get,
-                postFactory: post,
-                putFactory: put,
-                deleteFactory: del
-            })
+            return sync.getResourceInCollection(coll, document, [], options)
                 .then(result => {
                     expect(result).to.not.be.undefined;
                     expect(get.callCount).to.eq(3);
@@ -400,33 +425,6 @@ describe('Synchroniser', () => {
                 }
             ]
         };
-
-        let get;
-        let post;
-        let put;
-        let del;
-        let options;
-
-        beforeEach(() => {
-            get = sinon.stub();
-            post = sinon.stub();
-            put = sinon.stub();
-            del = sinon.stub();
-
-            options = {
-                getFactory: get,
-                postFactory: post,
-                putFactory: put,
-                deleteFactory: del
-            };
-        });
-
-        afterEach(() => {
-            get.reset();
-            post.reset();
-            put.reset();
-            del.reset();
-        });
 
         describe('getResourceInNamedCollection', () => {
 
@@ -840,7 +838,6 @@ describe('Synchroniser', () => {
         });
     });
 
-
     describe('getSingleton', () => {
 
         const parent = {
@@ -906,33 +903,6 @@ describe('Synchroniser', () => {
             email: 'test@rewire.example.nz',
             name: 'test',
         };
-
-        let get;
-        let post;
-        let put;
-        let del;
-        let options;
-
-        beforeEach(() => {
-            get = sinon.stub();
-            post = sinon.stub();
-            put = sinon.stub();
-            del = sinon.stub();
-
-            options = {
-                getFactory: get,
-                postFactory: post,
-                putFactory: put,
-                deleteFactory: del
-            };
-        });
-
-        afterEach(() => {
-            get.reset();
-            post.reset();
-            put.reset();
-            del.reset();
-        });
 
         it('should not update when attributes on singleton are same', function () {
 

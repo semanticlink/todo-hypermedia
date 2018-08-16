@@ -296,8 +296,19 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
     }
 }
 
+/*
+ * ************************************
+ *
+ * Linked Representations as resources
+ *
+ * ************************************
+ */
+
 /**
  * Retrieves a resource and synchronises (its attributes) from the document
+ *
+ * Note: this is used for syncing two documents through their parents see {@link getSingleton}
+ *
  *
  * @example
  *
@@ -339,6 +350,77 @@ export function getResource(resource, resourceDocument, strategies, options = {}
                 );
         });
 }
+
+/**
+ * Retrieves a singleton resource on a parent resource and updates (its
+ * attributes) based on a singleton of the same name in the given parent document.
+ *
+ * The parent maybe either a collection resource or a singleton resource
+ *
+ * Note: this is used for syncing two documents through their parents
+ * (see {@link getResource} for non-parented)
+ *
+ * @example
+ *
+ *
+ *     parent     singleton           singleton   parent
+ *     Resource    Resource            Document   Document
+ *
+ *     +----------+                            +---------+
+ *     |          |            sync            |         |
+ *     |          +-----+                +-----+         |
+ *     |     Named|     |  <-----------+ |     |Named    |
+ *     |          |     |                |     |         |
+ *     |          +-----+                +-----+         |
+ *     |          |                            |         |
+ *     |          |                       ^    |         |
+ *     +----------+                       |    +---------+
+ *                                        |
+ *                                        +
+ *                                        looks for
+ *
+ * @param {LinkedRepresentation} parentResource
+ * @param {string} singletonName
+ * @param {string|RegExp|string[]|RegExp[]} singletonRel
+ * @param {*} parentDocument
+ * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {UtilOptions} options
+ * @return {Promise} containing the parent {@link LinkedRepresentation}
+ */
+export function getSingleton(parentResource, singletonName, singletonRel, parentDocument, strategies, options = {}) {
+
+    log.debug(`[Sync] singleton '${singletonName}' on ${link.getUri(parentResource, /self/)}`);
+
+    return cache
+        .getResource(parentResource)
+        .then(resource => cache
+            .tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options)
+            .then(singletonResource => {
+                if (singletonResource) {
+                    return cache
+                        .updateResource(singletonResource, parentDocument[singletonName], options)
+                        .then(() => _(strategies)
+                            .sequentialWait((memo, strategy) => {
+                                if (strategy && _(strategy).isFunction()) {
+                                    return strategy(singletonResource, parentDocument[singletonName], options);
+                                } else {
+                                    log.warn(`[Sync] Calling function has not handed in correct strategy and will not provision '${singletonName}'`, options);
+                                }
+                            }));
+                } else {
+                    log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${link.getUri(parentResource, /self/)}`);
+                }
+            }))
+        .then(() => parentResource);
+}
+
+/**
+ * **************************************
+ *
+ * Linked Representations as collections
+ *
+ * **************************************
+ */
 
 /**
  * Retrieves a resource item from a resource collection and synchronises (its attributes) from the document.
@@ -504,62 +586,4 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
  */
 export function getNamedCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies, options) {
     return getCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument[collectionName], strategies, options);
-}
-
-/**
- * Retrieves a singleton resource on a parent resource and updates based on a singleton
- * of the same name in the given parent document
- *
- * @example
- *
- *
- *     parent     singleton           singleton   parent
- *     Resource    Resource            Document   Document
- *
- *     +----------+                            +---------+
- *     |          |            sync            |         |
- *     |          +-----+                +-----+         |
- *     |     Named|     |  <-----------+ |     |Named    |
- *     |          |     |                |     |         |
- *     |          +-----+                +-----+         |
- *     |          |                            |         |
- *     |          |                       ^    |         |
- *     +----------+                       |    +---------+
- *                                        |
- *                                        +
- *                                        looks for
- *
- * @param {LinkedRepresentation} parentResource
- * @param {string} singletonName
- * @param {string|RegExp|string[]|RegExp[]} singletonRel
- * @param {*} parentDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
- * @param {UtilOptions} options
- * @return {Promise} containing the parent {@link LinkedRepresentation}
- */
-export function getSingleton(parentResource, singletonName, singletonRel, parentDocument, strategies, options = {}) {
-
-    log.debug(`[Sync] singleton '${singletonName}' on ${link.getUri(parentResource, /self/)}`);
-
-    return cache
-        .getResource(parentResource)
-        .then(resource => cache
-            .tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options)
-            .then(singletonResource => {
-                if (singletonResource) {
-                    return cache
-                        .updateResource(singletonResource, parentDocument[singletonName], options)
-                        .then(() => _(strategies)
-                            .sequentialWait((memo, strategy) => {
-                                if (strategy && _(strategy).isFunction()) {
-                                    return strategy(singletonResource, parentDocument[singletonName], options);
-                                } else {
-                                    log.warn(`[Sync] Calling function has not handed in correct strategy and will not provision '${singletonName}'`, options);
-                                }
-                            }));
-                } else {
-                    log.debug(`[Sync] No update: singleton '${singletonName}' not found on ${link.getUri(parentResource, /self/)}`);
-                }
-            }))
-        .then(() => parentResource);
 }
