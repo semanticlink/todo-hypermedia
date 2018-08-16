@@ -32,8 +32,20 @@ export const mapCollectionItemsToUriList = collectionOrItems => {
 };
 
 
+/**
+ * see https://tools.ietf.org/html/rfc2483#section-5
+ *
+ * TODO: refactor out into underscore and put tests around
+ * @param {string[]} uriList
+ * @return {string}
+ */
+export const toUriListMimeTypeFormat = uriList => {
+    uriList.join('\n');
+};
+
 
 export const uriListMixins = {
     makeUriList: mapResourceToUriList,
-    mapUriList: mapCollectionItemsToUriList
+    mapUriList: mapCollectionItemsToUriList,
+    toUriListMimeTypeFormat
 };

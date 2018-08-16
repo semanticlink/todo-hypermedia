@@ -8,18 +8,7 @@ import {put} from 'semantic-link';
 import {uriMappingResolver} from './UriMappingResolver';
 import {loader} from 'semantic-link-cache/Loader';
 import {defaultResolver} from './syncResolver';
-
-
-/**
- * see https://tools.ietf.org/html/rfc2483#section-5
- *
- * TODO: refactor out into underscore and put tests around
- * @param (string[]} uriList
- * @return {*}
- */
-function toUriListMimeTypeFormat(uriList) {
-    uriList.join('\n');
-}
+import {toUriListMimeTypeFormat} from '../mixins/uri-list';
 
 /**
  * Returns a array of uris from either uris or resources. Basically, this downgrades to uris from source representations.
@@ -29,14 +18,15 @@ function toUriListMimeTypeFormat(uriList) {
  * However, in most cases, you will need to write your own resolver, before synchronisation. In this example,
  * the resolver the notifications collection also looks into the `question-item` link relation:
  *
- *  options = _({}).extend(options, {
-     *      uriListResolver: notificationCollection =>
-     *          _(notificationCollection.items).map(item => this.link.getUri(item, /question-item/))
-     *  });
+ * @example
+ *
+ *  options = {
+ *      ...options,
+ *      uriListResolver: notificationCollection =>
+ *          notificationCollection.items.map(item => this.link.getUri(item, /question-item/))
+ *  };
  *
  *  getUriListOnNamedCollection(userResource, 'notifications', /notifications/, notificationUriList, options)
- *
- * TODO: the default could better use and extend representation underscore makeUriLists
  *
  * @param {CollectionRepresentation|LinkedRepresentation|string[]} uriListOrResource
  * @return {string[]}

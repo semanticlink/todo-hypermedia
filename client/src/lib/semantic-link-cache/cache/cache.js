@@ -79,7 +79,7 @@ export function createResourceOnCollection(collection, collectionAttribute, rel,
  * A factory that creates a {@link State} for a resource in at a given state {@link stateFlagEnum} as
  * a named attribute of an object
  * @param state
- * @return {function():State}
+ * @return {function():{Symbol, (state): State}}
  */
 export function defaultState(state) {
     return () => State.make(state);

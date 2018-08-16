@@ -61,9 +61,9 @@ export function extendResource(obj) {
  * Merge a resource with a new document returning the existing resource with only fields updated in the
  * fields (whitelist) from the document.
  *
- * @param resource
- * @param document
- * @param fields
+ * @param {LinkedRepresentation} resource
+ * @param {LinkedRepresentation} document
+ * @param {string[]} fields
  * @return {*} containing a document
  */
 export const mergeByFields = (resource, document, fields) => {
