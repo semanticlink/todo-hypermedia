@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "author": "toddb",
   "description": "Sample REST client to demonstrate the use of hypermedia",
-  "productName": "Demo",
-  "license": "UNLICENSED",
+  "productName": "Todo client",
+  "license": "MIT",
   "scripts": {
     "clean": "rimraf ./dist ./.nyc_output ./coverage",
     "dev": "webpack-dev-server --mode development --open --config webpack.dev.js --hot",
