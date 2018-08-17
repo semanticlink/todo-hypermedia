@@ -10,6 +10,7 @@
     "dev": "webpack-dev-server --mode development --open --config webpack.dev.js --hot",
     "test": "jest --config=jest.config.js",
     "test-watch": "jest --watch --config=jest.config.js",
+    "test-watch-notify": "jest --watch --notify --config=jest.config.js",
     "test-clear-cache": "jest --clearCache",
     "coverage": "jest --coverage --config=jest.config.js",
     "build": "webpack --mode development --config webpack.dev.js --progress --hide-modules",
