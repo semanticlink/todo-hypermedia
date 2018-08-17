@@ -54,8 +54,6 @@
     "html-webpack-plugin": "^3.2.0",
     "jest": "^23.5.0",
     "jest-each": "^23.5.0",
-    "mocha": "^5.2.0",
-    "mocha-webpack": "^2.0.0-beta.0",
     "node-sass": "^4.9.3",
     "raw-loader": "^0.5.1",
     "resolve-url-loader": "^2.3.0",
