@@ -566,7 +566,10 @@ export default class State {
         if (State.needsFetch(this.status, options)) {
             log.debug(`[State] Fetch collection ${this.status.toString()}: '${link.getUri(collection, rel)}'`);
             return this.loadResource(collection, rel, options)
-                .then(representation => State.mergeResource(collection, representation))
+                .then(representation => {
+                    //
+                    return State.mergeResource(collection, representation);
+                })
                 .then(collection => {
                     // make into a sparsely populated collection
                     /*

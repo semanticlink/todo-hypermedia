@@ -5,6 +5,7 @@ import {resourceMerger} from '../sync/ResourceMerger';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 import State from './State';
+import {filter} from 'semantic-link/lib/filter';
 
 /**
  *
@@ -558,10 +559,8 @@ export function getNamedCollectionResource(resource, collectionAttribute, rel, o
         return getCollectionResource(resource[collectionAttribute], options);
     } else {
         return getResource(resource)
-            .then((resource) => {
-                return getResourceState(resource)
-                    .makeCollectionResource(resource, collectionAttribute, rel, options);
-            })
+            .then((resource) => getResourceState(resource)
+                .makeCollectionResource(resource, collectionAttribute, rel, options))
             .then((collection) => {
                 if (collection) {
                     return getCollectionResource(collection, options);
@@ -583,10 +582,7 @@ export function getNamedCollectionResource(resource, collectionAttribute, rel, o
  * @return {Promise} promise contains a {@link CollectionRepresentation}
  */
 export function tryGetNamedCollectionResource(resource, collectionAttribute, rel, options = {}) {
-    options = _({}).extend(options, {
-        getUri: link.getUri
-    });
-
+    options = {...options, getUri: link.getUri};
     return getNamedCollectionResource(resource, collectionAttribute, rel, options);
 }
 
@@ -619,9 +615,7 @@ export function getNamedCollectionResourceOnSingletons(singletons, collectionNam
  * @return {Promise} promise contains original {@link LinkedRepresentation[]}
  */
 export function tryGetNamedCollectionResourceOnSingletons(singletons, collectionName, rel, options = {}) {
-    options = _({}).extend(options, {
-        getUri: link.getUri
-    });
+    options = {...options, getUri: link.getUri};
 
     return _(singletons)
         .mapWaitAll(singleton =>
@@ -687,6 +681,47 @@ export function getNamedCollectionResourceAndItems(resource, collectionName, rel
 }
 
 /**
+ * Ensures that a collection resource from a link relation based on its uri and is synchronised as a name
+ * attribute with an items made to {@link stateFlagEnum.feedOnly} state.
+ *
+ * This is used where there are multiple link relations of the same name.
+ *
+ * Note: this is for more complex api designs using multiple link relations on a resource to representat collections.
+ *
+ * @param {LinkedRepresentation} resource the parent to the collection
+ * @param {string} collectionName the name of the collection in the parent container
+ * @param {string|RegExp} rel the link relation name
+ * @param {string} title the title of the resource in the collection to be hydrated
+ * @param {UtilOptions=} options
+ * @return {Promise} with the item by uri from the collection resource of type {@link FeedRepresentation}
+ */
+export function getNamedCollectionByTitle(resource, collectionName, rel, title, options) {
+
+    /**
+     * Override the semantic link getUri implementation that returns the first found href. However
+     * because these options cascade through, ensure that the getUri is only used once and then discarded
+     */
+    return getNamedCollectionResource(
+        resource,
+        collectionName,
+        rel,
+        {
+            ...options,
+            getUri: _.once((links, relationshipType, mediaType) => {
+                const [first,] = filter(links, relationshipType, mediaType).filter(link => link.title === title);
+                if (first) {
+                    log.debug(`[Cache] getUri override on rel '${rel}' found title '${title}' using '${first.href}'`);
+                    return first.href;
+                } else {
+                    log.debug(`No match on link rel '${rel}' for title '${title}'`);
+                }
+            })
+        })
+        .then(collection => tryGetCollectionResourceItems(collection, options));
+
+}
+
+/**
  * Ensures that a collection resource from a link relation is synchronised as a name
  * attribute with an items made to {@link stateFlagEnum.feedOnly} state. It will then load the single
  * resource identified by its uri to {@link stateFlagEnum.hydrated} state.
@@ -698,7 +733,7 @@ export function getNamedCollectionResourceAndItems(resource, collectionName, rel
  * @param {UtilOptions=} options
  * @return {Promise} with the item by uri from the collection resource of type {@link FeedRepresentation}
  */
-export function getCollectionResourceAndItemByUri(resource, collectionName, rel, uri, options) {
+export function getItemInNamedCollectionByUri(resource, collectionName, rel, uri, options) {
 
     return getNamedCollectionResource(resource, collectionName, rel, options)
         .then((collection) => {

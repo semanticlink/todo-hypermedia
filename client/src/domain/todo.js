@@ -18,6 +18,9 @@ const getTenant = (apiResource, tenantUri) => {
 
 /**
  * use the organisation from a provided list (when authenticated)
+ *
+ * Warning: this design has a flaw. Switching between tenant todos will conflict
+ *
  * @param {ApiRepresentation} apiResource
  * @param {string} tenantUri
  * @returns {Promise<TodoCollectionRepresentation>}
@@ -25,10 +28,10 @@ const getTenant = (apiResource, tenantUri) => {
 const getTodos = (apiResource, tenantUri) => {
     log.debug(`Looking for todos in tenant ${tenantUri}`);
 
-    return cache.getSingletonResource(apiResource, 'me', /me/)
-        .then(me => cache.getNamedCollectionResourceAndItems(me, 'todos', /todos/));
+    return Promise.all([cache.getSingletonResource(apiResource, 'me', /me/), getTenant(apiResource, tenantUri)])
+    // note this usese 'code' to select the title on the link relation
+        .then(([me, tenant]) => cache.getNamedCollectionByTitle(me, 'todos', /todos/, tenant.code));
 };
-
 
 /**
  * Creates a new in-memory object based on a form.
