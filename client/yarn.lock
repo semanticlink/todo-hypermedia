@@ -1113,10 +1113,6 @@ boolbase@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
 
-bootstrap-sass@^3.3.7:
-  version "3.3.7"
-  resolved "https://registry.yarnpkg.com/bootstrap-sass/-/bootstrap-sass-3.3.7.tgz#6596c7ab40f6637393323ab0bc80d064fc630498"
-
 bootstrap-vue@^2.0.0-rc.11:
   version "2.0.0-rc.11"
   resolved "https://registry.yarnpkg.com/bootstrap-vue/-/bootstrap-vue-2.0.0-rc.11.tgz#47aaa6d2a8d390477de75e636d8ea652b1d03f59"

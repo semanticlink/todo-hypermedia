@@ -20,7 +20,6 @@
     "auth0-js": "^9.7.3",
     "axios": "^0.18.0",
     "bootstrap": "^4.1.3",
-    "bootstrap-sass": "^3.3.7",
     "bootstrap-vue": "^2.0.0-rc.11",
     "bottleneck": "^2.7.1",
     "fast-json-patch": "^2.0.6",
