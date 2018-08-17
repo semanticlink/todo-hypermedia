@@ -14,9 +14,3 @@
    - [IDEA mind map](https://plugins.jetbrains.com/plugin/8045-idea-mind-map)
    
 * [Graphviz/dot](http://www.graphviz.org/)
-
-## Browser Developement
-
-* Firefox (now comes with JSON rendering)
-  - Modify Header Value (HTTP Headers)
-    
