@@ -1,5 +1,4 @@
 import _ from '../mixins/index';
-import {stateFlagEnum} from './stateFlagEnum';
 import * as SparseResource from './SparseResource';
 import {resourceMerger} from '../sync/ResourceMerger';
 import * as link from 'semantic-link';
@@ -74,226 +73,6 @@ const getResourceState = resource => State.get(resource);
 /*
 
 /**
- * A factory that creates a {@link State} for a resource in at a given state {@link stateFlagEnum} as
- * a named attribute of an object
- * @param state
- * @return {function():{Symbol, (state): State}}
- */
-const defaultState = state => () => State.make(state);
-
-/**
- *
- * @param {stateFlagEnum} state
- * @return {{stateFactory: *}} see {@link SparseResourceOptions}
- */
-const makeSparseResourceOptions = (state) => {
-    return {stateFactory: defaultState(state)};
-};
-
-/**
- * Make a new, sparsely populated {@link LinkedRepresentation} with {@link State}.
- * @param {*=} defaultValues
- * @param {stateFlagEnum=} state
- * @return {LinkedRepresentation}
- */
-export function makeLinkedRepresentation(defaultValues, state) {
-    return SparseResource.makeLinkedRepresentation(makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
-}
-
-/**
- * Make a new, sparsely populated {@link CollectionRepresentation} with {@link State}.
- *
- * This means that there is at least an empty `items` attribute.
- *
- * @param {*=} defaultValues
- * @param {stateFlagEnum=} state=stateFlagEnum.unknown
- * @return {CollectionRepresentation}
- */
-export function makeCollection(defaultValues, state) {
-    return SparseResource.makeCollection(makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
-}
-
-/**
- * Make a new, sparsely populated {@link LinkedRepresentation} with {@link State} and
- * link relation 'self' populated with from given uri
- *
- * @param uri
- * @param defaultValues
- * @param {stateFlagEnum=} state
- * @return {LinkedRepresentation}
- */
-export function makeSparseResourceFromUri(uri, defaultValues, state) {
-    if (!uri) {
-        state = stateFlagEnum.virtual;
-    }
-    return SparseResource.makeFromUri(uri, makeSparseResourceOptions(state || stateFlagEnum.locationOnly), defaultValues);
-}
-
-/**
- * Make a new, sparsely populated {@link CollectionRepresentation} with {@link State} and
- * link relation 'self' populated with from given uri
- *
- * @param {string} uri
- * @param {*=} defaultValues
- * @param {stateFlagEnum=} state
- * @return {CollectionRepresentation}
- */
-export function makeSparseCollectionResourceFromUri(uri, defaultValues, state) {
-    if (!uri) {
-        state = stateFlagEnum.virtual;
-    }
-    return SparseResource.makeCollectionFromUri(uri, makeSparseResourceOptions(state || stateFlagEnum.locationOnly), defaultValues);
-}
-
-/**
- * Add a resource into the tree where the value is unknown (including the URI)
- *
- * @param {LinkedRepresentation} resource the parent resource that will act as the container
- *   for the named child resource.
- * @param {string} resourceName the name of the child resource in the container
- * @param {LinkedRepresentation=} defaultValues optional default values for the resource
- * @return {LinkedRepresentation} resource existing as a child
- */
-export function makeUnknownResourceAddedToResource(resource, resourceName, defaultValues) {
-    return getResourceState(resource)
-        .addResourceByName(resource, resourceName, () => makeLinkedRepresentation(defaultValues));
-}
-
-/**
- * Add a collection resource into the tree where the value is unknown (including the URI)
- *
- * @param {LinkedRepresentation} resource a parent resource container
- * @param {string} collectionResourceName
- * @param {LinkedRepresentation=} defaultValues optional default values for the resource
- * @return {CollectionRepresentation}
- */
-export function makeUnknownCollectionAddedToResource(resource, collectionResourceName, defaultValues) {
-    return getResourceState(resource)
-        .addCollectionResourceByName(resource, collectionResourceName, () => makeCollection(defaultValues));
-}
-
-/**
- * Add a resource into a collection in the tree where the value is unknown (including the URI)
- *
- * @param {CollectionRepresentation} collection
- * @param {LinkedRepresentation=} defaultValues optional default values for the resource
- * @return {LinkedRepresentation}
- */
-export function makeUnknownResourceAddedToCollection(collection, defaultValues) {
-    return State.makeItemToCollectionResource(collection, () => makeCollection(defaultValues));
-}
-
-/**
- *
- * @param {CollectionRepresentation} collection
- * @param {string} resourceUri
- * @param {*} defaultValues
- * @return {*|LinkedRepresentation}
- */
-export function makeResourceFromUriAddedToCollection(collection, resourceUri, defaultValues) {
-    return State.makeItemToCollectionResource(collection, () => makeSparseResourceFromUri(resourceUri, defaultValues));
-}
-
-/**
- *
- * @param {CollectionRepresentation} collection
- * @param {string[]} uriList
- * @return {CollectionRepresentation}
- */
-export function makeCollectionItemsFromUriListAddedToCollection(collection, uriList) {
-    const resourceState = getResourceState(collection);
-    uriList.forEach(resourceUri =>
-        resourceState.addItemToCollectionResource(collection, () => makeSparseResourceFromUri(resourceUri)));
-    return collection;
-}
-
-/**
- * Takes a feed representation and converts to a sparse collection representation
- *
- * @param {CollectionRepresentation} collection
- * @param {FeedRepresentation} feedRepresentation
- * @return {CollectionRepresentation}
- */
-export function makeCollectionItemsFromFeedAddedToCollection(collection, feedRepresentation) {
-    feedRepresentation.items.forEach(item => makeCollectionResourceItemByUri(collection, item.id, {name: item.title}));
-    return collection;
-}
-
-/**
- * Adds a, or uses an existing, named collection on resource and then adds items into the collection based on a uri list
- *
- * @param {LinkedRepresentation} resource
- * @param {string} collectionResourceName
- * @param {string} collectionUri
- * @param {string[]} itemsUriList
- * @param {stateFlagEnum} state
- * @return {LinkedRepresentation}
- */
-export function makeNamedCollectionFromUriAndResourceFromUriList(resource, collectionResourceName, collectionUri, itemsUriList, state) {
-    let collection = getResourceState(resource)
-        .addCollectionResourceByName(
-            resource,
-            collectionResourceName,
-            () => {
-                if (!collectionUri) {
-                    state = stateFlagEnum.virtual;
-                }
-                return SparseResource.makeCollectionFromUri(collectionUri, makeSparseResourceOptions(state || stateFlagEnum.locationOnly));
-            });
-
-    // only add items not currently loaded
-    _(itemsUriList).each(uri => makeCollectionResourceItemByUri(collection, uri));
-    return collection;
-}
-
-/**
- * Add a singleton list (array) of sparse LinkedRepresentations based on an attribute that has a uriList.
- * @param {LinkedRepresentation} resource
- * @param {string} singletonName
- * @param {string} itemsUriListName
- * @param {stateFlagEnum=} state
- * @return {Promise} contains an array of sparsely populated resources
- */
-export function makeSingletonSparseListFromAttributeUriList(resource, singletonName, itemsUriListName, state) {
-
-    return getResource(resource)
-        .then(resource => {
-
-            if (!resource[singletonName]) {
-                makeUnknownCollectionAddedToResource(resource, singletonName);
-            }
-
-            _(resource[itemsUriListName]).map(uri => {
-                if (!resource[singletonName].items.find(item => link.getUri(item, /canonical|self/) === uri)) {
-                    resource[singletonName].items.splice(resource[singletonName].length, 0, makeSparseResourceFromUri(uri, state));
-                }
-            });
-
-            return resource[singletonName];
-        });
-
-}
-
-/**
- * Add a singleton sparse LinkedRepresentations based on an uri.
- * @param {LinkedRepresentation} resource
- * @param {string} singletonName
- * @param {string} uri
- * @return {Promise} contains an array of populated resources
- */
-export function makeSingletonSparseFromUri(resource, singletonName, uri) {
-    return getResource(resource)
-        .then(resource => {
-
-            if (!resource[singletonName]) {
-                resource[singletonName] = makeSparseResourceFromUri(uri);
-            }
-
-            return resource[singletonName];
-        });
-}
-
-/**
  * Add a singleton list (array) of hydrated LinkedRepresentations based on an attribute that has a uriList.
  * @param {LinkedRepresentation} resource
  * @param {string} singletonName
@@ -302,26 +81,12 @@ export function makeSingletonSparseFromUri(resource, singletonName, uri) {
  * @return {Promise} contains an array of populated resources
  */
 export function makeSingletonListFromAttributeUriList(resource, singletonName, itemsUriListName, state) {
-    return makeSingletonSparseListFromAttributeUriList(resource, singletonName, itemsUriListName, state)
+    return SparseResource.makeSingletonSparseListFromAttributeUriList(resource, singletonName, itemsUriListName, state)
         .then(collection => {
             return _(collection).mapWaitAll(item => {
                 return getResource(item);
             });
         });
-}
-
-
-/**
- * Add a resource into a collection in the tree where the value is known (including the URI)
- *
- * @param {CollectionRepresentation} collection
- * @param {string} resourceUri
- * @param {LinkedRepresentation=} defaultValues optional default values for the resource
- * @return {LinkedRepresentation}
- * @obsolete
- */
-export function makeCollectionResourceItemByUri(collection, resourceUri, defaultValues) {
-    return State.makeItemToCollectionResource(collection, () => makeSparseResourceFromUri(resourceUri, defaultValues));
 }
 
 /**
@@ -977,7 +742,7 @@ export function getItemInNamedCollectionByUri(parentResource, collectionName, co
             let itemResource = _(collection).findResourceInCollectionByRelOrAttribute(itemUri);
 
             if (!itemResource) {
-                itemResource = makeResourceFromUriAddedToCollection(collection, itemUri);
+                itemResource = SparseResource.makeResourceFromUriAddedToCollection(collection, itemUri);
             }
             return getResource(itemResource, options);
         });

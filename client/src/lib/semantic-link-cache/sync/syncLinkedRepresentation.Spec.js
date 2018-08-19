@@ -4,6 +4,7 @@ import * as sync from './syncLinkedRepresentation';
 import * as cache from '../cache/cache';
 import {log} from 'logger';
 import {stateFlagEnum} from 'semantic-link-cache/cache/stateFlagEnum';
+import * as SparseResource from '../cache/SparseResource';
 
 // needed for semantic link library has a DOM dependency
 global.Element = () => {
@@ -119,7 +120,7 @@ describe('Synchroniser', () => {
                 return Promise.resolve({data: editForm});
             });
 
-            const sparseResource = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant/90a936d4a3');
+            const sparseResource = SparseResource.makeSparseCollectionResourceFromUri('https://api.example.com/tenant/90a936d4a3');
 
             return sync.getResource(sparseResource, document, [], options)
                 .then(result => {
@@ -169,7 +170,7 @@ describe('Synchroniser', () => {
                 return Promise.resolve({headers: {location: 'https://api.example.com/tenant/90a936d4a3'}});
             });
 
-            const sparseResource = cache.makeSparseResourceFromUri('https://api.example.com/tenant/90a936d4a3');
+            const sparseResource = SparseResource.makeSparseResourceFromUri('https://api.example.com/tenant/90a936d4a3');
 
             return sync.getResource(sparseResource, document, [], {
                 getFactory: get,
@@ -259,7 +260,7 @@ describe('Synchroniser', () => {
                 return Promise.resolve({data: document});
             });
 
-            const coll = cache.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
+            const coll = SparseResource.makeSparseCollectionResourceFromUri('https://api.example.com/tenant');
 
             return sync.getResourceInCollection(coll, document, [], options)
                 .then(result => {
@@ -466,7 +467,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({});
                 });
 
-                const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
+                const sparseParent = SparseResource.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
 
                 return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, noChangeDocument, [], options)
                     .then(result => {
@@ -531,7 +532,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({});
                 });
 
-                const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
+                const sparseParent = SparseResource.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
 
                 return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, changedDocument, [], options)
                     .then(result => {
@@ -572,7 +573,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({data: createForm});
                 });
 
-                const sparseParent = cache.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
+                const sparseParent = SparseResource.makeSparseCollectionResourceFromUri('https://api.example.com/user/f58c6dd2a5', parent);
 
                 return sync.getResourceInNamedCollection(sparseParent, 'todos', /todos/, newDocument, [], options)
                     .then(result => {
@@ -612,7 +613,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({data: editForm});
                 });
 
-                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, noChangeCollection, [], options)
                     .then(result => {
@@ -675,7 +676,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({});
                 });
 
-                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemChangedInCollection, [], options)
                     .then(result => {
@@ -735,7 +736,7 @@ describe('Synchroniser', () => {
                 });
 
 
-                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemAddedInCollection, [], options)
                     .then(result => {
@@ -775,7 +776,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({data: editForm});
                 });
 
-                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemRemovedInCollection, [], options)
                     .then(result => {
@@ -823,7 +824,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({data: editForm});
                 });
 
-                const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
 
                 return sync.getNamedCollectionInNamedCollection(hydratedParent, 'todos', /todos/, noChangeParentCollection, [], options)
                     .then(result => {
@@ -906,7 +907,8 @@ describe('Synchroniser', () => {
 
         it('should not update when attributes on singleton are same', function () {
 
-            const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+
+            const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
 
             const noChangeParent = {
                 ...parent,
@@ -937,7 +939,7 @@ describe('Synchroniser', () => {
 
         it('should update when attributes on singleton are different', function () {
 
-            const hydratedParent = cache.makeLinkedRepresentation(parent, stateFlagEnum.hydrated);
+            const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
 
             const updatedUser = {
                 ...resource,

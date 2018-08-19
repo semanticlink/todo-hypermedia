@@ -1,12 +1,10 @@
 import {expect} from 'chai';
-import * as cache from './cache';
 import State from './State';
-
+import * as SparseResource from './SparseResource';
 import {stateFlagEnum} from './stateFlagEnum';
 
 global.Element = () => {
 };
-
 
 /**
  * Increasing counter to create new & unique resource names
@@ -28,21 +26,21 @@ describe('Cache', () => {
 
         describe('Unknown state', () => {
             beforeEach(() => {
-                linkedRepresentation = cache.makeSparseResourceFromUri(uniqueUri());
+                linkedRepresentation = SparseResource.makeSparseResourceFromUri(uniqueUri());
             });
 
             describe('makeUnknownResourceAddedToResource', () => {
 
                 it('Does not add a tracked resource into state when attribute of same name exists', () => {
                     linkedRepresentation.name = 'N';
-                    const result = cache.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
+                    const result = SparseResource.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.equal('N');
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.false;
                 });
 
                 it('Does add a tracked resource into state when attribute of same name does not exist', () => {
-                    const result = cache.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
+                    const result = SparseResource.makeUnknownResourceAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.not.be.null;
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
@@ -50,7 +48,7 @@ describe('Cache', () => {
                 });
 
                 it('Makes a new one with defaults', () => {
-                    const result = cache.makeUnknownResourceAddedToResource(linkedRepresentation, 'name', {
+                    const result = SparseResource.makeUnknownResourceAddedToResource(linkedRepresentation, 'name', {
                         attr1: 'value'
                     });
                     expect(result.attr1).to.equal('value');
@@ -65,14 +63,14 @@ describe('Cache', () => {
 
             describe('makeUnknownCollectionAddedToResource', () => {
                 it('Does not add a tracked resource into state when attribute of same name exists', () => {
-                    const feed = cache.makeSparseResourceFromUri(uniqueUri());
+                    const feed = SparseResource.makeSparseResourceFromUri(uniqueUri());
                     feed.items = [
                         {id: uniqueUri(), title: 'a'},
                         {id: uniqueUri(), title: 'b'},
                     ];
                     linkedRepresentation.name = feed;
 
-                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
+                    const result = SparseResource.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.equal(feed);
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.false;
@@ -80,7 +78,7 @@ describe('Cache', () => {
                 });
 
                 it('Does add a tracked resource into state when attribute of same name does not exist', () => {
-                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
+                    const result = SparseResource.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name');
 
                     expect(result).to.not.be.null;
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
@@ -88,7 +86,7 @@ describe('Cache', () => {
                 });
 
                 it('Makes a new one with defaults including empty items attribute', () => {
-                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', {
+                    const result = SparseResource.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', {
                         attr1: 'value'
                     });
                     expect(result.attr1).to.equal('value');
@@ -104,7 +102,7 @@ describe('Cache', () => {
                             title: 'bla'
                         }]
                     };
-                    const result = cache.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', defaultValues);
+                    const result = SparseResource.makeUnknownCollectionAddedToResource(linkedRepresentation, 'name', defaultValues);
                     expect(result.attr1).to.equal('value');
                     expect(result.items.length).to.equal(1);
                     expect(result.items[0].id).to.equal('http://example.com');
@@ -114,17 +112,17 @@ describe('Cache', () => {
 
             describe('makeUnknownResourceAddedToCollection', () => {
                 beforeEach(() => {
-                    feedRepresentation = cache.makeSparseCollectionResourceFromUri(uniqueUri());
+                    feedRepresentation = SparseResource.makeSparseCollectionResourceFromUri(uniqueUri());
                 });
                 it('Does add a new item to the collection', () => {
-                    const result = cache.makeUnknownResourceAddedToCollection(feedRepresentation);
+                    const result = SparseResource.makeUnknownResourceAddedToCollection(feedRepresentation);
 
                     expect(result).to.not.be.null;
                     expect(feedRepresentation.items).to.deep.equal([result]);
                 });
 
                 it('Makes a new one with defaults', () => {
-                    const result = cache.makeUnknownResourceAddedToCollection(feedRepresentation, {
+                    const result = SparseResource.makeUnknownResourceAddedToCollection(feedRepresentation, {
                         extra: 3
                     });
                     expect(result.extra).to.equal(3);
@@ -138,12 +136,12 @@ describe('Cache', () => {
 
             describe('addCollectionResourceItemByUri', () => {
                 beforeEach(() => {
-                    feedRepresentation = cache.makeSparseCollectionResourceFromUri(uniqueUri());
+                    feedRepresentation = SparseResource.makeSparseCollectionResourceFromUri(uniqueUri());
                 });
 
                 it('add', () => {
                     const uri = uniqueUri();
-                    const result = cache.makeCollectionResourceItemByUri(feedRepresentation, uri);
+                    const result = SparseResource.makeCollectionResourceItemByUri(feedRepresentation, uri);
 
                     expect(result.links).to.deep.equal([{rel: 'self', href: uri}]);
                     expect(feedRepresentation.items).to.deep.equal([result]);
@@ -155,7 +153,7 @@ describe('Cache', () => {
                     const defaultLinked = {
                         extra: 3
                     };
-                    const result = cache.makeCollectionResourceItemByUri(feedRepresentation, uniqueUri(), defaultLinked);
+                    const result = SparseResource.makeCollectionResourceItemByUri(feedRepresentation, uniqueUri(), defaultLinked);
 
                     expect(result.extra).to.equal(3);
                     expect(result.items).to.be.undefined;
@@ -164,6 +162,5 @@ describe('Cache', () => {
         });
 
     });
-
 
 });
