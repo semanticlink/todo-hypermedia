@@ -469,7 +469,7 @@ export function getResourceInCollection(parentResource, resourceDocument, strate
  *      |          |   X                +---+
  *      |          |   X  <-----------+ | x |
  *      +----------+   X                +---+
- *      items
+ *                       items
  *
  * @param {LinkedRepresentation} parentResource
  * @param {string} collectionName
@@ -498,7 +498,7 @@ export function getResourceInNamedCollection(parentResource, collectionName, col
  *
  *  @example
  *
- *       parent     resource              document
+ *      parent     resource              document
  *      Resource   Collection            Collection
  *
  *     +----------+

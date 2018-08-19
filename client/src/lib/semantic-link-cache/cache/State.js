@@ -537,7 +537,7 @@ export default class State {
      * @param {LinkedRepresentation} resource
      * @param {string|RegExp} rel the link relation name
      * @param {UtilOptions|{}} options
-     * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
+     * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
     synchronise(resource, rel, options = {}) {
 
@@ -555,13 +555,12 @@ export default class State {
      * Ensures the in-memory collection resource and its items are up-to-date with the server with
      * the number of items matching and all items at least sparsely populated.
      *
-     * @param {LinkedRepresentation} collection
+     * @param {CollectionRepresentation|FeedRepresentation} collection
      * @param {string|RegExp} rel
      * @param {UtilOptions|{}} options
-     * @return {Promise} promise contains a {@link LinkedRepresentation}
-     * TODO: actually make this a synchronise collection
+     * @return {Promise<CollectionRepresentation>}
      */
-    synchroniseCollection(collection, rel, options = {}) {
+    synchroniseOnCollection(collection, rel, options = {}) {
 
         if (State.needsFetch(this.status, options)) {
             log.debug(`[State] Fetch collection ${this.status.toString()}: '${link.getUri(collection, rel)}'`);
@@ -707,7 +706,7 @@ export default class State {
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      */
     getCollectionResource(resource, options = {}) {
-        return this.synchroniseCollection(resource, /self|canonical/, options);
+        return this.synchroniseOnCollection(resource, /self|canonical/, options);
     }
 
     /**
