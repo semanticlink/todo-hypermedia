@@ -2,7 +2,7 @@
 
 import _ from '../mixins/index';
 import {stateFlagEnum} from './stateFlagEnum';
-import SparseResource from './SparseResource';
+import * as SparseResource from './SparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
 import {loader} from '../Loader';
@@ -280,7 +280,7 @@ export default class State {
      * @param {Function} linkedRepresentationFactory
      * @return {LinkedRepresentation}
      */
-    static addItemToCollectionResource(collection, linkedRepresentationFactory) {
+    static makeItemToCollectionResource(collection, linkedRepresentationFactory) {
 
         if (!collection) {
             throw new Error('No collection passed in');
@@ -418,7 +418,7 @@ export default class State {
     makeSparseCollectionItemsFromFeed(collection, resourceTitleAttributeName, state) {
         this.mappedTitle = resourceTitleAttributeName;
         return SparseResource
-            .mapFeedItemsToCollectionItems(collection, resourceTitleAttributeName, State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly));
+            .makeCollectionItemsFromFeedItems(collection, resourceTitleAttributeName, State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly));
     }
 
     /**
@@ -692,7 +692,7 @@ export default class State {
         if (!resource) {
             // we don't already know about this resource (but the client does), so so let's
             // add a sparsely populated resource ready to be synchronised
-            resource = State.addItemToCollectionResource(collection, () => State.makeFromUri(itemUri));
+            resource = State.makeItemToCollectionResource(collection, () => State.makeFromUri(itemUri));
         }
         return Promise.resolve(resource);
     }

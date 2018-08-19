@@ -1,6 +1,5 @@
 import {expect} from 'chai';
 import * as cache from './cache';
-import sinon from 'sinon';
 import State from './State';
 
 import {stateFlagEnum} from './stateFlagEnum';
@@ -20,12 +19,12 @@ let repCount = 1;
  * @param {string=} prefix=http://example.com/
  * @return {string} of url type
  */
-const uniqueUri = prefix => prefix || 'http://example.com/' + (++repCount);
+const uniqueUri = () => `http://example.com/${++repCount}`;
 
 describe('Cache', () => {
     let linkedRepresentation, feedRepresentation;
 
-    describe('Synch: cache simple functions - synchronise', () => {
+    describe('Sparse resource', () => {
 
         describe('Unknown state', () => {
             beforeEach(() => {
@@ -144,7 +143,7 @@ describe('Cache', () => {
 
                 it('add', () => {
                     const uri = uniqueUri();
-                    const result = cache.addCollectionResourceItemByUri(feedRepresentation, uri);
+                    const result = cache.makeCollectionResourceItemByUri(feedRepresentation, uri);
 
                     expect(result.links).to.deep.equal([{rel: 'self', href: uri}]);
                     expect(feedRepresentation.items).to.deep.equal([result]);
@@ -156,7 +155,7 @@ describe('Cache', () => {
                     const defaultLinked = {
                         extra: 3
                     };
-                    const result = cache.addCollectionResourceItemByUri(feedRepresentation, uniqueUri(), defaultLinked);
+                    const result = cache.makeCollectionResourceItemByUri(feedRepresentation, uniqueUri(), defaultLinked);
 
                     expect(result.extra).to.equal(3);
                     expect(result.items).to.be.undefined;
@@ -166,63 +165,5 @@ describe('Cache', () => {
 
     });
 
-    describe('Async: cache get/add resources - async promised-based', () => {
 
-        describe('getResource', () => {
-
-            it('retrieves the resource', () => {
-
-                let stateFactory = sinon.stub(State, 'get')
-                    .returns({
-                        getResource: () => Promise.resolve({x: 4, links: []})
-                    });
-
-                return cache.getResource({})
-                    .then(newResource => {
-                        expect(newResource.x).to.equal(4);
-                        expect(newResource.links).to.not.be.null;
-                        expect(stateFactory.called).to.be.true;
-                        stateFactory.restore();
-
-                    });
-
-            });
-        });
-
-        describe('tryGetResource', () => {
-
-            it('retrieves the resource when value', () => {
-
-                let stateFactory = sinon.stub(State, 'tryGet')
-                    .returns({
-                        getResource: () => Promise.resolve({x: 4, links: []})
-                    });
-
-                return cache.tryGetResource({})
-                    .then(newResource => {
-                        expect(newResource.x).to.equal(4);
-                        expect(newResource.links).to.not.be.null;
-                        expect(stateFactory.called).to.be.true;
-                        stateFactory.restore();
-
-                    });
-            });
-
-            it('returns default value when undefined', () => {
-
-                let stateFactory = sinon.stub(State, 'tryGet')
-                    .returns(undefined);
-
-                return cache.tryGetResource({}, undefined)
-                    .then(newResource => {
-                        expect(newResource).not.to.not.be.null;
-                        expect(stateFactory.called).to.be.true;
-                        stateFactory.restore();
-
-                    });
-            });
-
-        });
-
-    });
 });

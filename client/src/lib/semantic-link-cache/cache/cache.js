@@ -1,6 +1,6 @@
 import _ from '../mixins/index';
 import {stateFlagEnum} from './stateFlagEnum';
-import SparseResource from './SparseResource';
+import * as SparseResource from './SparseResource';
 import {resourceMerger} from '../sync/ResourceMerger';
 import * as link from 'semantic-link';
 import {log} from 'logger';
@@ -180,7 +180,7 @@ export function makeUnknownCollectionAddedToResource(resource, collectionResourc
  * @return {LinkedRepresentation}
  */
 export function makeUnknownResourceAddedToCollection(collection, defaultValues) {
-    return State.addItemToCollectionResource(collection, () => makeCollection(defaultValues));
+    return State.makeItemToCollectionResource(collection, () => makeCollection(defaultValues));
 }
 
 /**
@@ -191,7 +191,7 @@ export function makeUnknownResourceAddedToCollection(collection, defaultValues) 
  * @return {*|LinkedRepresentation}
  */
 export function makeResourceFromUriAddedToCollection(collection, resourceUri, defaultValues) {
-    return State.addItemToCollectionResource(collection, () => makeSparseResourceFromUri(resourceUri, defaultValues));
+    return State.makeItemToCollectionResource(collection, () => makeSparseResourceFromUri(resourceUri, defaultValues));
 }
 
 /**
@@ -215,7 +215,7 @@ export function makeCollectionItemsFromUriListAddedToCollection(collection, uriL
  * @return {CollectionRepresentation}
  */
 export function makeCollectionItemsFromFeedAddedToCollection(collection, feedRepresentation) {
-    feedRepresentation.items.forEach(item => addCollectionResourceItemByUri(collection, item.id, {name: item.title}));
+    feedRepresentation.items.forEach(item => makeCollectionResourceItemByUri(collection, item.id, {name: item.title}));
     return collection;
 }
 
@@ -242,7 +242,7 @@ export function makeNamedCollectionFromUriAndResourceFromUriList(resource, colle
             });
 
     // only add items not currently loaded
-    _(itemsUriList).each(uri => addCollectionResourceItemByUri(collection, uri));
+    _(itemsUriList).each(uri => makeCollectionResourceItemByUri(collection, uri));
     return collection;
 }
 
@@ -320,8 +320,8 @@ export function makeSingletonListFromAttributeUriList(resource, singletonName, i
  * @return {LinkedRepresentation}
  * @obsolete
  */
-export function addCollectionResourceItemByUri(collection, resourceUri, defaultValues) {
-    return State.addItemToCollectionResource(collection, () => makeSparseResourceFromUri(resourceUri, defaultValues));
+export function makeCollectionResourceItemByUri(collection, resourceUri, defaultValues) {
+    return State.makeItemToCollectionResource(collection, () => makeSparseResourceFromUri(resourceUri, defaultValues));
 }
 
 /**
@@ -1220,7 +1220,7 @@ export function createCollectionResourceItem(collection, document, options = {})
 
         })
         .then(resource => {
-            return State.addItemToCollectionResource(collection, () => resource);
+            return State.makeItemToCollectionResource(collection, () => resource);
         });
 }
 

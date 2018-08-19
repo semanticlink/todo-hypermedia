@@ -1,5 +1,5 @@
 import _ from '../mixins';
-import SparseResource from '../cache/SparseResource';
+import * as SparseResource from '../cache/SparseResource';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 
