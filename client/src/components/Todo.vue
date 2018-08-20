@@ -252,7 +252,7 @@
             removeAllCompleted() {
                 return Promise
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
-                        .map(todo => cache.deleteCollectionItem(this.todoCollection, todo)))
+                        .map(todo => cache.deleteCollectionResourceItem(this.todoCollection, todo)))
                     .catch(err => log.error(err));
             }
             ,

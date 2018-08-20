@@ -147,8 +147,8 @@ export const makeCollectionItemsFromFeedItems = (collection, resourceTitleAttrib
  * Make a new, sparsely populated {@link LinkedRepresentation} with {@link State} and
  * link relation 'self' populated with from given uri
  *
- * @param uri
- * @param defaultValues
+ * @param {string} uri
+ * @param {*=} defaultValues
  * @param {stateFlagEnum=} state
  * @return {LinkedRepresentation}
  */
@@ -304,10 +304,9 @@ export const makeNamedCollectionFromUriAndResourceFromUriList = (resource, colle
  * @param {LinkedRepresentation} resource
  * @param {string} singletonName
  * @param {string} itemsUriListName
- * @param {stateFlagEnum=} state
  * @return {Promise} contains an array of sparsely populated resources
  */
-export const makeSingletonSparseListFromAttributeUriList = (resource, singletonName, itemsUriListName, state) => {
+export const makeSingletonSparseListFromAttributeUriList = (resource, singletonName, itemsUriListName) => {
 
     return State.get(resource)
         .then(resource => {
@@ -318,7 +317,7 @@ export const makeSingletonSparseListFromAttributeUriList = (resource, singletonN
 
             _(resource[itemsUriListName]).map(uri => {
                 if (!resource[singletonName].items.find(item => link.getUri(item, /canonical|self/) === uri)) {
-                    resource[singletonName].items.splice(resource[singletonName].length, 0, makeSparseResourceFromUri(uri, state));
+                    resource[singletonName].items.splice(resource[singletonName].length, 0, makeSparseResourceFromUri(uri));
                 }
             });
 

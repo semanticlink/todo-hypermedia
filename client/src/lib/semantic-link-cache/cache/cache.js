@@ -11,37 +11,6 @@ import {filter} from 'semantic-link/lib/filter';
  * This is just a utility that has a series of helpers that allows the client to layout the network of data
  * in a way that it wants allowoing the client-side application cache data to have self-consistency.
  *
- * Three types of apps
- * ====================
- *
- * Type One: retrieve each time
- * ----------------------------
- *
- * A first approach to have very little application caching and rely of the intermediary caches. The
- * implementation is to make requests buy using each resource itself and then binding the view to it.
- *
- * @example (humble) api browser using semantic link directly
- *
- * // retrieves and the view binds to the model
- * const apiUri = link.getUri('HEAD', 'api')
- * link.get(apiUri)
- *     .then(resource => model = resource);
- *
- * Type Two: retrieving from the application cache
- * -----------------------------------------------
- *
- * Another approach is to build up client-side cache from the root of the api. Each time a client view
- * needs a resource it goes through the cache to find it and then bind to it.
- *
- * @example
- *
- * const apiUri = link.getUri('HEAD', 'api');
- * const $api = cache.makeSparseResourceFromUri(apiUri);
- *
- * ...
- *
- * cache.getResource($api, 'self');  <-- goes out
- * cache.getResource($api, 'self');  <-- does not go out
  */
 
 /**
@@ -62,36 +31,29 @@ const defaultCreateFormStrategy = (resource, createForm, options) =>
  * @property {*} resolver
  */
 
-const toWireRepresentation = resource => State.delete(resource);
-
 /**
- * Returns the resource state. This shifts the context of the network of data the specified resource.
+ * Internal helper returning the resource state. This shifts the context of the network of data the specified resource.
  * @param {LinkedRepresentation} resource
  * @return {State}
+ * @private
  */
 const getResourceState = resource => State.get(resource);
+
 /*
 
-/**
- * Add a singleton list (array) of hydrated LinkedRepresentations based on an attribute that has a uriList.
- * @param {LinkedRepresentation} resource
- * @param {string} singletonName
- * @param {string} itemsUriListName
- * @param {stateFlagEnum=} state
- * @return {Promise} contains an array of populated resources
- */
-export function makeSingletonListFromAttributeUriList(resource, singletonName, itemsUriListName, state) {
-    return SparseResource.makeSingletonSparseListFromAttributeUriList(resource, singletonName, itemsUriListName, state)
-        .then(collection => {
-            return _(collection).mapWaitAll(item => {
-                return getResource(item);
-            });
-        });
-}
 
 /**
- * Get a resource. The resource **must** be {@link LinkedRepresentation} with
+ * Get a resource ensuring that it has a {@link State} on it.
+ *
+ * The resource **must** be at least sparse resource (ie {@link LinkedRepresentation}) with
  * at least the link relation `self` or 'canonical' in place.
+ *
+ * @example logical resource (with {@link stateFlagEnum.hydrated} state)
+ *
+ *    +-----+
+ *    | hydrated
+ *    |     |
+ *    +-----+
  *
  * @example:
  *
@@ -142,7 +104,8 @@ export function tryGetResource(resource, defaultValue = undefined, options = {})
  * the items list are synchronised with items at worst in {@link stateFlagEnum.locationOnly}.
  * @example
  *
- *    Collection
+ *    collection      item
+ *    Resource        Resource
  *
  *    +-----+
  *    | hydrated
@@ -164,17 +127,44 @@ export function getCollectionResource(collection, options) {
 }
 
 /**
- * Given a collection of local resources, get the resource identified by the uri
- * or add it if it doesn't exist and ensure that it is @link stateFlagEnum.hydrated} (its state is synchronised
- * with the server).
+ * Get an item resource from a collection resource. This gets the resource identified by the self/canonical
+ * link relation and ensures that it is synchronised with the server.
+ *
+ * This may result in a partially synchronised collection.
+ * @example
+ *
+ *    collection      item
+ *    Resource        Resource
+ *
+ *    +-----+
+ *    |     |
+ *    |     |         'self'
+ *    +-----+
+ *        X    item   +---+
+ *        X  <------+ |   |
+ *        X           +---+
+ *
+ * @param {CollectionRepresentation} collection
+ * @param {LinkedRepresentation} resource
+ * @param {UtilOptions=} options
+ * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
+ */
+export function getCollectionResourceItem(collection, resource, options) {
+    return getCollectionResourceItemByUri(collection, link.getUri(resource, /canonical|self/), options);
+}
+
+/**
+ * Get an item resource (by uri) from a collection resource. This gets the resource identified by
+ * the given uri and ensures that it is synchronised with the server.
  *
  * This may result in a partially synchronised collection.
  *  * @example
  *
- *    Collection
+ *    collection      item
+ *    Resource        Resource
  *
  *    +-----+
- *    |     |        resource
+ *    |     |
  *    |     |          uri
  *    +-----+
  *        X    item   +---+
@@ -192,31 +182,6 @@ export function getCollectionResourceItemByUri(collection, itemUri, options) {
         .then(resource => getResource(resource, options));
 }
 
-/**
- * Given a collection of local resources, get the resource identified by the self/canonical
- * link relation and ensure that it is synchronised with the server.
- *
- * This may result in a partially synchronised collection.
- * @example
- *
- *    Collection
- *
- *    +-----+
- *    |     |        resource
- *    |     |
- *    +-----+
- *        X    item   +---+
- *        X  <------+ |   |
- *        X           +---+
- *
- * @param {CollectionRepresentation} collection
- * @param {LinkedRepresentation} resource
- * @param {UtilOptions=} options
- * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
- */
-export function getCollectionResourceItem(collection, resource, options) {
-    return getCollectionResourceItemByUri(collection, link.getUri(resource, /canonical|self/), options);
-}
 
 /**
  * Get a singleton resource on a parent resource added  as a named attribute on the parent resource.
@@ -261,9 +226,7 @@ export function getSingletonResource(parentResource, singletonName, rel, options
 }
 
 /**
- * Get a singleton resource on a parent resource added  as a named attribute on the parent resource.
- *
- * Note: this overrides conflicting attributes
+ * Get a singleton resource on a parent resource added as a named attribute on the parent resource.
  *
  * @example
  *
@@ -321,8 +284,8 @@ export function tryGetSingletonResource(parentResource, singletonName, rel, defa
  * (see {@link getCollectionResource} for hydration behaviour of the collection)
  *  @example
  *
- *      parent     resource
- *      Resource   Collection
+ *      parent     collection
+ *      Resource   Resource
  *
  *     +----------+
  *     |          |
@@ -364,8 +327,8 @@ export function getNamedCollectionResource(parentResource, collectionName, colle
  * (see {@link getCollectionResource} for hydration behaviour of the collection)
  *  @example
  *
- *      parent     resource
- *      Resource   Collection
+ *      parent     collection
+ *      Resource   Resource
  *
  *     +----------+
  *     |          |
@@ -397,8 +360,8 @@ export function tryGetNamedCollectionResource(parentResource, collectionName, co
  *  @example
  *
  *      singleton
- *      parent      resource
- *      Resources   Collection (per singleton)
+ *      parent      collection
+ *      Resources   Resource (per singleton)
  *
  *     +----------+
  *     |          |
@@ -446,8 +409,8 @@ export function getNamedCollectionResourceOnSingletons(singletons, collectionNam
  *  @example
  *
  *      singleton
- *      parent      resource
- *      Resources   Collection (per singleton)
+ *      parent      collection
+ *      Resources   Resource (per singleton)
  *
  *     +----------+
  *     |          |
@@ -579,6 +542,48 @@ export function getNamedCollectionResourceAndItems(parentResource, collectionNam
         .then(collection => tryGetCollectionResourceItems(collection, options));
 }
 
+
+/**
+ * Get a collection resource and all its items based on an attribute containing a uri-list added
+ * as a named attribute. This is a pre-emptive load of all item resources.
+ *
+ * @example
+ *
+ *
+ *     parent       item
+ *     Resource     Resources
+ *
+ *     +-----------+
+ *     |           |
+ *     |           |
+ *     |           +---------+
+ *     |   existing|uri-list |
+ *     |      named|         | +--------+
+ *     |           |         |          |
+ *     |           +---------+          |
+ *     |           |            each    |
+ *     |           |            uri     |
+ *     |           +-----+      to      |
+ *     |      Named|     |      item    |
+ *     |           |     |              |
+ *     |           +-----+              |
+ *     |           |   X  items         |
+ *     |           |   X    <-----------+
+ *     |           |   X
+ *     +-----------+
+ *
+ *
+ * @param {LinkedRepresentation} parentResource
+ * @param {string} collectionName
+ * @param {string} uriListName
+ * @param {UtilOptions=} options
+ * @return {Promise<LinkedRepresentation[]>} contains an array of populated resources
+ */
+export function getNamedCollectionResourceAndItemsFromUriList(parentResource, collectionName, uriListName, options) {
+    return SparseResource.makeSingletonSparseListFromAttributeUriList(parentResource, collectionName, uriListName)
+        .then(collection => _(collection).mapWaitAll(item => getResource(item, options)));
+}
+
 /**
  * Get a collection resource and all its items. This is a pre-emptive load of all item resources.
  *
@@ -638,8 +643,8 @@ export function tryGetCollectionResourceAndItems(parentResource, collectionName,
  * @example
  *
  *
- *      parent      resource
- *      Resource   Collection (where link rel and title)
+ *      parent     collection
+ *      Resource   Resource (where link rel and title)
  *
  *     +----------+
  *     |          |
@@ -678,7 +683,7 @@ export function tryGetCollectionResourceAndItems(parentResource, collectionName,
  * @param {UtilOptions=} options
  * @return {Promise} with the item by uri from the collection resource of type {@link FeedRepresentation}
  */
-export function getNamedCollectionByTitle(parentResource, collectionName, collectionRel, title, options) {
+export function getNamedCollectionResourceByTitle(parentResource, collectionName, collectionRel, title, options) {
 
     /**
      * Override the semantic link getUri implementation that returns the first found href. However
@@ -730,7 +735,7 @@ export function getNamedCollectionByTitle(parentResource, collectionName, collec
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation>} with the item by uri from the collection item resource
  */
-export function getItemInNamedCollectionByUri(parentResource, collectionName, collectionRel, itemUri, options) {
+export function getItemInNamedCollectionResourceByUri(parentResource, collectionName, collectionRel, itemUri, options) {
 
     return getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
         .then((collection) => {
@@ -857,6 +862,7 @@ export function tryGetNamedCollectionResourceOnCollectionItems(parentCollectionR
  *                   |          |
  *                   |          |
  *                   +----------+
+ *
  * @param {CollectionRepresentation} parentCollectionResource the parent to the collection
  * @param {string} childSingletonName the name of the collection in the parent collection items
  * @param {string|RegExp} childSingletonRel the link relation name
@@ -901,19 +907,39 @@ export function defaultEditFormStrategy(resource, documentResource, editForm, op
 /**
  * Tries to update a resource. If the server refuses an update the local version will not be mutated.
  *
+ * @example
+ *                   document    edit-form    item
+ *    Resource                   Resource     Resource
+ *
+ *    +-----+        +-----+     +-----+  merged
+ *    | edit-form    |     |+--->|     |+--------+
+ *    |     |        |     |     |     |         V
+ *    +-----+        +-----+     +-----+      +-----+
+ *       ^                                    |     |
+ *       +----------------------------------+ |     |
+ *                  item updated              +-----+
+ *
  * @param {LinkedRepresentation} resource must include the 'edit-form' link relation
- * @param documentResource
+ * @param (*) document
  * @param {UpdateCollectionResourceItemOptions} options
  * @return {Promise} with the updated resource
  */
-export function updateResource(resource, documentResource, options = {}) {
+export function updateResource(resource, document, options = {}) {
+
+    /**
+     * Helper to clean out im-memory objects to be serialised across the wire to the api/server.
+     * @param {LinkedRepresentation} resource
+     * @return {*}
+     */
+    const toWireRepresentation = resource => State.delete(resource);
+
 
     /* @type {EditMergeOptions} */
     options = _({}).extend(options, {
         undefinedWhenNoUpdateRequired: true
     });
 
-    if (!documentResource) {
+    if (!document) {
         log.warn(`No document provided to update for resource ${link.getUri(resource, /self/)}`);
         return Promise.resolve(resource);
     }
@@ -928,7 +954,7 @@ export function updateResource(resource, documentResource, options = {}) {
                 editForm = {items: []};
             }
 
-            return mergeStrategy(resource, documentResource, editForm, options)
+            return mergeStrategy(resource, document, editForm, options)
                 .then(merged => {
                     if (merged) {
                         return getResourceState(resource)
@@ -953,16 +979,28 @@ export function tryUpdateResource(resource, documentResource, editFormCallback, 
 }
 
 /**
+ * @example
  *
- * @param {CollectionRepresentation} collection the collection to add the new resource to
- * @param {createDocument} document The document provided to create form callback to make the create data
+ *    collection     document    create-form  item
+ *    Resource                   Resource     Resource
+ *
+ *    +-----+        +-----+     +-----+  merged
+ *    | create-form  |     |+--->|     |+--------+
+ *    |     |        |     |     |     |         V
+ *    +-----+        +-----+     +-----+      +-----+
+ *        X                                   |     |
+ *  items X  <------------------------------+ |     |
+ *        X          item added               +-----+
+ *
+ * @param {CollectionRepresentation} collectionRepresentation the collection to add the new resource to
+ * @param {*} document The document provided to create form callback to make the create data
  * @param {CreateCollectionResourceItemOptions} options
  * @return {LinkedRepresentation} a sparsely populated resource representation
  */
-export function createCollectionResourceItem(collection, document, options = {}) {
+export function createCollectionResourceItem(collectionRepresentation, document, options = {}) {
     const mergeStrategy = options.createForm || defaultCreateFormStrategy;
 
-    return getCollectionResource(collection, options)
+    return getCollectionResource(collectionRepresentation, options)
         .then(collectionOrCreateForm => {
 
             if (!options.contributeonly) {
@@ -970,26 +1008,34 @@ export function createCollectionResourceItem(collection, document, options = {})
                     .then(createFormResource => mergeStrategy(document, createFormResource, options))
                     .then(mergedResource => {
                         if (_(mergedResource).isEmpty()) {
-                            log.warn(`Unexpected empty item '${link.getUri(document, /self|canonical/)}' in '${link.getUri(collection, /self|canonical/)}' on mapping '${options.mappedTitle}'`);
-                            return Promise.resolve(collection);
+                            log.warn(`Unexpected empty item '${link.getUri(document, /self|canonical/)}' in '${link.getUri(collectionRepresentation, /self|canonical/)}' on mapping '${options.mappedTitle}'`);
+                            return Promise.resolve(collectionRepresentation);
                         }
-                        return getResourceState(collection)
-                            .createResource(collection, mergedResource, options);
+                        return getResourceState(collectionRepresentation)
+                            .createResource(collectionRepresentation, mergedResource, options);
                     });
             } else {
 
                 // // data for uri returns a json array of Uris
-                return getResourceState(collection)
-                    .createResource(collection, [link.getUri(document, /canonical|self/)], options);
+                return getResourceState(collectionRepresentation)
+                    .createResource(collectionRepresentation, [link.getUri(document, /canonical|self/)], options);
             }
 
         })
         .then(resource => {
-            return State.makeItemToCollectionResource(collection, () => resource);
+            return State.makeItemToCollectionResource(collectionRepresentation, () => resource);
         });
 }
 
 /**
+ * Delete a linked representation
+ *
+ * @example logical resource (with {@link stateFlagEnum.hydrated} state)
+ *
+ *    +-----+
+ *    | deleteInProgress --> delete (then de-reference)
+ *    |     |
+ *    +-----+
  *
  * @param {LinkedRepresentation} resource
  * @param {UtilOptions} options
@@ -1003,13 +1049,27 @@ export function deleteResource(resource, options = {}) {
 }
 
 /**
+ * Delete a item resource from a collection.
+ *
+ * @example
+ *
+ *    collection     item
+ *    Resource       Resource
+ *
+ *    +-----+
+ *    |     |
+ *    |     |
+ *    +-----+
+ *        X   item    +---+
+ *        -  <------+ |deleteInProgress -> deleted (then remove from list)
+ *        X           +---+
  *
  * @param {CollectionRepresentation} collection
  * @param {LinkedRepresentation} item
  * @param {UtilOptions} options
  * @return {Promise}
  */
-export function deleteCollectionItem(collection, item, options = {}) {
+export function deleteCollectionResourceItem(collection, item, options = {}) {
 
     return getCollectionResource(collection, options)
         .then((collectionResource) => {

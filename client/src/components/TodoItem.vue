@@ -121,7 +121,7 @@
              * Flush the delete back through the collection server-side
              */
             remove() {
-                return cache.deleteCollectionItem(this.collection, this.item);
+                return cache.deleteCollectionResourceItem(this.collection, this.item);
             },
 
             /**

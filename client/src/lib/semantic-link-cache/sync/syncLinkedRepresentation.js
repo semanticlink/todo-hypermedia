@@ -125,7 +125,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
      */
     const deleteResourceAndUpdateResolver = (deleteResource) => {
         return cache
-            .deleteCollectionItem(collectionResource, deleteResource, options)
+            .deleteCollectionResourceItem(collectionResource, deleteResource, options)
             .then(result => {
                 resolver.remove(link.getUri(deleteResource, /self|canonical/));
                 return result;
@@ -186,7 +186,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
             }
         });
         return cache
-            .deleteCollectionItem(collectionResource, deleteResource, options)
+            .deleteCollectionResourceItem(collectionResource, deleteResource, options)
             .then(result => {
                 resolver.remove(link.getUri(deleteResource, /self|canonical/));
                 return result;
