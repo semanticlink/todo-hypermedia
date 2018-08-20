@@ -3,8 +3,8 @@ import sinon from 'sinon';
 import * as sync from './syncLinkedRepresentation';
 import * as cache from '../cache/cache';
 import {log} from 'logger';
-import StateEnum from 'semantic-link-cache/cache/stateEnum';
-import * as SparseResource from '../cache/SparseResource';
+import StateEnum from 'semantic-link-cache/cache/StateEnum';
+import * as SparseResource from '../cache/sparseResource';
 
 // needed for semantic link library has a DOM dependency
 global.Element = () => {

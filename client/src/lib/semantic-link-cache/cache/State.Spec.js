@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import StateEnum from './stateEnum';
+import StateEnum from './StateEnum';
 import State from './State';
 
 describe('StateFactory', () => {

@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import State from './State';
-import * as SparseResource from './SparseResource';
-import StateEnum from './stateEnum';
+import * as SparseResource from './sparseResource';
+import StateEnum from './StateEnum';
 
 global.Element = () => {
 };

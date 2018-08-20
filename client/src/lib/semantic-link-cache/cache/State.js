@@ -1,8 +1,8 @@
 /* global JSON */
 
 import _ from '../mixins/index';
-import StateEnum from './stateEnum';
-import * as SparseResource from './SparseResource';
+import StateEnum from './StateEnum';
+import * as SparseResource from './sparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
 import {loader} from '../Loader';
