@@ -94,7 +94,7 @@ export default class PooledCollection {
      */
     static makeAndResolveResource(collectionResource, resourceDocument, options) {
         return cache
-            .createCollectionResourceItem(collectionResource, resourceDocument, options)
+            .createCollectionItem(collectionResource, resourceDocument, options)
             .then(createdResource => {
                 log.info(`Pooled: created ${link.getUri(createdResource, /self|canonical/)}`);
                 return PooledCollection.resolve(resourceDocument, createdResource, options);

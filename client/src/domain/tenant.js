@@ -8,18 +8,18 @@ import {uriMappingResolver, sync, cache} from 'semantic-link-cache';
 
 export const getTenants = root => cache.getNamedCollectionResource(root, 'tenants', /tenants/);
 
-const getTags = root => cache.tryGetCollectionResourceAndItems(root, 'tags', /tags/);
+const getTags = root => cache.tryGetCollectionAndItems(root, 'tags', /tags/);
 
 export const getTenantAndTodos = root => {
     return Promise.all([getTenants(root), getTags(root)])
-        .then(([tenantCollection]) => cache.tryGetNamedCollectionResourceAndItemsOnCollectionItems(tenantCollection, 'users', /users/))
+        .then(([tenantCollection]) => cache.tryGetNamedCollectionAndItemsOnCollectionItems(tenantCollection, 'users', /users/))
         .then(tenantCollectionItems => _(tenantCollectionItems)
             .mapWaitAll(tenant => _(tenant)
-                .mapFlattenWaitAll(user => cache.tryGetCollectionResourceAndItems(user, 'todos', /todos/)))
+                .mapFlattenWaitAll(user => cache.tryGetCollectionAndItems(user, 'todos', /todos/)))
         )
         .then(userTodoCollectionItems => _([].concat(...userTodoCollectionItems))
             .mapWaitAll(userTodo => _(userTodo)
-                .mapWaitAll(todo => cache.tryGetCollectionResourceAndItems(todo, 'tags', /tags/))))
+                .mapWaitAll(todo => cache.tryGetCollectionAndItems(todo, 'tags', /tags/))))
         .then(() => root);
 };
 

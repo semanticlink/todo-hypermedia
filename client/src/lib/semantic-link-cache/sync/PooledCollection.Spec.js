@@ -128,7 +128,7 @@ describe('Pooled collection', () => {
                 .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.equal(createdResource);
-                    cache.createCollectionResourceItem.restore();
+                    cache.createCollectionItem.restore();
                 });
 
         });
@@ -169,7 +169,7 @@ describe('Pooled collection', () => {
                 .then(representation => {
                     expect(representation).to.equal(createdResource);
                     expect(addResolverCalled).to.be.false;
-                    cache.createCollectionResourceItem.restore();
+                    cache.createCollectionItem.restore();
                 });
         });
 

@@ -238,7 +238,7 @@
              * Adds the new todo document into the existing todo collection
              */
             addTodo() {
-                return cache.createCollectionResourceItem(this.todoCollection, {...this.newTodo})
+                return cache.createCollectionItem(this.todoCollection, {...this.newTodo})
                     .then(todoResource => cache.getResource(todoResource)
                         .then(() => this.reset()))
                     .catch(err => log.error(err));
@@ -252,7 +252,7 @@
             removeAllCompleted() {
                 return Promise
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
-                        .map(todo => cache.deleteCollectionResourceItem(this.todoCollection, todo)))
+                        .map(todo => cache.deleteCollectionItem(this.todoCollection, todo)))
                     .catch(err => log.error(err));
             }
             ,

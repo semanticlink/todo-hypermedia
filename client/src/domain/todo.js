@@ -13,7 +13,7 @@ const getTenant = (apiResource, tenantUri) => {
     return cache
         .getResource(apiResource)
         .then(apiResource => cache.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
-        .then(tenants => cache.getCollectionResourceItemByUri(tenants, tenantUri));
+        .then(tenants => cache.getCollectionItemByUri(tenants, tenantUri));
 };
 
 /**
@@ -28,9 +28,9 @@ const getTenant = (apiResource, tenantUri) => {
 const getTodos = (apiResource, tenantUri) => {
     log.debug(`Looking for todos in tenant ${tenantUri}`);
 
-    return Promise.all([cache.getSingletonResource(apiResource, 'me', /me/), getTenant(apiResource, tenantUri)])
+    return Promise.all([cache.getSingleton(apiResource, 'me', /me/), getTenant(apiResource, tenantUri)])
     // note this usese 'code' to select the title on the link relation
-        .then(([me, tenant]) => cache.getNamedCollectionResourceByTitle(me, 'todos', /todos/, tenant.code));
+        .then(([me, tenant]) => cache.getNamedCollectionByTitle(me, 'todos', /todos/, tenant.code));
 };
 
 /**
@@ -46,7 +46,7 @@ const getTodos = (apiResource, tenantUri) => {
 const defaultTodo = todoResource => {
     return cache
         .getResource(todoResource)
-        .then(todoCollection => cache.getSingletonResource(todoCollection, 'createForm', /create-form/))
+        .then(todoCollection => cache.getSingleton(todoCollection, 'createForm', /create-form/))
         .catch(() => log.error(`No create form for on '${link.getUri(todoResource, /self/)}'`))
         .then(form => {
             const obj = {};

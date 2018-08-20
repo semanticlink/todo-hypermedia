@@ -78,7 +78,7 @@ function syncResourceInCollection(collectionResource, resourceDocument, options 
     if (collectionItemResource && !options.forceCreate) {
         return cache
         // synchronise the item in the collection from the server
-            .getCollectionResourceItem(collectionResource, collectionItemResource, options)
+            .getCollectionItem(collectionResource, collectionItemResource, options)
             .then(item => {
                 // and update the resource back to the server and return it
                 return cache.updateResource(item, resourceDocument, options);
@@ -92,7 +92,7 @@ function syncResourceInCollection(collectionResource, resourceDocument, options 
     } else {
         return cache
         // add the document to the collection a
-            .createCollectionResourceItem(collectionResource, resourceDocument, options)
+            .createCollectionItem(collectionResource, resourceDocument, options)
             .then(item => {
                 // ensure the resource is returned
                 return cache.getResource(item, options);
@@ -125,7 +125,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
      */
     const deleteResourceAndUpdateResolver = (deleteResource) => {
         return cache
-            .deleteCollectionResourceItem(collectionResource, deleteResource, options)
+            .deleteCollectionItem(collectionResource, deleteResource, options)
             .then(result => {
                 resolver.remove(link.getUri(deleteResource, /self|canonical/));
                 return result;
@@ -157,7 +157,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
      */
     const createResourceAndUpdateResolver = (createDataDocument) => {
         return cache
-            .createCollectionResourceItem(collectionResource, createDataDocument, options)
+            .createCollectionItem(collectionResource, createDataDocument, options)
             .then(result => {
                 resolver.add(
                     link.getUri(createDataDocument, /self|canonical/),
@@ -186,7 +186,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
             }
         });
         return cache
-            .deleteCollectionResourceItem(collectionResource, deleteResource, options)
+            .deleteCollectionItem(collectionResource, deleteResource, options)
             .then(result => {
                 resolver.remove(link.getUri(deleteResource, /self|canonical/));
                 return result;
@@ -212,7 +212,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
     const addContributeOnlyResourceAndUpdateResolver = (createDataDocument) => {
 
         return cache
-            .createCollectionResourceItem(collectionResource, createDataDocument, options)
+            .createCollectionItem(collectionResource, createDataDocument, options)
             .then(result => {
                 resolver.add(
                     link.getUri(createDataDocument, /self|canonical/),
@@ -397,7 +397,7 @@ export function getSingleton(parentResource, singletonName, singletonRel, parent
 
     return cache
         .getResource(parentResource)
-        .then(resource => cache.tryGetSingletonResource(resource, singletonName, singletonRel, undefined, options))
+        .then(resource => cache.tryGetSingleton(resource, singletonName, singletonRel, undefined, options))
         .then(singletonResource => {
             if (singletonResource) {
                 return cache.updateResource(singletonResource, parentDocument[singletonName], options)
@@ -445,7 +445,7 @@ export function getResourceInCollection(parentResource, resourceDocument, strate
     log.debug(`[Sync] collection ${link.getUri(parentResource, /self/)} with '${resourceDocument.name}'`);
 
     return cache
-        .getCollectionResource(parentResource, options)
+        .getCollection(parentResource, options)
         .then(collectionResource => syncResourceInCollection(collectionResource, resourceDocument, options))
         .then(syncInfos(strategies, options));
 }
@@ -539,7 +539,7 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
                     // populate the potentially sparse collection - we need to ensure that
                     // any existing ones (old) are not stale and that any just created (sparse)
                     // are hydrated
-                        .tryGetCollectionResourceItems(collectionResource, options)
+                        .tryGetCollectionItems(collectionResource, options)
                         .then(() => {
                             // each item in the collection perform the strategy
                             return tailRecursionThroughStrategies(strategies, options, syncInfos);

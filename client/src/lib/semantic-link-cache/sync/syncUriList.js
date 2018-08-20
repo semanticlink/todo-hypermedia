@@ -217,7 +217,7 @@ export function getUriListOnNamedCollection(parentResource, uriListName, uriList
                     // note discarding synch infos (not sure why)
                         .then(() => {
                             options = {...options, forceLoad: true};
-                            return cache.getCollectionResourceAndItems(collection, options);
+                            return cache.getCollectionAndItems(collection, options);
                         });
                 }
             }));
@@ -252,10 +252,10 @@ export function patchUriListOnNamedCollection(parentResource, uriListName, uriLi
                             // now make it so and the server should pay nicely and accept all the changes
                             log.debug('[Sync] update collection with uri-list');
                             return cache
-                                .getSingletonResource(collection, 'editForm', /edit-form/, options)
+                                .getSingleton(collection, 'editForm', /edit-form/, options)
                                 .then(form => put(form, /submit/, 'text/uri-list', uriList.join('\n')));
                         })
-                        .then(() => cache.getCollectionResourceAndItems(collection, {...options, ...{forceLoad: true}}));
+                        .then(() => cache.getCollectionAndItems(collection, {...options, ...{forceLoad: true}}));
                 }
             }));
 }

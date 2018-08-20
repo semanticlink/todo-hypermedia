@@ -118,10 +118,10 @@ export function tryGetResource(resource, defaultValue = undefined, options = {})
  * @param {CollectionRepresentation} collection
  * @param {UtilOptions} options
  * @return {Promise<CollectionRepresentation>} collection is {@link StateEnum.hydrated}, sparsely
- * populate the items as {@link LinkedRepresentation} to {@link StateEnum.locationOnly} in the current
+ * populate the items as {@link LinkedRepr  esentation} to {@link StateEnum.locationOnly} in the current
  * set (but not refresh the item set itself)
  */
-export function getCollectionResource(collection, options) {
+export function getCollection(collection, options) {
     return getResourceState(collection)
         .getCollectionResource(collection, options);
 }
@@ -149,8 +149,8 @@ export function getCollectionResource(collection, options) {
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
  */
-export function getCollectionResourceItem(collection, resource, options) {
-    return getCollectionResourceItemByUri(collection, link.getUri(resource, /canonical|self/), options);
+export function getCollectionItem(collection, resource, options) {
+    return getCollectionItemByUri(collection, link.getUri(resource, /canonical|self/), options);
 }
 
 /**
@@ -176,7 +176,7 @@ export function getCollectionResourceItem(collection, resource, options) {
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation>} collection item synchronised with the server
  */
-export function getCollectionResourceItemByUri(collection, itemUri, options) {
+export function getCollectionItemByUri(collection, itemUri, options) {
     return getResourceState(collection)
         .makeItemOnCollectionResource(collection, itemUri, options)
         .then(resource => getResource(resource, options));
@@ -184,14 +184,14 @@ export function getCollectionResourceItemByUri(collection, itemUri, options) {
 
 
 /**
- * Get a singleton resource on a parent resource added  as a named attribute on the parent resource.
+ * Get a singleton resource in the context of a given resource added  as a named attribute on the context resource.
  *
  * Note: this overrides conflicting attributes
  *
  * @example
  *
  *
- *     parent      singleton
+ *     context     singleton
  *     Resource    Resource
  *
  *     +----------+
@@ -204,15 +204,15 @@ export function getCollectionResourceItemByUri(collection, itemUri, options) {
  *     |          |
  *     +----------+
  *
- * @param {LinkedRepresentation} parentResource
- * @param {string} singletonName the attribute name on the parent resource
+ * @param {LinkedRepresentation} resource
+ * @param {string} singletonName the attribute name on the context resource
  * @param {string|RegExp} rel the link relation name
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
  */
-export function getSingletonResource(parentResource, singletonName, rel, options) {
+export function getSingleton(resource, singletonName, rel, options) {
 
-    return getResource(parentResource, options)
+    return getResource(resource, options)
         .then(resource => {
             if (resource[singletonName]) {
                 return getResource(resource[singletonName], options);
@@ -226,12 +226,12 @@ export function getSingletonResource(parentResource, singletonName, rel, options
 }
 
 /**
- * Get a singleton resource on a parent resource added as a named attribute on the parent resource.
+ * Get a singleton resource in the context of a given resource added as a named attribute on the context resource.
  *
  * @example
  *
  *
- *     parent      singleton
+ *     context     singleton
  *     Resource    Resource
  *
  *     +----------+
@@ -244,30 +244,30 @@ export function getSingletonResource(parentResource, singletonName, rel, options
  *     |          |
  *     +----------+
  *
- * @param {LinkedRepresentation} parentResource
- * @param {string} singletonName the attribute name on the parent resource
+ * @param {LinkedRepresentation} resource
+ * @param {string} singletonName the attribute name on the context resource
  * @param {string|RegExp} rel the link relation name
  * @param {LinkedRepresentation} defaultValue
  * @param {UtilOptions=} options
  * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
  */
-export function tryGetSingletonResource(parentResource, singletonName, rel, defaultValue, options = {}) {
+export function tryGetSingleton(resource, singletonName, rel, defaultValue, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
     options = _({}).extend(options, {
         getUri: link.getUri
     });
 
-    if (!link.getUri(parentResource, rel, undefined)) {
+    if (!link.getUri(resource, rel, undefined)) {
         log.debug(`Missing uri for rel '${rel}' - resolving with default value`);
         return Promise.resolve(defaultValue);
     }
 
-    if (parentResource[singletonName]) {
-        return tryGetResource(parentResource[singletonName], defaultValue, options);
+    if (resource[singletonName]) {
+        return tryGetResource(resource[singletonName], defaultValue, options);
     } else {
-        return getResourceState(parentResource)
+        return getResourceState(resource)
         // add a sparsely populated resource as a named attribute and return it
-            .makeSingletonResource(parentResource, singletonName, rel, options)
+            .makeSingletonResource(resource, singletonName, rel, options)
             .then(resource => {
                 //
                 return getResource(resource, options);
@@ -279,12 +279,12 @@ export function tryGetSingletonResource(parentResource, singletonName, rel, defa
 }
 
 /**
- * Get a collection resource added as a named attribute on the parent resource.
+ * Get a collection resource added as a named attribute on the context resource.
  *
- * (see {@link getCollectionResource} for hydration behaviour of the collection)
+ * (see {@link getCollection} for hydration behaviour of the collection)
  *  @example
  *
- *      parent     collection
+ *      context    collection
  *      Resource   Resource
  *
  *     +----------+
@@ -297,23 +297,23 @@ export function tryGetSingletonResource(parentResource, singletonName, rel, defa
  *     |          |   X items
  *     +----------+   X
  *
- * @param {LinkedRepresentation} parentResource
+ * @param {LinkedRepresentation} resource
  * @param {string} collectionName the name of a {@link FeedRepresentation}
  * @param {string|RegExp} collectionRel the link relation name
  * @param {UtilOptions} options
  * @return {Promise<CollectionRepresentation>} promise contains a {@link CollectionRepresentation}
  *
  */
-export function getNamedCollectionResource(parentResource, collectionName, collectionRel, options) {
-    if (parentResource[collectionName]) {
-        return getCollectionResource(parentResource[collectionName], options);
+export function getNamedCollectionResource(resource, collectionName, collectionRel, options) {
+    if (resource[collectionName]) {
+        return getCollection(resource[collectionName], options);
     } else {
-        return getResource(parentResource)
+        return getResource(resource)
             .then((resource) => getResourceState(resource)
                 .makeCollectionResource(resource, collectionName, collectionRel, options))
             .then((collection) => {
                 if (collection) {
-                    return getCollectionResource(collection, options);
+                    return getCollection(collection, options);
                 } else {
                     return collection;
                 }
@@ -322,12 +322,12 @@ export function getNamedCollectionResource(parentResource, collectionName, colle
 }
 
 /**
- * Get a collection resource added as a named attribute on the parent resource.
+ * Get a collection resource added as a named attribute on the context resource.
  *
- * (see {@link getCollectionResource} for hydration behaviour of the collection)
+ * (see {@link getCollection} for hydration behaviour of the collection)
  *  @example
  *
- *      parent     collection
+ *      context    collection
  *      Resource   Resource
  *
  *     +----------+
@@ -340,27 +340,27 @@ export function getNamedCollectionResource(parentResource, collectionName, colle
  *     |          |   X items
  *     +----------+   X
  *
- * @param {LinkedRepresentation} parentResource
+ * @param {LinkedRepresentation} resource
  * @param {string} collectionName the name of a {@link FeedRepresentation}
  * @param {string|RegExp} collectionRel the link relation name
  * @param {UtilOptions} options
  * @return {Promise<CollectionRepresentation|undefined>} promise contains a {@link CollectionRepresentation}
  */
-export function tryGetNamedCollectionResource(parentResource, collectionName, collectionRel, options = {}) {
+export function tryGetNamedCollectionResource(resource, collectionName, collectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
     options = {...options, getUri: link.getUri};
-    return getNamedCollectionResource(parentResource, collectionName, collectionRel, options);
+    return getNamedCollectionResource(resource, collectionName, collectionRel, options);
 }
 
 /**
  *
- * Get a collection resource on each of the resources added as a named attribute on the parent singleton resource.
+ * Get a collection resource on each of the resources added as a named attribute on the context singleton resource.
  *
- * (see {@link getCollectionResource} for hydration behaviour of the collection)
+ * (see {@link getCollection} for hydration behaviour of the collection)
  *  @example
  *
  *      singleton
- *      parent      collection
+ *      context     collection
  *      Resources   Resource (per singleton)
  *
  *     +----------+
@@ -388,7 +388,7 @@ export function tryGetNamedCollectionResource(parentResource, collectionName, co
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation[]>} promise contains original singletons
  */
-export function getNamedCollectionResourceOnSingletons(singletons, collectionName, collectionRel, options) {
+export function getNamedCollectionOnSingletons(singletons, collectionName, collectionRel, options) {
     return _(singletons)
         .mapWaitAll(singleton =>
             getResource(singleton)
@@ -402,14 +402,14 @@ export function getNamedCollectionResourceOnSingletons(singletons, collectionNam
 
 /**
  *
- * Get a collection resource on each of the resources added as a named attribute on the parent singleton resource.
+ * Get a collection resource on each of the resources added as a named attribute on the context singleton resource.
 
  *
- * (see {@link getCollectionResource} for hydration behaviour of the collection)
+ * (see {@link getCollection} for hydration behaviour of the collection)
  *  @example
  *
  *      singleton
- *      parent      collection
+ *      context     collection
  *      Resources   Resource (per singleton)
  *
  *     +----------+
@@ -437,7 +437,7 @@ export function getNamedCollectionResourceOnSingletons(singletons, collectionNam
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation[]>} promise contains original singletons
  */
-export function tryGetNamedCollectionResourceOnSingletons(singletons, collectionName, collectionRel, options = {}) {
+export function tryGetNamedCollectionOnSingletons(singletons, collectionName, collectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
     options = {...options, getUri: link.getUri};
 
@@ -472,7 +472,7 @@ export function tryGetNamedCollectionResourceOnSingletons(singletons, collection
  * @param {UtilOptions} options (with a cancellable)
  * @return {Promise} with the collection resource
  */
-export function tryGetCollectionResourceItems(collection, options = {}) {
+export function tryGetCollectionItems(collection, options = {}) {
 
     return _(collection)
         .mapWaitAll((item) => {
@@ -505,19 +505,19 @@ export function tryGetCollectionResourceItems(collection, options = {}) {
  * @param {UtilOptions=} options
  * @return {Promise<CollectionRepresentation>}
  */
-export function getCollectionResourceAndItems(collection, options) {
+export function getCollectionAndItems(collection, options) {
 
-    return getCollectionResource(collection, options)
-        .then(collection => tryGetCollectionResourceItems(collection, options));
+    return getCollection(collection, options)
+        .then(collection => tryGetCollectionItems(collection, options));
 }
 
 /**
- * Get a collection resource and all its items added  as a named attribute on the parent resource. This
+ * Get a collection resource and all its items added as a named attribute on the context resource. This
  * is a pre-emptive load of all item resources.
  *
  * @example
  *
- *      parent     collection    item
+ *      context    collection    item
  *      Resource   Resource      Resource
  *
  *     +----------+
@@ -530,16 +530,16 @@ export function getCollectionResourceAndItems(collection, options) {
  *     |          |   X <------+ |hydrated
  *     +----------+   X          +---+
  *
- * @param {LinkedRepresentation} parentResource
- * @param {string} collectionName the name of the collection in the parent container
+ * @param {LinkedRepresentation} resource
+ * @param {string} collectionName the name of the collection in the context container
  * @param {string|RegExp} collectionRel the link relation name
  * @param {UtilOptions=} options
  * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
  */
-export function getNamedCollectionResourceAndItems(parentResource, collectionName, collectionRel, options) {
+export function getNamedCollectionAndItems(resource, collectionName, collectionRel, options) {
 
-    return getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
-        .then(collection => tryGetCollectionResourceItems(collection, options));
+    return getNamedCollectionResource(resource, collectionName, collectionRel, options)
+        .then(collection => tryGetCollectionItems(collection, options));
 }
 
 
@@ -550,7 +550,7 @@ export function getNamedCollectionResourceAndItems(parentResource, collectionNam
  * @example
  *
  *
- *     parent       item
+ *     context      item
  *     Resource     Resources
  *
  *     +-----------+
@@ -573,14 +573,14 @@ export function getNamedCollectionResourceAndItems(parentResource, collectionNam
  *     +-----------+
  *
  *
- * @param {LinkedRepresentation} parentResource
+ * @param {LinkedRepresentation} resource
  * @param {string} collectionName
  * @param {string} uriListName
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation[]>} contains an array of populated resources
  */
-export function getNamedCollectionResourceAndItemsFromUriList(parentResource, collectionName, uriListName, options) {
-    return SparseResource.makeSingletonSparseListFromAttributeUriList(parentResource, collectionName, uriListName)
+export function getNamedCollectionAndItemsFromUriList(resource, collectionName, uriListName, options) {
+    return SparseResource.makeSingletonSparseListFromAttributeUriList(resource, collectionName, uriListName)
         .then(collection => _(collection).mapWaitAll(item => getResource(item, options)));
 }
 
@@ -589,12 +589,12 @@ export function getNamedCollectionResourceAndItemsFromUriList(parentResource, co
  *
  * @example
  *
- * Get a collection resource and all its items added  as a named attribute on the parent resource. This
+ * Get a collection resource and all its items added  as a named attribute on the context resource. This
  * is a pre-emptive load of all item resources.
  *
  * @example
  *
- *      parent     collection    item
+ *      context     collection    item
  *      Resource   Resource      Resource
  *
  *     +----------+
@@ -608,19 +608,19 @@ export function getNamedCollectionResourceAndItemsFromUriList(parentResource, co
  *     +----------+   X          +---+
  *
  *
- * @param {LinkedRepresentation} parentResource the parent to the collection
- * @param {string} collectionName the name of the collection in the parent
+ * @param {LinkedRepresentation} resource the context to the collection
+ * @param {string} collectionName the name of the collection in the context
  * @param {string|RegExp} collectionRel the link relation name
  * @param {UtilOptions=} options
  * @return {Promise<CollectionRepresentation|undefined>}
  */
-export function tryGetCollectionResourceAndItems(parentResource, collectionName, collectionRel, options = {}) {
+export function tryGetCollectionAndItems(resource, collectionName, collectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
     options = _({}).extend(options, {
         getUri: link.getUri
     });
 
-    return getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
+    return getNamedCollectionResource(resource, collectionName, collectionRel, options)
         .then(collection => {
 
             if (!collection) {
@@ -634,7 +634,7 @@ export function tryGetCollectionResourceAndItems(parentResource, collectionName,
 
 /**
  * Get a collection resource (based also on its 'title') and all its items added  as a named attribute on
- * the parent resource. This is a pre-emptive load of all item resources.
+ * the context resource. This is a pre-emptive load of all item resources.
  *
  * This is used where there are multiple link relations of the same name and are different by 'title'
  *
@@ -643,7 +643,7 @@ export function tryGetCollectionResourceAndItems(parentResource, collectionName,
  * @example
  *
  *
- *      parent     collection
+ *      context     collection
  *      Resource   Resource (where link rel and title)
  *
  *     +----------+
@@ -676,21 +676,21 @@ export function tryGetCollectionResourceAndItems(parentResource, collectionName,
  *        },
  *     } ...
  *
- * @param {LinkedRepresentation} parentResource the parent to the collection
- * @param {string} collectionName the name of the collection in the parent container
+ * @param {LinkedRepresentation} resource the context to the collection
+ * @param {string} collectionName the name of the collection in the context container
  * @param {string|RegExp} collectionRel the link relation name
  * @param {string} title the title of the resource in the collection to be hydrated
  * @param {UtilOptions=} options
  * @return {Promise} with the item by uri from the collection resource of type {@link FeedRepresentation}
  */
-export function getNamedCollectionResourceByTitle(parentResource, collectionName, collectionRel, title, options) {
+export function getNamedCollectionByTitle(resource, collectionName, collectionRel, title, options) {
 
     /**
      * Override the semantic link getUri implementation that returns the first found href. However
      * because these options cascade through, ensure that the getUri is only used 'once' and then discarded
      */
     return getNamedCollectionResource(
-        parentResource,
+        resource,
         collectionName,
         collectionRel,
         {
@@ -705,17 +705,17 @@ export function getNamedCollectionResourceByTitle(parentResource, collectionName
                 }
             })
         })
-        .then(collection => tryGetCollectionResourceItems(collection, options));
+        .then(collection => tryGetCollectionItems(collection, options));
 
 }
 
 /**
- * Get an item resource (based on its 'self' uri link relation) from a named collection resource on a parent resource
+ * Get an item resource (based on its 'self' uri link relation) from a named collection resource in the context of a given resource
  *
  * @example
  *
  *
- *      parent     collection    item
+ *      context    collection    item
  *      Resource   Resource      Resource
  *
  *     +----------+
@@ -728,20 +728,20 @@ export function getNamedCollectionResourceByTitle(parentResource, collectionName
  *     |          |   X <------+ |hydrated
  *     +----------+   X          +---+
  *
- * @param {LinkedRepresentation} parentResource the parent resource to the collection
- * @param {string} collectionName the name of the collection in the parent
+ * @param {LinkedRepresentation} resource the context resource to the collection
+ * @param {string} collectionName the name of the collection in the context
  * @param {string|RegExp} collectionRel the link relation name
  * @param {string} itemUri the uri of the item resource in the collection to be hydrated
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation>} with the item by uri from the collection item resource
  */
-export function getNamedCollectionResourceItemByUri(parentResource, collectionName, collectionRel, itemUri, options) {
+export function getNamedCollectionItemByUri(resource, collectionName, collectionRel, itemUri, options) {
 
-    return getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
+    return getNamedCollectionResource(resource, collectionName, collectionRel, options)
         .then((collection) => {
 
             if (!collection) {
-                throw new Error(`A collection should have been created ${link.getUri(parentResource, /self|canonical/)} with ${collectionName}`);
+                throw new Error(`A collection should have been created ${link.getUri(resource, /self|canonical/)} with ${collectionName}`);
             }
 
             let itemResource = _(collection).findResourceInCollectionByRelOrAttribute(itemUri);
@@ -764,12 +764,12 @@ export function getNamedCollectionResourceItemByUri(parentResource, collectionNa
 
 
 /**
- * Get each item resource in the named child collection resource on the parent collection items. This is a
+ * Get each item resource in the named child collection resource in the context of collection items. This is a
  * pre-emptive load of the child collection items.
  *
  * @example
  *
- *   parent                      child
+ *   context                      child
  *   collection      item        collection   item
  *   Resource        Resource    Resource     Resource
  *
@@ -786,33 +786,33 @@ export function getNamedCollectionResourceItemByUri(parentResource, collectionNa
  *                   |          |   X <------+ |hydrated
  *                   +----------+   X          +---+
  *
- * @param {CollectionRepresentation} parentCollection
+ * @param {CollectionRepresentation} contextCollection
  * @param {string} childCollectionName the name of the collection on each item resource
  * @param {string|RegExp} childCollectionRel the link relation name
  * @param {UtilOptions=} options
  * @return {Promise<CollectionRepresentation>} original collection
  */
-export function tryGetNamedCollectionResourceAndItemsOnCollectionItems(parentCollection, childCollectionName, childCollectionRel, options = {}) {
+export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection, childCollectionName, childCollectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
     options = _({}).extend(options, {
         getUri: link.getUri
     });
 
     // TODO ?? should this return the child collection items ??
-    return _(parentCollection)
+    return _(contextCollection)
         .mapWaitAll(item => getNamedCollectionResource(item, childCollectionName, childCollectionRel, options)
-            .then(childCollection => tryGetCollectionResourceItems(childCollection, options))
+            .then(childCollection => tryGetCollectionItems(childCollection, options))
         )
         .then(collection => collection);
 }
 
 /**
- * Get each item resource in the named child collection resource on the parent collection items. This is a
+ * Get each item resource in the named child collection resource in the context of collection items. This is a
  * lazy load of child collection items.
  *
  * @example
  *
- *   parent                      child
+ *   context                     child
  *   collection      item        collection   item
  *   Resource        Resource    Resource     Resource
  *
@@ -829,24 +829,24 @@ export function tryGetNamedCollectionResourceAndItemsOnCollectionItems(parentCol
  *                   |          |   X <------+ |locationOnly
  *                   +----------+   X          +---+
  *
- * @param {CollectionRepresentation} parentCollectionResource the parent to the collection
- * @param {string} childCollectionName the name of the collection in the parent collection items
+ * @param {CollectionRepresentation} collection the context to the collection
+ * @param {string} childCollectionName the name of the collection in the context collection items
  * @param {string|RegExp} rel the link relation name
  * @param {UtilOptions=} options
  * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
  */
-export function tryGetNamedCollectionResourceOnCollectionItems(parentCollectionResource, childCollectionName, rel, options) {
+export function tryGetNamedCollectionOnCollectionItems(collection, childCollectionName, rel, options) {
 
-    return _(parentCollectionResource)
+    return _(collection)
         .mapWaitAll(item => tryGetNamedCollectionResource(item, childCollectionName, rel, options));
 }
 
 /**
- * Get singleton resource on a parent collection added as a named attribute on each item resource
+ * Get singleton resource on a context collection added as a named attribute on each item resource
  *
  * @example
  *
- *   parent                      child
+ *   context                      child
  *   collection      item        singleton
  *   Resource        Resource    Resource
  *
@@ -863,15 +863,15 @@ export function tryGetNamedCollectionResourceOnCollectionItems(parentCollectionR
  *                   |          |
  *                   +----------+
  *
- * @param {CollectionRepresentation} parentCollectionResource the parent to the collection
- * @param {string} childSingletonName the name of the collection in the parent collection items
+ * @param {CollectionRepresentation} collection the context to the collection
+ * @param {string} childSingletonName the name of the collection in the context collection items
  * @param {string|RegExp} childSingletonRel the link relation name
  * @param {UtilOptions=} options
  * @return {Promise} with the array of singleton resources that succeed
  */
-export function tryGetNamedSingletonResourceOnCollectionItems(parentCollectionResource, childSingletonName, childSingletonRel, options) {
-    return _(parentCollectionResource)
-        .mapWaitAll(item => tryGetSingletonResource(item, childSingletonName, childSingletonRel, undefined, options))
+export function tryGetSingletonOnCollectionItems(collection, childSingletonName, childSingletonRel, options) {
+    return _(collection)
+        .mapWaitAll(item => tryGetSingleton(item, childSingletonName, childSingletonRel, undefined, options))
         // now discard any in the tryGet that returned the default value 'undefined'
         .then(result => _(result).reject(item => !item));
 }
@@ -902,7 +902,7 @@ const defaultEditFormStrategy = (resource, documentResource, editForm, options =
         .catch(() => {
             log.error('[Merge] unknown merge error');
         });
-}
+};
 
 /**
  * Tries to update a resource. If the server refuses an update the local version will not be mutated.
@@ -920,7 +920,7 @@ const defaultEditFormStrategy = (resource, documentResource, editForm, options =
  *                  item updated              +-----+
  *
  * @param {LinkedRepresentation} resource must include the 'edit-form' link relation
- * @param (*) document
+ * @param {*} document
  * @param {UpdateCollectionResourceItemOptions} options
  * @return {Promise} with the updated resource
  */
@@ -945,7 +945,7 @@ export function updateResource(resource, document, options = {}) {
     }
     const mergeStrategy = options.editForm || defaultEditFormStrategy;
 
-    return tryGetSingletonResource(resource, 'editForm', /edit-form/, undefined, options)
+    return tryGetSingleton(resource, 'editForm', /edit-form/, undefined, options)
         .then(editForm => {
 
             if (!editForm) {
@@ -997,14 +997,14 @@ export function tryUpdateResource(resource, documentResource, editFormCallback, 
  * @param {CreateCollectionResourceItemOptions} options
  * @return {LinkedRepresentation} a sparsely populated resource representation
  */
-export function createCollectionResourceItem(collectionRepresentation, document, options = {}) {
+export function createCollectionItem(collectionRepresentation, document, options = {}) {
     const mergeStrategy = options.createForm || defaultCreateFormStrategy;
 
-    return getCollectionResource(collectionRepresentation, options)
+    return getCollection(collectionRepresentation, options)
         .then(collectionOrCreateForm => {
 
             if (!options.contributeonly) {
-                return getSingletonResource(collectionOrCreateForm, 'createForm', /create-form/, options)
+                return getSingleton(collectionOrCreateForm, 'createForm', /create-form/, options)
                     .then(createFormResource => mergeStrategy(document, createFormResource, options))
                     .then(mergedResource => {
                         if (_(mergedResource).isEmpty()) {
@@ -1069,9 +1069,9 @@ export function deleteResource(resource, options = {}) {
  * @param {UtilOptions} options
  * @return {Promise}
  */
-export function deleteCollectionResourceItem(collection, item, options = {}) {
+export function deleteCollectionItem(collection, item, options = {}) {
 
-    return getCollectionResource(collection, options)
+    return getCollection(collection, options)
         .then((collectionResource) => {
             const itemResource = _(collectionResource).findResourceInCollection(item);
             if (itemResource) {
