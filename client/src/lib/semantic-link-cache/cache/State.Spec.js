@@ -1,5 +1,5 @@
-import { expect } from 'chai';
-import { stateFlagEnum } from './stateFlagEnum';
+import {expect} from 'chai';
+import StateEnum from './stateEnum';
 import State from './State';
 
 describe('StateFactory', () => {
@@ -7,7 +7,7 @@ describe('StateFactory', () => {
     it('should be create an object with state', () => {
         const obj = State.make();
         expect(obj).to.not.be.null;
-        expect(State.get(obj).getStatus()).to.equal(stateFlagEnum.unknown);
+        expect(State.get(obj).getStatus()).to.equal(StateEnum.unknown);
     });
 
     it('should return undefined when tryGet on object with no state', () => {

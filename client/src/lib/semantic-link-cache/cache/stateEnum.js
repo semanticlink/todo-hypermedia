@@ -3,11 +3,13 @@
  *
  * TODO: paging is not catered for
  *
- * @class stateFlagEnum
+ * Note: Jest cannot test typescript enums
+ *
+ * @class StateEnum
  * @readonly
  * @enum {number}
  */
-export const stateFlagEnum = {
+const StateEnum = {
     /**
      * The resource is known to exist but the URI of the resource
      * is not known. None of the attribute values will be known.
@@ -106,3 +108,5 @@ export const stateFlagEnum = {
      */
     stale: Symbol('stale'),
 };
+
+export default StateEnum;

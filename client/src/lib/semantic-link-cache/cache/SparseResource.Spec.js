@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import State from './State';
 import * as SparseResource from './SparseResource';
-import {stateFlagEnum} from './stateFlagEnum';
+import StateEnum from './stateEnum';
 
 global.Element = () => {
 };
@@ -44,7 +44,7 @@ describe('Cache', () => {
 
                     expect(result).to.not.be.null;
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
-                    expect(State.get(result).getStatus()).to.equal(stateFlagEnum.unknown);
+                    expect(State.get(result).getStatus()).to.equal(StateEnum.unknown);
                 });
 
                 it('Makes a new one with defaults', () => {
@@ -82,7 +82,7 @@ describe('Cache', () => {
 
                     expect(result).to.not.be.null;
                     expect(State.get(linkedRepresentation).isTracked('name')).to.be.true;
-                    expect(State.get(result).getStatus()).to.equal(stateFlagEnum.unknown);
+                    expect(State.get(result).getStatus()).to.equal(StateEnum.unknown);
                 });
 
                 it('Makes a new one with defaults including empty items attribute', () => {
@@ -145,8 +145,8 @@ describe('Cache', () => {
 
                     expect(result.links).to.deep.equal([{rel: 'self', href: uri}]);
                     expect(feedRepresentation.items).to.deep.equal([result]);
-                    expect(State.get(result).getStatus()).not.to.equal(stateFlagEnum.hydrated);
-                    expect(State.get(result).getStatus()).to.equal(stateFlagEnum.locationOnly);
+                    expect(State.get(result).getStatus()).not.to.equal(StateEnum.hydrated);
+                    expect(State.get(result).getStatus()).to.equal(StateEnum.locationOnly);
                 });
 
                 it('add with defaults', () => {

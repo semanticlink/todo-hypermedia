@@ -101,7 +101,7 @@ export function tryGetResource(resource, defaultValue = undefined, options = {})
  * Get a collection resource with the items list synchronised.
  *
  * Note: At worst, this is only one call back to the server because the request returns a feed representation and then
- * the items list are synchronised with items at worst in {@link stateFlagEnum.locationOnly}.
+ * the items list are synchronised with items at worst in {@link StateEnum.locationOnly}.
  * @example
  *
  *    collection      item
@@ -117,8 +117,8 @@ export function tryGetResource(resource, defaultValue = undefined, options = {})
  *
  * @param {CollectionRepresentation} collection
  * @param {UtilOptions} options
- * @return {Promise<CollectionRepresentation>} collection is {@link stateFlagEnum.hydrated}, sparsely
- * populate the items as {@link LinkedRepresentation} to {@link stateFlagEnum.locationOnly} in the current
+ * @return {Promise<CollectionRepresentation>} collection is {@link StateEnum.hydrated}, sparsely
+ * populate the items as {@link LinkedRepresentation} to {@link StateEnum.locationOnly} in the current
  * set (but not refresh the item set itself)
  */
 export function getCollectionResource(collection, options) {
@@ -1030,7 +1030,7 @@ export function createCollectionResourceItem(collectionRepresentation, document,
 /**
  * Delete a linked representation
  *
- * @example logical resource (with {@link stateFlagEnum.hydrated} state)
+ * @example logical resource (with {@link StateEnum.hydrated} state)
  *
  *    +-----+
  *    | deleteInProgress --> delete (then de-reference)

@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import State from 'semantic-link-cache/cache/State';
-import {stateFlagEnum} from 'semantic-link-cache/cache/stateFlagEnum';
+import StateEnum from 'semantic-link-cache/cache/stateEnum';
 import * as link from 'semantic-link/lib/index';
 
 /**
@@ -30,7 +30,7 @@ export const defaultStateFactory = () => {
 
 /**
  *
- * @param {stateFlagEnum} state
+ * @param {StateEnum} state
  * @return {{stateFactory: *}} see {@link SparseResourceOptions}
  */
 export const makeSparseResourceOptions = (state) => {
@@ -154,9 +154,9 @@ export const makeCollectionItemsFromFeedItems = (collection, resourceTitleAttrib
  */
 export const makeSparseResourceFromUri = (uri, defaultValues, state) => {
     if (!uri) {
-        state = stateFlagEnum.virtual;
+        state = StateEnum.virtual;
     }
-    return makeFromUri(uri, makeSparseResourceOptions(state || stateFlagEnum.locationOnly), defaultValues);
+    return makeFromUri(uri, makeSparseResourceOptions(state || StateEnum.locationOnly), defaultValues);
 };
 
 /**
@@ -165,14 +165,14 @@ export const makeSparseResourceFromUri = (uri, defaultValues, state) => {
  *
  * @param {string} uri
  * @param {*=} defaultValues
- * @param {stateFlagEnum=} state
+ * @param {StateEnum=} state
  * @return {CollectionRepresentation}
  */
 export const makeSparseCollectionResourceFromUri = (uri, defaultValues, state) => {
     if (!uri) {
-        state = stateFlagEnum.virtual;
+        state = StateEnum.virtual;
     }
-    return makeCollectionFromUri(uri, makeSparseResourceOptions(state || stateFlagEnum.locationOnly), defaultValues);
+    return makeCollectionFromUri(uri, makeSparseResourceOptions(state || StateEnum.locationOnly), defaultValues);
 };
 
 /**
@@ -188,7 +188,7 @@ export const makeUnknownCollectionAddedToResource = (resource, collectionResourc
         .addCollectionResourceByName(
             resource,
             collectionResourceName,
-            () => makeCollection(makeSparseResourceOptions(stateFlagEnum.unknown), defaultValues));
+            () => makeCollection(makeSparseResourceOptions(StateEnum.unknown), defaultValues));
 };
 
 /**
@@ -199,7 +199,7 @@ export const makeUnknownCollectionAddedToResource = (resource, collectionResourc
  * @return {LinkedRepresentation}
  */
 export const makeUnknownResourceAddedToCollection = (collection, defaultValues) => {
-    return State.makeItemToCollectionResource(collection, () => makeCollection(makeSparseResourceOptions(stateFlagEnum.unknown), defaultValues));
+    return State.makeItemToCollectionResource(collection, () => makeCollection(makeSparseResourceOptions(StateEnum.unknown), defaultValues));
 };
 
 
@@ -217,7 +217,7 @@ export const makeUnknownResourceAddedToResource = (resource, resourceName, defau
         .addResourceByName(
             resource,
             resourceName,
-            () => makeLinkedRepresentation(makeSparseResourceOptions(stateFlagEnum.unknown), defaultValues));
+            () => makeLinkedRepresentation(makeSparseResourceOptions(StateEnum.unknown), defaultValues));
 };
 
 
@@ -279,7 +279,7 @@ export const makeCollectionItemsFromFeedAddedToCollection = (collection, feedRep
  * @param {string} collectionResourceName
  * @param {string} collectionUri
  * @param {string[]} itemsUriList
- * @param {stateFlagEnum} state
+ * @param {StateEnum} state
  * @return {LinkedRepresentation}
  */
 export const makeNamedCollectionFromUriAndResourceFromUriList = (resource, collectionResourceName, collectionUri, itemsUriList, state) => {
@@ -289,9 +289,9 @@ export const makeNamedCollectionFromUriAndResourceFromUriList = (resource, colle
             collectionResourceName,
             () => {
                 if (!collectionUri) {
-                    state = stateFlagEnum.virtual;
+                    state = StateEnum.virtual;
                 }
-                return makeCollectionFromUri(collectionUri, makeSparseResourceOptions(state || stateFlagEnum.locationOnly));
+                return makeCollectionFromUri(collectionUri, makeSparseResourceOptions(state || StateEnum.locationOnly));
             });
 
     // only add items not currently loaded

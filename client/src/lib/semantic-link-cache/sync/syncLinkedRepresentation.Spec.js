@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import * as sync from './syncLinkedRepresentation';
 import * as cache from '../cache/cache';
 import {log} from 'logger';
-import {stateFlagEnum} from 'semantic-link-cache/cache/stateFlagEnum';
+import StateEnum from 'semantic-link-cache/cache/stateEnum';
 import * as SparseResource from '../cache/SparseResource';
 
 // needed for semantic link library has a DOM dependency
@@ -613,7 +613,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({data: editForm});
                 });
 
-                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, noChangeCollection, [], options)
                     .then(result => {
@@ -676,7 +676,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({});
                 });
 
-                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemChangedInCollection, [], options)
                     .then(result => {
@@ -736,7 +736,7 @@ describe('Synchroniser', () => {
                 });
 
 
-                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemAddedInCollection, [], options)
                     .then(result => {
@@ -776,7 +776,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({data: editForm});
                 });
 
-                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
 
                 return sync.getCollectionInNamedCollection(hydratedParent, 'todos', /todos/, oneItemRemovedInCollection, [], options)
                     .then(result => {
@@ -824,7 +824,7 @@ describe('Synchroniser', () => {
                     return Promise.resolve({data: editForm});
                 });
 
-                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
 
                 return sync.getNamedCollectionInNamedCollection(hydratedParent, 'todos', /todos/, noChangeParentCollection, [], options)
                     .then(result => {
@@ -908,7 +908,7 @@ describe('Synchroniser', () => {
         it('should not update when attributes on singleton are same', function () {
 
 
-            const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
+            const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
 
             const noChangeParent = {
                 ...parent,
@@ -939,7 +939,7 @@ describe('Synchroniser', () => {
 
         it('should update when attributes on singleton are different', function () {
 
-            const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(stateFlagEnum.hydrated), parent);
+            const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
 
             const updatedUser = {
                 ...resource,

@@ -1,7 +1,7 @@
 /* global JSON */
 
 import _ from '../mixins/index';
-import {stateFlagEnum} from './stateFlagEnum';
+import StateEnum from './stateEnum';
 import * as SparseResource from './SparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
@@ -21,14 +21,14 @@ export default class State {
 
     /**
      *
-     * @param {stateFlagEnum} defaultStatus
+     * @param {StateEnum} defaultStatus
      */
     constructor(defaultStatus) {
         /**
-         * @type {stateFlagEnum}
-         * @default {@link stateFlagEnum.unknown}
+         * @type {StateEnum}
+         * @default {@link StateEnum.unknown}
          */
-        this.status = defaultStatus || stateFlagEnum.unknown;
+        this.status = defaultStatus || StateEnum.unknown;
 
         this.previousStatus = undefined;
 
@@ -69,7 +69,7 @@ export default class State {
      * This is a helper function because we can't simply add the {@link State}
      * object onto the resource using the object literal notation
      *
-     * @param {stateFlagEnum=} state
+     * @param {StateEnum=} state
      * @return {{Symbol(state): State}}
      */
     static make(state) {
@@ -160,14 +160,14 @@ export default class State {
 
     /**
      * Simple cache bust strategy which is an override switch. To be expanded as needed. Currently, only
-     * cache bust on {@link stateFlagEnum.hydrated} resources. There is no time-based, refresh st
-     * @param {stateFlagEnum} status
+     * cache bust on {@link StateEnum.hydrated} resources. There is no time-based, refresh st
+     * @param {StateEnum} status
      * @param {UtilOptions} options
      * @return boolean
      * @private
      */
     static cacheBust(status, options) {
-        return options.forceLoad && this.status === stateFlagEnum.hydrated;
+        return options.forceLoad && this.status === StateEnum.hydrated;
     }
 
     /**
@@ -177,15 +177,15 @@ export default class State {
      * got the resource. Currently, the forceLoad allows an override which is an initial cache busting
      * strategy that will need improvemnt
      *
-     * @param {stateFlagEnum} status
+     * @param {StateEnum} status
      * @param {UtilOptions} options
      * @return boolean
      * @private
      */
     static needsFetch(status, options) {
-        return status === stateFlagEnum.unknown ||
-            status === stateFlagEnum.locationOnly ||
-            status === stateFlagEnum.stale ||
+        return status === StateEnum.unknown ||
+            status === StateEnum.locationOnly ||
+            status === StateEnum.stale ||
             State.cacheBust(status, options);
     }
 
@@ -205,7 +205,7 @@ export default class State {
 
     /**
      * Returns the value of the private status flag
-     * @return {stateFlagEnum}
+     * @return {StateEnum}
      */
     getStatus() {
         return this.status;
@@ -299,7 +299,7 @@ export default class State {
         const resourceUri = link.getUri(item, /canonical|self/);
         const indexOfItemToBeRemoved = _(collection.items).findIndex(item => link.getUri(item, /canonical|self/) === resourceUri);
         if (indexOfItemToBeRemoved >= 0) {
-            this.status = stateFlagEnum.stale;
+            this.status = StateEnum.stale;
             return _(collection.items.splice(indexOfItemToBeRemoved, 1)).first();
         }
         return undefined;
@@ -322,7 +322,7 @@ export default class State {
 
     /**
      *
-     * @param {stateFlagEnum} state
+     * @param {StateEnum} state
      * @return {SparseResourceOptions}
      */
     static makeSparseResourceOptions(state) {
@@ -334,11 +334,11 @@ export default class State {
     /**
      * Make a new, sparsely populated {@link LinkedRepresentation} with {@link State}.
      * @param {*=} defaultValues
-     * @param {stateFlagEnum=} state
+     * @param {StateEnum=} state
      * @return {LinkedRepresentation}
      */
     static makeLinkedRepresentationWithState(defaultValues, state) {
-        return SparseResource.makeLinkedRepresentation(State.makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
+        return SparseResource.makeLinkedRepresentation(State.makeSparseResourceOptions(state || StateEnum.unknown), defaultValues);
     }
 
     /**
@@ -347,11 +347,11 @@ export default class State {
      * This means that there is at least an empty `items` attribute.
      *
      * @param {*=} defaultValues
-     * @param {stateFlagEnum=} state
+     * @param {StateEnum=} state
      * @return {CollectionRepresentation}
      */
     static makeCollection(defaultValues, state) {
-        return SparseResource.makeCollection(State.makeSparseResourceOptions(state || stateFlagEnum.unknown), defaultValues);
+        return SparseResource.makeCollection(State.makeSparseResourceOptions(state || StateEnum.unknown), defaultValues);
     }
 
     /**
@@ -361,14 +361,14 @@ export default class State {
      *
      * @param {string} uri
      * @param {*=} defaultValues
-     * @param {stateFlagEnum=} state
+     * @param {StateEnum=} state
      * @return {LinkedRepresentation}
      */
     static makeFromUri(uri, defaultValues, state) {
         if (uri) {
-            return SparseResource.makeFromUri(uri, State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly), defaultValues);
+            return SparseResource.makeFromUri(uri, State.makeSparseResourceOptions(state || StateEnum.locationOnly), defaultValues);
         } else {
-            return SparseResource.makeFromUri(uri, State.makeSparseResourceOptions(stateFlagEnum.virtual), defaultValues);
+            return SparseResource.makeFromUri(uri, State.makeSparseResourceOptions(StateEnum.virtual), defaultValues);
         }
     }
 
@@ -380,11 +380,11 @@ export default class State {
      *
      * @param {string|[{rel:string,href:string,title:string}]} uriOrLinkRelation uri or an array or link relations
      * @param {*=} defaultValues
-     * @param {stateFlagEnum=} state
+     * @param {StateEnum=} state
      * @return {CollectionRepresentation}
      */
     static makeCollectionFromUri(uriOrLinkRelation, defaultValues, state) {
-        let options = State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly);
+        let options = State.makeSparseResourceOptions(state || StateEnum.locationOnly);
 
         if (_(uriOrLinkRelation).isString() || !uriOrLinkRelation) {
             return SparseResource.makeCollectionFromUri(uriOrLinkRelation, options, defaultValues);
@@ -406,7 +406,7 @@ export default class State {
     makeSparseCollectionItemsFromFeed(collection, resourceTitleAttributeName, state) {
         this.mappedTitle = resourceTitleAttributeName;
         return SparseResource
-            .makeCollectionItemsFromFeedItems(collection, resourceTitleAttributeName, State.makeSparseResourceOptions(state || stateFlagEnum.locationOnly));
+            .makeCollectionItemsFromFeedItems(collection, resourceTitleAttributeName, State.makeSparseResourceOptions(state || StateEnum.locationOnly));
     }
 
     /**
@@ -439,12 +439,12 @@ export default class State {
         const uri = (options.getUri || link.getUri)(resource, rel);
 
         // uri may be undefined on a link.getUri
-        if (!uri || this.status === stateFlagEnum.virtual) {
+        if (!uri || this.status === StateEnum.virtual) {
             log.info(`Resource is client-side only and will not be fetched ${uri} ${this.status.toString()}`);
             return Promise.resolve(resource);
-        } else if (this.status === stateFlagEnum.deleted || this.status === stateFlagEnum.deleteInProgress) {
+        } else if (this.status === StateEnum.deleted || this.status === StateEnum.deleteInProgress) {
             return Promise.reject(`Resource is deleted ${uri}`);
-        } else if (this.status === stateFlagEnum.forbidden) {
+        } else if (this.status === StateEnum.forbidden) {
             // TODO: enhance forbidden strategy as needed currently assumes forbidden access doesn't change per session
             log.info(`[State] Resource is already forbidden and will not be fetched ${uri}`);
             return Promise.resolve(resource);
@@ -461,7 +461,7 @@ export default class State {
                     // how was it retrieved
                     this.headers = response.headers;
                     // save the across-the-wire meta data so we can check for collisions/staleness
-                    this.status = stateFlagEnum.hydrated;
+                    this.status = StateEnum.hydrated;
 
                     // when was it retrieved
                     this.retrieved = new Date();
@@ -480,7 +480,7 @@ export default class State {
                 if (err.status === 403) {
                     log.debug(`[State] Request forbidden ${err.status} ${err.statusText} '${uri}'`);
                     // save the across-the-wire meta data so we can check for collisions/staleness
-                    this.status = stateFlagEnum.forbidden;
+                    this.status = StateEnum.forbidden;
                     // when was it retrieved
                     this.retrieved = new Date();
                     // how was it retrieved
@@ -488,26 +488,26 @@ export default class State {
                     /**
                      * On a forbidden resource we are going to let the decision of what to do with
                      * it lie at the application level. So we'll set the state, etc and return the
-                     * resource. This means that the application needs to check if it is {@link stateFlagEnum.forbidden}
+                     * resource. This means that the application needs to check if it is {@link StateEnum.forbidden}
                      * and decide whether to remove (from say the set, or in the UI dim the item).
                      */
                     return Promise.resolve(resource);
                 } else if (err.status === 404) {
                     log.info(`[State] Likely stale collection for '${link.getUri(resource, ['up', 'parent', 'self', '*'])}' on resource ${uri}`);
-                    this.status = stateFlagEnum.deleted;
+                    this.status = StateEnum.deleted;
                     return Promise.reject(resource);
                 } else if (err.status >= 400 && err.status < 499) {
                     log.info(`[State] Client error '${err.statusText}' on resource ${uri}`);
-                    this.status = stateFlagEnum.unknown;
+                    this.status = StateEnum.unknown;
                     return Promise.resolve(resource);
                 } else if (err.status >= 500 && err.status < 599) {
                     log.info(`[State] Server error '${err.statusText}' on resource ${uri}`);
-                    this.status = stateFlagEnum.unknown;
+                    this.status = StateEnum.unknown;
                     return Promise.resolve(resource);
                 } else {
                     log.error(`[State] Request error: '${err.message}'}`);
                     log.debug(err.stack);
-                    this.status = stateFlagEnum.unknown;
+                    this.status = StateEnum.unknown;
                     /**
                      * We really don't know what is happening here. But allow the application
                      * to continue.
@@ -762,7 +762,7 @@ export default class State {
 
         return loader.submit(putFactory, resource, data)
             .then(response => {
-                this.status = stateFlagEnum.hydrated;
+                this.status = StateEnum.hydrated;
                 this.retrieved = new Date();
                 this.headers = response.headers;
                 return State.mergeResource(resource, data);
@@ -773,13 +773,13 @@ export default class State {
                 // @see https://github.com/SGrondin/bottleneck#debugging-your-application
 
                 if (response.status === 403) {
-                    this.status = stateFlagEnum.forbidden;
+                    this.status = StateEnum.forbidden;
                 } else if (response.status === 404 || response.status === 405) {
                     this.status = this.previousStatus;
                     log.info(`[State] Resource not found for update ${uri} [${Object.keys(options).map(o => o).join(',')}]`);
                 } else {
                     // 500, 400, 409
-                    let msg = `Error on update resource ${uri}: ${response.statusText} [${stateFlagEnum.unknown.toString()}]`;
+                    let msg = `Error on update resource ${uri}: ${response.statusText} [${StateEnum.unknown.toString()}]`;
                     return Promise.reject(msg);
                 }
 
@@ -809,24 +809,24 @@ export default class State {
 
         let uri = link.getUri(item, /self/);
 
-        if (this.status === stateFlagEnum.feedOnly ||
-            this.status === stateFlagEnum.hydrated ||
-            this.status === stateFlagEnum.locationOnly || stateFlagEnum) {
-            this.status = stateFlagEnum.deleteInProgress;
+        if (this.status === StateEnum.feedOnly ||
+            this.status === StateEnum.hydrated ||
+            this.status === StateEnum.locationOnly || StateEnum) {
+            this.status = StateEnum.deleteInProgress;
         }
-        else if (this.status === stateFlagEnum.deleteInProgress) {
+        else if (this.status === StateEnum.deleteInProgress) {
             log.info(`[State] Delete already in progress ${uri}`);
             return Promise.resolve(item);
         }
-        else if (this.status === stateFlagEnum.virtual) {
+        else if (this.status === StateEnum.virtual) {
             log.info(`[State] Virtual resources can just be removed ${uri}`);
             return Promise.resolve(item);
         }
-        else if (stateFlagEnum.deleted) {
+        else if (StateEnum.deleted) {
             log.info(`[State] Already deleted, please remove from collection ${uri}`);
             return Promise.resolve(item);
         }
-        else if (stateFlagEnum.forbidden) {
+        else if (StateEnum.forbidden) {
             log.info(`[State] Forbidden access ${uri}`);
             return Promise.resolve(item);
         }
@@ -836,7 +836,7 @@ export default class State {
 
         return loader.submit(deleteFactory, item)
             .then(() => {
-                this.status = stateFlagEnum.deleted;
+                this.status = StateEnum.deleted;
                 log.info(`[State] Resource  for delete'${uri}' ${this.status.toString()} `);
                 return item;
             })
@@ -847,7 +847,7 @@ export default class State {
 
                 if (response.status === 403) {
 
-                    this.status = stateFlagEnum.forbidden;
+                    this.status = StateEnum.forbidden;
                     log.debug(`Resource forbidden '${uri}' ${this.status.toString()}`);
 
                     return Promise.resolve(item);
@@ -861,7 +861,7 @@ export default class State {
 
                 } else {
                     // 500, 400, 409
-                    let msg = `Error '${response.statusText}' on delete resource ${uri} ${stateFlagEnum.unknown.toString()}`;
+                    let msg = `Error '${response.statusText}' on delete resource ${uri} ${StateEnum.unknown.toString()}`;
                     return Promise.reject(msg);
                 }
 
