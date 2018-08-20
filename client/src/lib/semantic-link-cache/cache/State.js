@@ -90,7 +90,7 @@ export default class State {
         }
 
         if (!resource[stateFlagName]) {
-            const hrefOrActual = link.getUri(resource, /self|canonical/) || JSON.stringify(resource);
+            const hrefOrActual = link.getUri(resource, /self|canonical/) || State.toJson(resource);
             throw new Error(`No state found on resource '${hrefOrActual}'`);
         }
 
@@ -167,7 +167,7 @@ export default class State {
      * @private
      */
     static cacheBust(status, options) {
-        return options.forceLoad &&this.status === stateFlagEnum.hydrated;
+        return options.forceLoad && this.status === stateFlagEnum.hydrated;
     }
 
     /**
@@ -197,23 +197,11 @@ export default class State {
      * Updates a resource across the wire
      * @param {LinkedRepresentation} resource
      * @param {*} data
+     * @param mediaType
      */
     static defaultPutFactory(resource, data, mediaType) {
         return link.put(resource, /canonical|self/, mediaType, data);
     }
-
-    /*
-       toJson() {
-           return JSON.stringify({
-               this.status,
-               this.retrieved,
-               this.headers,
-               this.collection,
-               this.resources,
-               this.mappedTitle
-           });
-       }
-   */
 
     /**
      * Returns the value of the private status flag
@@ -815,7 +803,7 @@ export default class State {
      */
     deleteResource(item, options = {}) {
 
-        this.previousStatus =this.status;
+        this.previousStatus = this.status;
 
         let deleteFactory = options.deleteFactory || State.defaultDeleteFactory;
 
@@ -879,6 +867,32 @@ export default class State {
 
             });
     }
+
+
+    /**
+     * A replacer function to strip the state from a model
+     * see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
+     *
+     * @param key
+     * @param value
+     * @return {*|undefined} undefined to keep the key
+     */
+    static ToJsonReplacer(key, value) {
+        return key !== 'createForm' && key !== 'editForm' ? value : undefined;
+    }
+
+    /**
+     * Returns a representation from a model that is already hydrated and looks close as possible to what
+     * it looked like when it came over the wire. In this case, it removes the state attribute.
+     *
+     * @param {LinkedRepresentation} resource
+     * @param {[Number|String]=} space number of spaces in the pretty print JSON
+     * @return {string}
+     */
+    static toJson(resource, space) {
+        return JSON.stringify(resource, State.ToJsonReplacer, space);
+    }
+
 
 }
 

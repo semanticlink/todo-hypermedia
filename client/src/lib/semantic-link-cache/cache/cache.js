@@ -735,7 +735,7 @@ export function getNamedCollectionResourceByTitle(parentResource, collectionName
  * @param {UtilOptions=} options
  * @return {Promise<LinkedRepresentation>} with the item by uri from the collection item resource
  */
-export function getItemInNamedCollectionResourceByUri(parentResource, collectionName, collectionRel, itemUri, options) {
+export function getNamedCollectionResourceItemByUri(parentResource, collectionName, collectionRel, itemUri, options) {
 
     return getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
         .then((collection) => {
@@ -884,7 +884,7 @@ export function tryGetNamedSingletonResourceOnCollectionItems(parentCollectionRe
  * @param {UpdateCollectionResourceItemOptions} options
  * @return {Promise}
  */
-export function defaultEditFormStrategy(resource, documentResource, editForm, options = {}) {
+const defaultEditFormStrategy = (resource, documentResource, editForm, options = {}) => {
 
     const isTracked = (resource, trackedName) => {
         const resourceState = State.tryGet(resource);
@@ -1087,28 +1087,4 @@ export function deleteCollectionResourceItem(collection, item, options = {}) {
                 .removeItemFromCollectionResource(collection, resource);
         });
 }
-
-
-/**
- * A replacer function to strip the state from a model
- * see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
- *
- * @param key
- * @param value
- * @return {*|undefined} undefined to keep the key
- */
-const ToJsonReplacer = (key, value) => key !== 'createForm' && key !== 'editForm' ? value : undefined;
-
-/**
- * Returns a representation from a model that is already hydrated and looks close as possible to what
- * it looked like when it came over the wire. In this case, it removes the state attribute.
- *
- * @param {LinkedRepresentation} obj
- * @param {[Number|String]=} space number of spaces in the pretty print JSON
- * @return {LinkedRepresentation} obj
- */
-export function toJson(obj, space) {
-    return JSON.stringify(obj, ToJsonReplacer, space);
-}
-
 
