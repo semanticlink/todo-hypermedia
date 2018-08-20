@@ -485,7 +485,7 @@ export function getResourceInNamedCollection(parentResource, collectionName, col
 
     return cache
     // ensure that the collection is added to the parent resource
-        .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
+        .getNamedCollection(parentResource, collectionName, collectionRel, options)
         .then(collectionResource => syncResourceInCollection(collectionResource, resourceDocument, options))
         .then(syncInfos(strategies, options));
 }
@@ -524,7 +524,7 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
     log.debug(`[Sync] collection '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
 
     return cache
-        .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
+        .getNamedCollection(parentResource, collectionName, collectionRel, options)
         .then(collectionResource => {
 
             if (!collectionResource) {

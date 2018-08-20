@@ -26,7 +26,7 @@ export function pooledTagResourceResolver(contextResource) {
 
     let resolve = (collectionName, collectionRel, type) =>
         (resource, options) => PooledCollection
-            .getResourceInNamedCollection(contextResource, collectionName, collectionRel, resource, options)
+            .getPooledCollection(contextResource, collectionName, collectionRel, resource, options)
             .then(document => {
                 if (document) {
                     return document;

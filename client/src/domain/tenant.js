@@ -6,7 +6,7 @@ import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
 import {uriMappingResolver, sync, cache} from 'semantic-link-cache';
 
 
-export const getTenants = root => cache.getNamedCollectionResource(root, 'tenants', /tenants/);
+export const getTenants = root => cache.getNamedCollection(root, 'tenants', /tenants/);
 
 const getTags = root => cache.tryGetCollectionAndItems(root, 'tags', /tags/);
 

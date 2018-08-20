@@ -27,7 +27,7 @@ describe('Pooled collection', () => {
         roles: pooledCollection
     };
 
-    sinon.stub(cache, 'getNamedCollectionResource')
+    sinon.stub(cache, 'getNamedCollection')
         .callsFake(() => Promise.resolve(pooledCollection));
 
     describe('strategy one & two: it is simply found map it based on self and/or mappedTitle', () => {
@@ -41,7 +41,7 @@ describe('Pooled collection', () => {
 
         it('returns document based on uri/name matching', () => {
             PooledCollection
-                .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource)
+                .getPooledCollection(parentCollection, 'roles', /roles/, resource)
                 .then(representation => {
                     expect(representation).to.deep.equal(document);
                 });
@@ -68,7 +68,7 @@ describe('Pooled collection', () => {
                 }
             };
             PooledCollection
-                .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
+                .getPooledCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(() => {
                     expect(documentUriResolved).to.equal('http://api.example.com/role/2');
                     expect(nodUriResolved).to.equal('http://api.example.com/role/1');
@@ -96,7 +96,7 @@ describe('Pooled collection', () => {
                 }
             };
             return PooledCollection
-                .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
+                .getPooledCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.deep.equal(document);
 
@@ -121,11 +121,11 @@ describe('Pooled collection', () => {
                 name: 'NewRole'
             };
 
-            sinon.stub(cache, 'createCollectionResourceItem')
+            sinon.stub(cache, 'createCollectionItem')
                 .callsFake(() => Promise.resolve(createdResource));
 
             return PooledCollection
-                .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
+                .getPooledCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.equal(createdResource);
                     cache.createCollectionItem.restore();
@@ -161,11 +161,11 @@ describe('Pooled collection', () => {
                 name: 'UtterlyNewRole'
             };
 
-            sinon.stub(cache, 'createCollectionResourceItem')
+            sinon.stub(cache, 'createCollectionItem')
                 .callsFake(() => Promise.resolve(createdResource));
 
             return PooledCollection
-                .getResourceInNamedCollection(parentCollection, 'roles', /roles/, resource, options)
+                .getPooledCollection(parentCollection, 'roles', /roles/, resource, options)
                 .then(representation => {
                     expect(representation).to.equal(createdResource);
                     expect(addResolverCalled).to.be.false;

@@ -12,7 +12,7 @@ import {log} from 'logger';
 const getTenant = (apiResource, tenantUri) => {
     return cache
         .getResource(apiResource)
-        .then(apiResource => cache.getNamedCollectionResource(apiResource, 'tenants', /tenants/))
+        .then(apiResource => cache.getNamedCollection(apiResource, 'tenants', /tenants/))
         .then(tenants => cache.getCollectionItemByUri(tenants, tenantUri));
 };
 

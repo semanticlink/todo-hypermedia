@@ -102,31 +102,31 @@ export default class PooledCollection {
     }
 
     /**
-     * Retrieves a resource from a named collection on a parent resource.
+     * Retrieves a resource from a named collection from the context of a given resource.
      *
-     * @param {LinkedRepresentation} parentResource
+     * @param {LinkedRepresentation} resource
      * @param {string} collectionName
      * @param {string|RegExp|string[]|RegExp[]} collectionRel
      * @param {*} resourceDocument
      * @param {UtilOptions} options
-     * @return {Promise} containing the uri resource {@link LinkedRepresentation}
+     * @return {Promise<string>} containing the uri resource {@link LinkedRepresentation}
      */
-    static getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, options) {
+    static getPooledCollection(resource, collectionName, collectionRel, resourceDocument, options) {
 
         //options = Object.assign({}, {mappedTitle: 'name'}, options);
 
         return cache
-            .getNamedCollectionResource(parentResource, collectionName, collectionRel, options)
+            .getNamedCollection(resource, collectionName, collectionRel, options)
             .then(collectionResource => {
 
-                let parentUri = link.getUri(parentResource, /self|canonical/);
+                let uri = link.getUri(resource, /self|canonical/);
 
                 // strategy one & two: it is simply found map it based on self and/or mappedTitle
                 let existingResource = findResourceInCollection(collectionResource, resourceDocument, options.mappedTitle);
 
                 if (existingResource) {
 
-                    log.info(`Pooled: ${collectionName} on ${parentUri} - found: ${link.getUri(existingResource, /self|canonical/)}`);
+                    log.info(`Pooled: ${collectionName} on ${uri} - found: ${link.getUri(existingResource, /self|canonical/)}`);
                     return PooledCollection.resolve(resourceDocument, existingResource, options);
 
                 } else if (link.getUri(resourceDocument, /self|canonical/)) {
@@ -140,7 +140,7 @@ export default class PooledCollection {
                         if (tryGetResource) {
                             return tryGetResource;
                         } else {
-                            log.error(`Resource '${resolvedUri}' is not found on ${parentUri} - very unexpected`);
+                            log.error(`Resource '${resolvedUri}' is not found on ${uri} - very unexpected`);
                         }
                     } else {
                         return PooledCollection.makeAndResolveResource(collectionResource, resourceDocument, options);
@@ -148,7 +148,7 @@ export default class PooledCollection {
 
                 } else {
                     // strategy four: make if we can because we at least might have the attributes
-                    log.info(`Pooled: ${collectionName} on ${parentUri} - not found}`);
+                    log.info(`Pooled: ${collectionName} on ${uri} - not found}`);
                     return PooledCollection.makeAndResolveResource(collectionResource, resourceDocument, options);
                 }
 

@@ -304,7 +304,7 @@ export function tryGetSingleton(resource, singletonName, rel, defaultValue, opti
  * @return {Promise<CollectionRepresentation>} promise contains a {@link CollectionRepresentation}
  *
  */
-export function getNamedCollectionResource(resource, collectionName, collectionRel, options) {
+export function getNamedCollection(resource, collectionName, collectionRel, options) {
     if (resource[collectionName]) {
         return getCollection(resource[collectionName], options);
     } else {
@@ -346,10 +346,10 @@ export function getNamedCollectionResource(resource, collectionName, collectionR
  * @param {UtilOptions} options
  * @return {Promise<CollectionRepresentation|undefined>} promise contains a {@link CollectionRepresentation}
  */
-export function tryGetNamedCollectionResource(resource, collectionName, collectionRel, options = {}) {
+export function tryGetNamedCollection(resource, collectionName, collectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
     options = {...options, getUri: link.getUri};
-    return getNamedCollectionResource(resource, collectionName, collectionRel, options);
+    return getNamedCollection(resource, collectionName, collectionRel, options);
 }
 
 /**
@@ -392,7 +392,7 @@ export function getNamedCollectionOnSingletons(singletons, collectionName, colle
     return _(singletons)
         .mapWaitAll(singleton =>
             getResource(singleton)
-                .then(resource => tryGetNamedCollectionResource(resource, collectionName, collectionRel, options)))
+                .then(resource => tryGetNamedCollection(resource, collectionName, collectionRel, options)))
         .catch(err => {
             log.info('Singleton error:', err);
             return Promise.resolve(singletons);
@@ -444,7 +444,7 @@ export function tryGetNamedCollectionOnSingletons(singletons, collectionName, co
     return _(singletons)
         .mapWaitAll(singleton =>
             getResource(singleton)
-                .then(resource => tryGetNamedCollectionResource(resource, collectionName, collectionRel, options)))
+                .then(resource => tryGetNamedCollection(resource, collectionName, collectionRel, options)))
         .catch(err => {
             log.info('Singleton error:', err);
             return Promise.resolve(singletons);
@@ -538,7 +538,7 @@ export function getCollectionAndItems(collection, options) {
  */
 export function getNamedCollectionAndItems(resource, collectionName, collectionRel, options) {
 
-    return getNamedCollectionResource(resource, collectionName, collectionRel, options)
+    return getNamedCollection(resource, collectionName, collectionRel, options)
         .then(collection => tryGetCollectionItems(collection, options));
 }
 
@@ -620,7 +620,7 @@ export function tryGetCollectionAndItems(resource, collectionName, collectionRel
         getUri: link.getUri
     });
 
-    return getNamedCollectionResource(resource, collectionName, collectionRel, options)
+    return getNamedCollection(resource, collectionName, collectionRel, options)
         .then(collection => {
 
             if (!collection) {
@@ -689,7 +689,7 @@ export function getNamedCollectionByTitle(resource, collectionName, collectionRe
      * Override the semantic link getUri implementation that returns the first found href. However
      * because these options cascade through, ensure that the getUri is only used 'once' and then discarded
      */
-    return getNamedCollectionResource(
+    return getNamedCollection(
         resource,
         collectionName,
         collectionRel,
@@ -737,7 +737,7 @@ export function getNamedCollectionByTitle(resource, collectionName, collectionRe
  */
 export function getNamedCollectionItemByUri(resource, collectionName, collectionRel, itemUri, options) {
 
-    return getNamedCollectionResource(resource, collectionName, collectionRel, options)
+    return getNamedCollection(resource, collectionName, collectionRel, options)
         .then((collection) => {
 
             if (!collection) {
@@ -800,7 +800,7 @@ export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection
 
     // TODO ?? should this return the child collection items ??
     return _(contextCollection)
-        .mapWaitAll(item => getNamedCollectionResource(item, childCollectionName, childCollectionRel, options)
+        .mapWaitAll(item => getNamedCollection(item, childCollectionName, childCollectionRel, options)
             .then(childCollection => tryGetCollectionItems(childCollection, options))
         )
         .then(collection => collection);
@@ -838,7 +838,7 @@ export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection
 export function tryGetNamedCollectionOnCollectionItems(collection, childCollectionName, rel, options) {
 
     return _(collection)
-        .mapWaitAll(item => tryGetNamedCollectionResource(item, childCollectionName, rel, options));
+        .mapWaitAll(item => tryGetNamedCollection(item, childCollectionName, rel, options));
 }
 
 /**

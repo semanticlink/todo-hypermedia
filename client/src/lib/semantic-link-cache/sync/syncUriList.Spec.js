@@ -17,7 +17,7 @@ describe('Synchroniser', () => {
 
         it('should return undefined on no singleton rel found', () => {
             const getResource = sinon.stub(cache, 'getResource');
-            const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
+            const tryGetNamedCollection = sinon.stub(cache, 'tryGetNamedCollection');
 
             let uriList = ['http://example.com/question/item/1'];
             let resource = {
@@ -25,7 +25,7 @@ describe('Synchroniser', () => {
             };
 
             getResource.returns(Promise.resolve(resource));
-            tryGetNamedCollectionResource.returns(Promise.resolve(undefined));
+            tryGetNamedCollection.returns(Promise.resolve(undefined));
 
             return sync.getUriListOnNamedCollection(resource, 'notifications', /notifications/, uriList, {})
                 .then(result => {
@@ -35,7 +35,7 @@ describe('Synchroniser', () => {
 
         it('should be able to add a single url', () => {
             const getResource = sinon.stub(cache, 'getResource');
-            const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
+            const tryGetNamedCollection = sinon.stub(cache, 'tryGetNamedCollection');
             const getCollectionResourceAndItems = sinon.stub(cache, 'getCollectionResourceAndItems');
 
 
@@ -80,7 +80,7 @@ describe('Synchroniser', () => {
             };
 
             getResource.returns(Promise.resolve(undefined));
-            tryGetNamedCollectionResource.returns(Promise.resolve(resource));
+            tryGetNamedCollection.returns(Promise.resolve(resource));
             getCollectionResourceAndItems.returns(Promise.resolve(resource));
 
             const diffUriList = sinon.stub(Differencer, 'diffUriList')
@@ -89,7 +89,7 @@ describe('Synchroniser', () => {
             return sync.getUriListOnNamedCollection(resource, 'notifications', /notifications/, uriList, options)
                 .then(result => {
                     expect(getResource.called).to.be.true;
-                    expect(tryGetNamedCollectionResource.called).to.be.true;
+                    expect(tryGetNamedCollection.called).to.be.true;
                     expect(diffUriList.called).to.be.true;
                     expect(getCollectionResourceAndItems.called).to.be.true;
                     expect(result).to.equal(resource);
@@ -103,11 +103,11 @@ describe('Synchroniser', () => {
             beforeEach(() => {
 
                 const getResource = sinon.stub(cache, 'getResource');
-                const tryGetNamedCollectionResource = sinon.stub(cache, 'tryGetNamedCollectionResource');
+                const tryGetNamedCollection = sinon.stub(cache, 'tryGetNamedCollection');
                 const getCollectionResourceAndItems = sinon.stub(cache, 'getCollectionResourceAndItems');
 
                 getResource.returns(Promise.resolve());
-                tryGetNamedCollectionResource.returns(Promise.resolve({singleton: ''}));
+                tryGetNamedCollection.returns(Promise.resolve({singleton: ''}));
                 getCollectionResourceAndItems.returns(Promise.resolve());
 
             });

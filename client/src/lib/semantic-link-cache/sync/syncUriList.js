@@ -206,7 +206,7 @@ export function getUriListOnNamedCollection(parentResource, uriListName, uriList
     return cache
         .getResource(parentResource)
         .then(resource => cache
-            .tryGetNamedCollectionResource(resource, uriListName, uriListRel, options)
+            .tryGetNamedCollection(resource, uriListName, uriListRel, options)
             .then(collection => {
                 if (!collection) {
                     log.info(`[Sync] No update: uri-list '${uriListName}' not found on ${link.getUri(parentResource, /self/)}`);
@@ -240,7 +240,7 @@ export function patchUriListOnNamedCollection(parentResource, uriListName, uriLi
     return cache
         .getResource(parentResource)
         .then(resource => cache
-            .tryGetNamedCollectionResource(resource, uriListName, uriListRel, options)
+            .tryGetNamedCollection(resource, uriListName, uriListRel, options)
             .then(collection => {
                 if (!collection) {
                     log.info(`[Sync] No update: uri-list '${uriListName}' not found on ${link.getUri(parentResource, /self/)}`);
