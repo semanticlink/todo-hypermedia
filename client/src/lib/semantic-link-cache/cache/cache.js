@@ -1088,3 +1088,14 @@ export function deleteCollectionItem(collection, item, options = {}) {
         });
 }
 
+/**
+ * Create a sparse representation that can be the root of the cache.
+ *
+ * This is a wrapper around {@link SparseResource} and {@link.getUri)
+ *
+ * @param {LinkType} links
+ * @param {RelationshipType} rel
+ * @return {LinkedRepresentation|CollectionRepresentation}
+ */
+export const create = (links, rel) => SparseResource.makeSparseResourceFromUri(link.getUri(links, rel));
+

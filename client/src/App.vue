@@ -62,7 +62,7 @@
              *
              * @type {ApiRepresentation}
              */
-            this.$root.$api = this.$root.$api || cache.makeSparseResourceFromUri(link.getUri('HEAD', 'api'));
+            this.$root.$api = this.$root.$api || cache.create('HEAD', 'api');
 
         }
     };
