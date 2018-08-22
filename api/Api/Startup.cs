@@ -134,13 +134,13 @@ namespace Api
                  *         Cache-Control: private,max-age=60
                  *
                  *         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-                 *         [HttpCacheValidation(AddNoCache = true)]
+                 *         [HttpCacheValidation(NoCache = true)]
                  * 
                  *  Items
                  *         Cache-Control: private,max-age=60
                  *
                  *         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-                 *         [HttpCacheValidation(AddNoCache = true)]
+                 *         [HttpCacheValidation(NoCache = true)]
                  * 
                  *  Readonly
                  *         Cache-Control: public,max-age=3600
@@ -152,7 +152,7 @@ namespace Api
                  *         Cache-Control: private,max-age=60
                  *
                  *         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-                 *         [HttpCacheValidation(AddNoCache = true)]
+                 *         [HttpCacheValidation(NoCache = true)]
                  *
                  * WARNING: class attributes ARE NOT OVERRIDDEN by method attributes
                  *         Therefore, add attributes per method rather than per class

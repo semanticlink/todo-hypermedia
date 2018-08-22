@@ -47,7 +47,7 @@ namespace Api.Controllers
 /*
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseRedirect]
         public IActionResult Me()
         {
@@ -59,7 +59,7 @@ namespace Api.Controllers
 */
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseRedirect]
         public async Task<UserRepresentation> Me()
         {
@@ -78,7 +78,7 @@ namespace Api.Controllers
 
         [HttpGet("{id}", Name = UserUriFactory.UserRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseUser(Permission.Get)]
         public async Task<UserRepresentation> Get(string id)
         {
@@ -126,7 +126,7 @@ namespace Api.Controllers
         /// <see cref="TodoController.GetById"/>
         [HttpGet("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseUserTenantTodoCollection(Permission.Get)]
         public async Task<FeedRepresentation> GetUserTodos(string tenantId)
         {

@@ -38,7 +38,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("{id}", Name = TenantUriFactory.TenantRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [Authorise(RightType.Tenant, Permission.Get)]
         public async Task<TenantRepresentation> Get(string id)
         {
@@ -113,7 +113,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("{id}/user/", Name = TenantUriFactory.TenantUsersRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseTenantUserCollection(Permission.Get)]
         public async Task<FeedRepresentation> GetUsers(string id)
         {

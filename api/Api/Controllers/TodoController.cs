@@ -35,7 +35,7 @@ namespace Api.Controllers
 
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseTodo(Permission.Get)]
         public async Task<TodoRepresentation> GetById(string id)
         {
@@ -100,7 +100,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseTodoTagCollection(Permission.Get)]
         public async Task<FeedRepresentation> GetTodoTags(string id)
         {
@@ -284,7 +284,7 @@ namespace Api.Controllers
         /// <returns></returns>
         [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseTodo(Permission.Get)]
         [AuthoriseTag(Permission.Get, "tagId")]
         public async Task<TagRepresentation> Get(string id, string tagId)

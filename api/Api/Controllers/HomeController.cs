@@ -53,7 +53,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet(@"a/{tenantCode:regex(^[[\w\d\-\.]]+$)}")]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         public async Task<IActionResult> GetTenant(string tenantCode)
         {
             return (await _tenantStore
@@ -75,7 +75,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("tenant/", Name = HomeUriFactory.TenantsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [Authorize]
         public async Task<FeedRepresentation> GetTenants([FromQuery(Name = "q")] string search = null)
         {
@@ -139,7 +139,7 @@ namespace Api.Controllers
         /// </remarks>
         [HttpGet("user/", Name = HomeUriFactory.UsersRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(AddNoCache = true)]
+        [HttpCacheValidation(NoCache = true)]
         [AuthoriseRootUserCollection(Permission.Get)]
         public IActionResult GetUsers()
         {
