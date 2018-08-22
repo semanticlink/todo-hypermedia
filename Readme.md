@@ -1,7 +1,12 @@
 
 # Development
 
+* Rider (api)
+* WebStorm (client)
+* [.NET Core 2.1 SDK v.2.1.401](https://www.microsoft.com/net/download)
 
+Api instructions [here]() 
+Client instructions [here]()
 
 # AWS deployment
 
@@ -96,4 +101,76 @@ $ dotnet new -i Amazon.Lambda.Templates::*
   
   ...
   
+```
+
+## .NET Core inspect
+
+### Windows
+
+``` dotnet  --info
+   .NET Core SDK (reflecting any global.json):
+    Version:   2.1.301
+    Commit:    59524873d6
+   
+   Runtime Environment:
+    OS Name:     Windows
+    OS Version:  10.0.17134
+    OS Platform: Windows
+    RID:         win10-x64
+    Base Path:   C:\Program Files\dotnet\sdk\2.1.301\
+   
+   Host (useful for support):
+     Version: 2.1.3
+     Commit:  124038c13e
+   
+   .NET Core SDKs installed:
+     2.1.200 [C:\Program Files\dotnet\sdk]
+     2.1.301 [C:\Program Files\dotnet\sdk]
+   
+   .NET Core runtimes installed:
+     Microsoft.AspNetCore.All 2.1.1 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.All]
+     Microsoft.AspNetCore.App 2.1.1 [C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App]
+     Microsoft.NETCore.App 2.0.7 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+     Microsoft.NETCore.App 2.1.1 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+     Microsoft.NETCore.App 2.1.3 [C:\Program Files\dotnet\shared\Microsoft.NETCore.App]
+   
+   To install additional .NET Core runtimes or SDKs:
+     https://aka.ms/dotnet-download
+```
+
+### MacOS
+
+```
+$ dotnet --info
+.NET Core SDK (reflecting any global.json):
+ Version:   2.1.401
+ Commit:    91b1c13032
+
+Runtime Environment:
+ OS Name:     Mac OS X
+ OS Version:  10.13
+ OS Platform: Darwin
+ RID:         osx.10.13-x64
+ Base Path:   /usr/local/share/dotnet/sdk/2.1.401/
+
+Host (useful for support):
+  Version: 2.1.3
+  Commit:  124038c13e
+
+.NET Core SDKs installed:
+  2.1.200 [/usr/local/share/dotnet/sdk]
+  2.1.301 [/usr/local/share/dotnet/sdk]
+  2.1.401 [/usr/local/share/dotnet/sdk]
+
+.NET Core runtimes installed:
+  Microsoft.AspNetCore.All 2.1.1 [/usr/local/share/dotnet/shared/Microsoft.AspNetCore.All]
+  Microsoft.AspNetCore.All 2.1.3 [/usr/local/share/dotnet/shared/Microsoft.AspNetCore.All]
+  Microsoft.AspNetCore.App 2.1.1 [/usr/local/share/dotnet/shared/Microsoft.AspNetCore.App]
+  Microsoft.AspNetCore.App 2.1.3 [/usr/local/share/dotnet/shared/Microsoft.AspNetCore.App]
+  Microsoft.NETCore.App 2.0.7 [/usr/local/share/dotnet/shared/Microsoft.NETCore.App]
+  Microsoft.NETCore.App 2.1.1 [/usr/local/share/dotnet/shared/Microsoft.NETCore.App]
+  Microsoft.NETCore.App 2.1.3 [/usr/local/share/dotnet/shared/Microsoft.NETCore.App]
+
+To install additional .NET Core runtimes or SDKs:
+  https://aka.ms/dotnet-download
 ```

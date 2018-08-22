@@ -26,8 +26,8 @@
     "ProxyFunction" : {
       "Type" : "AWS::Serverless::Function",
       "Properties": {
-        "Handler": "TodoApi::TodoApi.LambdaEntryPoint::FunctionHandlerAsync",
-        "Runtime": "dotnetcore2.0",
+        "Handler": "Api::Api.LambdaEntryPoint::FunctionHandlerAsync",
+        "Runtime": "dotnetcore2.1",
         "CodeUri": "",
         "MemorySize": 256,
         "Timeout": 30,
