@@ -34,6 +34,8 @@ namespace Api.Web
             this IServiceCollection services,
             IConfiguration configuration)
         {
+            var api = configuration.GetSection(ApiDomainSettings.SectionName).Get<ApiDomainSettings>();
+
             // Needed, well documented as a problem
             // see https://github.com/aspnet/Security/issues/1043
             // see https://dev.to/coolgoose/setting-up-jwt-and-identity-authorizationauthentication-in-asp-net-core-4l45
@@ -95,9 +97,11 @@ namespace Api.Web
                     options.SaveToken = true;
 */
 
-                    // TODO: inject api hosting address and uri construction
                     options.Challenge =
-                        $"{AuthenticatorDefaults.ExternalAuthenticationSchemeName} realm=\"{AuthenticatorDefaults.AuthenticatorAuth0Realm}\" uri=http://localhost:5000/authenticate/auth0";
+                        string.Format("{0} realm=\"{1}\" uri={2}",
+                            AuthenticatorDefaults.ExternalAuthenticationSchemeName,
+                            AuthenticatorDefaults.AuthenticatorAuth0Realm,
+                            api.AuthorizationUri());
 
                     options.Events = new JwtBearerEvents
                     {

@@ -86,7 +86,8 @@ namespace Api
 
 
                     // Content-negotitation output types
-                    options.OutputFormatters.Add(new HtmlFormMediaFormatter(Configuration.GetApiClientSettings()));
+                    options.OutputFormatters.Add(new HtmlFormMediaFormatter(
+                        Configuration.GetSection(ApiClientSettings.SectionName).Get<ApiClientSettings>()));
 /*
                     // add in when support is required
                     options.OutputFormatters.Add(new UriListOutputFormatter());
