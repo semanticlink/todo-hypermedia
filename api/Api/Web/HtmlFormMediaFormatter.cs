@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.Configuration;
 using NLog;
 using Toolkit;
 using Toolkit.Representation.LinkedRepresentation;
@@ -32,10 +30,13 @@ namespace Api.Web
 
         private readonly List<string> scripts = new List<string>();
 
-        public HtmlFormMediaFormatter()
+        public HtmlFormMediaFormatter(ApiClientSettings configuration)
         {
             SupportedEncodings.Add(Encoding.UTF8);
             SupportedMediaTypes.Add(MediaTypeNames.Text.Html);
+
+            scripts.AddRange(configuration.ToScriptsHref());
+            Log.DebugFormat("Script loaded for html representation: {0}", scripts.ToCsvString(script => script));
         }
 
         /// <summary>
@@ -50,54 +51,6 @@ namespace Api.Web
 
         public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
-            IServiceProvider serviceProvider = context.HttpContext.RequestServices;
-
-            if (scripts.IsNullOrEmpty())
-            {
-                /**
-                 * Load up the scripts tag into the html based on the configuration in the appsettings.json
-                 * 
-                 * Development is likely to only have one:
-                 * 
-                 *   "Api.Client":{
-                 *        "Scripts": ["dist/api.js"],
-                 *        "Domain": "http://localhost:8080/"
-                 *    }
-                 *    
-                 * Production may have multiple to allow for Progressive web apps:
-                 * 
-                 *   "Api.Client":{
-                 *        "Scripts": ["api.js", "vendors~api.js", "vendors~api~app.js"],
-                 *        "Domain": "https://api.example.com/"
-                 *    }
-                 *
-                 * TODO: no error real error handling or separation of configuration (or defaults)
-                 * see https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/index?view=aspnetcore-2.1&tabs=basicconfiguration#bind-to-an-object-graph
-                 */
-
-                // only read the configuration once. The formatter is held in memory and will keep adding scripts 
-                // TODO: check can we inject in the constructor
-                if (serviceProvider.GetService(typeof(IConfiguration)) is IConfiguration configuration)
-                {
-                    var externalScripts = configuration.GetSection("Api.Client:Scripts").Get<string[]>();
-                    var domain = configuration.GetSection("Api.Client:Domain").Get<string>();
-
-                    scripts.AddRange(externalScripts.Select(script => new Uri(new Uri(domain), script).AbsoluteUri));
-
-                    Log.DebugFormat("Script loaded for html representation: {0}", scripts.ToCsvString(script => script));
-                }
-                else
-                {
-                    Log.Error("Configuration cannot be loaded for api client scripts");
-
-                }
-            }
-
-            else
-            {
-                Log.Trace("Scripts already loaded for api client html representation");
-            }
-
             return context.HttpContext.Response.WriteAsync(this.ToHtml(context));
         }
 

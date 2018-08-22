@@ -86,7 +86,7 @@ namespace Api
 
 
                     // Content-negotitation output types
-                    options.OutputFormatters.Add(new HtmlFormMediaFormatter());
+                    options.OutputFormatters.Add(new HtmlFormMediaFormatter(Configuration.GetApiClientSettings()));
 /*
                     // add in when support is required
                     options.OutputFormatters.Add(new UriListOutputFormatter());
@@ -168,7 +168,6 @@ namespace Api
             IApplicationBuilder app,
             ILoggerFactory loggerFactory)
         {
- 
             if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
