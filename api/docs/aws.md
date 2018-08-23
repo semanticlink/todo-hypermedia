@@ -19,7 +19,7 @@ Deploy the application only from the `Api` folder (note this is folder of the Ap
 
 ```
 cd Api
-dotnet lambda deploy-serverless --framework netcoreapp2.1 --s3-bucket todo-rest-aws --stack-name DotNetCoreServerless
+dotnet lambda deploy-serverless --s3-bucket todo-rest-aws --stack-name DotNetCoreServerless
 ```
 
 # Setup

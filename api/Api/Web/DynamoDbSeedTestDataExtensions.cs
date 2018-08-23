@@ -49,8 +49,9 @@ namespace Api.Web
             // we have added 'Scoped' services, this will return the root scope with them attached
             using (var scope = app.CreateScope())
             {
-                if (hostingEnvironment.IsDevelopment())
+                if (hostingEnvironment.IsDevelopment() || true)
                 {
+                    Log.Debug("Seed test data");
                     Task.Run(() => scope.ServiceProvider.SeedData()).GetAwaiter().GetResult();
                 }
 

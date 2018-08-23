@@ -10,11 +10,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Morcatko.AspNetCore.JsonMergePatch;
+using NLog;
+using ILogger = NLog.ILogger;
 
 namespace Api
 {
     public class Startup
     {
+        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+        
         private IHostingEnvironment HostingEnvironment { get; }
         private IConfiguration Configuration { get; }
 
@@ -26,6 +30,8 @@ namespace Api
 
         public void ConfigureServices(IServiceCollection services)
         {
+            Log.Debug("[Init] Configure services");
+            
             services
                 // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
                 .AddMvc(options => options.RespectBrowserAcceptHeader = true) // default: false
@@ -165,10 +171,19 @@ namespace Api
             services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
         }
 
-        public void Configure(
-            IApplicationBuilder app,
-            ILoggerFactory loggerFactory)
+        public void Configure( IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
+            // aws IS production
+            if (HostingEnvironment.IsProduction())
+            {
+                Log.Debug("[Init] Add AWS logging configuration");
+                // see https://github.com/aws/aws-logging-dotnet
+                // requires AWS.Logging sectopm in appsettings.Production.json
+                loggerFactory.AddAWSProvider(Configuration.GetAWSLoggingConfigSection());
+            }
+            
+            Log.Debug("[Init] Configure");
+
             if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
