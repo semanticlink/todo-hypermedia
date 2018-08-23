@@ -71,10 +71,10 @@ At this point the files are not public.
 ##
 
 ```
-$ aws s3 mb s3://semantic-link
+$ aws s3 mb s3://api-client.goneopen.com
 
 $ aws s3 ls
-2018-08-22 16:28:44 semantic-link
+2018-08-22 16:28:44 api-client.goneopen.com
 2018-02-15 14:37:37 todo-rest-aws
 
 ```

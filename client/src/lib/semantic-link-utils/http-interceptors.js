@@ -4,6 +4,7 @@ import {httpQueue} from './HTTPQueue';
 import * as authorization from 'auth-header';
 import {authConfirmed, authRequired, offline, serverError} from './authEvent';
 import {eventBus} from './EventBus';
+import {wwwAuthenticateHeader, amazonAuthenticateHeader, parseAuthenticateHeader} from './WWWAuthenticate';
 
 
 /**
@@ -178,12 +179,6 @@ export const clearJsonWebTokenOnHeaders = () => {
     }
 };
 
-/**
- * Name of the WWW-Authenticate header
- * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate
- * @type {string}
- */
-export const WWW_AUTHENTICATE_HEADER = 'www-authenticate';
 
 /**
  * Name of the Authorization header.
@@ -250,6 +245,7 @@ export const INVALID_TOKEN = {
  * Looks inside the 401 response www-authenticate header and returns the header details
  *
  * @example www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
+ * @example x-amzn-remapped-www-authenticate: Bearer realm="api", rel=authenticate, uri=http://example.com
  *
  * TODO: this does not implement multiple www-authenticate headers
  * TODO: this does not deal with underlying implementation of multiple realms in one header
@@ -262,17 +258,19 @@ const parseErrorForAuthenticateHeader = error => {
         return;
     }
 
-    const wwwAuthenticate = error.response.headers[WWW_AUTHENTICATE_HEADER];
+    const wwwAuthenticate = parseAuthenticateHeader(error.response.headers);
     if (!wwwAuthenticate) {
         log.error(`[Authentication] No www-authenticate header for bearer token on ${error.config.url}`);
         return;
     }
 
+    const headerValue = error.response.headers[wwwAuthenticate];
+    log.debug(`[Authentication] parsing header '${wwwAuthenticate}' for '${headerValue}'`);
     /**
      * @example www-authenticate: jwt realm="api-auth0", uri=http://example.com/authenticate/auth0
      * @type {{scheme: string, token: string, params: {realm: string, rel: string, uri: string}}}
      */
-    const auth = authorization.parse(wwwAuthenticate);
+    const auth = authorization.parse(headerValue);
 
     if (!auth && auth.scheme === JWT && auth.params.rel === API_AUTH0_REALM) {
         log.error(`[Authentication ] No '${JWT}' scheme on realm '${API_AUTH0_REALM}' with link rel found: '${wwwAuthenticate}'`);

@@ -1,7 +1,18 @@
 import {_} from '../semantic-link-cache/index';
 import {log} from 'logger';
 
-const wwwAuthenticateHeader = 'www-authenticate';
+/**
+ * Name of the WWW-Authenticate header
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/WWW-Authenticate
+ * @type {string}
+ */
+export const wwwAuthenticateHeader = 'www-authenticate';
+
+/**
+ * Amazon rewrite the header to serverless lambda functions proxied through API Gateway :-(
+ * @type {string}
+ */
+export const amazonAuthenticateHeader = 'x-amzn-remapped-www-authenticate';
 
 /**
  * This is a partial implementation for parsing the WWW-Authenticate header and
@@ -28,6 +39,7 @@ const knownHeaders = [
     'location',
     'accept',
     wwwAuthenticateHeader,
+    amazonAuthenticateHeader,
     'content-type'
 ];
 
@@ -106,20 +118,37 @@ export function matchNegotiateType(headerValues, negotiateType) {
 }
 
 /**
- *
+ * Decide which auth header to use 'www-authenticate' or 'x-amzn-remapped-www-authenticate'
+ * @param {string[]} headers response headers
+ * @return {string|undefined}
+ */
+export function parseAuthenticateHeader(headers) {
+    if (headers[wwwAuthenticateHeader]) {
+        return wwwAuthenticateHeader;
+    } else if (headers[amazonAuthenticateHeader]) {
+        return amazonAuthenticateHeader;
+    } else {
+        log.debug(`[Authenticate] no authenticate header found from [${[wwwAuthenticateHeader, amazonAuthenticateHeader].join(' ,')}]`);
+    }
+}
+
+
+/**
  * @param {object|Http} response An http response object
  * @param {string|'Resource'|'Basic'|'Bearer'} negotiateType type of authentication to parse for
  * @return {string|undefined} negotiate type
  */
 export function getAuthenticateUri(response, negotiateType) {
 
-    const w3AuthHeaderValues = response.headers[wwwAuthenticateHeader];
-    if (w3AuthHeaderValues) {
-        const resourceUri = matchNegotiateType(w3AuthHeaderValues, negotiateType);
+    const headers = response.headers;
+    const headerToUse = parseAuthenticateHeader(headers);
+
+    if (headerToUse) {
+        const resourceUri = matchNegotiateType(headers[headerToUse], negotiateType);
         if (resourceUri) {
             return resourceUri;
         }
+        const fixedW3AuthHeaderValues = rewriteBrokenFirefoxHeadersAndSelect(headers, headerToUse);
+        return matchNegotiateType(fixedW3AuthHeaderValues, negotiateType);
     }
-    const fixedW3AuthHeaderValues = rewriteBrokenFirefoxHeadersAndSelect(response.headers, wwwAuthenticateHeader);
-    return matchNegotiateType(fixedW3AuthHeaderValues, negotiateType);
 }
