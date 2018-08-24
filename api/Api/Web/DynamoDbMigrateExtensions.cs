@@ -11,33 +11,32 @@ using Domain.Persistence;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace Api.Web
 {
     public static class DynamoDbMigrateExtensions
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
-        public static IApplicationBuilder MigrateDynamoDb(this IApplicationBuilder app)
+        public static IApplicationBuilder MigrateDynamoDb(this IApplicationBuilder app, ILogger log)
         {
             app.ApplicationServices
-                .MigrateDynamoDb();
+                .MigrateDynamoDb(log);
 
             return app;
         }
 
-        private static void MigrateDynamoDb(this IServiceProvider services)
+        private static void MigrateDynamoDb(this IServiceProvider services, ILogger log)
         {
-            Log.Info("[Seed] database creating");
-            Task.Run(() => { services.GetService<IAmazonDynamoDB>().CreateAllTables().GetAwaiter().GetResult(); });
-            Log.Debug("[Seed] database create complete");
+            log.Info("[Seed] database creating");
+            Task.Run(() => { services.GetService<IAmazonDynamoDB>().CreateAllTables(log).GetAwaiter().GetResult(); });
+            log.Debug("[Seed] database create complete");
 
             // we have added 'Scoped' services, this will return the root scope with them attached
             using (var scopedProvider = services.CreateScope())
             {
-                Task.Run(scopedProvider.ServiceProvider.SeedServiceUser).GetAwaiter().GetResult();
+                Task.Run(() => scopedProvider.ServiceProvider.SeedServiceUser(log)).GetAwaiter().GetResult();
             }
         }
 
@@ -59,12 +58,12 @@ namespace Api.Web
         /// </list>
         /// </para>
         /// </summary>
-        public static async Task SeedServiceUser(this IServiceProvider services)
+        public static async Task SeedServiceUser(this IServiceProvider services, ILogger log)
         {
-            Log.Info("[Seed] service user start");
+            log.Info("[Seed] service user start");
 
             // guard to check everything is up and running
-            await services.GetRequiredService<IAmazonDynamoDB>().WaitForAllTables();
+            await services.GetRequiredService<IAmazonDynamoDB>().WaitForAllTables(log);
 
             //////////////////////////
             // Seed the root
@@ -81,7 +80,8 @@ namespace Api.Web
                 new User {Id = TrustDefaults.ProvisioningId},
                 services.GetRequiredService<IDynamoDBContext>(),
                 services.GetRequiredService<IIdGenerator>(),
-                userRightStore);
+                userRightStore,
+                services.GetRequiredService<ILogger<UserStore>>());
 
 
             // TODO: get from configuration
@@ -128,11 +128,11 @@ namespace Api.Web
                         right.Value)
                 ));
                 
-                Log.Info("[Seed] service user '{0}'", rootUserCreateData.ExternalId);
+                log.InfoFormat("[Seed] service user '{0}'", rootUserCreateData.ExternalId);
             }
             else
             {
-                Log.Info("[Seed] service user already exists");
+                log.Info("[Seed] service user already exists");
             }
         }
     }

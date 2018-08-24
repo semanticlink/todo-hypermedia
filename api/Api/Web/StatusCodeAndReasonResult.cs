@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
-using NLog.Fluent;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace Api.Web
@@ -24,37 +24,41 @@ namespace Api.Web
     ///     </para>
     /// </remarks>
     /// <seealso cref = "StatusCodeResult" />
-    /// <seealso cref = "https://stackoverflow.com/questions/40040794/how-to-set-statusdescription-from-kestrel-server" />
+    /// see "https://stackoverflow.com/questions/40040794/how-to-set-statusdescription-from-kestrel-server" 
     public class StatusCodeAndReasonResult : ActionResult
     {
         public StatusCodeAndReasonResult(int statusCode, string reasonPhrase)
         {
-            this.ReasonPhrase = reasonPhrase;
-            this.StatusCode = statusCode;
+            ReasonPhrase = reasonPhrase;
+            StatusCode = statusCode;
         }
 
-        public int StatusCode { get; }
-        public string ReasonPhrase { get; }
+        private int StatusCode { get; }
+        private string ReasonPhrase { get; }
 
         public override void ExecuteResult(ActionContext context)
         {
+            var log = context.HttpContext.RequestServices.GetService(
+                typeof(ILogger<FormUrlEncodedMediaFormatter>)) as ILogger;
+
             var httpResponse = context
                 .HttpContext
                 .Features
                 .Get<IHttpResponseFeature>();
+            
             if (!httpResponse.HasStarted)
             {
-                if (!this.ReasonPhrase.IsNullOrWhitespace())
+                if (!ReasonPhrase.IsNullOrWhitespace())
                 {
-                    httpResponse.ReasonPhrase = this.ReasonPhrase;
+                    httpResponse.ReasonPhrase = ReasonPhrase;
                 }
 
-                httpResponse.StatusCode = this.StatusCode;
-                context.HttpContext.Response.StatusCode = this.StatusCode;
+                httpResponse.StatusCode = StatusCode;
+                context.HttpContext.Response.StatusCode = StatusCode;
             }
             else
             {
-                Log.Warn("Failed to set http response status as the response has already started");
+                log.Warn("Failed to set http response status as the response has already started");
             }
         }
     }

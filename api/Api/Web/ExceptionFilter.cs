@@ -4,7 +4,7 @@ using System.IO;
 using Amazon.Runtime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace Api.Web
@@ -17,10 +17,12 @@ namespace Api.Web
     /// <seealso cref = "StatusCodeAndReasonResult" />
     public class ExceptionFilter : ExceptionFilterAttribute
     {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public override void OnException(ExceptionContext context)
         {
+            var log = context.HttpContext.RequestServices.GetService(
+                typeof(ILogger<ExceptionFilter>)) as ILogger;
+            
             var ex = context.Exception;
             switch (ex)
             {
@@ -31,7 +33,7 @@ namespace Api.Web
                 case InvalidDataException _:
                     // Log a trace message so we can find and fix these if they are inappropriatly
                     // generating the wrong/unexpected exception type.
-                    Log.TraceExceptionFormat(
+                    log.TraceExceptionFormat(
                         ex,
                         "Bad request (400) for {0} '{1}': {2}",
                         context.HttpContext.Request.Method,
@@ -46,7 +48,7 @@ namespace Api.Web
                     break;
                 case ConflictException _:
                     // 409
-                    Log.DebugExceptionFormat(
+                    log.DebugExceptionFormat(
                         ex,
                         "Http conflict (409) for {0} '{1}': {2}",
                         context.HttpContext.Request.Method,
@@ -61,7 +63,7 @@ namespace Api.Web
                     // TODO: data. All usages of this request should be investigated and fixed. 
                     // TODO:
                     // 409
-                    Log.WarnExceptionFormat(
+                    log.WarnExceptionFormat(
                         ex,
                         "Request generated unexpected exception for {0} '{1}': {2}",
                         context.HttpContext.Request.Method,
@@ -72,7 +74,7 @@ namespace Api.Web
                 {
                     var dbException = ex as AmazonServiceException;
 
-                    Log.ErrorExceptionFormat(
+                    log.ErrorExceptionFormat(
                         ex,
                         "DynamoDb exception not handled: {0} {1}, [{2}] '{3}'",
                         dbException.ErrorCode,
@@ -86,7 +88,7 @@ namespace Api.Web
                 {
                     var dbException = ex as AmazonClientException;
 
-                    Log.ErrorExceptionFormat(ex, "DynamoDb internal exception not handled: '{0}'", dbException.Message);
+                    log.ErrorExceptionFormat(ex, "DynamoDb internal exception not handled: '{0}'", dbException.Message);
                     context.Result = ex.Message.InternalServerError();
                     break;
                 }
@@ -103,7 +105,7 @@ namespace Api.Web
                     // outside the range of type 'int'"
                     if ((uint) ex.HResult == 0x80131904)
                     {
-                        Log.InfoExceptionFormat(
+                        log.InfoExceptionFormat(
                             ex,
                             "SQL timeout exception: Server '{0}', error [c={1},n={2},h={3}], procedure {4}:{5}: {6}",
                             sqlEx.Server,
@@ -116,7 +118,7 @@ namespace Api.Web
                     }
                     else
                     {
-                        Log.ErrorExceptionFormat(
+                        log.ErrorExceptionFormat(
                             ex,
                             "SQL exception not handled: Server '{0}', error [c={1},n={2},h={3}], procedure {4}:{5}: {6}",
                             sqlEx.Server,
@@ -130,7 +132,7 @@ namespace Api.Web
 
                     break;
                 default:
-                    Log.ErrorExceptionFormat(ex, "Exception not handled by MVC filter: {0}");
+                    log.ErrorExceptionFormat(ex, "Exception not handled by MVC filter: {0}");
                     context.Result = ex.Message.InternalServerError();
                     break;
             }

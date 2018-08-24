@@ -66,21 +66,9 @@ namespace Api.Web
                             //
                             .SetPreflightMaxAge(TimeSpan.FromDays(1.0));
 
-                        var allowedOrigins = ConfigurationKeys
-                            .AllowedCorsOrigins
-                            .AppSettingOrNull();
-                        if (!allowedOrigins.IsNullOrWhitespace())
-                        {
-                            builder.WithOrigins(allowedOrigins
-                                .Split(',')
-                                .Where(origin => !string.IsNullOrWhiteSpace(origin))
-                                .Select(origin => origin.Trim())
-                                .ToArray());
-                        }
-                        else
-                        {
-                            builder.AllowAnyOrigin();
-                        }
+
+                        // at this point, we aren't going to configure up allowed origins to be specific. 
+                        builder.AllowAnyOrigin();
                     });
             });
         }

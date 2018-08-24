@@ -5,20 +5,20 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Domain;
 using Domain.Models;
 using Domain.Persistence;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
     public class UserRightStore : IUserRightStore
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
-
+        private ILogger Log { get; }
         private readonly IDynamoDBContext _dbContext;
         private readonly IIdGenerator _idGenerator;
 
-        public UserRightStore(IDynamoDBContext dbContext, IIdGenerator idGenerator)
+        public UserRightStore(IDynamoDBContext dbContext, IIdGenerator idGenerator, ILogger<UserRightStore> log)
         {
+            Log = log;
             _dbContext = dbContext;
             _idGenerator = idGenerator;
         }

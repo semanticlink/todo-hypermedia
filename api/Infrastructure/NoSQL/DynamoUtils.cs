@@ -5,31 +5,31 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Domain.Models;
-using NLog;
+using Microsoft.Extensions.Logging;
+using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
     public static class DynamoUtils
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
 
-        public static async Task WaitForAllTables(this IAmazonDynamoDB client)
+        public static async Task WaitForAllTables(this IAmazonDynamoDB client, ILogger log)
         {
             await Task.WhenAll(
                 TableNameConstants
                     .AllTables
-                    .Select(table => table.WaitForActiveTable(client)));
+                    .Select(table => table.WaitForActiveTable(client, log)));
         }
 
-        public static async Task CreateAllTables(this IAmazonDynamoDB client)
+        public static async Task CreateAllTables(this IAmazonDynamoDB client, ILogger log)
         {
             await Task.WhenAll(
                 TableNameConstants
                     .AllTables
-                    .Select(table => table.CreateTable(client)));
+                    .Select(table => table.CreateTable(client, log)));
         }
 
-        public static async Task WaitForActiveTable(this string userTableName, IAmazonDynamoDB client)
+        public static async Task WaitForActiveTable(this string userTableName, IAmazonDynamoDB client, ILogger log)
         {
             int count = 0;
             bool active;
@@ -43,7 +43,7 @@ namespace Infrastructure.NoSQL
                 }
                 catch (ResourceNotFoundException)
                 {
-                    Log.Debug("Waiting for Dynamo to be available");
+                    log.Debug("Waiting for Dynamo to be available");
                     count++;
                     if (count > 5)
                     {
@@ -59,16 +59,17 @@ namespace Infrastructure.NoSQL
                     active = false;
                 }
 
-                Log.Debug($"Waiting for table {userTableName} to become active...");
+                log.Debug($"Waiting for table {userTableName} to become active...");
                 await Task.Delay(TimeSpan.FromSeconds(1));
             } while (!active);
 
-            Log.Debug($"Table {userTableName} active");
+            log.Debug($"Table {userTableName} active");
         }
 
         public static async Task<IAmazonDynamoDB> CreateTable(
             this string tableName,
             IAmazonDynamoDB client,
+            ILogger log,
             string hashKey = "Id",
             long readCapacityUnits = 5,
             long writeCapacityUnits = 5)
@@ -97,18 +98,18 @@ namespace Infrastructure.NoSQL
                     WriteCapacityUnits = writeCapacityUnits
                 }
             );
-            Log.Debug($"Building table: {tableName}");
+            log.Debug($"Building table: {tableName}");
             try
             {
                 await client.CreateTableAsync(request);
-                Log.Debug($"Table created: {tableName}");
+                log.Debug($"Table created: {tableName}");
             }
             catch (ResourceInUseException)
             {
                 // Table already created, just describe it
-                Log.Debug($"Table already exists: {tableName}");
+                log.Debug($"Table already exists: {tableName}");
                 var result = await client.DescribeTableAsync(tableName);
-                Log.Debug($"Using: {result.Table.TableName} ");
+                log.Debug($"Using: {result.Table.TableName} ");
             }
 
             return client;

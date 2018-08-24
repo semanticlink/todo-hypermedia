@@ -8,7 +8,8 @@ using Domain;
 using Domain.Models;
 using Infrastructure.NoSQL;
 using Microsoft.Extensions.DependencyInjection;
-using NLog;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,7 +17,7 @@ namespace IntegrationTests
 {
     public abstract class BaseTestProvider : IDisposable
     {
-        protected static ILogger Log;
+        protected ILogger Log { get; }
         protected IServiceProvider ServiceProvider;
         private readonly ServiceCollection _services;
 
@@ -26,14 +27,18 @@ namespace IntegrationTests
             // TODO: use Fixtures
 
             _services = new ServiceCollection();
+
             // Register up the repositories to make them available
             Register(iocRegistrations =>
             {
                 iocRegistrations
-                    .RegisterInfrastructure( /* isDevelopment) */true)
-                    .RegisterRespositories();
+                    .RegisterInfrastructure(isDevelopment: true)
+                    .RegisterRespositories()
+                    // various discussion here on unit test with the ILogger in xunit
+                    // see https://stackoverflow.com/questions/43424095/how-to-unit-test-with-ilogger-in-asp-net-core
+                    .AddScoped<ILoggerFactory, NullLoggerFactory>();
             });
-            
+
             UserId = RegisterUser();
 
             Startup();
@@ -43,8 +48,8 @@ namespace IntegrationTests
 
         protected BaseTestProvider(ITestOutputHelper output) : this()
         {
-            // need to be able to see the output in the console window
-            Log = output.GetNLogLogger();
+            // some methods require the Logger to be passed in
+            Log = ServiceProvider.GetService<ILogger>();
 
             // TODO: remember if we need to write assertions on log messages use Divergic.Logging.Xunit
         }
@@ -55,12 +60,12 @@ namespace IntegrationTests
 
             TableNameConstants
                 .AllTables
-                .ForEach(table => table.CreateTable(client).ConfigureAwait(false));
+                .ForEach(table => table.CreateTable(client, Log).ConfigureAwait(false));
 
             Task.Run(() => Task.WhenAll(
                     TableNameConstants
                         .AllTables
-                        .Select(table => table.WaitForActiveTable(client))))
+                        .Select(table => table.WaitForActiveTable(client, Log))))
                 .GetAwaiter()
                 .GetResult();
         }
@@ -102,15 +107,9 @@ namespace IntegrationTests
 
         public void Dispose()
         {
-            (ServiceProvider as ServiceProvider).Dispose();
-            try
+            if (ServiceProvider as ServiceProvider is ServiceProvider provider)
             {
-                Log.RemoveTestOutputHelper();
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "Ensure that the test calls ':base(outputHelper)'");
-                throw;
+                provider.Dispose();
             }
         }
     }

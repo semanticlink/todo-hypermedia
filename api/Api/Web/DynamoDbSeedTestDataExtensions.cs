@@ -15,7 +15,7 @@ using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace Api.Web
@@ -26,43 +26,44 @@ namespace Api.Web
     /// </summary>
     public static class DynamoDbSeedTestDataExtensions
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
-
         public static IApplicationBuilder DynamoDbSeedTestData(
             this IApplicationBuilder app,
-            IHostingEnvironment hostingEnvironment)
+            IHostingEnvironment hostingEnvironment,
+            ILogger log)
         {
-            app.ApplicationServices.DynamoDbSeedTestData(hostingEnvironment);
+            app.ApplicationServices.DynamoDbSeedTestData(hostingEnvironment, log);
             return app;
         }
 
-        public static IWebHost DynamoDbSeedTestData(this IWebHost host, IHostingEnvironment hostingEnvironment)
+        public static IWebHost DynamoDbSeedTestData(
+            this IWebHost host,
+            IHostingEnvironment hostingEnvironment,
+            ILogger log)
         {
-            host.Services.DynamoDbSeedTestData(hostingEnvironment);
+            host.Services.DynamoDbSeedTestData(hostingEnvironment, log);
             return host;
         }
 
-        private static void DynamoDbSeedTestData(
-            this IServiceProvider app,
-            IHostingEnvironment hostingEnvironment)
+        private static void DynamoDbSeedTestData(this IServiceProvider app,
+            IHostingEnvironment hostingEnvironment, ILogger log)
         {
             // we have added 'Scoped' services, this will return the root scope with them attached
             using (var scope = app.CreateScope())
             {
                 if (hostingEnvironment.IsDevelopment() || true)
                 {
-                    Log.Debug("Seed test data");
-                    Task.Run(() => scope.ServiceProvider.SeedData()).GetAwaiter().GetResult();
+                    log.Debug("Seed test data");
+                    Task.Run(() => scope.ServiceProvider.SeedData(log)).GetAwaiter().GetResult();
                 }
 
-                Log.Debug("[Seed] test data complete");
+                log.Debug("[Seed] test data complete");
             }
         }
 
         /// <summary>
         ///     Creates a tenant, user on the tenant and some todos with tags
         /// </summary>
-        public static async Task SeedData(this IServiceProvider services)
+        public static async Task SeedData(this IServiceProvider services, ILogger log)
         {
             /**
              * Get registered services.
@@ -79,17 +80,42 @@ namespace Api.Web
             /**
              * Hand make up these because we want to inject the user with the provisioning user
              */
-            var tenantStore = new TenantStore(provisioningUser, context, idGenerator, userRightsStore);
-            var userStore = new UserStore(provisioningUser, context, idGenerator, userRightsStore);
-            var tagStore = new TagStore(provisioningUser, context, idGenerator, userRightsStore);
-            var todoStore = new TodoStore(provisioningUser, context, idGenerator, userRightsStore, tagStore);
+            var tenantStore = new TenantStore(
+                provisioningUser,
+                context,
+                idGenerator,
+                userRightsStore,
+                services.GetRequiredService<ILogger<TenantStore>>());
+            
+            var userStore = new UserStore(
+                provisioningUser,
+                context,
+                idGenerator,
+                userRightsStore,
+                services.GetRequiredService<ILogger<UserStore>>());
+            
+            var tagStore = new TagStore(
+                provisioningUser,
+                context,
+                idGenerator,
+                userRightsStore,
+                services.GetRequiredService<ILogger<TagStore>>());
+            
+            var todoStore = new TodoStore(
+                provisioningUser,
+                context,
+                idGenerator,
+                userRightsStore,
+                tagStore,
+                services.GetRequiredService<ILogger<TodoStore>>());
 
 
             // ensure the database is up and tables are created
-            await services.GetRequiredService<IAmazonDynamoDB>().WaitForAllTables();
+            await services.GetRequiredService<IAmazonDynamoDB>()
+                .WaitForAllTables(log);
 
 
-            Log.Info("[Seed] create sample data");
+            log.Info("[Seed] create sample data");
 
             //////////////////////////
             // Authentication
@@ -121,7 +147,7 @@ namespace Api.Web
             // create seeed data if the user doesn't exist
             if ((await userStore.GetByExternalId(userData.ExternalId)).IsNull())
             {
-                Log.Info($"[Seed] user {userData.Email}");
+                log.Info($"[Seed] user {userData.Email}");
 
                 var userId = await userStore.Create(
                     rootUser.Id,
@@ -142,7 +168,7 @@ namespace Api.Web
                     Description = "A sample tenant (company/organisation)"
                 };
 
-                Log.Info($"[Seed] tenant '{tenantCreateData.Code}'");
+                log.Info($"[Seed] tenant '{tenantCreateData.Code}'");
 
                 var tenantId = await tenantStore.Create(
                     rootUser.Id,
@@ -165,7 +191,7 @@ namespace Api.Web
                         CallerCollectionRights.Tenant);
                 }
 
-                Log.Info($"[Seed] registered user '{userData.Email}' against tenant '{tenantCreateData.Code}'");
+                log.Info($"[Seed] registered user '{userData.Email}' against tenant '{tenantCreateData.Code}'");
 
                 //////////////////////////
                 // Seed global tags
@@ -185,7 +211,7 @@ namespace Api.Web
                     .Where(result => result != null)
                     .ToList();
 
-                Log.InfoFormat("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
+                log.InfoFormat("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
 
                 //////////////////////////
                 // Seed some todos
@@ -223,11 +249,11 @@ namespace Api.Web
                         CallerCollectionRights.Todo)));
 
 
-                Log.InfoFormat("[Seed] todos: [{0}]", ids.ToCsvString(id => id));
+                log.InfoFormat("[Seed] todos: [{0}]", ids.ToCsvString(id => id));
             }
             else
             {
-                Log.Debug("[Seed] test data already setup");
+                log.Debug("[Seed] test data already setup");
             }
         }
     }

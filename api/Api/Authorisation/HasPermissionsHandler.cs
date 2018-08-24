@@ -4,7 +4,7 @@ using Domain.Models;
 using Domain.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace Api.Authorisation
@@ -17,13 +17,14 @@ namespace Api.Authorisation
     /// </summary>
     public class HasPermissionsHandler : AuthorizationHandler<HasPermissionsOnResourceRequirement>
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
-
         private readonly IUserRightStore _userRightStore;
 
-        public HasPermissionsHandler(IUserRightStore userRightStore)
+        private ILogger Log { get; }
+
+        public HasPermissionsHandler(IUserRightStore userRightStore, ILogger<HasPermissionsHandler> log)
         {
             _userRightStore = userRightStore;
+            Log = log;
         }
 
         /// <summary>
@@ -35,7 +36,7 @@ namespace Api.Authorisation
         /// return values not contained in the Uri of the request that need to be substituted. Otherwise, get from the
         /// Uri (ie RouteData based on a key)
         /// </remarks>
-        private string ResourceId(string resourceKeyInUri, AuthorizationFilterContext authContext)
+        private string ResourceId(string resourceKeyInUri, AuthorizationFilterContext context)
         {
             switch (resourceKeyInUri)
             {
@@ -43,7 +44,7 @@ namespace Api.Authorisation
                     Log.TraceFormat("Resource '{0}' access delegated", ResourceKey.Root);
                     return TrustDefaults.KnownHomeResourceId;
                 case ResourceKey.User:
-                    var id = authContext.HttpContext.User.GetId();
+                    var id = context.HttpContext.User.GetId();
                     Log.TraceFormat("Resource '{0}' access from authentication", id);
                     return id;
                 /*
@@ -52,8 +53,9 @@ namespace Api.Authorisation
                  * case ResourceKey.Id:
                  */
                 default:
-                    var resourceId = authContext.RouteData.Values[resourceKeyInUri]?.ToString();
-                    Log.TraceFormat("Resource '{0}' access determined from route param '{1}'", resourceId, resourceKeyInUri);
+                    var resourceId = context.RouteData.Values[resourceKeyInUri]?.ToString();
+                    Log.TraceFormat("Resource '{0}' access determined from route param '{1}'", resourceId,
+                        resourceKeyInUri);
                     return resourceId;
             }
         }
@@ -97,9 +99,9 @@ namespace Api.Authorisation
                             "User {0} does not have permission {3} ({4}) {1} on resource {2}",
                             userId,
                             requirement.Access,
-                            resourceId, 
+                            resourceId,
                             requirement.Type,
-                            (int)requirement.Type);
+                            (int) requirement.Type);
                     }
                 }
                 else

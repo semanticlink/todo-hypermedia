@@ -14,8 +14,8 @@ namespace AcceptanceTests
         [Fact]
         public async void Users()
         {
-            await ServiceProvider.SeedServiceUser();
-            await ServiceProvider.SeedData();
+            await ServiceProvider.SeedServiceUser(Log);
+            await ServiceProvider.SeedData(Log);
         }
     }
 }

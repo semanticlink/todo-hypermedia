@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using FastMember;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using NLog;
+using Microsoft.Extensions.Logging;
+using Toolkit;
 
 namespace Api.Web
 {
@@ -32,8 +33,6 @@ namespace Api.Web
     /// </remarks>
     public class FormUrlEncodedMediaFormatter : IInputFormatter
     {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
         private readonly string FormUrlEncodedMediaType = "application/x-www-form-urlencoded";
 
         public bool CanRead(InputFormatterContext context)
@@ -43,6 +42,9 @@ namespace Api.Web
 
         public async Task<InputFormatterResult> ReadAsync(InputFormatterContext context)
         {
+            var log = context.HttpContext.RequestServices.GetService(
+                typeof(ILogger<FormUrlEncodedMediaFormatter>)) as ILogger;
+
             if (context.HttpContext.Request.Form != null && context.HttpContext.Request.Form.Any())
             {
                 var modelType = context.ModelType;
@@ -68,7 +70,7 @@ namespace Api.Web
                         }
                         catch
                         {
-                            Log.Info("Cannot write property '{0}' on {1}", entry.Key, modelType.Name);
+                            log.InfoFormat("Cannot write property '{0}' on {1}", entry.Key, modelType.Name);
                         }
                     }
 
@@ -77,7 +79,7 @@ namespace Api.Web
             }
             else
             {
-                Log.Error("The form collection must exist for this formatter.");
+                log.Error("The form collection must exist for this formatter.");
             }
 
             return InputFormatterResult.Failure();

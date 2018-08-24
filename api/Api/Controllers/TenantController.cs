@@ -9,7 +9,7 @@ using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Mvc;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 using Toolkit.Representation.Forms;
 using Toolkit.Representation.LinkedRepresentation;
@@ -19,12 +19,13 @@ namespace Api.Controllers
     [Route("tenant")]
     public class TenantController : Controller
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+        public ILogger<TenantController> Log { get; }
         private readonly ITenantStore _tenantStore;
         private readonly IUserStore _userStore;
 
-        public TenantController(ITenantStore tenantStore, IUserStore userStore)
+        public TenantController(ITenantStore tenantStore, IUserStore userStore, ILogger<TenantController> log)
         {
+            Log = log;
             _tenantStore = tenantStore;
             _userStore = userStore;
         }

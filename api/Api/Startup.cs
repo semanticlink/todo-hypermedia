@@ -10,28 +10,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using Morcatko.AspNetCore.JsonMergePatch;
-using NLog;
-using ILogger = NLog.ILogger;
+using Toolkit;
 
 namespace Api
 {
     public class Startup
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
-        
         private IHostingEnvironment HostingEnvironment { get; }
         private IConfiguration Configuration { get; }
+        private ILogger<Startup> Log { get; }
 
-        public Startup(IHostingEnvironment env, IConfiguration config)
+        public Startup(IHostingEnvironment env, IConfiguration config, ILogger<Startup> log)
         {
             HostingEnvironment = env;
             Configuration = config;
+            Log = log;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
+      
             Log.Debug("[Init] Configure services");
-            
+
             services
                 // see https://docs.microsoft.com/en-us/aspnet/core/web-api/advanced/formatting?view=aspnetcore-2.1#browsers-and-content-negotiation
                 .AddMvc(options => options.RespectBrowserAcceptHeader = true) // default: false
@@ -93,7 +93,8 @@ namespace Api
 
                     // Content-negotitation output types
                     options.OutputFormatters.Add(new HtmlFormMediaFormatter(
-                        Configuration.GetSection(ApiClientSettings.SectionName).Get<ApiClientSettings>()));
+                        Configuration.GetSection(ApiClientSettings.SectionName).Get<ApiClientSettings>(),
+                        Log));
 /*
                     // add in when support is required
                     options.OutputFormatters.Add(new UriListOutputFormatter());
@@ -171,10 +172,9 @@ namespace Api
             services.Configure<RouteOptions>(options => { options.LowercaseUrls = true; });
         }
 
-        public void Configure( IApplicationBuilder app, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
 
-            
             Log.Debug("[Init] Configure");
 
             if (HostingEnvironment.IsDevelopment())
@@ -208,8 +208,8 @@ namespace Api
                 .UseMvc()
 
                 // requires a dynamoDb instance - see readme for setup in docker
-                .MigrateDynamoDb()
-                .DynamoDbSeedTestData(HostingEnvironment);
+                .MigrateDynamoDb(Log)
+                .DynamoDbSeedTestData(HostingEnvironment, Log);
         }
     }
 }

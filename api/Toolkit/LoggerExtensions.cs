@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using NLog;
+using Microsoft.Extensions.Logging;
 
 namespace Toolkit
 {
@@ -17,7 +16,7 @@ namespace Toolkit
     ///         <li>the exception class type</li>
     ///     </ul>
     /// </summary>
-    public static class NLogExtensions
+    public static class LoggerExtensions
     {
         [StringFormatMethod("format")]
         public static void LogFormat(
@@ -36,7 +35,7 @@ namespace Toolkit
             string format,
             params object[] args)
         {
-            logger.Trace(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
+            logger.LogTrace(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
         }
 
         [StringFormatMethod("format")]
@@ -46,7 +45,7 @@ namespace Toolkit
             string format,
             params object[] args)
         {
-            logger.Debug(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
+            logger.LogDebug(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
         }
 
         /// <seealso cref = "ErrorExceptionFormat" />
@@ -57,7 +56,7 @@ namespace Toolkit
             string format,
             params object[] args)
         {
-            logger.Info(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
+            logger.LogInformation(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
         }
 
         /// <seealso cref = "ErrorExceptionFormat" />
@@ -68,7 +67,7 @@ namespace Toolkit
             string format,
             params object[] args)
         {
-            logger.Warn(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
+            logger.LogWarning(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
         }
 
         [StringFormatMethod("format")]
@@ -78,7 +77,7 @@ namespace Toolkit
             string format,
             params object[] args)
         {
-            logger.Error(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
+            logger.LogError(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
         }
 
         /// <seealso cref = "ErrorExceptionFormat" />
@@ -89,48 +88,73 @@ namespace Toolkit
             string format,
             params object[] args)
         {
-            logger.Fatal(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
+            logger.LogCritical(ex, format, args.Concatenate(ex.Message, ex.GetType().Name));
         }
 
         [StringFormatMethod("format")]
         public static void InfoFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Info, CultureInfo.InvariantCulture, format, args);
+            logger.Log(LogLevel.Information, format, args);
         }
 
         [StringFormatMethod("format")]
         public static void DebugFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Debug, CultureInfo.InvariantCulture, format, args);
+            logger.Log(LogLevel.Debug, format, args);
         }
 
         [StringFormatMethod("format")]
         public static void WarnFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Warn, CultureInfo.InvariantCulture, format, args);
+            logger.Log(LogLevel.Warning, format, args);
         }
 
         [StringFormatMethod("format")]
         public static void ErrorFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Error, CultureInfo.InvariantCulture, format, args);
+            logger.Log(LogLevel.Error, format, args);
         }
 
         [StringFormatMethod("format")]
         public static void FatalFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Fatal, CultureInfo.InvariantCulture, format, args);
+            logger.Log(LogLevel.Critical, format, args);
         }
 
         [StringFormatMethod("format")]
         public static void TraceFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Trace, CultureInfo.InvariantCulture, format, args);
+            logger.Log(LogLevel.Trace, format, args);
         }
 
         public static void Trace(this ILogger logger, string message)
         {
-            logger.Log(LogLevel.Trace, CultureInfo.InvariantCulture, message);
+            logger.Log(LogLevel.Trace, message);
+        }
+
+        public static void Debug(this ILogger logger, string message)
+        {
+            logger.Log(LogLevel.Debug, message);
+        }
+
+        public static void Info(this ILogger logger, string message)
+        {
+            logger.Log(LogLevel.Information, message);
+        }
+
+        public static void Error(this ILogger logger, string message)
+        {
+            logger.Log(LogLevel.Error, message);
+        }
+
+        public static void Fata(this ILogger logger, string message)
+        {
+            logger.Log(LogLevel.Critical, message);
+        }
+
+        public static void Warn(this ILogger logger, string message)
+        {
+            logger.Log(LogLevel.Warning, message);
         }
 
         /// <summary>

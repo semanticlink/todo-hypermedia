@@ -6,6 +6,7 @@ using Domain.Models;
 using Infrastructure;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace App
@@ -19,11 +20,13 @@ namespace App
     /// </remarks>
     public class UserResolverService : IUserResolverService
     {
+        private ILogger Log { get; }
         private readonly IHttpContextAccessor _context;
         private readonly IDynamoDBContext _dbContext;
 
-        public UserResolverService(IHttpContextAccessor context, IDynamoDBContext dbContext)
+        public UserResolverService(IHttpContextAccessor context, IDynamoDBContext dbContext, ILogger<UserResolverService> log)
         {
+            Log = log;
             _context = context;
             _dbContext = dbContext;
         }
@@ -38,7 +41,7 @@ namespace App
         /// </remarks>
         public async Task<User> GetPrincipleUserAsync(ClaimsPrincipal user)
         {
-            var externalId = user.GetExternalId();
+            var externalId = user.GetExternalId(Log);
 
             if (externalId.IsNullOrWhitespace())
             {

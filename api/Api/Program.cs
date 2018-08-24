@@ -1,36 +1,34 @@
 ﻿using System;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using NLog;
-using NLog.Web;
 using Toolkit;
 
 namespace Api
 {
     public class Program
     {
-        private static readonly NLog.ILogger Log = NLogBuilder
-            .ConfigureNLog("Config/NLog.config")
-            .GetCurrentClassLogger();
-
         public static void Main(string[] args)
         {
+            var host = BuildWebHost(args);
+
+            var log = host.Services.GetService(typeof(ILogger<Program>)) as ILogger;
+
             try
             {
-                Log.Debug("[Init] starting");
-                BuildWebHost(args).Run();
+                log.Debug("[Init] starting");
+                host.Run();
             }
             catch (Exception ex)
             {
-                Log.ErrorExceptionFormat(ex, "[Init] stopped program because of exception");
+                log.ErrorExceptionFormat(ex, "[Init] stopped program because of exception");
                 throw;
             }
             finally
             {
-                Log.Debug("[Init] shutting down");
+                log.Debug("[Init] shutting down");
                 // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
-                LogManager.Shutdown();
             }
         }
 
@@ -40,16 +38,22 @@ namespace Api
                  * Default builder will deal with configuration in root directory and also spinning up Kestrel
                  */
                 .CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .ConfigureLogging(logging =>
+                .ConfigureLogging((context, logging) =>
                 {
-                    // remove all other loggers
-                    logging.ClearProviders();
                     // setup log levels for other
-                    logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                    logging.SetMinimumLevel(LogLevel.Trace);
+
+                    // see https://github.com/andrewlock/NetEscapades.Extensions.Logging/blob/master/sample/SampleApp/Program.cs
+                    logging.AddFile(opts =>
+                    {
+                        opts.LogDirectory = Environment.GetEnvironmentVariable("TMPDIR")
+                                            ?? Environment.GetEnvironmentVariable("TMP")
+                                            ?? opts.LogDirectory;
+
+                        context.Configuration.GetSection("Logging.File").Bind(opts);
+                    });
                 })
-                // Register NLog other code using Microsoft.Extensions.ILogger
-                .UseNLog()
+                .UseStartup<Startup>()
                 .Build();
     }
 }

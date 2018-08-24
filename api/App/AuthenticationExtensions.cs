@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Domain.Models;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace App
 {
     public static class AuthenticationExtensions
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
-
         private const string UserIdClaimKey = "userId";
 
         /// <summary>
@@ -33,9 +31,9 @@ namespace App
         /// <summary>
         /// Retrieves the user Id from the <see cref="User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Sub"/>).
         /// </summary>
-        public static string GetExternalId(this ClaimsPrincipal user)
+        public static string GetExternalId(this ClaimsPrincipal user, ILogger log = null)
         {
-            return user.Value(JwtRegisteredClaimNames.Sub);
+            return user.Value(JwtRegisteredClaimNames.Sub, log);
         }
 
         /// <summary>
@@ -49,12 +47,12 @@ namespace App
         /// <summary>
         /// Retrieves the user Identity Id from the <see cref="User"/> from the claim via <see cref="UserIdClaimKey"/>.
         /// </summary>
-        public static string GetId(this ClaimsPrincipal user)
+        public static string GetId(this ClaimsPrincipal user, ILogger log = null)
         {
-            return user.Value(UserIdClaimKey);
+            return user.Value(UserIdClaimKey, log);
         }
 
-        private static string Value(this ClaimsPrincipal user, string type)
+        private static string Value(this ClaimsPrincipal user, string type, ILogger log = null)
         {
             try
             {
@@ -63,19 +61,20 @@ namespace App
             catch (NullReferenceException e)
             {
                 /**
-                 *  An error here is likely to be a programming error
-                 *  because either the method/class has no [Authorize] attribute
-                 *  or incorrectly has [AllowAnonymous]
-                 *
-                 *  With either of these methods, no User.Principal is loaded onto the Context.User
-                 *
-                 *  see https://github.com/aspnet/Security/issues/1310
-                 *
-                 */
-                Log.DebugExceptionFormat(
+                     *  An error here is likely to be a programming error
+                     *  because either the method/class has no [Authorize] attribute
+                     *  or incorrectly has [AllowAnonymous]
+                     *
+                     *  With either of these methods, no User.Principal is loaded onto the Context.User
+                     *
+                     *  see https://github.com/aspnet/Security/issues/1310
+                     *
+                     */
+                log?.DebugExceptionFormat(
                     e,
-                    $"No claim '{type}' found. Either no 'jwt' token sent or ensure method/class atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed"
-                );
+                    "No claim '{0}' found. Either no 'jwt' token sent or ensure method/class " +
+                    "atrribute has correct [Authorize] added or incorrect [AllowAnonymous] removed",
+                    type);
                 return string.Empty;
             }
         }

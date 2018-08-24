@@ -6,15 +6,14 @@ using Amazon.DynamoDBv2.DataModel;
 using Domain;
 using Domain.Models;
 using Domain.Persistence;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 
 namespace Infrastructure.NoSQL
 {
     public class TagStore : ITagStore
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
-
+        private ILogger Log { get; }
         private readonly IDynamoDBContext _context;
         private readonly IIdGenerator _idGenerator;
         private readonly string _userId;
@@ -24,8 +23,10 @@ namespace Infrastructure.NoSQL
             User creator,
             IDynamoDBContext context,
             IIdGenerator idGenerator,
-            IUserRightStore userRightStore)
+            IUserRightStore userRightStore,
+            ILogger<TagStore> log)
         {
+            Log = log;
             _context = context;
             _idGenerator = idGenerator;
             _userRightStore = userRightStore;

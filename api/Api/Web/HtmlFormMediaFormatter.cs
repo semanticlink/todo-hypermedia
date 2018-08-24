@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Toolkit;
 using Toolkit.Representation.LinkedRepresentation;
 
@@ -13,7 +13,7 @@ namespace Api.Web
 {
     public class HtmlFormMediaFormatter : TextOutputFormatter
     {
-        private static readonly ILogger Log = LogManager.GetCurrentClassLogger();
+        private ILogger Log { get; }
 
         private const string ResourceHtml = @"<html>
     <head>
@@ -30,8 +30,9 @@ namespace Api.Web
 
         private readonly List<string> scripts = new List<string>();
 
-        public HtmlFormMediaFormatter(ApiClientSettings configuration)
+        public HtmlFormMediaFormatter(ApiClientSettings configuration, ILogger log)
         {
+            Log = log;
             SupportedEncodings.Add(Encoding.UTF8);
             SupportedMediaTypes.Add(MediaTypeNames.Text.Html);
 
