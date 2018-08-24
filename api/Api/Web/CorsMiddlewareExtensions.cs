@@ -61,7 +61,8 @@ namespace Api.Web
                             .WithExposedHeaders(
                                 "Allow",
                                 "Location",
-                                "WWW-Authenticate")
+                                "WWW-Authenticate",
+                                "x-amzn-remapped-www-authenticate")
 
                             //
                             .SetPreflightMaxAge(TimeSpan.FromDays(1.0));
