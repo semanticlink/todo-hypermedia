@@ -17,7 +17,7 @@ namespace Toolkit
     ///         <li>the exception class type</li>
     ///     </ul>
     /// </summary>
-    public static class LogExtensions
+    public static class NLogExtensions
     {
         [StringFormatMethod("format")]
         public static void LogFormat(
