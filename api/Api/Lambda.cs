@@ -1,4 +1,5 @@
 ﻿using System;
+using AWS.Logger.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
@@ -46,6 +47,27 @@ namespace Api
                 Log.Debug("[Init] starting");
                 builder
                     .UseStartup<Startup>()
+                    .ConfigureLogging(logging =>
+                    {
+                        // uses section 'Lambda.Logging' in appsettings.json
+                        // this actually looks to be added by default
+                        // logging.AddLambdaLogger();
+
+                        // remove all other loggers. This means that we get all applicaiton
+                        // logging going through NLog. In practice, it means that this app uses
+                        // NLog and all others that don't also go to the same logging 'files'
+                        //logging.ClearProviders();
+                        // setup log levels for other
+                        logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Debug);
+
+                        //logging.AddProvider(new AWSLoggerProvider());
+                        // In startup we will set the aspnetcore ILogger to NLog implementation
+                        // see Startup.Configure
+                    })
+                    // TODO: can we set it here?
+                    .UseNLog()
+                    // don't forget this little sucker, it will give you access to the
+                    // IServer through IoC for later in the app is needed
                     .UseApiGateway();
             }
             catch (Exception ex)

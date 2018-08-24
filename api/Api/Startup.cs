@@ -173,14 +173,7 @@ namespace Api
 
         public void Configure( IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-            // aws IS production
-            if (HostingEnvironment.IsProduction())
-            {
-                Log.Debug("[Init] Add AWS logging configuration");
-                // see https://github.com/aws/aws-logging-dotnet
-                // requires AWS.Logging sectopm in appsettings.Production.json
-                loggerFactory.AddAWSProvider(Configuration.GetAWSLoggingConfigSection());
-            }
+
             
             Log.Debug("[Init] Configure");
 
