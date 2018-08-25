@@ -12,36 +12,39 @@ Setting up aws s3 and cloudflare to serve up static javascript files for the cli
 Create a bucket that *matches* the name of domain
 
 ```bash
-$ aws s3 mb s3://api-client.goneopen.com
+$ aws s3 mb s3://todo.semanticlink.io
 
-make_bucket: api-client.goneopen.com
+make_bucket: todo.semanticlink.io
 
 ```
 
 
 # S3 Sync
 
-Upload
+## Upload
 
 ```bash
-aws s3 sync ./dist/ s3://api-client.goneopen.com --exclude "*" --include "*api*.js"
+aws s3 sync ./dist/ s3://todo.semanticlink.io --exclude "*" --include "*app*.js"
+aws s3 cp index.html s3://todo.semanticlink.io
 ```
 Check the files are there (`ls`):
 
 ```bash
-$ aws s3 ls s3://semantic-link
-2018-08-22 19:40:48     139842 api.js
-2018-08-22 19:40:48      54198 vendors~api.js
-2018-08-22 19:40:48     822964 vendors~api~app.js
+$ aws s3 ls s3://todo.semanticlink.io
+2018-08-24 18:11:23     155990 app.js
+2018-08-24 18:12:14        460 index.html
+2018-08-24 18:11:23     822964 vendors~api~app.js
+2018-08-24 18:11:23      24354 vendors~app.js
 ```
 
 ## Set Permissions
 
 At this point the files are not public.
 
-1. Go to Bucket > Permssions (tab) > Bucket Policy
+1. Go to Service (s3) > Bucket > Permssions (tab) > Bucket Policy
 2. Add JSON (below) > Save
-3. This bucket has public access. You have provided public access to this bucket. We highly recommend that you never grant any kind of public access to your S3 bucket.
+  This bucket has public access. You have provided public access to this bucket. We highly recommend that you never grant any kind of public access to your S3 bucket.
+3. Individually make each file "Make public"
 
 ```json
 {
@@ -51,7 +54,7 @@ At this point the files are not public.
         "Effect":"Allow",
 	  "Principal": "*",
       "Action":["s3:GetObject"],
-      "Resource":["arn:aws:s3:::api-client.goneopen.com/*"
+      "Resource":["arn:aws:s3:::todo.semanticlink.io/*"
       ]
     }
   ]

@@ -32,6 +32,10 @@ dotnet lambda deploy-serverless --s3-bucket todo-rest-aws --stack-name DotNetCor
 
 ## ApiGateway
 
+## Add DNS entry
+
+* `api.todo.semanticlink.io CNAME fy9y4dto60.execute-api.ap-southeast-2.amazonaws.com.`
+
 
 
 # Links
