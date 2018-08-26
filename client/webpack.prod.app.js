@@ -5,6 +5,7 @@ const common = require('./webpack.prod.js');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
+let FaviconsWebpackPlugin = require('favicons-webpack-plugin')
 
 module.exports = merge(common, {
     entry: {
@@ -40,6 +41,8 @@ module.exports = merge(common, {
                 uri: 'https://api.todo.semanticlink.io/'
             }
         }),
+
+        new FaviconsWebpackPlugin(path.resolve(__dirname, 'logo.png')),
 
     ]
 });
