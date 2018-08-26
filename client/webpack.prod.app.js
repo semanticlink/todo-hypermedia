@@ -37,7 +37,7 @@ module.exports = merge(common, {
             template: 'template.html',
             templateParameters: {
                 title: 'Todo',
-                rel: 'self',
+                rel: 'api',
                 uri: 'https://api.todo.semanticlink.io/'
             }
         }),
