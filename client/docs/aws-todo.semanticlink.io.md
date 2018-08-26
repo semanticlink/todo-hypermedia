@@ -2,10 +2,8 @@ Setting up aws s3 and cloudflare to serve up static javascript files for the cli
 
 # Prerequisites
 
-* install [awscli](https://aws.amazon.com/cli/)
-* create security credentials
-* configured with cli
-* set up DNS/CNAME (api-client.goneopen.com) pointing to the cloudfront distribution
+* (Setup aws)[aws-configure.md]
+* set up DNS/CNAME (cdn.semanticlink.io) pointing to the cloudfront distribution
 
 # S3 Make bucket with domain
 
@@ -24,8 +22,7 @@ make_bucket: todo.semanticlink.io
 ## Upload
 
 ```bash
-aws s3 sync ./dist/ s3://todo.semanticlink.io --exclude "*" --include "*app*.js"
-aws s3 cp index.html s3://todo.semanticlink.io
+aws s3 sync ./dist/app/ s3://todo.semanticlink.io
 ```
 Check the files are there (`ls`):
 
@@ -33,8 +30,7 @@ Check the files are there (`ls`):
 $ aws s3 ls s3://todo.semanticlink.io
 2018-08-24 18:11:23     155990 app.js
 2018-08-24 18:12:14        460 index.html
-2018-08-24 18:11:23     822964 vendors~api~app.js
-2018-08-24 18:11:23      24354 vendors~app.js
+2018-08-24 18:11:23      24354 vendors~app.842187.js
 ```
 
 ## Set Permissions
@@ -74,33 +70,14 @@ At this point the files are not public.
 ##
 
 ```
-$ aws s3 mb s3://api-client.goneopen.com
+$ aws s3 mb s3://cdn.semanticlink.io
 
 $ aws s3 ls
-2018-08-22 16:28:44 api-client.goneopen.com
+2018-08-22 16:28:44 cdn.semanticlink.io
 2018-02-15 14:37:37 todo-rest-aws
 
 ```
 
-## AWS settings
-
-```
-$ aws configure
-
-
-```
-
-```.aws/config
-[default]
-output = text
-region = ap-southeast-2
-```
-
-```.aws/credentials
-[default]
-aws_access_key_id = AKI......
-aws_secret_access_key = bU0F....
-````
 ## AWS sync/upload
 
 ```

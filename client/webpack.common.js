@@ -6,24 +6,6 @@ const path = require('path');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
-    entry: {
-        // single-page app
-        app: './src/app',
-        // api client app
-        api: './src/api'
-    },
-    output: {
-        path: path.join(__dirname, 'dist'),
-        /**
-         * In app and api, we make these available under the same path
-         */
-        // publicPath: '/dist/',
-        /**
-         * The chunks, however, are not cache
-         * busted in the application and thus need hashes.
-         */
-        filename: '[name].js',
-    },
     resolve: {
         alias: {
             // vendor checked in libraries (perhaps we can dependency manage these?

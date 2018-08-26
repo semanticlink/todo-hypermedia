@@ -6,7 +6,7 @@
   "productName": "Todo client",
   "license": "MIT",
   "scripts": {
-    "clean": "rimraf ./dist ./coverage",
+    "clean": "rimraf ./dist ./coverage ./build",
     "dev": "webpack-dev-server --mode development --open --config webpack.dev.js --hot",
     "test": "jest --config=jest.config.js",
     "test-watch": "jest --watch --config=jest.config.js",
@@ -14,7 +14,8 @@
     "test-clear-cache": "jest --clearCache",
     "coverage": "jest --coverage --config=jest.config.js",
     "build": "webpack --mode development --config webpack.dev.js --progress --hide-modules",
-    "dist": "webpack --mode production --config webpack.prod.js --colors false --progress false"
+    "dist-api": "webpack --mode production --config webpack.prod.api.js --colors false --progress false",
+    "dist-app": "webpack --mode production --config webpack.prod.app.js --colors false --progress false"
   },
   "dependencies": {
     "auth-header": "^0.3.1",

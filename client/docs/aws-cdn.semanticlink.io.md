@@ -2,9 +2,7 @@ Setting up aws s3 and cloudflare to serve up static javascript files for the cli
 
 # Prerequisites
 
-* install [awscli](https://aws.amazon.com/cli/)
-* create security credentials
-* configured with cli
+* (Setup aws)[aws-configure.md]
 * set up DNS/CNAME (cdn.semanticlink.io) pointing to the cloudfront distribution
 
 0. Copy files to s3 Bucket
@@ -102,26 +100,7 @@ $ aws s3 ls
 
 ```
 
-## AWS settings
-
-```
-$ aws configure
-
-
-```
-
-```.aws/config
-[default]
-output = text
-region = ap-southeast-2
-```
-
-```.aws/credentials
-[default]
-aws_access_key_id = AKI......
-aws_secret_access_key = bU0F....
-````
-## AWS sync/upload
+### AWS sync/upload
 
 ```
 $aws s3 sync ./dist/ s3://semantic-link --exclude "*" --include "*api*.js"
