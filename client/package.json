@@ -15,7 +15,9 @@
     "coverage": "jest --coverage --config=jest.config.js",
     "build": "webpack --mode development --config webpack.dev.js --progress --hide-modules",
     "dist-api": "webpack --mode production --config webpack.prod.api.js --colors false --progress false",
-    "dist-app": "webpack --mode production --config webpack.prod.app.js --colors false --progress false"
+    "dist-app": "webpack --mode production --config webpack.prod.app.js --colors false --progress false",
+    "publish-api-demo": "yarn run dist-api && aws s3 sync ./dist/api/ s3://cdn.semanticlink.io",
+    "publish-app-demo": "yarn run dist-app && aws s3 sync ./dist/app/ s3://todo.semanticlink.io"
   },
   "dependencies": {
     "auth-header": "^0.3.1",

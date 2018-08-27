@@ -25,11 +25,6 @@ module.exports = merge(common, {
          * In app and api, we make these available under the same path
          */
         path: path.resolve(__dirname, 'build'),
-        // publicPath: '/build/',
-        /**
-         * The chunks, however, are not cache
-         * busted in the application and thus need hashes.
-         */
         filename: '[name].js',
     },
     plugins: [

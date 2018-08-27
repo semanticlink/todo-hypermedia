@@ -17,6 +17,19 @@ module.exports = merge(common, {
          * In app and api, we make these available under the same path
          */
         path: path.resolve(__dirname, 'dist/app'),
+        /**
+         * Simple chunking strategy
+         *
+         * Need to move to 'manifest', 'vendor', etc
+         chunkFilename: '[id].js',
+         */
+        chunkFilename: '[id].[chunkhash:6].js',
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
+        },
+        namedChunks: true
     },
     plugins: [
         new CleanWebpackPlugin(['dist/app']),

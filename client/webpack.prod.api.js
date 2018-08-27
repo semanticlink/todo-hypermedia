@@ -15,6 +15,7 @@ module.exports = merge(common, {
          * In app and api, we make these available under the same path
          */
         path: path.resolve(__dirname, 'dist/api'),
+        filename: '[name].js',
     },
     plugins: [
         new CleanWebpackPlugin(['dist/api']),

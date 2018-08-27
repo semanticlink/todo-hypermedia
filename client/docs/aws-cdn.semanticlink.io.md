@@ -29,15 +29,14 @@ make_bucket: cdn.semanticlink.io
 ## Upload
 
 ```bash
-aws s3 sync ./dist/ s3://cdn.semanticlink.io --exclude "*" --include "*api*.js"
+aws s3 sync ./dist/api/ s3://cdn.semanticlink.io
 ```
 Check the files are there (`ls`):
 
 ```bash
-$ aws s3 ls s3://semantic-link
+$ aws s3 ls s3://cdn.semanticlink.io
 2018-08-22 19:40:48     139842 api.js
 2018-08-22 19:40:48      54198 vendors~api.js
-2018-08-22 19:40:48     822964 vendors~api~app.js
 ```
 
 ## Set Permissions
@@ -103,9 +102,8 @@ $ aws s3 ls
 ### AWS sync/upload
 
 ```
-$aws s3 sync ./dist/ s3://semantic-link --exclude "*" --include "*api*.js"
+$aws s3 sync ./dist/api/ s3://cdn.semanticlink.io
 
-upload: dist/api.js to s3://semantic-link/api.js
-upload: dist/vendors~api.js to s3://semantic-link/vendors~api.js
-upload: dist/vendors~api~app.js to s3://semantic-link/vendors~api~app.js
+upload: dist/api.js to s3://cdn.semanticlink.io/api.js
+upload: dist/vendors~api.js to s3://cdn.semanticlink.io/vendors~api.js
 ```
