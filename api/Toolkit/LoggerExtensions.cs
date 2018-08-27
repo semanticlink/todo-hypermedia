@@ -94,37 +94,37 @@ namespace Toolkit
         [StringFormatMethod("format")]
         public static void InfoFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Information, format, args);
+            logger.Log(LogLevel.Information, string.Format(format, args));
         }
 
         [StringFormatMethod("format")]
         public static void DebugFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Debug, format, args);
+            logger.Log(LogLevel.Debug, string.Format(format, args));
         }
 
         [StringFormatMethod("format")]
         public static void WarnFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Warning, format, args);
+            logger.Log(LogLevel.Warning, string.Format(format, args));
         }
 
         [StringFormatMethod("format")]
         public static void ErrorFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Error, format, args);
+            logger.Log(LogLevel.Error, string.Format(format, args));
         }
 
         [StringFormatMethod("format")]
         public static void FatalFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Critical, format, args);
+            logger.Log(LogLevel.Critical, string.Format(format, args));
         }
 
         [StringFormatMethod("format")]
         public static void TraceFormat(this ILogger logger, string format, params object[] args)
         {
-            logger.Log(LogLevel.Trace, format, args);
+            logger.Log(LogLevel.Trace, string.Format(format, args));
         }
 
         public static void Trace(this ILogger logger, string message)

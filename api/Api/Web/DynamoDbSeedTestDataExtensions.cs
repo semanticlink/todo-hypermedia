@@ -14,6 +14,7 @@ using Domain.Representation.Enum;
 using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Toolkit;
@@ -71,6 +72,7 @@ namespace Api.Web
             var context = services.GetRequiredService<IDynamoDBContext>();
             var idGenerator = services.GetRequiredService<IIdGenerator>();
             var userRightsStore = services.GetRequiredService<IUserRightStore>();
+            var configuration = services.GetRequiredService<IConfiguration>();
 
             /**
              * Setup the provisioning user
@@ -86,21 +88,21 @@ namespace Api.Web
                 idGenerator,
                 userRightsStore,
                 services.GetRequiredService<ILogger<TenantStore>>());
-            
+
             var userStore = new UserStore(
                 provisioningUser,
                 context,
                 idGenerator,
                 userRightsStore,
                 services.GetRequiredService<ILogger<UserStore>>());
-            
+
             var tagStore = new TagStore(
                 provisioningUser,
                 context,
                 idGenerator,
                 userRightsStore,
                 services.GetRequiredService<ILogger<TagStore>>());
-            
+
             var todoStore = new TodoStore(
                 provisioningUser,
                 context,
@@ -124,7 +126,9 @@ namespace Api.Web
 
             // A precreated user (in third-party system) [or decoded JWT through https://jwt.io
             // grab it from the Authorization header in a request]
-            var knownAuth0Id = "auth0|5b32b696a8c12d3b9a32b138";
+            var knownAuth0Id = configuration.GetSection("TestSeedUser").Value;
+            
+            log.DebugFormat("[Seed] found seed user '{0}'",knownAuth0Id);
 
             var rootUser = (await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier))
                 .ThrowConfigurationErrorsExceptionIfNull(() => "Root user has not been configured");
@@ -139,7 +143,7 @@ namespace Api.Web
 
             var userData = new UserCreateData
             {
-                Email = "test@rewire.nz",
+                Email = "test-1@semanticlink.io",
                 Name = "test",
                 ExternalId = knownAuth0Id
             };
@@ -163,8 +167,8 @@ namespace Api.Web
 
                 var tenantCreateData = new TenantCreateData
                 {
-                    Code = "rewire.example.nz",
-                    Name = "Rewire NZ",
+                    Code = "rewire.semanticlink.io",
+                    Name = "Rewire",
                     Description = "A sample tenant (company/organisation)"
                 };
 

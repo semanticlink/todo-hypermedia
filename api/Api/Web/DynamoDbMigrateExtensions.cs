@@ -88,7 +88,7 @@ namespace Api.Web
             var rootUserCreateData = new UserCreateData
             {
                 Name = "Service Account",
-                Email = "root@rewire.nz",
+                Email = "root@semanticlink.io",
                 ExternalId = TrustDefaults.KnownRootIdentifier
             };
 
