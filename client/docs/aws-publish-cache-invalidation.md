@@ -18,8 +18,14 @@ Note: only 1000 invalidation paths (ie searches so *.js is one path) per month a
 
 # Cache invalidation (cli)
 
-```
+todo
+```bash
 aws cloudfront create-invalidation --distribution-id E3B418MBKZV7VN --paths /app.*
+```
+
+cdn
+```bash
+aws cloudfront create-invalidation --distribution-id I2CGIMDILPBW0X --paths /api.*
 ```
 
 ## References
