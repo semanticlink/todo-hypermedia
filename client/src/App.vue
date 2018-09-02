@@ -7,6 +7,7 @@
         <router-view></router-view>
         <div>
             <router-link :to="{ name: routeName.Admin }" v-if="$route.fullPath !== routePath.Admin">Admin</router-link>
+            | <a :href="apiUri()">Api</a>
         </div>
     </div>
 </template>
@@ -18,13 +19,14 @@
     import {cache} from 'semantic-link-cache';
     import * as link from 'semantic-link';
     import {routeName, routePath} from "router";
+    import {apiUri} from 'semantic-link-utils/UriMapping';
 
     export default {
         name: 'app',
         components: {Offline, Login, Spinner},
         data() {
             return {
-                routeName, routePath
+                routeName, routePath, apiUri
             }
         },
         created: function () {

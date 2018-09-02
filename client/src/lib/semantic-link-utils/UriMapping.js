@@ -234,6 +234,14 @@ export function fromSitePath(path, sitePrefix) {
     log.error('Mapper is not initialised. Instantiate first before calling this method');
 }
 
+export function apiUri() {
+    if (instance) {
+        return instance.apiUri;
+    } else {
+        log.debug('Mapper is not initialised. Instantiate first before calling this method');
+    }
+}
+
 /**
  *
  * @param {string} clientUri uri of serving out the client application (html)
