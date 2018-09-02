@@ -409,7 +409,7 @@
                                         type: 'Edit',
                                         onClick: this.getForm,
                                         rel: 'edit-form',
-                                        title: 'Click to update existing information'
+                                        title: 'Update existing'
                                     }
                                 })],
                                 ['search', undefined, new ButtonComponent({
@@ -417,7 +417,7 @@
                                         type: 'Search',
                                         onClick: this.getForm,
                                         rel: 'search',
-                                        title: 'Click to open a search form'
+                                        title: 'Enter search'
                                     }
                                 })],
                                 ['create-form', undefined, new ButtonComponent({
@@ -425,7 +425,7 @@
                                         type: 'Add',
                                         onClick: this.getForm,
                                         rel: 'create-form',
-                                        title: 'Click to enter new information to create a new item'
+                                        title: 'Add new'
                                     }
                                 })],
                                 ['self', undefined, new ButtonComponent({
@@ -433,7 +433,7 @@
                                         type: 'Delete',
                                         onClick: this.tryDelete,
                                         rel: 'self',
-                                        title: 'Click to delete'
+                                        title: 'Delete'
                                     }
                                 })],
                                 ['edit-form', 'text/uri-list', new DropTargetComponent({
