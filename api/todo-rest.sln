@@ -5,7 +5,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionFolder", "{D9502D34-4121-4964-B121-D264736477FA}"
 ProjectSection(SolutionItems) = preProject
 	ApiResources.puml = ApiResources.puml
-	Readme.md = Readme.md
 EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{EFA20D4D-36E7-4120-B8F7-FE5141348511}"
@@ -24,7 +23,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcceptanceTests", "Acceptan
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{A514F5F5-4008-4040-A523-2064AF5F1551}"
 ProjectSection(SolutionItems) = preProject
-	docs\aws.md = docs\aws.md
 	..\Readme.md = ..\Readme.md
 EndProjectSection
 EndProject
