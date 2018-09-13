@@ -7,7 +7,8 @@
         <router-view></router-view>
         <div>
             <router-link :to="{ name: routeName.Admin }" v-if="$route.fullPath !== routePath.Admin">Admin</router-link>
-            | <a :href="apiUri()">Api</a>
+            <span v-if="$route.fullPath !== routePath.Admin"> | </span>
+            <a :href="apiUri()">Api</a>
         </div>
     </div>
 </template>
