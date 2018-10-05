@@ -87,6 +87,12 @@
 
                                 log.info('Renewing token');
 
+                                /**
+                                 * KLUDGE: don't understand why we need to clear out the session but somehow
+                                 * the underlying auth0 code works to show the login.
+                                 */
+                                AuthService.clearSession();
+
                                 AuthService
                                     .makeFromRepresentation(cfg)
                                     .renewToken()
