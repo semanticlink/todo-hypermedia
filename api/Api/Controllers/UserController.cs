@@ -34,7 +34,7 @@ namespace Api.Controllers
         ///     A virtual resource to return a redirect. 
         /// </summary>
         /// <remarks>
-        ///     However, redirects with preflight requests do not work in Firefox.  Firefox just marked their
+        ///     However, redirects with preflight requests do not work in Firefox less than v63.  Firefox just marked their
         ///     issue "fixed" for Firefox 63, which is currently scheduled for beta on 2018-09-05
         ///     and stable on 2018-10-23.
         /// 
@@ -44,7 +44,6 @@ namespace Api.Controllers
         ///
         ///     The best page to track this issues is here: https://github.com/google/shaka-player/issues/666
         /// </remarks>
-/*
         [HttpGet("me", Name = UserUriFactory.UserMeName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
@@ -52,29 +51,10 @@ namespace Api.Controllers
         public IActionResult Me()
         {
             return User
-                .GetIdentityId()
+                .GetId()
                 .MakeUserUri(Url)
                 .MakeRedirect();
         }
-*/
-        [HttpGet("me", Name = UserUriFactory.UserMeName)]
-        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(NoCache = true)]
-        [AuthoriseRedirect]
-        public async Task<UserRepresentation> Me()
-        {
-            ///////
-            //  Warning
-            //  See note above - make sure you update the real method below
-            // 
-            var userId = User.GetId();
-            var tenants = await _tenantStore.GetTenantsForUser(userId);
-
-            return (await _userStore
-                    .Get(userId))
-                .ToRepresentation(tenants.ToList(), Url);
-        }
-
 
         [HttpGet("{id}", Name = UserUriFactory.UserRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
