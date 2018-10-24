@@ -10,7 +10,6 @@ using Infrastructure.NoSQL;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace IntegrationTests
@@ -27,21 +26,26 @@ namespace IntegrationTests
             // TODO: use Fixtures
 
             _services = new ServiceCollection();
-
+            
             // Register up the repositories to make them available
             Register(iocRegistrations =>
             {
                 iocRegistrations
                     .RegisterInfrastructure(isDevelopment: true)
-                    .RegisterRespositories()
+                    .RegisterRepositories()
                     // various discussion here on unit test with the ILogger in xunit
                     // see https://stackoverflow.com/questions/43424095/how-to-unit-test-with-ilogger-in-asp-net-core
-                    .AddScoped<ILoggerFactory, NullLoggerFactory>();
+                    // at this stage, going to log out nothing to xunit console by registering a null logger factory
+                    // and a logger 
+                    .AddScoped<ILoggerFactory, NullLoggerFactory>()
+                    .AddSingleton(typeof(ILogger<>), typeof(Logger<>));
             });
 
             UserId = RegisterUser();
+            Log = ServiceProvider.GetService<ILoggerFactory>().CreateLogger<BaseTestProvider>();
 
             Startup();
+            
         }
 
         protected string UserId { get; private set; }
@@ -49,11 +53,15 @@ namespace IntegrationTests
         protected BaseTestProvider(ITestOutputHelper output) : this()
         {
             // some methods require the Logger to be passed in
-            Log = ServiceProvider.GetService<ILogger>();
+//            Log = ServiceProvider.GetService<ILogger>();
+            Log = ServiceProvider.GetService<ILoggerFactory>().CreateLogger<BaseTestProvider>();
 
             // TODO: remember if we need to write assertions on log messages use Divergic.Logging.Xunit
         }
 
+        /// <summary>
+        ///     At startup, ensure that all the tables are created and active
+        /// </summary>
         private void Startup()
         {
             var client = Get<IAmazonDynamoDB>();
