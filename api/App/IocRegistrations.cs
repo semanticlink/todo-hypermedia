@@ -21,7 +21,7 @@ namespace App
         {
             return services
                 .RegisterInfrastructure(env.IsDevelopment())
-                .RegisterRespositories();
+                .RegisterRepositories();
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace App
             bool isDevelopment)
         {
             /**
-             * DymanoDb Registration
+             * DynamoDb Registration
              */
             services.AddSingleton<IAmazonDynamoDB>(i => isDevelopment
                 ? new AmazonDynamoDBClient(new AmazonDynamoDBConfig
@@ -52,19 +52,20 @@ namespace App
             return services;
         }
 
- 
+
         /// <summary>
         ///     Register all the persistence layer services (eg repositories/stores)
         /// </summary>
         /// <remarks>
         ///    Most of these services will *also* require other services that are not registered in here (eg id generators, time, currency)
         /// </remarks>
-        public static IServiceCollection RegisterRespositories(this IServiceCollection services)
+        public static IServiceCollection RegisterRepositories(this IServiceCollection services)
         {
             /**
              * DynamoDb Stores
              */
             services.AddScoped<ITodoStore, TodoStore>();
+            services.AddScoped<ITodoListStore, TodoListStore>();
             services.AddScoped<ITenantStore, TenantStore>();
             services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<ITagStore, TagStore>();

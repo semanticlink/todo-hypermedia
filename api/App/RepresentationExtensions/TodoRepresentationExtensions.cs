@@ -16,23 +16,22 @@ namespace App.RepresentationExtensions
     public static class TodoRepresentationExtensions
     {
         /// <summary>
-        ///     Feed reperesentation of todos parented on a user
+        ///     Feed representation of todos parented on a named todo list
         /// </summary>
-        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Todo> todos,
-            string userId,
-            string tenantId,
+        public static FeedRepresentation ToFeedRepresentation(
+            this IEnumerable<Todo> todos,
+            string todoListId,
             IUrlHelper url)
         {
             return new FeedRepresentation
             {
                 Links = new[]
                 {
-                    // self
-                    tenantId.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    // self (the feed of todos on a todo list)
+                    todoListId.MakeTodoListTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // up link to user
-                    userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
-
+                    // up link to a named todolist
+                    todoListId.MakeTodoListUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // create-form
                     url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
@@ -97,15 +96,16 @@ namespace App.RepresentationExtensions
             };
         }
 
-        public static TodoCreateData FromRepresentation(this TodoCreateDataRepresentation todo,
-            string tenantId)
+        public static TodoCreateData FromRepresentation(
+            this TodoCreateDataRepresentation todo,
+            string todoListId)
         {
             return new TodoCreateData
             {
                 Name = todo.Name
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a name"),
 
-                Tenant = tenantId
+                TodoList = todoListId
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a tenant"),
 
                 Due = todo.Due,
@@ -124,7 +124,7 @@ namespace App.RepresentationExtensions
                     todo.Id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up - the collection of user todos is the logical parent
-                    todo.Tenant.MakeUserTenantTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    todo.TodoList.MakeTodoListTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // the collection of todos tags (this may or may not have tags ie is an empty collection)
                     todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),

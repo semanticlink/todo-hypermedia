@@ -7,8 +7,9 @@ namespace Domain.Persistence
 {
     public interface ITodoStore
     {
- 
-        Task<string> Create(string ownerId, string contextResourceId,
+        Task<string> Create(
+            string ownerId, 
+            string contextResourceId,
             TodoCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights);
@@ -33,7 +34,6 @@ namespace Domain.Persistence
         ///     Retrieve a full set of todos by <see cref="User"/>
         /// </summary>
         Task<IEnumerable<Todo>> GetByUser();
-        Task<IEnumerable<Todo>> GetByTenant(string tenantId);
 
         /// <summary>
         ///     Update details of a <see cref="Todo"/> that includes checking if the <see cref="Todo.Tags"/> have changed
@@ -67,5 +67,11 @@ namespace Domain.Persistence
         /// </summary>
         /// <param name="tagId"><see cref="Tag.Id"/> of the tag to be searched across all todos</param>
         Task<IEnumerable<Todo>> GetByTag(string tagId);
+
+        /// <summary>
+        ///     Retrieve a list of todo based on a <see cref="TodoList"/>
+        /// </summary>
+        /// <param name="todoListId"><see cref="TodoList.Id"/> of the tag to be searched across all todos</param></param>
+        Task<IEnumerable<Todo>> GetByList(string todoListId);
     }
 }

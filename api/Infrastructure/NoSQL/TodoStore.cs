@@ -42,8 +42,12 @@ namespace Infrastructure.NoSQL
             var todo = new Todo
             {
                 Id = _idGenerator.New(),
+/*
                 Tenant = data.Tenant
                     .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Tenant cannot be empty"),
+*/
+                TodoList = data.TodoList
+                    .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Todo list cannot be empty"),
                 Name = data.Name,
                 State = data.State,
                 Due = data.Due,
@@ -117,21 +121,13 @@ namespace Infrastructure.NoSQL
             return await GetAll();
         }
 
-        public async Task<IEnumerable<Todo>> GetByTenant(string tenantId)
-        {
-            return await _context.Where<Todo>(new List<ScanCondition>
-            {
-                new ScanCondition(nameof(Todo.Tenant), ScanOperator.Equal, tenantId)
-            });
-        }
-
 
         public async Task Update(string id, Action<Todo> updater)
         {
             var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            var tenantId = todo.Tenant;
+            var todoListId = todo.TodoList;
 
             var originalTags = todo.Tags.IsNullOrEmpty()
                 ? new List<string>()
@@ -143,7 +139,7 @@ namespace Infrastructure.NoSQL
 
             // no messing with the IDs allowed
             todo.Id = id;
-            todo.Tenant = tenantId;
+            todo.TodoList = todoListId;
 
             // no messing with the update time allowed
             todo.UpdatedAt = DateTime.UtcNow;
@@ -194,6 +190,12 @@ namespace Infrastructure.NoSQL
         public async Task<IEnumerable<Todo>> GetByTag(string tagId)
         {
             return await _context.Where<Todo>(new ScanCondition(nameof(Todo.Tags), ScanOperator.Contains, tagId));
+        }
+
+        public async Task<IEnumerable<Todo>> GetByList(string todoListId)
+        {
+            return await _context.Where<Todo>(
+                new ScanCondition(nameof(Todo.TodoList), ScanOperator.Contains, todoListId));
         }
 
         private async Task SetRightsForTodoTag(string todoId, IList<string> origIds, IList<string> newIds)

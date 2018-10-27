@@ -108,4 +108,13 @@ namespace Api.Authorisation
     public class AuthoriseRedirectAttribute : AuthorizeAttribute
     {
     }
+    
+    /// <summary>
+    ///     Wrapper around Authorize so that we can add authentication later on—this is a transitional stage
+    /// </summary>
+    public class AuthoriseMeAsapAttribute : AuthorizeAttribute
+    {
+    }
+    
+    
 }

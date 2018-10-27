@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
 using App;
@@ -20,13 +19,13 @@ namespace Api.Controllers
     public class UserController : Controller
     {
         private readonly IUserStore _userStore;
-        private readonly ITodoStore _todoStore;
+        private readonly ITodoListStore _todoListStore;
         private readonly ITenantStore _tenantStore;
 
-        public UserController(IUserStore userStore, ITodoStore todoStore, ITenantStore tenantStore)
+        public UserController(IUserStore userStore, ITodoListStore todoListStore, ITenantStore tenantStore)
         {
             _userStore = userStore;
-            _todoStore = todoStore;
+            _todoListStore = todoListStore;
             _tenantStore = tenantStore;
         }
 
@@ -56,6 +55,9 @@ namespace Api.Controllers
                 .MakeRedirect();
         }
 
+        /// <summary>
+        ///     A user resource that parents todo lists and allows access to authentication mechanisms
+        /// </summary>
         [HttpGet("{id}", Name = UserUriFactory.UserRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
@@ -69,7 +71,7 @@ namespace Api.Controllers
             return (await _userStore
                     .Get(userId))
                 .ThrowObjectNotFoundExceptionIfNull($"User '{id}' not found")
-                .ToRepresentation(tenants.ToList(), Url);
+                .ToRepresentation(Url);
         }
 
 
@@ -100,36 +102,47 @@ namespace Api.Controllers
         //
         // (tenant) Todo collection on a user
 
+
         /// <summary>
         ///     User todo collection
         /// </summary>
         /// <see cref="TodoController.GetById"/>
-        [HttpGet("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]
+        [HttpGet("{id}/todolist", Name = UserUriFactory.UserTodosRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
-        [AuthoriseUserTenantTodoCollection(Permission.Get)]
-        public async Task<FeedRepresentation> GetUserTodos(string tenantId)
+//        [AuthoriseUserTenantTodoCollection(Permission.Get)]
+        [AuthoriseMeAsap]
+        public async Task<FeedRepresentation> GetUserTodo(string id)
         {
-            return (await _todoStore
-                    .GetByTenant(tenantId))
-                .ToFeedRepresentation(User.GetId(), tenantId, Url);
+            var todoLists = await _todoListStore
+                .GetByUser(id);
+            return todoLists
+                .ToFeedRepresentation(id, Url);
         }
 
-        [HttpPost("tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodosRouteName)]
-        [AuthoriseUserTenantTodoCollection(Permission.Post)]
-        public async Task<CreatedResult> Create([FromBody] TodoCreateDataRepresentation data, string tenantId)
+        /// <summary>
+        ///     Create a user named todo list
+        /// </summary>
+        [HttpPost("{id}/todolist", Name = UserUriFactory.UserTodosRouteName)]
+//        [AuthoriseUserTenantTodoCollection(Permission.Post)]
+        [AuthoriseMeAsap]
+        public async Task<CreatedResult> CreateTodoList([FromBody] TodoListCreateDataRepresentation data, string id)
         {
             var userId = User.GetId();
-            return (await _todoStore.Create(
+            
+            // reverse map an absolute uri into a tenantId
+            var tenantId = data.Tenant.GetParamFromNamedRoute("id", TenantUriFactory.TenantRouteName, HttpContext);
+            
+            return (await _todoListStore.Create(
                     userId,
                     userId, // context is the userId
                     data
-                        .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
+                        .ThrowInvalidDataExceptionIfNull("Invalid todo list create data")
                         .FromRepresentation(tenantId),
                     Permission.FullControl,
                     CallerCollectionRights.Todo
                 ))
-                .MakeTodoUri(Url)
+                .MakeTodoListUri(Url)
                 .MakeCreated();
         }
     }

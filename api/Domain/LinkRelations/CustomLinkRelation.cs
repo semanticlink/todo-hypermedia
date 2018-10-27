@@ -30,7 +30,7 @@
         public const string Auth0 = "auth0";
 
         /// <summary>
-        ///     Link to the collection avaiallable to the authenticated user
+        ///     Link to the collection avaialable to the authenticated user
         /// </summary>
         public const string Me = "me";
 
@@ -38,6 +38,7 @@
         ///     Tenants collection for authenticated users
         /// </summary>
         public const string Tenants = "tenants";
+        public const string Tenant = "tenant";
 
         /// <summary>
         ///     Users collection on a tenant

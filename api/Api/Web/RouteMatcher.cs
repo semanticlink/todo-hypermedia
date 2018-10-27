@@ -11,17 +11,17 @@ namespace Api.Web
 {
     /// <summary>
     /// <para>
-    ///     A reverse uri to params via routename coverter.
+    ///     A reverse uri to params via routename converter.
     /// </para>
     /// <para>
-    ///     Takes in an absolute uri, with the Named Route returns the named param in the route template (that attribtued)
+    ///     Takes in an absolute uri, with the Named Route returns the named param in the route template (that attributed)
     /// </para>
     /// <para>
     ///    Used as a reverse mapping for <see cref="IUrlHelper.Link"/>
     /// </para>
     /// </summary>
     /// <remarks>
-    ///    Aplogies, I couldn't find the proper way to do this so rolled my own
+    ///    Apologies, I couldn't find the proper way to do this so rolled my own
     /// </remarks>
     public static class RouteMatcher
     {

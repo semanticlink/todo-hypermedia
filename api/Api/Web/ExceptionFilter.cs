@@ -31,7 +31,7 @@ namespace Api.Web
                     context.Result = new ForbidResult();
                     break;
                 case InvalidDataException _:
-                    // Log a trace message so we can find and fix these if they are inappropriatly
+                    // Log a trace message so we can find and fix these if they are inappropriately
                     // generating the wrong/unexpected exception type.
                     log.TraceExceptionFormat(
                         ex,

@@ -11,12 +11,9 @@ namespace Domain.Models
         [DynamoDBHashKey] public string Id { get; set; }
 
         /// <summary>
-        ///     Todos logically belong to a user and a tenant
+        ///     Todos now logical belong to a list (which belongs to one tenant)
         /// </summary>
-        /// <remarks>
-        ///    Todos could actually live across tenants but for now it is only one tenant
-        /// </remarks>
-        public string Tenant { get; set; }
+        public string TodoList { get; set; }
 
         public string Description { get; set; }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
@@ -111,6 +110,13 @@ namespace Api.Web
                 tagStore,
                 services.GetRequiredService<ILogger<TodoStore>>());
 
+            var todoListStore = new TodoListStore(
+                provisioningUser,
+                context,
+                idGenerator,
+                userRightsStore,
+                tenantStore,
+                services.GetRequiredService<ILogger<TodoListStore>>());
 
             // ensure the database is up and tables are created
             await services.GetRequiredService<IAmazonDynamoDB>()
@@ -127,8 +133,8 @@ namespace Api.Web
             // A precreated user (in third-party system) [or decoded JWT through https://jwt.io
             // grab it from the Authorization header in a request]
             var knownAuth0Id = configuration.GetSection("TestSeedUser").Value;
-            
-            log.DebugFormat("[Seed] found seed user '{0}'",knownAuth0Id);
+
+            log.DebugFormat("[Seed] found seed user '{0}'", knownAuth0Id);
 
             var rootUser = (await userStore.GetByExternalId(TrustDefaults.KnownRootIdentifier))
                 .ThrowConfigurationErrorsExceptionIfNull(() => "Root user has not been configured");
@@ -217,9 +223,29 @@ namespace Api.Web
 
                 log.InfoFormat("[Seed] tags: [{0}]", tagIds.ToCsvString(tagId => tagId));
 
+                /////////////////////////////////////
+                // Seed a named todo list
+                // ======================
+                //
+
+                var todoListCreateData = new TodoListCreateData
+                {
+                    Tenant = tenantId,
+                    Name = "Shopping Todo List"
+                };
+
+                var todoListId = await todoListStore.Create(
+                    userId,
+                    tenantId,
+                    todoListCreateData,
+                    Permission.Owner,
+                    CallerCollectionRights.Todo);
+
+                log.InfoFormat("[Seed] todo list [{0}]", todoListId);
+
                 //////////////////////////
                 // Seed some todos
-                // =============
+                // ===============
                 //
 
                 var createTodoDatas = new List<TodoCreateData>
@@ -227,20 +253,20 @@ namespace Api.Web
                     new TodoCreateData
                     {
                         Name = "One Todo",
-                        Tenant = tenantId
+                        TodoList = todoListId
                     },
                     new TodoCreateData
                     {
                         Name = "Two Todo (tag)",
                         Tags = new List<string> {tagIds.First()},
                         State = TodoState.Complete,
-                        Tenant = tenantId
+                        TodoList = todoListId
                     },
                     new TodoCreateData
                     {
                         Name = "Three Todo (tagged)",
                         Tags = tagIds,
-                        Tenant = tenantId
+                        TodoList = todoListId
                     }
                 };
 

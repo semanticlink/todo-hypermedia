@@ -14,9 +14,7 @@ namespace App.RepresentationExtensions
 {
     public static class UserRepresentationExtensions
     {
-        public static UserRepresentation ToRepresentation(
-            this User user,
-            List<Tenant> tenantId,
+        public static UserRepresentation ToRepresentation(this User user,
             IUrlHelper url)
         {
             return new UserRepresentation
@@ -28,13 +26,18 @@ namespace App.RepresentationExtensions
 
                         // logical parent of user is home
                         url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
+                        
+                        // named todo lists
+                        user.Id.MakeUserTodosUri(url).MakeWebLink(CustomLinkRelation.Todos),
 
                         // edit-form
                         url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
                     }
+/*
                     // user tenant todos
                     .Concat(tenantId.Select(tenant =>
                         tenant.Id.MakeUserTenantTodosUri(url).MakeWebLink(CustomLinkRelation.Todos, tenant.Code)))
+*/
                     // authentication
                     .Concat(new Auth0Id().MakeWebLinks(user.ExternalIds, url))
                     // TODO: user tennants

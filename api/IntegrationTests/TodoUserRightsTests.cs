@@ -28,7 +28,7 @@ namespace IntegrationTests
         {
             // Setup 
             //   - user
-            //   - todo collection context
+            //   - todo collection context (
             //   - todo (that we want to created)
 
             Register(services => { services.AddTransient(ctx => new User {Id = UserId}); });
@@ -40,7 +40,8 @@ namespace IntegrationTests
 
             var createData = new TodoCreateData
             {
-                Name = "Test"
+                Name = "Test",
+                TodoList = NewId()
             };
 
             /////////////////////////////////////////////////////////////
