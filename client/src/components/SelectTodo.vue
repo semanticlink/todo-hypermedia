@@ -2,21 +2,20 @@
     <div class="hello">
         <h1>Todo lists</h1>
 
-        <div v-for="todo in todos.items" v-cloak>
+        <ul v-for="todo in todos.items" v-cloak>
 
-            <b-button @click="gotoTodo(todo)">{{ todo.name }}</b-button>
+            <li><b-link @click="gotoTodo(todo)">{{ todo.name }}</b-link></li>
 
-        </div>
+        </ul>
     </div>
 </template>
 
 <script>
-    import {_} from 'semantic-link-cache';
     import {log} from 'logger';
     import {redirectToTodo} from "router";
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
     import bButton from 'bootstrap-vue/es/components/button/button';
-    import {getTodoList, getTodos} from 'domain/todo';
+    import {getTodoList} from 'domain/todo';
 
     export default {
         components: {DragAndDroppableModel, bButton},
@@ -56,6 +55,9 @@
                                 title: "You have no todo lists and need to create some",
                                 type: 'info'
                             });
+
+                            // TODO: implement create in the UI
+
                         } else if (tail.length === 0) {
                             // there is only one todo so let's go there
                             return this.gotoTodo(head)

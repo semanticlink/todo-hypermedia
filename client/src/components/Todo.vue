@@ -162,8 +162,7 @@
             return getTodoListByUri(this.$root.$api, this.apiUri)
                 .then(todos => {
 
-                    console.log('***', todos)
-                    return this.todoCollection = todos;
+                     return this.todoCollection = todos;
                 })
                 .then(() => this.reset())
                 .catch(err => log.error(err));
