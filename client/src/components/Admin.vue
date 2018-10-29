@@ -61,6 +61,7 @@
                 busy: true,
                 me: {},
                 todos: {},
+                tenants: {},
             };
         },
         created: function () {

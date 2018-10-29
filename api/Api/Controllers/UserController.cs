@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
 using App;
@@ -114,9 +115,8 @@ namespace Api.Controllers
         [AuthoriseMeAsap]
         public async Task<FeedRepresentation> GetUserTodo(string id)
         {
-            var todoLists = await _todoListStore
-                .GetByUser(id);
-            return todoLists
+            return (await _todoListStore
+                    .GetByUser(id))
                 .ToFeedRepresentation(id, Url);
         }
 
@@ -129,10 +129,10 @@ namespace Api.Controllers
         public async Task<CreatedResult> CreateTodoList([FromBody] TodoListCreateDataRepresentation data, string id)
         {
             var userId = User.GetId();
-            
+
             // reverse map an absolute uri into a tenantId
             var tenantId = data.Tenant.GetParamFromNamedRoute("id", TenantUriFactory.TenantRouteName, HttpContext);
-            
+
             return (await _todoListStore.Create(
                     userId,
                     userId, // context is the userId
@@ -144,6 +144,22 @@ namespace Api.Controllers
                 ))
                 .MakeTodoListUri(Url)
                 .MakeCreated();
+        }
+
+        /////////////////////////
+        //
+        // (tenant) Tenant collection on a user
+
+
+        /// <summary>
+        ///     Tenants available for a user
+        /// </summary>
+        [HttpGet("{id}/tenant", Name = UserUriFactory.UserTenantsRouteName)]
+        [AuthoriseMeAsap]
+        public async Task<FeedRepresentation> GetUserTenant(string id)
+        {
+            return (await _tenantStore.GetTenantsForUser(id))
+                .ToTenantFeedRepresentation(id, Url);
         }
     }
 }

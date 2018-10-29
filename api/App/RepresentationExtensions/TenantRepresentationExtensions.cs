@@ -40,6 +40,7 @@ namespace App.RepresentationExtensions
             };
         }
 
+
         public static FeedRepresentation ToRepresentation(
             this IEnumerable<Tenant> tenants,
             string criteria,
@@ -87,6 +88,29 @@ namespace App.RepresentationExtensions
                     .Select(id => ToFeedRepresentationItem(id, url))
                     .ToArray()
             };
+        }
+
+        
+        public static FeedRepresentation ToTenantFeedRepresentation(
+            this IEnumerable<Tenant> tenants,
+            string userId,
+            IUrlHelper url)
+        {
+            var feedRepresentation = new FeedRepresentation
+            {
+                Links = new[]
+                {
+                    // self
+                    userId.MakeUserTenantsUri(url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // home is the logical parent
+                    userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
+                },
+                Items = tenants
+                    .Select(tenant => ToFeedRepresentationItem(tenant, url))
+                    .ToArray()
+            };
+            return feedRepresentation;
         }
 
 

@@ -4,7 +4,7 @@ Todo network of data resource types:
 
 class home as "Home/Root of the API" <<H, #00FF00) >>
 home : version
-home +--|> tenant : tenants
+' home +--|> tenant : tenants
 home +--|> tag : tags
 home #-left-|> todoState : states
 home .--|> user : me
@@ -23,6 +23,7 @@ tenant +--|> todo : todos
 class todo as "todo"   <<I, #0000FF) >>
 todo : many
 todo : state
+todo +--> todo : todos
 todo #--|> todoState
 todo +--|> comment : comments
 todo +--|> tag : tags
@@ -42,7 +43,7 @@ note top
   the system 
 end note
 user : name
-user +--|> tenant : tenant
+user +--|> tenant : tenants
 user +--|> todo : todos
 
 

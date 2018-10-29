@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using App.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
@@ -26,21 +25,18 @@ namespace App.RepresentationExtensions
 
                         // logical parent of user is home
                         url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
-                        
+
                         // named todo lists
                         user.Id.MakeUserTodosUri(url).MakeWebLink(CustomLinkRelation.Todos),
 
+                        // user tenants
+                        user.Id.MakeUserTenantsUri(url).MakeWebLink(CustomLinkRelation.Tenants),
+        
                         // edit-form
-                        url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm)
+                        url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm),
                     }
-/*
-                    // user tenant todos
-                    .Concat(tenantId.Select(tenant =>
-                        tenant.Id.MakeUserTenantTodosUri(url).MakeWebLink(CustomLinkRelation.Todos, tenant.Code)))
-*/
                     // authentication
                     .Concat(new Auth0Id().MakeWebLinks(user.ExternalIds, url))
-                    // TODO: user tennants
                     .ToArray()
                     .RemoveNulls(),
                 Email = user.Email,
