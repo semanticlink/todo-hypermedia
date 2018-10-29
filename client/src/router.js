@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import {makeAbsolute, toSitePath} from 'semantic-link-utils/UriMapping';
-import SelectTenant from './components/SelectTenant.vue';
 import Admin from './components/Admin.vue';
 import Todo from './components/Todo.vue';
+import SelectTodo from './components/SelectTodo.vue';
 import * as link from 'semantic-link';
 
 Vue.use(VueRouter);
@@ -102,7 +102,7 @@ const router = new VueRouter({
         {
             path: routePath.Home,
             name: routeName.Home,
-            component: SelectTenant,
+            component: SelectTodo,
         },
         {
             path: routePath.Admin,
@@ -120,8 +120,9 @@ const router = new VueRouter({
 
 const redirect = (representation, path, query = {}) => router.push({...{path: toSitePath(link.getUri(representation, /self/), path)}, ...query});
 
-export const redirectToTenant = (tenantRepresentation, filter) => {
-    return redirect(tenantRepresentation, makePrefix(clientPath.Todo), filter);
+
+export const redirectToTodo = (todoRepresentation, filter) => {
+    return redirect(todoRepresentation, makePrefix(clientPath.Todo), filter);
 };
 
 export default router;

@@ -64,9 +64,9 @@
 
     import {_, cache} from 'semantic-link-cache';
     import {log} from 'logger';
-    import {redirectToTenant} from 'router';
+    import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';
-    import {defaultTodo, getTenant, getTodos} from "domain/todo";
+    import {defaultTodo, getTodoListByUri, getTodos} from "domain/todo";
     import {mapCompletedToState} from "semantic-link-utils/form-type-mappings";
 
     /**
@@ -149,6 +149,8 @@
 
         created() {
 
+            log.debug(`Loading selected todo ${this.apiUri}`);
+
             /**
              * Visibility filter can be handed in via the Uri (eg http://localhost:8080/#/todo/a/tenant/1?completed)
              * @type {filterEnum}
@@ -156,10 +158,13 @@
             const visibilityFilterFromUriQuery = _(this.$route.query).chain().keys().first().value();
             this.setVisibilityFilter(visibilityFilterFromUriQuery);
 
-            log.debug(`Loading selected organisation`);
 
-            return getTodos(this.$root.$api, this.apiUri)
-                .then(todos => this.todoCollection = todos)
+            return getTodoListByUri(this.$root.$api, this.apiUri)
+                .then(todos => {
+
+                    console.log('***', todos)
+                    return this.todoCollection = todos;
+                })
                 .then(() => this.reset())
                 .catch(err => log.error(err));
 
@@ -331,8 +336,8 @@
                         break;
                 }
 
-                return getTenant(this.$root.$api, this.apiUri)
-                    .then(tenant => redirectToTenant(tenant, query));
+                return getTodo(this.$root.$api, this.apiUri)
+                    .then(todo => redirectToTodo(todo, query));
 
             }
         }

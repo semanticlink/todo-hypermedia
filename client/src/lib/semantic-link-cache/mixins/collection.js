@@ -30,7 +30,7 @@ const isLinkedRepresentation = resource => {
  *
  * @param {CollectionRepresentation|LinkedRepresentation[]} collection
  * @param {string} uri
- * @param {string|RegExp} rel
+ * @param {string|RegExp=} rel=/self|canonical/
  */
 export const findResourceInCollectionByUri = (collection, uri, rel) =>
     normalise(collection).find(item => link.getUri(item, rel || /self|canonical/) === uri);

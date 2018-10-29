@@ -2,6 +2,7 @@ import {cache} from 'semantic-link-cache';
 import * as link from 'semantic-link';
 import {TEXT} from 'semantic-link-utils/form-type-mappings';
 import {log} from 'logger';
+import {findResourceInCollectionByUri} from 'semantic-link-cache/mixins/collection';
 
 /**
  * use the organisation from a provided list (when authenticated)
@@ -9,28 +10,60 @@ import {log} from 'logger';
  * @param {string} tenantUri
  * @returns {Promise<TenantRepresentation>}
  */
-const getTenant = (apiResource, tenantUri) => {
+export const getTenant = (apiResource, tenantUri) => {
     return cache
         .getResource(apiResource)
         .then(apiResource => cache.getNamedCollection(apiResource, 'tenants', /tenants/))
         .then(tenants => cache.getCollectionItemByUri(tenants, tenantUri));
 };
-
 /**
- * use the organisation from a provided list (when authenticated)
- *
- * Warning: this design has a flaw. Switching between tenant todos will conflict
+ * Get the first level of todos (regardless of tenants)
  *
  * @param {ApiRepresentation} apiResource
- * @param {string} tenantUri
+ * @param {UtilOptions?} options
+ * @returns {Promise<TodoCollectionRepresentation>} sparsely populated
+ */
+export const getTodoList = (apiResource, options) => {
+
+    log.debug('Looking for todos on root');
+
+    return cache.getSingleton(apiResource, 'me', /me/, options)
+        .then(user => cache.getNamedCollection(user, 'todos', /todos/, options));
+};
+
+/**
+ * Get the todos on the todo list
+ * @param todoListResource
+ * @param {UtilOptions?} options
  * @returns {Promise<TodoCollectionRepresentation>}
  */
-const getTodos = (apiResource, tenantUri) => {
-    log.debug(`Looking for todos in tenant ${tenantUri}`);
+export const getTodos = (todoListResource, options) => {
 
-    return Promise.all([cache.getSingleton(apiResource, 'me', /me/), getTenant(apiResource, tenantUri)])
-    // note this usese 'code' to select the title on the link relation
-        .then(([me, tenant]) => cache.getNamedCollectionByTitle(me, 'todos', /todos/, tenant.code));
+    log.debug(`Looking for todos on list ${link.getUri(todoListResource, 'self')}`);
+
+    return cache.getNamedCollectionAndItems(todoListResource, 'todos', /todos/, options);
+};
+
+
+/**
+ * Get the todolist based on a uri starting from the root
+ *
+ * Looks for: (api)-(me)-[todos...{self:$todoUri}]-[todos...]
+ *
+ * @param {ApiRepresentation} apiResource
+ * @param {string} todoUri
+ * @param {UtilOptions?} options
+ * @returns {Promise<CollectionRepresentation>}
+ */
+export const getTodoListByUri = (apiResource, todoUri, options) => {
+
+    return getTodoList(apiResource, options)
+        .then(todosList => {
+
+            const itemResource = findResourceInCollectionByUri(todosList, todoUri);
+
+            return cache.getNamedCollectionAndItems(itemResource, 'todos', /todos/, options);
+        });
 };
 
 /**
@@ -43,7 +76,7 @@ const getTodos = (apiResource, tenantUri) => {
  * @param todoResource
  * @returns {Promise<any>}
  */
-const defaultTodo = todoResource => {
+export const defaultTodo = todoResource => {
     return cache
         .getResource(todoResource)
         .then(todoCollection => cache.getSingleton(todoCollection, 'createForm', /create-form/))
@@ -63,5 +96,3 @@ const defaultTodo = todoResource => {
         })
         .catch((err) => log.error(err));
 };
-
-export {getTenant, getTodos, defaultTodo};

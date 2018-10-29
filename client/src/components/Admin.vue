@@ -60,7 +60,7 @@
                 invalid: '',
                 busy: true,
                 me: {},
-                tenants: {},
+                todos: {},
             };
         },
         created: function () {
@@ -120,7 +120,7 @@
             },
             createOrUpdateUsersOnTenant(tenantDocument) {
 
-                createOrUpdateUsersOnTenant(this.$root.$api.tenants, tenantDocument, this.$root.$api, {})
+                createOrUpdateUsersOnTenant(this.$root.$api.todos, tenantDocument, this.$root.$api, {})
                     .then(this.notifySuccess)
                     .catch(this.notifyError);
 

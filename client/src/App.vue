@@ -18,7 +18,6 @@
     import Offline from './components/Offline.vue';
     import Login from './components/Login.vue';
     import {cache} from 'semantic-link-cache';
-    import * as link from 'semantic-link';
     import {routeName, routePath} from "router";
     import {apiUri} from 'semantic-link-utils/UriMapping';
 
