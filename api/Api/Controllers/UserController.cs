@@ -156,10 +156,21 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet("{id}/tenant", Name = UserUriFactory.UserTenantsRouteName)]
         [AuthoriseMeAsap]
-        public async Task<FeedRepresentation> GetUserTenant(string id)
+        public async Task<FeedRepresentation> GetUserTenants(string id)
         {
             return (await _tenantStore.GetTenantsForUser(id))
                 .ToTenantFeedRepresentation(id, Url);
+        }
+        
+       /// <summary>
+        ///     Tenant available for a user
+        /// </summary>
+        [HttpGet("{id}/tenant/{tenantId}", Name = UserUriFactory.UserTenantRouteName)]
+        [AuthoriseMeAsap]
+        public async Task<TenantRepresentation> GetUserTenant(string id, string tenantId)
+        {
+            return (await _tenantStore.Get(tenantId))
+                .ToRepresentation(id, Url);
         }
     }
 }

@@ -40,6 +40,40 @@ namespace App.RepresentationExtensions
             };
         }
 
+        /// <summary>
+        ///    Tenant for a user with access to the user's todos (as well as the tenants users that that user has access to)     
+        /// </summary>
+        public static TenantRepresentation ToRepresentation(this Tenant tenant, string userId, IUrlHelper url)
+        {
+            return new TenantRepresentation
+            {
+                Links = new[]
+                {
+                    // self
+                    userId.MakeUserTenantUri(tenant.Id, url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // canonical
+                    tenant.Id.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Canonical),
+
+                    // logical parent of user tenant is user
+                    url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
+
+                    // todos
+                    userId.MakeUserTodosUri(url).MakeWebLink(CustomLinkRelation.Todos),
+
+                    // users over the entire tenant
+                    tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users),
+
+                    // edit form
+                    url.MakeTenantEditFormUri().MakeWebLink(IanaLinkRelation.EditForm),
+                },
+
+                Code = tenant.Code,
+                Name = tenant.Name,
+                Description = tenant.Description
+            };
+        }
+
 
         public static FeedRepresentation ToRepresentation(
             this IEnumerable<Tenant> tenants,
@@ -90,7 +124,7 @@ namespace App.RepresentationExtensions
             };
         }
 
-        
+
         public static FeedRepresentation ToTenantFeedRepresentation(
             this IEnumerable<Tenant> tenants,
             string userId,
@@ -107,12 +141,24 @@ namespace App.RepresentationExtensions
                     userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
                 },
                 Items = tenants
-                    .Select(tenant => ToFeedRepresentationItem(tenant, url))
+                    .Select(tenant => tenant.ToUserTenantFeedRepresentationItem(userId, url))
                     .ToArray()
             };
             return feedRepresentation;
         }
 
+
+        private static FeedItemRepresentation ToUserTenantFeedRepresentationItem(
+            this Tenant tenant,
+            string userId,
+            IUrlHelper url)
+        {
+            return new FeedItemRepresentation
+            {
+                Id = userId.MakeUserTenantUri(tenant.Id, url),
+                Title = tenant.Name
+            };
+        }
 
         private static FeedItemRepresentation ToFeedRepresentationItem(this Tenant tenant, IUrlHelper url)
         {
