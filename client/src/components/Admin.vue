@@ -67,7 +67,10 @@
                 error: false,
                 invalid: '',
                 busy: true,
-                me: {},
+
+                /**
+                 * Tenants available for the user
+                 */
                 tenants: {},
             };
         },
@@ -95,6 +98,7 @@
 
                         // this is not a lazy-loading UI design (large sets will appear after time)
                         return getTodosWithTagsOnTenantTodos(tenants, options)
+                        // lazy loading would require explicit setting inside the tenants
                             .then(() => this.tenants = tenants)
 
                     })
@@ -112,9 +116,20 @@
 
         },
         methods: {
+            /**
+             * User has decided to browse to the todo list to work on it
+             */
             gotoTodo(todo) {
                 redirectToTodo(todo);
             },
+            /**
+             * Create a new tenant and clones existing lists/tags onto this tenant
+             *
+             * Note: demo version just creates its own new tenant with random numbers
+             *
+             * @param tenantDocument
+             * @param apiResource
+             */
             createTenantOnRoot(tenantDocument, apiResource) {
 
                 // Ensure the survey name and code are 'unique' (To Be Deleted)
@@ -130,6 +145,10 @@
                     .then(this.notifySuccess)
                     .catch(this.notifyError);
             },
+            /**
+             * Update an existing tenant with existing (or new) todo lists with tags)
+             * @param tenantDocument
+             */
             createOrUpdateUsersOnTenant(tenantDocument) {
 
                 createOrUpdateUsersOnTenant(this.$root.$api.todos, tenantDocument, this.$root.$api, {})
@@ -137,7 +156,15 @@
                     .catch(this.notifyError);
 
             },
-            hydrateTenant: function (tenantTodos) {
+            /**
+             * Helper that when a tenant is on start drag that the entire graph is hydrated. Once that is done
+             * it hands back off with an event that needs to be listened for.
+             *
+             * Note: communicating between events async requires this approach
+             *
+             * @param tenantTodos
+             */
+            hydrateTenant(tenantTodos) {
                 getTodosWithTagsOnTenantTodos(tenantTodos)
                     .then(() => eventBus.$emit('resource:ready'))
                     .catch(err => {

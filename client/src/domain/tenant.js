@@ -6,8 +6,19 @@ import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
 import {uriMappingResolver, sync, cache} from 'semantic-link-cache';
 
 
+/***********************************
+ *
+ * Retrieve tenant information
+ * ===========================
+ */
+
+
 /**
  * Get the tenants that an authenticated user has access to
+ *
+ * Context: (api)
+ * Access: -(me)-[tenants...]
+ *
  * @param {ApiRepresentation} apiResource
  * @param {UtilOptions?} options
  * @returns {Promise<TenantCollectionRepresentation>}
@@ -16,10 +27,27 @@ export const getTenantsOnUser = (apiResource, options) =>
     cache.getSingleton(apiResource, 'me', /me/, options)
         .then(user => cache.getNamedCollectionAndItems(user, 'tenants', /tenants/, options));
 
-export const getTenants = root => cache.getNamedCollection(root, 'tenants', /tenants/);
+/**
+ *
+ * Context: (api)
+ * Access: -[tenants...]
+ * @param apiResource
+ * @param {UtilOptions?} options
+ * @returns {Promise<TenantCollectionRepresentation>}
+ */
+export const getTenants = (apiResource, options) => cache.getNamedCollection(apiResource, 'tenants', /tenants/, options);
 
-const getTags = root => cache.tryGetCollectionAndItems(root, 'tags', /tags/);
+/**
+ *
+ * @param apiResource
+ * @param {UtilOptions?} options
+ * @returns {Promise<CollectionRepresentation|undefined>}
+ */
+const getTags = (apiResource, options) => cache.tryGetCollectionAndItems(apiResource, 'tags', /tags/, options);
 
+/**
+ * @obsolete
+ */
 export const getTenantAndTodos = root => {
     return Promise.all([getTenants(root), getTags(root)])
         .then(([tenantCollection]) => cache.tryGetNamedCollectionAndItemsOnCollectionItems(tenantCollection, 'users', /users/))
@@ -34,6 +62,13 @@ export const getTenantAndTodos = root => {
 };
 
 
+/***********************************
+ *
+ * Create single tenant updates
+ * ============================
+ */
+
+
 const syncUsersStrategy = (tenant, aTenant, strategies, options) =>
     sync.getNamedCollectionInNamedCollection(tenant, 'users', /users/, aTenant, strategies, options);
 
@@ -46,54 +81,28 @@ const syncTagsStrategy = (todo, aTodo, root, options) =>
 const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) =>
     sync.getResourceInCollection(tenantCollection, aTenant, strategies, options);
 
-const syncTenant = (tenantRepresentation, aTenant, root, options) =>
-    sync.getResource(
-        tenantRepresentation,
-        aTenant,
-        [
-            (tenantRepresentation, tenantDocument, options) => syncUsersStrategy(
-                tenantRepresentation,
-                tenantDocument,
-                [
-                    (usersRepresentation, usersDocument, options) => syncTodosStrategy(
-                        usersRepresentation,
-                        usersDocument,
-                        [
-                            (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, root, options)
-                        ],
-                        options)
-                ],
-                options)
-        ],
-        options);
 
 /**
- * Takes a tenant and updates on the collection
+ * Clone a graph of tenant todo lists on root
  *
- * @param {CollectionRepresentation} tenant
- * @param {LinkedRepresentation} aTenant
- * @param {ApiRepresentation} root
- * @param {UtilOptions} options
- * @return {Promise|*|{x, links}}
+ * Context: (api)-(me)-[tenants]
+ * Access: [todos...]-[todos...]-[tags]
+ * Pool: (api)-[tags]
+ *
+ * @param root
+ * @param aTenant
+ * @param {UtilOptions?} options
+ * @returns {Promise<TenantCollectionRepresentation | never>}
  */
-export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
-
-    const tenantRepresentation = findResourceInCollection(tenant, aTenant, 'self');
-
-    log.debug(`Update tenant ${tenantRepresentation.name} --> ${getUri(tenantRepresentation, 'self')}`);
-
-    return syncTenant(tenantRepresentation, aTenant, root, options);
-};
-
 export const createTenantOnRoot = (root, aTenant, options) => {
 
     if (!aTenant) {
         throw new Error('Tenant is empty');
     }
 
-    log.debug('[Tenant] start create on root');
+    log.debug('[Tenant] start create');
 
-    return getTenants(root)
+    return getTenantsOnUser(root, options)
         .then(tenantCollection => {
             log.debug(`[Tenant] root loaded ${getUri(tenantCollection, /self/)}`);
             return syncTenantStrategy(
@@ -123,4 +132,52 @@ export const createTenantOnRoot = (root, aTenant, options) => {
         });
 
 
+};
+
+/***********************************
+ *
+ * Single tenant updates
+ * =====================
+ */
+
+/**
+ * @deprecated
+ */
+const syncTenant = (tenantRepresentation, aTenant, root, options) =>
+    sync.getResource(
+        tenantRepresentation,
+        aTenant,
+        [
+            (tenantRepresentation, tenantDocument, options) => syncUsersStrategy(
+                tenantRepresentation,
+                tenantDocument,
+                [
+                    (usersRepresentation, usersDocument, options) => syncTodosStrategy(
+                        usersRepresentation,
+                        usersDocument,
+                        [
+                            (todoRepresentation, todoDocument, options) => syncTagsStrategy(todoRepresentation, todoDocument, root, options)
+                        ],
+                        options)
+                ],
+                options)
+        ],
+        options);
+
+/**
+ * Takes a tenant and updates on the collection
+ *
+ * @param {CollectionRepresentation} tenant
+ * @param {LinkedRepresentation} aTenant
+ * @param {ApiRepresentation} root
+ * @param {UtilOptions?} options
+ * @return {Promise|*|{x, links}}
+ */
+export const createOrUpdateUsersOnTenant = (tenant, aTenant, root, options) => {
+
+    const tenantRepresentation = findResourceInCollection(tenant, aTenant, 'self');
+
+    log.debug(`Update tenant ${tenantRepresentation.name} --> ${getUri(tenantRepresentation, 'self')}`);
+
+    return syncTenant(tenantRepresentation, aTenant, root, options);
 };
