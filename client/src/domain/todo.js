@@ -3,6 +3,7 @@ import * as link from 'semantic-link';
 import {TEXT} from 'semantic-link-utils/form-type-mappings';
 import {log} from 'logger';
 import {findResourceInCollectionByUri} from 'semantic-link-cache/mixins/collection';
+import {mapWaitAll} from 'semantic-link-cache/mixins/asyncCollection';
 
 /**
  * use the organisation from a provided list (when authenticated)
@@ -44,11 +45,26 @@ export const getTodos = (todoListResource, options) => {
     return cache.getNamedCollectionAndItems(todoListResource, 'todos', /todos/, options);
 };
 
+/**
+ *
+ * Context: (user)-[todos...]
+ * Looks for: -[todos...]+->[tags...]
+ * @param {TenantCollectionRepresentation} userTenantsCollection
+ * @param {UtilOptions?} options
+ * @returns {Promise}
+ */
+export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) => {
+
+    return cache.tryGetNamedCollectionAndItemsOnCollectionItems(userTenantsCollection, 'todos', /todos/, options)
+        .then(todosCollection => mapWaitAll(todosCollection, item =>
+            cache.tryGetNamedCollectionOnCollectionItems(item, 'tags', /tags/, options)));
+};
 
 /**
- * Get the todolist based on a uri starting from the root
+ * Get the todo list based on a uri starting from the root
  *
- * Looks for: (api)-(me)-[todos...{self:$todoUri}]-[todos...]
+ * Context: (api)
+ * Looks for: -(me)-[todos...{self:$todoUri}]-[todos...]
  *
  * @param {ApiRepresentation} apiResource
  * @param {string} todoUri

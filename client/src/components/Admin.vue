@@ -16,14 +16,14 @@
         </h1>
         <ul>
             <li v-for="tenant in tenants.items" v-cloak>
-                <b-link @click="gotoTenant(tenant)">{{ tenant.name }}</b-link>
+                <span>{{ tenant.name }}</span>
                 <drag-and-droppable-model
                         :model="tenant"
                         :async="true"
                         media-type="application/json"
                         :dropped="createOrUpdateUsersOnTenant">
                     <b-button
-                            @mousedown="hydrateTenant"
+                            @mousedown="hydrateTenant(tenant.todos)"
                             variant="outline"
                             v-b-tooltip.hover.html.right
                             title="Drag off to take a copy or drop on to update"
@@ -31,6 +31,12 @@
                         <add w="22px" h="22px" title="Drag"/>
                     </b-button>
                 </drag-and-droppable-model>
+
+                <ul>
+                    <li v-for="todo in tenant.todos.items" v-cloak>
+                        <b-link @click="gotoTodo(todo)">{{ todo.name }}</b-link>
+                    </li>
+                </ul>
 
             </li>
         </ul>
@@ -41,14 +47,16 @@
     import {_} from 'semantic-link-cache';
     import {getUri} from 'semantic-link';
     import {log} from 'logger';
-    import {redirectToTenant} from 'router';
+    import {redirectToTodo} from 'router';
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
-    import {getTenantAndTodos, getTenants, createOrUpdateUsersOnTenant, createTenantOnRoot} from '../domain/tenant';
+    import {createOrUpdateUsersOnTenant, createTenantOnRoot} from '../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
     import {eventBus} from 'semantic-link-utils/EventBus';
+    import {getTenantsOnUser} from 'domain/tenant';
+    import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 
     export default {
@@ -60,23 +68,22 @@
                 invalid: '',
                 busy: true,
                 me: {},
-                todos: {},
                 tenants: {},
             };
         },
         created: function () {
 
-            log.info(`Loading selected tenant from api`);
+            log.info(`Loading tenants for user`);
 
             /**
              * Strategy One: use the first tenant from a provided list (when authenticated)
              * @param {ApiRepresentation} apiResource
+             * @param {UtilOptions?} options
              * @returns {Promise|*}
              */
-            const strategyOneProvidedTenant = (apiResource) => {
-                log.info('Looking for provided tenant');
+            const loadTenantsWithTodoLists = (apiResource, options) => {
 
-                return getTenants(apiResource)
+                return getTenantsOnUser(apiResource, options)
                     .then(tenants => {
                         if (tenants && _(tenants.items).isEmpty()) {
                             this.$notify({
@@ -85,7 +92,11 @@
                             });
                             log.info('No tenants found');
                         }
-                        this.tenants = tenants;
+
+                        // this is not a lazy-loading UI design (large sets will appear after time)
+                        return getTodosWithTagsOnTenantTodos(tenants, options)
+                            .then(() => this.tenants = tenants)
+
                     })
                     .catch(err => {
                         this.$notify({
@@ -97,12 +108,12 @@
                     });
             };
 
-            return strategyOneProvidedTenant(this.$root.$api);
+            return loadTenantsWithTodoLists(this.$root.$api);
 
         },
         methods: {
-            gotoTenant(organisation) {
-                redirectToTenant(organisation);
+            gotoTodo(todo) {
+                redirectToTodo(todo);
             },
             createTenantOnRoot(tenantDocument, apiResource) {
 
@@ -111,7 +122,7 @@
                 tenantDocument.code = `${Date.now() % 1000000}.${tenantDocument.code }`;
                 if ('links' in tenantDocument) {
                     delete tenantDocument.links;
-                 }
+                }
 
                 this.$notify('Starting create new tenant');
 
@@ -126,8 +137,8 @@
                     .catch(this.notifyError);
 
             },
-            hydrateTenant: function () {
-                getTenantAndTodos(this.$root.$api)
+            hydrateTenant: function (tenantTodos) {
+                getTodosWithTagsOnTenantTodos(tenantTodos)
                     .then(() => eventBus.$emit('resource:ready'))
                     .catch(err => {
                         this.$notify({type: 'error', title: 'Could not load up the tenant'});

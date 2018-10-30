@@ -6,6 +6,16 @@ import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
 import {uriMappingResolver, sync, cache} from 'semantic-link-cache';
 
 
+/**
+ * Get the tenants that an authenticated user has access to
+ * @param {ApiRepresentation} apiResource
+ * @param {UtilOptions?} options
+ * @returns {Promise<TenantCollectionRepresentation>}
+ */
+export const getTenantsOnUser = (apiResource, options) =>
+    cache.getSingleton(apiResource, 'me', /me/, options)
+        .then(user => cache.getNamedCollectionAndItems(user, 'tenants', /tenants/, options));
+
 export const getTenants = root => cache.getNamedCollection(root, 'tenants', /tenants/);
 
 const getTags = root => cache.tryGetCollectionAndItems(root, 'tags', /tags/);
