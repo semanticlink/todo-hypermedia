@@ -116,7 +116,7 @@ namespace App.RepresentationExtensions
 
                     tenantId.MakeTenantUri(url).MakeWebLink(IanaLinkRelation.Up),
 
-                    tenantId.MakeRegisterUserCreateFormUri(url).MakeWebLink(IanaLinkRelation.CreateForm)
+                    url.MakeUserCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = userIds
                     .Select(id => ToFeedRepresentationItem(id, url))

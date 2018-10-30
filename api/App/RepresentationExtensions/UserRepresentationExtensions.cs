@@ -70,16 +70,14 @@ namespace App.RepresentationExtensions
         ///     modify instances on the resource
         /// </summary>
         /// <seealso cref="UserCreateDataRepresentation" />
-        public static CreateFormRepresentation ToRegisterUserCreateFormRepresentation(
-            this string tenantId,
-            IUrlHelper url)
+        public static CreateFormRepresentation ToUserCreateFormRepresentation(this IUrlHelper url)
         {
             return new CreateFormRepresentation
             {
                 Links = new[]
                 {
                     // this collection
-                    tenantId.MakeRegisterUserCreateFormUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    url.MakeUserCreateFormUri().MakeWebLink(IanaLinkRelation.Self),
                 },
                 Items = MakeCreateFormItems()
             };

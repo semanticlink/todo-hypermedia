@@ -4,15 +4,9 @@ namespace App.UriFactory
 {
     public static class TodoUriFactory
     {
-        public const string SelfRouteName = "TodosRouteName";
         public const string TodoRouteName = "TodoRouteName";
         public const string CreateFormRouteName = "TodoCreateFormRouteName";
         public const string EditFormRouteName = "TodoEditFormRouteName";
-
-        public static string MakeTodoCollectionUri(this IUrlHelper url)
-        {
-            return url.Link(SelfRouteName, new { });
-        }
 
         public static string MakeTodoUri(this string todoId, IUrlHelper url)
         {

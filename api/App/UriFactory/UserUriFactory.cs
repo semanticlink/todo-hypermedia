@@ -5,12 +5,9 @@ namespace App.UriFactory
     public static class UserUriFactory
     {
         public const string UserRouteName = "UserRouteName";
-        public const string UserCollectionRouteName = "UserRouteName";
         public const string UserMeName = "UserMeName";
         public const string CreateFormRouteName = "UserCreateForm";
-        public const string RegisterCreateFormRouteName = "RegisterCreateFormRouteName";
         public const string EditFormRouteName = "UserEditForm";
-        public const string UserTenantTodosRouteName = "UserTodoCollectionRouteName";
         public const string UserTodosRouteName = "UserNamedTodoCollectionRouteName";
         public const string UserTenantsRouteName = "UserTenantsRouteName";
         public const string UserTenantRouteName = "UserTenantRouteName";
@@ -25,11 +22,6 @@ namespace App.UriFactory
             return url.Link(CreateFormRouteName, new { });
         }
 
-        public static string MakeRegisterUserCreateFormUri(this string tenantId, IUrlHelper url)
-        {
-            return url.Link(RegisterCreateFormRouteName, new {id = tenantId});
-        }
-
         public static string MakeUserEditFormUri(this IUrlHelper url)
         {
             return url.Link(EditFormRouteName, new { });
@@ -38,11 +30,6 @@ namespace App.UriFactory
         public static string MakeUserMeUri(this IUrlHelper url)
         {
             return url.Link(UserMeName, new { });
-        }
-
-        public static string MakeUserTenantTodosUri(this string tenantId, IUrlHelper url)
-        {
-            return url.Link(UserTenantTodosRouteName, new {tenantId = tenantId});
         }
 
         public static string MakeUserTodosUri(this string id, IUrlHelper url)

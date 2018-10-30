@@ -87,6 +87,18 @@ namespace Api.Controllers
             return Url.ToUserEditFormRepresentation();
         }
 
+        /// <summary>
+        ///     A public stateless edit form that is fully cacheable.
+        /// </summary>
+        [HttpGet("form/create", Name = UserUriFactory.CreateFormRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AuthoriseForm]
+        public CreateFormRepresentation GetCreateForm()
+        {
+            return Url.ToUserCreateFormRepresentation();
+        }
+
+
         [HttpPut("{id}")]
         [AuthoriseUser(Permission.Put)]
         public async Task<IActionResult> UpdateUser([FromBody] UserEditData model, string id)
@@ -183,7 +195,7 @@ namespace Api.Controllers
                 .ThrowInvalidDataExceptionIfNotNull("Invalid tenant"); // already exists
 
             var ownerId = User.GetId();
-            
+
             var tenantId = await _tenantStore.Create(
                 ownerId,
                 TrustDefaults.KnownHomeResourceId,

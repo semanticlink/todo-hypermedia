@@ -19,7 +19,7 @@ namespace Api.Controllers
     [Route("tenant")]
     public class TenantController : Controller
     {
-        public ILogger<TenantController> Log { get; }
+        private ILogger<TenantController> Log { get; }
         private readonly ITenantStore _tenantStore;
         private readonly IUserStore _userStore;
 
@@ -85,17 +85,6 @@ namespace Api.Controllers
         {
             return (await _tenantStore.GetUsersByTenant(id))
                 .ToRepresentation(id, Url);
-        }
-
-        [HttpGet("{id}/form/user/create", Name = UserUriFactory.RegisterCreateFormRouteName)]
-        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
-        [AuthoriseForm]
-        public async Task<CreateFormRepresentation> RegisterUserCreateForm(string id)
-        {
-            return (await _tenantStore.Get(id))
-                .ThrowObjectNotFoundExceptionIfNull("Invalid tenant")
-                .Id
-                .ToRegisterUserCreateFormRepresentation(Url);
         }
 
         /// <summary>
