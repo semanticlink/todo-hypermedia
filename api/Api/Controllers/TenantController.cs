@@ -63,42 +63,7 @@ namespace Api.Controllers
             return Url.ToTenantEditFormRepresentation();
         }
 
-        [HttpPost(Name = TenantUriFactory.SelfRouteName)]
-        [AuthoriseRootTenantCollection(Permission.Post)]
-        public async Task<CreatedResult> Create([FromBody] TenantCreateDataRepresentation data)
-        {
-            (await _tenantStore.GetByCode(data.Code))
-                .ThrowInvalidDataExceptionIfNotNull("Invalid tenant");
-
-
-            var tenantId = await _tenantStore.Create(
-                User.GetId(),
-                TrustDefaults.KnownHomeResourceId,
-                data
-                    .ThrowInvalidDataExceptionIfNull("Invalid tenant create data")
-                    .FromRepresentation(),
-                Permission.FullControl | Permission.Owner,
-                CallerCollectionRights.Tenant);
-
-
-            //////////////////////////
-            // Add user to tenant
-            // ==================
-            //
-
-            await _tenantStore.IncludeUser(
-                tenantId,
-                User.GetId(),
-                Permission.Get | Permission.Owner,
-                CallerCollectionRights.Tenant);
-
-            // now, we have the identity user, link this into the new user
-            return tenantId
-                .MakeTenantUri(Url)
-                .MakeCreated();
-        }
-
-
+  
         ///////////////////////////////////////
         //
         //  User collection
@@ -108,7 +73,7 @@ namespace Api.Controllers
         ///     User collection on a tenant
         /// </summary>
         /// <remarks>
-        ///    Authenticated users will get back a list of users. Authenticted but unregistered
+        ///    Authenticated users will get back a list of users. Authenticated but unregistered
         ///    users get back an empty collection. This allows us to parent the creation of new users off
         ///    the tenant and allow users who are unknown but authenticated to register themselves.
         /// </remarks>

@@ -161,8 +161,8 @@ namespace Api.Controllers
             return (await _tenantStore.GetTenantsForUser(id))
                 .ToTenantFeedRepresentation(id, Url);
         }
-        
-       /// <summary>
+
+        /// <summary>
         ///     Tenant available for a user
         /// </summary>
         [HttpGet("{id}/tenant/{tenantId}", Name = UserUriFactory.UserTenantRouteName)]
@@ -171,6 +171,43 @@ namespace Api.Controllers
         {
             return (await _tenantStore.Get(tenantId))
                 .ToRepresentation(id, Url);
+        }
+
+
+        [HttpPost("{id}/tenant", Name = UserUriFactory.UserTenantsRouteName)]
+//        [AuthoriseRootTenantCollection(Permission.Post)]
+        [AuthoriseMeAsap]
+        public async Task<CreatedResult> Create([FromBody] TenantCreateDataRepresentation data, string id)
+        {
+            (await _tenantStore.GetByCode(data.Code))
+                .ThrowInvalidDataExceptionIfNotNull("Invalid tenant"); // already exists
+
+            var ownerId = User.GetId();
+            
+            var tenantId = await _tenantStore.Create(
+                ownerId,
+                TrustDefaults.KnownHomeResourceId,
+                data
+                    .ThrowInvalidDataExceptionIfNull("Invalid tenant create data")
+                    .FromRepresentation(),
+                Permission.FullControl | Permission.Owner,
+                CallerCollectionRights.Tenant);
+
+
+            //////////////////////////
+            // Add user to tenant
+            // ==================
+            //
+
+            await _tenantStore.IncludeUser(
+                tenantId,
+                ownerId,
+                Permission.Get | Permission.Owner,
+                CallerCollectionRights.Tenant);
+
+            return ownerId
+                .MakeUserTenantUri(tenantId, Url)
+                .MakeCreated();
         }
     }
 }

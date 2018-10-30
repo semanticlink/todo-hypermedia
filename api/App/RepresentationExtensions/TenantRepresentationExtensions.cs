@@ -139,6 +139,9 @@ namespace App.RepresentationExtensions
 
                     // home is the logical parent
                     userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    
+                    // create-form
+                    url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = tenants
                     .Select(tenant => tenant.ToUserTenantFeedRepresentationItem(userId, url))
@@ -190,9 +193,6 @@ namespace App.RepresentationExtensions
                 {
                     // this collection
                     url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.Self),
-
-                    // create
-                    url.MakeTenantsUri().MakeWebLink(CustomLinkRelation.Submit)
                 },
                 Items = MakeFormItems()
             };

@@ -31,7 +31,7 @@ namespace App.RepresentationExtensions
 
                         // user tenants
                         user.Id.MakeUserTenantsUri(url).MakeWebLink(CustomLinkRelation.Tenants),
-        
+
                         // edit-form
                         url.MakeUserEditFormUri().MakeWebLink(IanaLinkRelation.EditForm),
                     }
@@ -80,14 +80,8 @@ namespace App.RepresentationExtensions
                 {
                     // this collection
                     tenantId.MakeRegisterUserCreateFormUri(url).MakeWebLink(IanaLinkRelation.Self),
-
-                    // Create a new organisation on the collection
-                    tenantId.MakeTenantUsersUri(url).MakeWebLink(IanaLinkRelation.Up),
-
-                    // submit
-                    tenantId.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Submit)
                 },
-                Items = MakeFormItems()
+                Items = MakeCreateFormItems()
             };
         }
 
@@ -134,6 +128,31 @@ namespace App.RepresentationExtensions
                     Description = "The third-party id fo the user (eg 'auth0|xxxxx')",
                     Required = false,
                     Multiple = true
+                }
+            };
+        }
+
+        private static FormItemRepresentation[] MakeCreateFormItems()
+        {
+            return new FormItemRepresentation[]
+            {
+                new EmailInputFormItemRepresentation
+                {
+                    Name = "email",
+                    Description = "The email address of the user",
+                    Required = true
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "name",
+                    Description = "The name of the user to be shown on the screen",
+                    Required = true
+                },
+                new TextInputFormItemRepresentation
+                {
+                    Name = "externalId",
+                    Description = "The third-party id fo the user (eg 'auth0|xxxxx')",
+                    Required = true
                 }
             };
         }
