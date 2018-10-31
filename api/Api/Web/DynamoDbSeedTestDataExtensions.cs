@@ -116,6 +116,7 @@ namespace Api.Web
                 idGenerator,
                 userRightsStore,
                 tenantStore,
+                todoStore,
                 services.GetRequiredService<ILogger<TodoListStore>>());
 
             // ensure the database is up and tables are created
@@ -238,7 +239,7 @@ namespace Api.Web
                     userId,
                     tenantId,
                     todoListCreateData,
-                    Permission.Owner,
+                    Permission.FullControl | Permission.Owner,
                     CallerCollectionRights.Todo);
 
                 log.InfoFormat("[Seed] todo list [{0}]", todoListId);

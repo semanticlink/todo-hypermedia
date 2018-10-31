@@ -19,14 +19,15 @@ namespace Infrastructure.NoSQL
         private readonly string _creatorId;
         private readonly IIdGenerator _idGenerator;
         private readonly ITenantStore _tenantStore;
+        private readonly ITodoStore _todoStore;
         private readonly IUserRightStore _userRightStore;
 
-        public TodoListStore(
-            User creator,
+        public TodoListStore(User creator,
             IDynamoDBContext context,
             IIdGenerator idGenerator,
             IUserRightStore userRightStore,
             ITenantStore tenantStore,
+            ITodoStore todoStore,
             ILogger<TodoListStore> log)
         {
             Log = log;
@@ -34,6 +35,7 @@ namespace Infrastructure.NoSQL
             _userRightStore = userRightStore;
             _idGenerator = idGenerator;
             _tenantStore = tenantStore;
+            _todoStore = todoStore;
             _creatorId = creator.Id;
         }
 
@@ -65,7 +67,28 @@ namespace Infrastructure.NoSQL
         {
             var id = await Create(data);
 
-            // create rights 
+            // create a security hole, if the user isn't injected then make the creator the parent resource
+            // which in this case is a user.
+            // KLUDGE : take out. This is only here because of seed data
+            await _userRightStore.CreateRights(
+                ownerId,
+                id,
+                RightType.Todo.MakeCreateRights(callerRights, callerCollectionRights),
+                new InheritForm
+                {
+                    Type = RightType.UserTodoCollection,
+                    ResourceId = contextResourceId,
+                    InheritedTypes = new List<RightType>
+                    {
+                        RightType.Todo,
+/*
+                        // todo list does have comments or tags (but might)
+                        RightType.TodoCommentCollection,
+                        RightType.TodoTagCollection
+*/
+                    }
+                });
+
 
             return id;
         }
@@ -114,11 +137,11 @@ namespace Infrastructure.NoSQL
 
         public async Task Delete(string id)
         {
-            // TODO: delete the children
-
             // remove list context    
             var todoList = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
+
+            await _todoStore.DeleteByParent(id);
 
             await _userRightStore.RemoveRight(_creatorId, id);
             await _context.DeleteAsync(todoList);

@@ -15,7 +15,7 @@ using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
 {
-    [Route("todolist")]
+    [Route("todos")]
     public class TodoListController : Controller
     {
         private readonly ITenantStore _tenantStore;
@@ -36,8 +36,7 @@ namespace Api.Controllers
         [HttpGet("{id}", Name = TodoListUriFactory.TodoListRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
-//        [AuthoriseTodoList(Permission.Get)]
-        [AuthoriseMeAsap]
+        [AuthoriseTodo(Permission.Get)]
         public async Task<TodoListRepresentation> GetById(string id)
         {
             return (await _todoListStore
@@ -51,8 +50,7 @@ namespace Api.Controllers
         /// </summary>    
         /// <see cref="UserController.CreateTodoList"/> for creating a todo list as they are parented on a user
         [HttpPut("{id}", Name = TodoListUriFactory.TodoListRouteName)]
-//        [AuthoriseTodo(Permission.Put)]
-        [AuthoriseMeAsap]
+        [AuthoriseTodo(Permission.Put)]
         public async Task<NoContentResult> Update(string id, [FromBody] TodoListRepresentation item)
         {
             await _todoListStore.Update(id,
@@ -80,8 +78,7 @@ namespace Api.Controllers
         ///     A private create form because it contains by value tenants that todo list can belong to
         /// </summary>
         [HttpGet("form/create", Name = TodoListUriFactory.CreateFormRouteName)]
-        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
-        [HttpCacheValidation(NoCache = true)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
         public async Task<CreateFormRepresentation> GetCreateForm()
         {
@@ -90,8 +87,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{id}", Name = TodoListUriFactory.TodoListRouteName)]
-//        [AuthoriseTodo(Permission.Delete)]
-        [AuthoriseMeAsap]
+        [AuthoriseTodo(Permission.Delete)]
         public async Task<NoContentResult> Delete(string id)
         {
             await _todoListStore.Delete(id);
@@ -110,18 +106,17 @@ namespace Api.Controllers
         [HttpGet("{id}/todo", Name = TodoListUriFactory.TodoListTodosRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
-//        [AuthoriseUserTenantTodoCollection(Permission.Get)]
-        [AuthoriseMeAsap]
+        [AuthoriseTodo(Permission.Get)]
         public async Task<FeedRepresentation> GetTodos(string id)
         {
             var todos = await _todoStore
-                .GetByList(id);
+                .GetByParent(id);
             return todos
                 .ToFeedRepresentation(id, Url);
         }
 
         [HttpPost("{id}/todo", Name = TodoListUriFactory.TodoListTodosRouteName)]
-        [AuthoriseMeAsap]
+        [AuthoriseTodo(Permission.Post)]
         public async Task<CreatedResult> CreateTodo(string id, [FromBody] TodoCreateDataRepresentation data)
         {
             var userId = User.GetId();

@@ -120,7 +120,7 @@ namespace Api.Controllers
         ///     User todo collection
         /// </summary>
         /// <see cref="TodoController.GetById"/>
-        [HttpGet("{id}/todolist", Name = UserUriFactory.UserTodosRouteName)]
+        [HttpGet("{id}/todos", Name = UserUriFactory.UserTodosRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
 //        [AuthoriseUserTenantTodoCollection(Permission.Get)]
@@ -135,7 +135,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Create a user named todo list
         /// </summary>
-        [HttpPost("{id}/todolist", Name = UserUriFactory.UserTodosRouteName)]
+        [HttpPost("{id}/todos", Name = UserUriFactory.UserTodosRouteName)]
 //        [AuthoriseUserTenantTodoCollection(Permission.Post)]
         [AuthoriseMeAsap]
         public async Task<CreatedResult> CreateTodoList([FromBody] TodoListCreateDataRepresentation data, string id)
@@ -227,7 +227,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Todos available for the user on a tenant
         /// </summary>
-        [HttpGet("{id}/tenant/{tenantId}/todolist", Name = UserUriFactory.UserTenantTodoListRouteName)]
+        [HttpGet("{id}/tenant/{tenantId}/todos", Name = UserUriFactory.UserTenantTodoListRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
 //        [AuthoriseRootTenantCollection(Permission.Post)]
         [AuthoriseMeAsap]
@@ -240,7 +240,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Create a user named todo list
         /// </summary>
-        [HttpPost("{id}/tenant/{tenantId}/todolist", Name = UserUriFactory.UserTenantTodoListRouteName)]
+        [HttpPost("{id}/tenant/{tenantId}/todos", Name = UserUriFactory.UserTenantTodoListRouteName)]
 //        [AuthoriseUserTenantTodoCollection(Permission.Post)]
         [AuthoriseMeAsap]
         public async Task<CreatedResult> CreateTodoList(

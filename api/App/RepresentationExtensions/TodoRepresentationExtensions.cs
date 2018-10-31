@@ -30,7 +30,7 @@ namespace App.RepresentationExtensions
                     // self (the feed of todos on a todo list)
                     todoListId.MakeTodoListTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // up link to a named todolist
+                    // up link to a named todos
                     todoListId.MakeTodoListUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // create-form

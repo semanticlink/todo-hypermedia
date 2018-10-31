@@ -7,7 +7,8 @@ namespace Domain.Persistence
 {
     public interface ITodoListStore
     {
-        Task<string> Create(string ownerId,
+        Task<string> Create(
+            string ownerId,
             string contextResourceId,
             TodoListCreateData data,
             Permission callerRights,

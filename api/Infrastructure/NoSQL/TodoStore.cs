@@ -42,12 +42,9 @@ namespace Infrastructure.NoSQL
             var todo = new Todo
             {
                 Id = _idGenerator.New(),
-/*
-                Tenant = data.Tenant
-                    .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Tenant cannot be empty"),
-*/
+
                 Parent = data.Parent
-                    .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Todo list cannot be empty"),
+                    .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Parent cannot be empty"),
                 Name = data.Name,
                 State = data.State,
                 Due = data.Due,
@@ -182,6 +179,16 @@ namespace Infrastructure.NoSQL
             await _context.DeleteAsync(todo);
         }
 
+        public async Task DeleteByParent(string parentId)
+        {
+            var tasks = (await GetByParent(parentId)).Select(todo => Delete(todo.Id));
+            await Task.WhenAll(tasks);
+ 
+            await _userRightStore.RemoveRight(_creatorId, parentId);
+
+            await _context.DeleteAsync(parentId);
+        }
+
         public async Task DeleteTag(string id, string tagId, Action<string> remove = null)
         {
             await Update(id, todo => todo.Tags?.RemoveAll(tag => tag == tagId));
@@ -192,7 +199,7 @@ namespace Infrastructure.NoSQL
             return await _context.Where<Todo>(new ScanCondition(nameof(Todo.Tags), ScanOperator.Contains, tagId));
         }
 
-        public async Task<IEnumerable<Todo>> GetByList(string todoListId)
+        public async Task<IEnumerable<Todo>> GetByParent(string todoListId)
         {
             return await _context.Where<Todo>(
                 new ScanCondition(nameof(Todo.Parent), ScanOperator.Contains, todoListId));

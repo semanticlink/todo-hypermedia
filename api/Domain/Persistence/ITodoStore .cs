@@ -72,6 +72,8 @@ namespace Domain.Persistence
         ///     Retrieve a list of todo based on a <see cref="TodoList"/>
         /// </summary>
         /// <param name="todoListId"><see cref="TodoList.Id"/> of the tag to be searched across all todos</param></param>
-        Task<IEnumerable<Todo>> GetByList(string todoListId);
+        Task<IEnumerable<Todo>> GetByParent(string todoListId);
+
+        Task DeleteByParent(string parentId);
     }
 }
