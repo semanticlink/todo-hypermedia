@@ -93,7 +93,7 @@ namespace App.RepresentationExtensions
                     userId.MakeUserTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // tenant - the tenant as (one) logical parent
-                    todoList.Tenant.MakeTenantUri(url).MakeWebLink(CustomLinkRelation.Tenant),
+                    userId.MakeUserTenantUri(todoList.Tenant, url).MakeWebLink(CustomLinkRelation.Tenant),
 
                     // todos
                     todoList.Id.MakeTodoListTodosUri(url).MakeWebLink(CustomLinkRelation.Todos),
