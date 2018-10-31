@@ -24,7 +24,7 @@ namespace Domain.Persistence
         /// <param name="userId"></param>
         Task<IEnumerable<TodoList>> GetByUser(string userId);
 
-        Task<IEnumerable<TodoList>> GetByTenant(string tenantId);
+        Task<IEnumerable<TodoList>> GetByTenantAndUser(string tenantId, string userId);
         
         /// <summary>
         ///     Deletes the todo list, its access rights and child todo

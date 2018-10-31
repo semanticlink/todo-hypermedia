@@ -167,6 +167,7 @@ namespace Api.Controllers
         ///     Tenants available for a user
         /// </summary>
         [HttpGet("{id}/tenant", Name = UserUriFactory.UserTenantsRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [AuthoriseMeAsap]
         public async Task<FeedRepresentation> GetUserTenants(string id)
         {
@@ -178,6 +179,7 @@ namespace Api.Controllers
         ///     Tenant available for a user
         /// </summary>
         [HttpGet("{id}/tenant/{tenantId}", Name = UserUriFactory.UserTenantRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [AuthoriseMeAsap]
         public async Task<TenantRepresentation> GetUserTenant(string id, string tenantId)
         {
@@ -219,6 +221,49 @@ namespace Api.Controllers
 
             return ownerId
                 .MakeUserTenantUri(tenantId, Url)
+                .MakeCreated();
+        }
+
+        /// <summary>
+        ///     Todos available for the user on a tenant
+        /// </summary>
+        [HttpGet("{id}/tenant/{tenantId}/todolist", Name = UserUriFactory.UserTenantTodoListRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+//        [AuthoriseRootTenantCollection(Permission.Post)]
+        [AuthoriseMeAsap]
+        public async Task<FeedRepresentation> GetUserTenantTodos(string id, string tenantId)
+        {
+            return (await _todoListStore.GetByTenantAndUser(tenantId, User.GetId()))
+                .ToTenantFeedRepresentation(id, tenantId, Url);
+        }
+
+        /// <summary>
+        ///     Create a user named todo list
+        /// </summary>
+        [HttpPost("{id}/tenant/{tenantId}/todolist", Name = UserUriFactory.UserTenantTodoListRouteName)]
+//        [AuthoriseUserTenantTodoCollection(Permission.Post)]
+        [AuthoriseMeAsap]
+        public async Task<CreatedResult> CreateTodoList(
+            [FromBody] TodoListCreateDataRepresentation data,
+            string id,
+            string tenantId)
+        {
+            var userId = User.GetId();
+
+            // reverse map an absolute uri into a tenantId
+            var tenantFromBody =
+                data.Tenant.GetParamFromNamedRoute("id", TenantUriFactory.TenantRouteName, HttpContext);
+
+            return (await _todoListStore.Create(
+                    userId,
+                    userId, // context is the userId
+                    data
+                        .ThrowInvalidDataExceptionIfNull("Invalid todo list create data")
+                        .FromRepresentation(tenantFromBody.IsNullOrWhitespace() ? tenantId : tenantFromBody),
+                    Permission.FullControl,
+                    CallerCollectionRights.Todo
+                ))
+                .MakeTodoListUri(Url)
                 .MakeCreated();
         }
     }

@@ -58,8 +58,8 @@ namespace App.RepresentationExtensions
                     // logical parent of user tenant is user
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // todos
-                    userId.MakeUserTodosUri(url).MakeWebLink(CustomLinkRelation.Todos),
+                    // tenant todos
+                    userId.MakeUserTenantTodoListUri(tenant.Id, url).MakeWebLink(CustomLinkRelation.Todos),
 
                     // users over the entire tenant
                     tenant.Id.MakeTenantUsersUri(url).MakeWebLink(CustomLinkRelation.Users),
@@ -139,7 +139,7 @@ namespace App.RepresentationExtensions
 
                     // home is the logical parent
                     userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
-                    
+
                     // create-form
                     url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
                 },

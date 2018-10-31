@@ -15,7 +15,7 @@ namespace App.RepresentationExtensions
     public static class TodoListRepresentationExtensions
     {
         /// <summary>
-        ///     Feed representation of named todos parented on a user and tenant
+        ///     Feed representation of named todos parented on a user
         /// </summary>
         /// <remarks>
         ///     TODO: a search mechanism could be written finding only todos list by tenant
@@ -35,6 +35,38 @@ namespace App.RepresentationExtensions
 
                     // up link to user
                     userId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
+
+                    // create-form for making a named todo list
+                    url.MakeTodoListCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
+                },
+                Items = todos
+                    .Select(t => t.MakeTodoListFeedItemRepresentation(url))
+                    .ToArray()
+            };
+        }
+        
+        /// <summary>
+        ///     Feed representation of named todos parented on a user and tenant
+        /// </summary>
+        /// <remarks>
+        ///     TODO: a search mechanism could be written finding only todos list by tenant
+        ///     TODO: a create mechanism will need to take into account on what tenant it is being created
+        /// </remarks>
+        public static FeedRepresentation ToTenantFeedRepresentation(
+            this IEnumerable<TodoList> todos,
+            string userId,
+            string tenantId,
+            IUrlHelper url)
+        {
+            return new FeedRepresentation
+            {
+                Links = new[]
+                {
+                    // self
+                    userId.MakeUserTenantTodoListUri(tenantId, url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // up link to user
+                    userId.MakeUserTenantUri(tenantId, url).MakeWebLink(IanaLinkRelation.Up),
 
                     // create-form for making a named todo list
                     url.MakeTodoListCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
@@ -111,14 +143,14 @@ namespace App.RepresentationExtensions
         /// </summary>
         public static TodoListCreateData FromRepresentation(
             this TodoListCreateDataRepresentation todoList,
-            string tenant)
+            string tenantId)
         {
             return new TodoListCreateData
             {
                 Name = todoList.Name
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo list requires a name"),
 
-                Tenant = tenant
+                Tenant = tenantId
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo list requires a tenant"),
             };
         }

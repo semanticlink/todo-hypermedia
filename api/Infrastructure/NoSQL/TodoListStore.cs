@@ -80,27 +80,37 @@ namespace Infrastructure.NoSQL
         {
             var tenantIds = (await _tenantStore
                     .GetTenantsForUser(userId))
-                //.ToList()
-                .Select(x => x.Id)
-                .ToList();
+                .Select(x => x.Id);
+
+            return await ByTenantAndUser(tenantIds);
+        }
+
+        public async Task<IEnumerable<TodoList>> GetByTenantAndUser(string tenantId, string userId)
+        {
+            var tenantIds = (await _tenantStore
+                    .GetTenantsForUser(userId))
+                .Where(x => x.Id.Equals(tenantId, StringComparison.InvariantCulture))
+                .Select(x => x.Id);
+
+            return await ByTenantAndUser(tenantIds);
+        }
+
+        private async Task<IEnumerable<TodoList>> ByTenantAndUser(IEnumerable<string> tenantIds)
+        {
+            var tasks = tenantIds
+                .ToList()
+                .Select(id =>
+                    _context.Where<TodoList>(new List<ScanCondition>
+                    {
+                        new ScanCondition(nameof(TodoList.Tenant), ScanOperator.Contains, id)
+                    }));
 
             // KLUDGE: inefficient and need to implement Batch Get
-            var tasks = tenantIds.Select(id =>
-                _context.Where<TodoList>(new List<ScanCondition>
-                {
-                    new ScanCondition(nameof(TodoList.Tenant), ScanOperator.Contains, id)
-                }));
-
             await Task.WhenAll(tasks);
 
             return tasks
                 .SelectMany(t => t.Result)
                 .ToList();
-        }
-
-        public Task<IEnumerable<TodoList>> GetByTenant(string tenantId)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task Delete(string id)
