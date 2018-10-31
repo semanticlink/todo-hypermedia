@@ -46,7 +46,8 @@ export default class Loader {
         });
 
         this._limiter.on(Loader.event.DEBUG, (message) => {
-            log.debug(`[Limiter] ${message}`);
+            // this is quite noisey so limiting down to trace
+            log.trace(`[Limiter] ${message}`);
         });
     }
 

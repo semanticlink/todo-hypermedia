@@ -23,7 +23,7 @@
                         media-type="application/json"
                         :dropped="createOrUpdateUsersOnTenant">
                     <b-button
-                            @mousedown="hydrateTenant(tenant.todos)"
+                            @mousedown="hydrateTenant(tenant)"
                             variant="outline"
                             v-b-tooltip.hover.html.right
                             title="Drag off to take a copy or drop on to update"
@@ -49,13 +49,13 @@
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
-    import {createOrUpdateUsersOnTenant, createTenantOnRoot} from '../domain/tenant';
+    import {createOrUpdateUsersOnTenant, createTenant} from '../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
     import {eventBus} from 'semantic-link-utils/EventBus';
-    import {getTenantsOnUser} from 'domain/tenant';
+    import {getTenantsOnUser, hydrateUserTenant} from 'domain/tenant';
     import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 
@@ -141,7 +141,7 @@
 
                 this.$notify('Starting create new tenant');
 
-                createTenantOnRoot(apiResource, tenantDocument, {})
+                createTenant(apiResource, tenantDocument, {})
                     .then(this.notifySuccess)
                     .catch(this.notifyError);
             },
@@ -162,10 +162,10 @@
              *
              * Note: communicating between events async requires this approach
              *
-             * @param tenantTodos
+             * @param {TenantRepresentation} tenant user's tenant
              */
-            hydrateTenant(tenantTodos) {
-                getTodosWithTagsOnTenantTodos(tenantTodos)
+            hydrateTenant(tenant) {
+                hydrateUserTenant(tenant)
                     .then(() => eventBus.$emit('resource:ready'))
                     .catch(err => {
                         this.$notify({type: 'error', title: 'Could not load up the tenant'});

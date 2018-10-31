@@ -14,6 +14,7 @@ export interface TenantCollectionRepresentation extends CollectionRepresentation
 
 export interface TenantRepresentation extends LinkedRepresentation {
     name: string;
+    code: string;
 }
 
 export interface TenantSearchRepresentation extends LinkedRepresentation {

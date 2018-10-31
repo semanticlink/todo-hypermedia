@@ -4,14 +4,14 @@ import {log} from 'logger';
 import * as cache from '../cache/cache';
 import Differencer from './Differencer';
 import {defaultResolver} from './syncResolver';
+import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
 
 /**
  * Default resource finder assumes that resources are in a collection via the 'items' attribute/array.
  * @return {function(CollectionRepresentation=, LinkedRepresentation=): LinkedRepresentation}
  * @private
  */
-const defaultFindResourceInCollectionStrategy = (collectionResource, resourceDocument) =>
-    _(collectionResource).findResourceInCollection(resourceDocument);
+const defaultFindResourceInCollectionStrategy = findResourceInCollection;
 
 /**
  *

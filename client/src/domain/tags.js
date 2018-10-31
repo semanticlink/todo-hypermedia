@@ -1,5 +1,6 @@
-import {cache, PooledCollection} from 'semantic-link-cache';
+import {PooledCollection} from 'semantic-link-cache';
 import {log} from 'logger';
+import {makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
 
 
 /**
@@ -10,14 +11,20 @@ import {log} from 'logger';
  * @example
  *
  *  The 'todos' collection in the userCollection requires a 'tags' collection that lives outside todos
- *
- *      // extend the options with the resolver
- *      options = {...options, ...pooledTagResourcesResolver(tenant)};
- *
+ **
  *      return cache
  *          .getResource(user)
  *          .then(user =>
- *               sync.getResourceInNamedCollection(user, 'todos', /todos/, userDocument, [], options));
+ *               sync.getResourceInNamedCollection(
+ *                  user,
+ *                  'todos',
+ *                  /todos/,
+ *                  userDocument,
+ *                  [],
+ *                  {
+ *                      ...options,
+ *                      ...pooledTagResourcesResolver(tenant)
+ *                  }));
  *
  * @param {LinkedRepresentation} contextResource
  * @return {{resourceFactory: (function(*): LinkedRepresentation), resourceResolver: (function(string):Array<function(*, *)>)}} see {@link UtilOptions.resourceFactory} and {@link UtilOptions.resourceResolver}
@@ -37,17 +44,17 @@ export function pooledTagResourceResolver(contextResource) {
             });
 
     return {
-        resourceFactory: linkRel => cache.makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
+        resourceFactory: linkRel => makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
         resourceResolver: (type/*, context */) => {
 
-            const rels = {
+            const rel = {
                 tag: resolve('tags', /tags/, type),
             };
 
-            if (rels[type]) {
-                return rels[type];
+            if (rel[type]) {
+                return rel[type];
             } else {
-                log.info(`Unable to resolve pooled resource '${type}', available: [${Object.keys(this.relsToResolve).join(',')}]`);
+                log.info(`Unable to resolve pooled resource '${type}', available: [${Object.keys(rel).join(',')}]`);
                 return () => Promise.resolve(undefined);
             }
         }
