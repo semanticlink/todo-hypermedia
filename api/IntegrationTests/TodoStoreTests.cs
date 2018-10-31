@@ -22,7 +22,7 @@ namespace IntegrationTests
             var s = await todoStore.Create(
                 UserId,
                 UserId,
-                new TodoCreateData {Name = "baba", TodoList = NewId()},
+                new TodoCreateData {Name = "baba", Parent = NewId()},
                 Permission.AllAccess,
                 CallerCollectionRights.Todo);
             var id = s;
@@ -53,7 +53,7 @@ namespace IntegrationTests
 
 
             var s = await todoStore.Create(UserId, UserId,
-                new TodoCreateData {Name = "Todo with tags", TodoList = NewId(), Tags = tagIds},
+                new TodoCreateData {Name = "Todo with tags", Parent = NewId(), Tags = tagIds},
                 Permission.AllAccess,
                 CallerCollectionRights.Todo);
             var id = s;

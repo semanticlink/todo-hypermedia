@@ -4,7 +4,6 @@ namespace Domain.Models
 {
     public static class TableNameConstants
     {
-        public const string TodoList = "TodoList";
         public const string Todo = "Todo";
         public const string Tenant = "Tenant";
         public const string User = "User";
@@ -14,7 +13,6 @@ namespace Domain.Models
 
         public static readonly List<string> AllTables = new List<string>
         {
-            TodoList,
             Todo,
             Tenant,
             User,

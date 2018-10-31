@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
@@ -43,7 +42,7 @@ namespace Infrastructure.NoSQL
             var todoList = new TodoList
             {
                 Id = _idGenerator.New(),
-                Tenant = data.Tenant
+                Parent = data.Parent
                     .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Tenant cannot be empty"),
                 Name = data.Name,
                 CreatedBy = _creatorId,
@@ -102,7 +101,7 @@ namespace Infrastructure.NoSQL
                 .Select(id =>
                     _context.Where<TodoList>(new List<ScanCondition>
                     {
-                        new ScanCondition(nameof(TodoList.Tenant), ScanOperator.Contains, id)
+                        new ScanCondition(nameof(TodoList.Parent), ScanOperator.Contains, id)
                     }));
 
             // KLUDGE: inefficient and need to implement Batch Get
@@ -130,13 +129,13 @@ namespace Infrastructure.NoSQL
             var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            var tenantId = todo.Tenant;
+            var tenantId = todo.Parent;
 
             updater(todo);
 
             // no messing with the IDs allowed
             todo.Id = id;
-            todo.Tenant = tenantId;
+            todo.Parent = tenantId;
 
             // no messing with the update time allowed
             todo.UpdatedAt = DateTime.UtcNow;

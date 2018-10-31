@@ -11,9 +11,14 @@ namespace Domain.Models
         [DynamoDBHashKey] public string Id { get; set; }
 
         /// <summary>
-        ///     Todos now logical belong to a list (which belongs to one tenant)
+        ///     <para>Parent is a recursive structure for todos. A parent at the top level is a tenant</para>
+        ///     <para>Note: At this stage, it is only implemented to one level deep</para>
         /// </summary>
-        public string TodoList { get; set; }
+        /// <remarks>
+        ///    An empty parent is a top-level todo list. If the parent has a value it is a todo item
+        /// </remarks>
+        [DynamoDBProperty("Parent")]
+        public string Parent { get; set; }
 
         public string Description { get; set; }
 

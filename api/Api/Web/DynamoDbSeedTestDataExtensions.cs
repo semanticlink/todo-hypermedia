@@ -230,7 +230,7 @@ namespace Api.Web
 
                 var todoListCreateData = new TodoListCreateData
                 {
-                    Tenant = tenantId,
+                    Parent = tenantId,
                     Name = "Shopping Todo List"
                 };
 
@@ -253,20 +253,20 @@ namespace Api.Web
                     new TodoCreateData
                     {
                         Name = "One Todo",
-                        TodoList = todoListId
+                        Parent = todoListId
                     },
                     new TodoCreateData
                     {
                         Name = "Two Todo (tag)",
                         Tags = new List<string> {tagIds.First()},
                         State = TodoState.Complete,
-                        TodoList = todoListId
+                        Parent = todoListId
                     },
                     new TodoCreateData
                     {
                         Name = "Three Todo (tagged)",
                         Tags = tagIds,
-                        TodoList = todoListId
+                        Parent = todoListId
                     }
                 };
 

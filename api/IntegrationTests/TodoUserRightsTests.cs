@@ -41,7 +41,7 @@ namespace IntegrationTests
             var createData = new TodoCreateData
             {
                 Name = "Test",
-                TodoList = NewId()
+                Parent = NewId()
             };
 
             /////////////////////////////////////////////////////////////

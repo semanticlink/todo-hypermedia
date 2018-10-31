@@ -93,7 +93,7 @@ namespace App.RepresentationExtensions
                     userId.MakeUserTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // tenant - the tenant as (one) logical parent
-                    userId.MakeUserTenantUri(todoList.Tenant, url).MakeWebLink(CustomLinkRelation.Tenant),
+                    userId.MakeUserTenantUri(todoList.Parent, url).MakeWebLink(CustomLinkRelation.Tenant),
 
                     // todos
                     todoList.Id.MakeTodoListTodosUri(url).MakeWebLink(CustomLinkRelation.Todos),
@@ -150,7 +150,7 @@ namespace App.RepresentationExtensions
                 Name = todoList.Name
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo list requires a name"),
 
-                Tenant = tenantId
+                Parent = tenantId
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo list requires a tenant"),
             };
         }

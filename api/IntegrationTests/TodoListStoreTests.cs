@@ -40,7 +40,7 @@ namespace IntegrationTests
                 new TodoListCreateData
                 {
                     Name = "My baba list",
-                    Tenant = tenant.Id
+                    Parent = tenant.Id
                 },
                 Permission.AllAccess,
                 CallerCollectionRights.Todo);

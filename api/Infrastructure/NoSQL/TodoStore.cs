@@ -46,7 +46,7 @@ namespace Infrastructure.NoSQL
                 Tenant = data.Tenant
                     .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Tenant cannot be empty"),
 */
-                TodoList = data.TodoList
+                Parent = data.Parent
                     .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Todo list cannot be empty"),
                 Name = data.Name,
                 State = data.State,
@@ -127,7 +127,7 @@ namespace Infrastructure.NoSQL
             var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            var todoListId = todo.TodoList;
+            var todoListId = todo.Parent;
 
             var originalTags = todo.Tags.IsNullOrEmpty()
                 ? new List<string>()
@@ -139,7 +139,7 @@ namespace Infrastructure.NoSQL
 
             // no messing with the IDs allowed
             todo.Id = id;
-            todo.TodoList = todoListId;
+            todo.Parent = todoListId;
 
             // no messing with the update time allowed
             todo.UpdatedAt = DateTime.UtcNow;
@@ -195,7 +195,7 @@ namespace Infrastructure.NoSQL
         public async Task<IEnumerable<Todo>> GetByList(string todoListId)
         {
             return await _context.Where<Todo>(
-                new ScanCondition(nameof(Todo.TodoList), ScanOperator.Contains, todoListId));
+                new ScanCondition(nameof(Todo.Parent), ScanOperator.Contains, todoListId));
         }
 
         private async Task SetRightsForTodoTag(string todoId, IList<string> origIds, IList<string> newIds)

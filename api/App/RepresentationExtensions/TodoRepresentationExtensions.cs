@@ -105,7 +105,7 @@ namespace App.RepresentationExtensions
                 Name = todo.Name
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a name"),
 
-                TodoList = todoListId
+                Parent = todoListId
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a tenant"),
 
                 Due = todo.Due,
@@ -124,7 +124,7 @@ namespace App.RepresentationExtensions
                     todo.Id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up - the collection of user todos is the logical parent
-                    todo.TodoList.MakeTodoListTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    todo.Parent.MakeTodoListTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // the collection of todos tags (this may or may not have tags ie is an empty collection)
                     todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
