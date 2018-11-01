@@ -30,8 +30,11 @@ namespace Api.Authorisation
             {RightType.RootTagCollection, Permission.Get | Permission.Post},
             //
             {RightType.UserTodoCollection, Permission.FullControl},
+            {RightType.UserTenantCollection, Permission.FullControl},
             //
+            {RightType.Tenant, Permission.Get | Permission.Post},
             {RightType.TenantUserCollection, Permission.Get | Permission.Post},
+            {RightType.TenantTodoCollection, Permission.FullControl},
             //
             {RightType.TodoCommentCollection, Permission.FullControl},
             {RightType.TodoTagCollection, Permission.FullControl},

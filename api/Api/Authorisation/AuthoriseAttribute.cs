@@ -21,7 +21,7 @@ namespace Api.Authorisation
     public class AuthoriseAttribute : AuthorizeAttribute
     {
         public AuthoriseAttribute(
-            RightType type, 
+            RightType type,
             Permission permission = Permission.None,
             string resourceKey = ResourceKey.Id)
         {
@@ -34,14 +34,6 @@ namespace Api.Authorisation
     {
         public AuthoriseRootUserCollectionAttribute(Permission permission)
             : base(RightType.RootUserCollection, permission, ResourceKey.Root)
-        {
-        }
-    }
-
-    public class AuthoriseRootTenantCollectionAttribute : AuthoriseAttribute
-    {
-        public AuthoriseRootTenantCollectionAttribute(Permission permission)
-            : base(RightType.RootTenantCollection, permission, ResourceKey.Root)
         {
         }
     }
@@ -62,10 +54,26 @@ namespace Api.Authorisation
         }
     }
 
-    public class AuthoriseUserTenantTodoCollectionAttribute : AuthoriseAttribute
+    public class AuthoriseTenantAttribute : AuthoriseAttribute
     {
-        public AuthoriseUserTenantTodoCollectionAttribute(Permission permission, string resourceKey = "tenantId")
+        public AuthoriseTenantAttribute(Permission permission)
+            : base(RightType.Tenant, permission)
+        {
+        }
+    }
+
+    public class AuthoriseTenantTodoCollectionAttribute : AuthoriseAttribute
+    {
+        public AuthoriseTenantTodoCollectionAttribute(Permission permission, string resourceKey = "tenantId")
             : base(RightType.TenantTodoCollection, permission, resourceKey)
+        {
+        }
+    }
+
+    public class AuthoriseUserTenantCollectionAttribute : AuthoriseAttribute
+    {
+        public AuthoriseUserTenantCollectionAttribute(Permission permission)
+            : base(RightType.UserTenantCollection, permission)
         {
         }
     }
@@ -108,13 +116,11 @@ namespace Api.Authorisation
     public class AuthoriseRedirectAttribute : AuthorizeAttribute
     {
     }
-    
+
     /// <summary>
     ///     Wrapper around Authorize so that we can add authentication later on—this is a transitional stage
     /// </summary>
     public class AuthoriseMeAsapAttribute : AuthorizeAttribute
     {
     }
-    
-    
 }
