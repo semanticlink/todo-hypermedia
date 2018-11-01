@@ -13,6 +13,7 @@ export interface TenantCollectionRepresentation extends CollectionRepresentation
 }
 
 export interface TenantRepresentation extends LinkedRepresentation {
+    todos: TenantCollectionRepresentation;
     name: string;
     code: string;
 }
@@ -22,9 +23,11 @@ export interface TenantSearchRepresentation extends LinkedRepresentation {
 }
 
 export interface TodoCollectionRepresentation extends CollectionRepresentation {
-
 }
 
 export interface TodoRepresentation extends LinkedRepresentation {
     name: string;
+}
+
+export interface UserCollectionRepresentation extends CollectionRepresentation {
 }

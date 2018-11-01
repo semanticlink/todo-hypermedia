@@ -21,7 +21,7 @@
                         :model="tenant"
                         :async="true"
                         media-type="application/json"
-                        :dropped="createOrUpdateUsersOnTenant">
+                        :dropped="createOrUpdateTenant">
                     <b-button
                             @mousedown="hydrateTenant(tenant)"
                             variant="outline"
@@ -49,13 +49,13 @@
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import DragAndDroppableModel from './DragAndDroppableModel.vue'
-    import {createOrUpdateUsersOnTenant, createTenant} from '../domain/tenant';
+    import {syncTenant} from '../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip'
     import {eventBus} from 'semantic-link-utils/EventBus';
-    import {getTenantsOnUser, hydrateUserTenant} from 'domain/tenant';
+    import {getTenantsOnUser, getUserTenant} from 'domain/tenant';
     import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 
@@ -141,17 +141,15 @@
 
                 this.$notify('Starting create new tenant');
 
-                createTenant(apiResource, tenantDocument, {})
-                    .then(this.notifySuccess)
-                    .catch(this.notifyError);
+                this.createOrUpdateTenant(tenantDocument);
             },
             /**
              * Update an existing tenant with existing (or new) todo lists with tags)
              * @param tenantDocument
              */
-            createOrUpdateUsersOnTenant(tenantDocument) {
+            createOrUpdateTenant(tenantDocument) {
 
-                createOrUpdateUsersOnTenant(this.$root.$api.todos, tenantDocument, this.$root.$api, {})
+                syncTenant(this.$root.$api, tenantDocument)
                     .then(this.notifySuccess)
                     .catch(this.notifyError);
 
@@ -165,7 +163,7 @@
              * @param {TenantRepresentation} tenant user's tenant
              */
             hydrateTenant(tenant) {
-                hydrateUserTenant(tenant)
+                getUserTenant(tenant)
                     .then(() => eventBus.$emit('resource:ready'))
                     .catch(err => {
                         this.$notify({type: 'error', title: 'Could not load up the tenant'});

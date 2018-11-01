@@ -4,19 +4,6 @@ import {TEXT} from 'semantic-link-utils/form-type-mappings';
 import {log} from 'logger';
 import {findResourceInCollectionByUri} from 'semantic-link-cache/mixins/collection';
 import {mapWaitAll} from 'semantic-link-cache/mixins/asyncCollection';
-
-/**
- * use the organisation from a provided list (when authenticated)
- * @param {ApiRepresentation} apiResource
- * @param {string} tenantUri
- * @returns {Promise<TenantRepresentation>}
- */
-export const getTenant = (apiResource, tenantUri) => {
-    return cache
-        .getResource(apiResource)
-        .then(apiResource => cache.getNamedCollection(apiResource, 'tenants', /tenants/))
-        .then(tenants => cache.getCollectionItemByUri(tenants, tenantUri));
-};
 /**
  * Get the first level of todos (regardless of tenants)
  *
@@ -34,15 +21,15 @@ export const getTodoList = (apiResource, options) => {
 
 /**
  * Get the todos on the todo list
- * @param todoListResource
+ * @param {TodoCollectionRepresentation} todoCollection
  * @param {UtilOptions?} options
  * @returns {Promise<TodoCollectionRepresentation>}
  */
-export const getTodos = (todoListResource, options) => {
+export const getTodos = (todoCollection, options) => {
 
-    log.debug(`Looking for todos on list ${link.getUri(todoListResource, 'self')}`);
+    log.debug(`Looking for todos on list ${link.getUri(todoCollection, 'self')}`);
 
-    return cache.getNamedCollectionAndItems(todoListResource, 'todos', /todos/, options);
+    return cache.getNamedCollectionAndItems(todoCollection, 'todos', /todos/, options);
 };
 
 /**
