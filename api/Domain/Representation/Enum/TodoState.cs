@@ -3,7 +3,7 @@
 namespace Domain.Representation.Enum
 {
     /// <summary>
-    ///     The options available for a <see cref="TodoRepresentation"/> and <seealso cref="Todo"/> that can be
+    ///     The options available for a <see cref="Domain.Representation.TodoRepresentation"/> and <seealso cref="Domain.Models.Todo"/> that can be
     ///      displaye in forms.
     /// </summary>
     /// <remarks>

@@ -108,16 +108,8 @@ namespace Api.Web
                 idGenerator,
                 userRightsStore,
                 tagStore,
-                services.GetRequiredService<ILogger<TodoStore>>());
-
-            var todoListStore = new TodoListStore(
-                provisioningUser,
-                context,
-                idGenerator,
-                userRightsStore,
                 tenantStore,
-                todoStore,
-                services.GetRequiredService<ILogger<TodoListStore>>());
+                services.GetRequiredService<ILogger<TodoStore>>());
 
             // ensure the database is up and tables are created
             await services.GetRequiredService<IAmazonDynamoDB>()
@@ -229,16 +221,17 @@ namespace Api.Web
                 // ======================
                 //
 
-                var todoListCreateData = new TodoListCreateData
+                var todoCreateData = new TodoCreateData
                 {
                     Parent = tenantId,
-                    Name = "Shopping Todo List"
+                    Name = "Shopping Todo List",
+                    Type = TodoType.List
                 };
 
-                var todoListId = await todoListStore.Create(
+                var todoListId = await todoStore.Create(
                     userId,
                     tenantId,
-                    todoListCreateData,
+                    todoCreateData,
                     Permission.FullControl | Permission.Owner,
                     CallerCollectionRights.Todo);
 
@@ -254,20 +247,23 @@ namespace Api.Web
                     new TodoCreateData
                     {
                         Name = "One Todo",
-                        Parent = todoListId
+                        Parent = todoListId,
+                        Type = TodoType.Item
                     },
                     new TodoCreateData
                     {
                         Name = "Two Todo (tag)",
                         Tags = new List<string> {tagIds.First()},
                         State = TodoState.Complete,
-                        Parent = todoListId
+                        Parent = todoListId,
+                        Type = TodoType.Item 
                     },
                     new TodoCreateData
                     {
                         Name = "Three Todo (tagged)",
                         Tags = tagIds,
-                        Parent = todoListId
+                        Parent = todoListId,
+                        Type = TodoType.Item
                     }
                 };
 

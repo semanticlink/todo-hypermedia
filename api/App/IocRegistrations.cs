@@ -65,7 +65,6 @@ namespace App
              * DynamoDb Stores
              */
             services.AddScoped<ITodoStore, TodoStore>();
-            services.AddScoped<ITodoListStore, TodoListStore>();
             services.AddScoped<ITenantStore, TenantStore>();
             services.AddScoped<IUserStore, UserStore>();
             services.AddScoped<ITagStore, TagStore>();

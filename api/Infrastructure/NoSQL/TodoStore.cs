@@ -19,14 +19,15 @@ namespace Infrastructure.NoSQL
         private readonly string _creatorId;
         private readonly IIdGenerator _idGenerator;
         private readonly ITagStore _tagStore;
+        private readonly ITenantStore _tenantStore;
         private readonly IUserRightStore _userRightStore;
 
-        public TodoStore(
-            User creator,
+        public TodoStore(User creator,
             IDynamoDBContext context,
             IIdGenerator idGenerator,
             IUserRightStore userRightStore,
             ITagStore tagStore,
+            ITenantStore tenantStore,
             ILogger<TodoStore> log)
         {
             Log = log;
@@ -34,6 +35,7 @@ namespace Infrastructure.NoSQL
             _userRightStore = userRightStore;
             _idGenerator = idGenerator;
             _tagStore = tagStore;
+            _tenantStore = tenantStore;
             _creatorId = creator.Id;
         }
 
@@ -41,10 +43,15 @@ namespace Infrastructure.NoSQL
         {
             var todo = new Todo
             {
+                // lists have the Id == Parent
+                // items have separate Id and Parent ids
                 Id = _idGenerator.New(),
 
                 Parent = data.Parent
                     .ThrowConfigurationErrorsExceptionIfNullOrWhiteSpace("Parent cannot be empty"),
+
+                Type = data.Type,
+
                 Name = data.Name,
                 State = data.State,
                 Due = data.Due,
@@ -118,6 +125,42 @@ namespace Infrastructure.NoSQL
             return await GetAll();
         }
 
+        public async Task<IEnumerable<Todo>> GetByUser(string userId)
+        {
+            var tenantIds = (await _tenantStore
+                    .GetTenantsForUser(userId))
+                .Select(x => x.Id);
+
+            return await ByTenantAndUser(tenantIds);
+        }
+
+        public async Task<IEnumerable<Todo>> GetByTenantAndUser(string tenantId, string userId)
+        {
+            var tenantIds = (await _tenantStore
+                    .GetTenantsForUser(userId))
+                .Where(x => x.Id.Equals(tenantId, StringComparison.InvariantCulture))
+                .Select(x => x.Id);
+
+            return await ByTenantAndUser(tenantIds);
+        }
+
+        private async Task<IEnumerable<Todo>> ByTenantAndUser(IEnumerable<string> tenantIds)
+        {
+            var tasks = tenantIds
+                .ToList()
+                .Select(id =>
+                    _context.Where<Todo>(new List<ScanCondition>
+                    {
+                        new ScanCondition(nameof(Todo.Parent), ScanOperator.Contains, id)
+                    }));
+
+            // KLUDGE: inefficient and need to implement Batch Get
+            await Task.WhenAll(tasks);
+
+            return tasks
+                .SelectMany(t => t.Result)
+                .ToList();
+        }
 
         public async Task Update(string id, Action<Todo> updater)
         {
@@ -169,6 +212,8 @@ namespace Infrastructure.NoSQL
             var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
+            await DeleteByParent(id);
+
             if (todo.Tags.IsNotNull())
             {
                 await Task.WhenAll(todo.Tags.Select(RemoveRightForTag));
@@ -183,7 +228,7 @@ namespace Infrastructure.NoSQL
         {
             var tasks = (await GetByParent(parentId)).Select(todo => Delete(todo.Id));
             await Task.WhenAll(tasks);
- 
+
             await _userRightStore.RemoveRight(_creatorId, parentId);
 
             await _context.DeleteAsync(parentId);

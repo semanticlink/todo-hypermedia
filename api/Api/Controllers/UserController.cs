@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
 using App;
@@ -20,13 +19,13 @@ namespace Api.Controllers
     public class UserController : Controller
     {
         private readonly IUserStore _userStore;
-        private readonly ITodoListStore _todoListStore;
+        private readonly ITodoStore _todoStore;
         private readonly ITenantStore _tenantStore;
 
-        public UserController(IUserStore userStore, ITodoListStore todoListStore, ITenantStore tenantStore)
+        public UserController(IUserStore userStore, ITodoStore todoStore, ITenantStore tenantStore)
         {
             _userStore = userStore;
-            _todoListStore = todoListStore;
+            _todoStore = todoStore;
             _tenantStore = tenantStore;
         }
 
@@ -66,8 +65,7 @@ namespace Api.Controllers
         public async Task<UserRepresentation> Get(string id)
         {
             var userId = User.GetId();
-            var tenants = await _tenantStore.GetTenantsForUser(userId);
-
+      
 
             return (await _userStore
                     .Get(userId))
@@ -120,42 +118,16 @@ namespace Api.Controllers
         ///     User todo collection
         /// </summary>
         /// <see cref="TodoController.GetById"/>
-        [HttpGet("{id}/todos", Name = UserUriFactory.UserTodosRouteName)]
+        [HttpGet("{id}/todo", Name = UserUriFactory.UserTodosRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
 //        [AuthoriseUserTenantTodoCollection(Permission.Get)]
         [AuthoriseMeAsap]
         public async Task<FeedRepresentation> GetUserTodo(string id)
         {
-            return (await _todoListStore
+            return (await _todoStore
                     .GetByUser(id))
-                .ToFeedRepresentation(id, Url);
-        }
-
-        /// <summary>
-        ///     Create a user named todo list
-        /// </summary>
-        [HttpPost("{id}/todos", Name = UserUriFactory.UserTodosRouteName)]
-//        [AuthoriseUserTenantTodoCollection(Permission.Post)]
-        [AuthoriseMeAsap]
-        public async Task<CreatedResult> CreateTodoList([FromBody] TodoListCreateDataRepresentation data, string id)
-        {
-            var userId = User.GetId();
-
-            // reverse map an absolute uri into a tenantId
-            var tenantId = data.Tenant.GetParamFromNamedRoute("id", TenantUriFactory.TenantRouteName, HttpContext);
-
-            return (await _todoListStore.Create(
-                    userId,
-                    userId, // context is the userId
-                    data
-                        .ThrowInvalidDataExceptionIfNull("Invalid todo list create data")
-                        .FromRepresentation(tenantId),
-                    Permission.FullControl,
-                    CallerCollectionRights.Todo
-                ))
-                .MakeTodoListUri(Url)
-                .MakeCreated();
+                .ToUserTodoFeedRepresentation(id, Url);
         }
 
         /////////////////////////
@@ -227,43 +199,40 @@ namespace Api.Controllers
         /// <summary>
         ///     Todos available for the user on a tenant
         /// </summary>
-        [HttpGet("{id}/tenant/{tenantId}/todos", Name = UserUriFactory.UserTenantTodoListRouteName)]
+        [HttpGet("{id}/tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodoRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
 //        [AuthoriseRootTenantCollection(Permission.Post)]
         [AuthoriseMeAsap]
         public async Task<FeedRepresentation> GetUserTenantTodos(string id, string tenantId)
         {
-            return (await _todoListStore.GetByTenantAndUser(tenantId, User.GetId()))
+            return (await _todoStore.GetByTenantAndUser(tenantId, User.GetId()))
                 .ToTenantFeedRepresentation(id, tenantId, Url);
         }
 
         /// <summary>
         ///     Create a user named todo list
         /// </summary>
-        [HttpPost("{id}/tenant/{tenantId}/todos", Name = UserUriFactory.UserTenantTodoListRouteName)]
+        /// <seealso cref="TodoController.CreateTodo"/>
+        [HttpPost("{id}/tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodoRouteName)]
 //        [AuthoriseUserTenantTodoCollection(Permission.Post)]
         [AuthoriseMeAsap]
-        public async Task<CreatedResult> CreateTodoList(
-            [FromBody] TodoListCreateDataRepresentation data,
+        public async Task<CreatedResult> CreateTodo(
+            [FromBody] TodoCreateDataRepresentation data,
             string id,
             string tenantId)
         {
-            var userId = User.GetId();
+            var userId = User.GetId() ?? id;
 
-            // reverse map an absolute uri into a tenantId
-            var tenantFromBody =
-                data.Tenant.GetParamFromNamedRoute("id", TenantUriFactory.TenantRouteName, HttpContext);
-
-            return (await _todoListStore.Create(
+            return (await _todoStore.Create(
                     userId,
                     userId, // context is the userId
                     data
                         .ThrowInvalidDataExceptionIfNull("Invalid todo list create data")
-                        .FromRepresentation(tenantFromBody.IsNullOrWhitespace() ? tenantId : tenantFromBody),
+                        .FromRepresentation(tenantId, TodoType.List),
                     Permission.FullControl,
                     CallerCollectionRights.Todo
                 ))
-                .MakeTodoListUri(Url)
+                .MakeTodoUri(Url)
                 .MakeCreated();
         }
     }

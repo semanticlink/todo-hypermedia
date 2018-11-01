@@ -4,7 +4,7 @@ using Amazon.DynamoDBv2.DataModel;
 namespace Domain.Models
 {
     /// <summary>
-    ///     An immutable collection of tags that can be used across <see cref="Todo"/>s
+    ///     An immutable collection of tags that can be used across <see cref="Domain.Models.Todo"/>s
     /// </summary>
     [DynamoDBTable(TableNameConstants.Tag)]
     public class Tag

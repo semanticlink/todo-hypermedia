@@ -16,6 +16,33 @@ namespace App.RepresentationExtensions
     public static class TodoRepresentationExtensions
     {
         /// <summary>
+        ///     Feed representation of todos parented on a user
+        /// </summary>
+        public static FeedRepresentation ToUserTodoFeedRepresentation(
+            this IEnumerable<Todo> todos,
+            string todoListId,
+            IUrlHelper url)
+        {
+            return new FeedRepresentation
+            {
+                Links = new[]
+                {
+                    // self (the feed of todos on a todo list)
+                    todoListId.MakeUserTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // up link to a named todos
+                    todoListId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
+
+                    // create-form - you  must create on user tenant
+//                    url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
+                },
+                Items = todos
+                    .Select(t => t.MakeTodoFeedItemRepresentation(url))
+                    .ToArray()
+            };
+        }
+
+        /// <summary>
         ///     Feed representation of todos parented on a named todo list
         /// </summary>
         public static FeedRepresentation ToFeedRepresentation(
@@ -28,12 +55,12 @@ namespace App.RepresentationExtensions
                 Links = new[]
                 {
                     // self (the feed of todos on a todo list)
-                    todoListId.MakeTodoListTodosUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    todoListId.MakeTodoTodoListUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to a named todos
-                    todoListId.MakeTodoListUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    todoListId.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Up),
 
-                    // create-form
+                    // create-form - you  must create on user tenant
                     url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = todos
@@ -80,7 +107,7 @@ namespace App.RepresentationExtensions
         ///     Get the create form to describe to clients of the API how to
         ///     modify instances on the resource
         /// </summary>
-        /// <seealso cref = "TodoCreateDataRepresentation" />
+        /// <seealso cref = "Domain.Representation.TodoCreateDataRepresentation" />
         public static CreateFormRepresentation ToTodoCreateFormRepresentation(this IUrlHelper url)
         {
             return new CreateFormRepresentation
@@ -98,15 +125,18 @@ namespace App.RepresentationExtensions
 
         public static TodoCreateData FromRepresentation(
             this TodoCreateDataRepresentation todo,
-            string todoListId)
+            string parentId,
+            TodoType type)
         {
             return new TodoCreateData
             {
                 Name = todo.Name
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a name"),
 
-                Parent = todoListId
+                Parent = parentId
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a tenant"),
+                
+                Type = type,
 
                 Due = todo.Due,
 
@@ -114,8 +144,13 @@ namespace App.RepresentationExtensions
             };
         }
 
-        public static TodoRepresentation ToRepresentation(this Todo todo, IUrlHelper url)
+        public static TodoRepresentation ToRepresentation(this Todo todo, string userId, IUrlHelper url)
         {
+            // up is dependent on context of whether it is a list or an item
+            var up = todo.Type == TodoType.Item
+                ? todo.Parent.MakeTodoTodoListUri(url)
+                : userId.MakeUserTodosUri(url);
+
             return new TodoRepresentation
             {
                 Links = new[]
@@ -123,8 +158,10 @@ namespace App.RepresentationExtensions
                     // self
                     todo.Id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Self),
 
-                    // up - the collection of user todos is the logical parent
-                    todo.Parent.MakeTodoListTodosUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    // up
+                    up.MakeWebLink(IanaLinkRelation.Up),
+
+                    todo.Id.MakeTodoTodoListUri(url).MakeWebLink(CustomLinkRelation.Todos),
 
                     // the collection of todos tags (this may or may not have tags ie is an empty collection)
                     todo.Id.MakeTodoTagCollectionUri(url).MakeWebLink(CustomLinkRelation.Tags),
@@ -201,6 +238,47 @@ namespace App.RepresentationExtensions
                     Name = "due",
                     Description = "The UTC date the todo is due"
                 },
+            };
+        }
+
+        /// <summary>
+        ///     Feed representation of named todos parented on a user and tenant
+        /// </summary>
+        /// <remarks>
+        ///     TODO: a search mechanism could be written finding only todos list by tenant
+        ///     TODO: a create mechanism will need to take into account on what tenant it is being created
+        /// </remarks>
+        public static FeedRepresentation ToTenantFeedRepresentation(
+            this IEnumerable<Todo> todos,
+            string userId,
+            string tenantId,
+            IUrlHelper url)
+        {
+            return new FeedRepresentation
+            {
+                Links = new[]
+                {
+                    // self
+                    userId.MakeUserTenantTodoListUri(tenantId, url).MakeWebLink(IanaLinkRelation.Self),
+
+                    // up link to user
+                    userId.MakeUserTenantUri(tenantId, url).MakeWebLink(IanaLinkRelation.Up),
+
+                    // create-form for making a named todo list
+                    url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
+                },
+                Items = todos
+                    .Select(t => t.MakeTodoListFeedItemRepresentation(url))
+                    .ToArray()
+            };
+        }
+
+        private static FeedItemRepresentation MakeTodoListFeedItemRepresentation(this Todo todo, IUrlHelper url)
+        {
+            return new FeedItemRepresentation
+            {
+                Id = todo.Id.MakeTodoUri(url),
+                Title = todo.Name
             };
         }
     }

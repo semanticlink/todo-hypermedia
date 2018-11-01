@@ -8,19 +8,19 @@ namespace Domain.Persistence
     public interface ITodoStore
     {
         Task<string> Create(
-            string ownerId, 
+            string ownerId,
             string contextResourceId,
             TodoCreateData data,
             Permission callerRights,
             IDictionary<RightType, Permission> callerCollectionRights);
 
         /// <summary>
-        ///     Retrieve a <see cref="Todo"/> based on its id
+        ///     Retrieve a <see cref="Domain.Models.Todo"/> based on its id
         /// </summary>
         Task<Todo> Get(string id);
 
         /// <summary>
-        ///     Retrieve a <see cref="Todo"/> based on its id and the presence of a tag.
+        ///     Retrieve a <see cref="Domain.Models.Todo"/> based on its id and the presence of a tag.
         /// </summary>
         Task<Todo> GetByIdAndTag(string id, string tagId);
 
@@ -36,28 +36,36 @@ namespace Domain.Persistence
         Task<IEnumerable<Todo>> GetByUser();
 
         /// <summary>
-        ///     Update details of a <see cref="Todo"/> that includes checking if the <see cref="Todo.Tags"/> have changed
+        ///     Retrieve a full set of todo lists by authenticated <see cref="User"/>
+        /// </summary>
+        /// <param name="userId"></param>
+        Task<IEnumerable<Todo>> GetByUser(string userId);
+
+        Task<IEnumerable<Todo>> GetByTenantAndUser(string tenantId, string userId);
+
+        /// <summary>
+        ///     Update details of a <see cref="Domain.Models.Todo"/> that includes checking if the <see cref="Domain.Models.Todo.Tags"/> have changed
         /// </summary>
         Task Update(string id, Action<Todo> updater);
 
         /// <summary>
-        ///     Add an existing <see cref="Tag"/> to a <see cref="Todo"/>. 
+        ///     Add an existing <see cref="Tag"/> to a <see cref="Domain.Models.Todo"/>. 
         /// </summary>
-        /// <param name="id"><see cref="Todo.Id"/> of the todo that has the tags</param>
+        /// <param name="id"><see cref="Domain.Models.Todo.Id"/> of the todo that has the tags</param>
         /// <param name="tagId"><see cref="Tag.Id"/> of the tag to be added</param>
         /// <param name="add">Callback on the <see cref="Tag.Id"/>. The default action is to increment the <see cref="Tag.Count"/> on the global collection of tags</param>
         Task AddTag(string id, string tagId, Action<string> add = null);
 
         /// <summary>
-        ///     Remove a <see cref="Todo"/> from the collection for and decrement <see cref="Tag.Count"/> on the global
+        ///     Remove a <see cref="Domain.Models.Todo"/> from the collection for and decrement <see cref="Tag.Count"/> on the global
         ///     collection
         /// </summary>
         Task Delete(string id);
 
         /// <summary>
-        ///     Remove a <see cref="Tag"/> from a <see cref="Todo"/>. 
+        ///     Remove a <see cref="Tag"/> from a <see cref="Domain.Models.Todo"/>. 
         /// </summary>
-        /// <param name="id"><see cref="Todo.Id"/> of the todo that has the tags</param>
+        /// <param name="id"><see cref="Domain.Models.Todo.Id"/> of the todo that has the tags</param>
         /// <param name="tagId"><see cref="Tag.Id"/> of the tag to be deleted</param>
         /// <param name="remove">Callback on the <see cref="Tag.Id"/>. The default action is to decrement the <see cref="Tag.Count"/> on the global collection of tags</param>
         Task DeleteTag(string id, string tagId, Action<string> remove = null);
@@ -69,9 +77,9 @@ namespace Domain.Persistence
         Task<IEnumerable<Todo>> GetByTag(string tagId);
 
         /// <summary>
-        ///     Retrieve a list of todo based on a <see cref="TodoList"/>
+        ///     Retrieve a list of todo based on a <see cref="Domain.Models.Todo"/>
         /// </summary>
-        /// <param name="todoListId"><see cref="TodoList.Id"/> of the tag to be searched across all todos</param></param>
+        /// <param name="todoListId"><see cref="Domain.Models.Todo.Id"/> of the tag to be searched across all todos</param></param>
         Task<IEnumerable<Todo>> GetByParent(string todoListId);
 
         Task DeleteByParent(string parentId);

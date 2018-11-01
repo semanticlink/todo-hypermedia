@@ -5,6 +5,9 @@ using Domain.Representation.Enum;
 
 namespace Domain.Models
 {
+    /// <summary>
+    ///     Todo is polymorphic between a todo list and a todo item
+    /// </summary>
     [DynamoDBTable(TableNameConstants.Todo)]
     public class Todo
     {
@@ -19,6 +22,8 @@ namespace Domain.Models
         /// </remarks>
         [DynamoDBProperty("Parent")]
         public string Parent { get; set; }
+
+        public TodoType Type { get; set; }
 
         public string Description { get; set; }
 

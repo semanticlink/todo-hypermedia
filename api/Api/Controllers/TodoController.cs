@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
@@ -42,7 +41,7 @@ namespace Api.Controllers
             return (await _todoStore
                     .Get(id))
                 .ThrowObjectNotFoundExceptionIfNull("todo not found")
-                .ToRepresentation(Url);
+                .ToRepresentation(User.GetId(), Url);
         }
 
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
@@ -58,7 +57,7 @@ namespace Api.Controllers
                     todo.State = item.State;
                     todo.Due = item.Due;
                 });
-            
+
             return NoContent();
         }
 
@@ -89,6 +88,48 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        ////////////////////////////////
+        //
+        // Todos on a list
+        // ===============
+
+        /// <summary>
+        ///     User todo collection
+        /// </summary>
+        /// <see cref="TodoController.GetById"/>
+        [HttpGet("{id}/todo", Name = TodoUriFactory.TodoTodoListRouteName)]
+        [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
+        [HttpCacheValidation(NoCache = true)]
+        [AuthoriseTodo(Permission.Get)]
+        public async Task<FeedRepresentation> GetTodos(string id)
+        {
+            return (await _todoStore
+                    .GetByParent(id))
+                .ToFeedRepresentation(id, Url);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <seealso cref="UserController.CreateTodo"/>
+        [HttpPost("{id}/todo", Name = TodoUriFactory.TodoTodoListRouteName)]
+        [AuthoriseTodo(Permission.Post)]
+        public async Task<CreatedResult> CreateTodo(string id, [FromBody] TodoCreateDataRepresentation data)
+        {
+            var userId = User.GetId();
+
+            return (await _todoStore.Create(
+                    userId,
+                    userId, // context is the userId
+                    data
+                        .ThrowInvalidDataExceptionIfNull("Invalid todo create data")
+                        .FromRepresentation(id,TodoType.Item),
+                    Permission.FullControl,
+                    CallerCollectionRights.Todo
+                ))
+                .MakeTodoUri(Url)
+                .MakeCreated();
+        }
         ////////////////////////////////////////////////
         // 
         //  The tags on the todo collection
