@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import {makeAbsolute, toSitePath} from 'semantic-link-utils/UriMapping';
-import Admin from './components/Admin.vue';
-import Todo from './components/Todo.vue';
-import SelectTodo from './components/SelectTodo.vue';
+import Admin from './components/app/Admin.vue';
+import Todo from './components/app/Todo.vue';
+import SelectTodo from './components/app/SelectTodo.vue';
 import * as link from 'semantic-link';
 
 Vue.use(VueRouter);

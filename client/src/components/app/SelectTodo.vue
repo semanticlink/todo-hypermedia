@@ -13,7 +13,7 @@
 <script>
     import {log} from 'logger';
     import {redirectToTodo} from "router";
-    import DragAndDroppableModel from './DragAndDroppableModel.vue'
+    import DragAndDroppableModel from '../DragAndDroppableModel.vue'
     import bButton from 'bootstrap-vue/es/components/button/button';
     import {getTodoList} from 'domain/todo';
 

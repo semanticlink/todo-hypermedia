@@ -68,7 +68,7 @@
     import {DateTime as LuxonDateTime} from 'luxon'
     // You need a specific loader for CSS files
     import 'vue-datetime/dist/vue-datetime.css'
-    import FormService from "../lib/FormService";
+    import FormService from "../../lib/FormService";
     import {filter, getUri} from 'semantic-link';
     import {log} from 'logger';
 

@@ -23,7 +23,8 @@ const TEXT = 'http://types/text';
  *      - For date and time style input, where supported, the displayed value in the GUI may be different than what is returned by its value.
  *      - Regardless of input type, the value is always returned as a string representation.
  *
- * @param {string} type     * @returns {string}
+ * @param {string} type
+ * @returns {string}
  */
 const mapApiToUiType = type => {
     switch (type) {

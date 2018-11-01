@@ -47,14 +47,22 @@ local port is 5000.
 
 ## Restore dependencies
 ```
-    dotnet restore
+cd api
+dotnet restore
 ```
 
-## Client development (javascript)
+Run the `Api` project through the IDE. For example, using Rider:
+
+* Exec Path: `Api/bin/Debug/netcoreapp2.1/Api.dll`
+* Working Directory: `./api/Api`
+* Environment Variables: `ASPNETCORE_ENVIRONMENT=Development;ASPNETCORE_URLS=http://localhost:5000`
+
+# Client development (javascript)
 
 Ensure that the Api is running and then `yarn dev` will open browser in localhost:8080
 
 ```
+cd client
 yarn install
 yarn dev
 ```

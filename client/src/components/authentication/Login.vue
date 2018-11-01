@@ -20,7 +20,7 @@
         API_AUTH0_REALM,
         renewToken
     } from 'semantic-link-utils/http-interceptors';
-    import Form from './Form.vue';
+    import Form from '../api/Form.vue';
     import AuthService from "semantic-link-utils/AuthService";
 
     /**

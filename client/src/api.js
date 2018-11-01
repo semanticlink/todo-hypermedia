@@ -13,8 +13,8 @@ import {LogLevel, setLogLevel, log} from 'logger';
 import VueLocalStorage from 'vue-localstorage';
 
 import Offline from './components/Offline.vue';
-import Login from './components/Login.vue';
-import Resource from './components/Resource.vue';
+import Login from './components/authentication/Login.vue';
+import Resource from './components/api/Resource.vue';
 import Spinner from './components/Spinner.vue';
 
 import {setJsonWebTokenOnHeaders, setInterceptors} from 'semantic-link-utils/http-interceptors';

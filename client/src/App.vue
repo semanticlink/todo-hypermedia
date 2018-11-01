@@ -16,7 +16,7 @@
 <script>
     import Spinner from './components/Spinner.vue';
     import Offline from './components/Offline.vue';
-    import Login from './components/Login.vue';
+    import Login from './components/authentication/Login.vue';
     import {cache} from 'semantic-link-cache';
     import {routeName, routePath} from "router";
     import {apiUri} from 'semantic-link-utils/UriMapping';

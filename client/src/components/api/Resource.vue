@@ -63,10 +63,10 @@
 <script>
 
     import axios from 'axios';
-    import {linkifyToSelf} from '../filters/linkifyWithClientRouting';
-    import {findLinkRel} from "../filters/makeButtonOnLinkifyLinkRels";
-    import Logout from './Logout.vue';
-    import Headers from './Headers.vue';
+    import {linkifyToSelf} from '../../filters/linkifyWithClientRouting';
+    import {findLinkRel} from "../../filters/makeButtonOnLinkifyLinkRels";
+    import Logout from '../authentication/Logout.vue';
+    import Headers from '../app/Headers.vue';
     import Form from './Form.vue';
     import {copyToClipboard, saveToFile} from "semantic-link-utils/raw-helpers";
     import {LinkedRepresentation, CollectionRepresentation} from 'semantic-link';

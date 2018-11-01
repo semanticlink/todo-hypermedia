@@ -16,7 +16,7 @@
 
 <script>
 
-    import DragAndDroppableModel from './DragAndDroppableModel.vue';
+    import DragAndDroppableModel from '../DragAndDroppableModel.vue';
     import FormAction from './FormAction.vue';
 
     import * as link from 'semantic-link';

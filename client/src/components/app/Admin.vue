@@ -48,8 +48,8 @@
     import {getUri} from 'semantic-link';
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
-    import DragAndDroppableModel from './DragAndDroppableModel.vue'
-    import {syncTenant} from '../domain/tenant';
+    import DragAndDroppableModel from '../DragAndDroppableModel.vue'
+    import {syncTenant} from '../../domain/tenant';
     import bButton from 'bootstrap-vue/es/components/button/button';
     import bLink from 'bootstrap-vue/es/components/link/link';
     import Add from 'vue-ionicons/dist/md-cloud-upload.vue';
