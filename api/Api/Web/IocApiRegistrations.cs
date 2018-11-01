@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Api.Web
 {
-    public static class IoCApiRegistrations
+    public static class IocApiRegistrations
     {
         /// <summary>
         ///     These services should only be registered in the context of a server because they require the
