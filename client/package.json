@@ -1,8 +1,8 @@
 {
-  "name": "todo-rest-client",
+  "name": "todo-hypermedia-client",
   "version": "0.0.1",
   "author": "toddb",
-  "description": "Sample REST client to demonstrate the use of hypermedia",
+  "description": "Sample clients to demonstrate the use of hypermedia",
   "productName": "Todo client",
   "license": "MIT",
   "scripts": {

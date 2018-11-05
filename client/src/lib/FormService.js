@@ -109,6 +109,8 @@ export default class FormService {
 
             const fields = form.items.map(item => item.name);
             return _(data).pick(fields);
+            // es6 version of underscore/lodash pick
+            // return Object.assign({}, ...fields.map(key => ({ [key]: data[key] })));
         }
 
         const rel = FormService.hasSubmitLinkRel(form) ? 'submit' : 'self';
