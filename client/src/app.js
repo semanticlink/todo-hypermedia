@@ -80,6 +80,13 @@ new Vue({
     components: {App},
     created() {
 
+        /**
+         * Get the starting URL from the base HTML
+         * <head>
+         *  <title>Todo App</title>
+         *  <link rel="api" href="http://localhost:5000/"/>
+         * </head>
+         */
         const [api,] = filter('HEAD', 'api');
         const apiUri = api.href;
         const clientUri = window.location.href;

@@ -18,7 +18,7 @@
     import Offline from './components/Offline.vue';
     import Login from './components/authentication/Login.vue';
     import {cache} from 'semantic-link-cache';
-    import {routeName, routePath} from "router";
+    import {routeName, clientPath} from "router";
     import {apiUri} from 'semantic-link-utils/UriMapping';
 
     export default {
@@ -26,7 +26,7 @@
         components: {Offline, Login, Spinner},
         data() {
             return {
-                routeName, routePath, apiUri
+                routeName, routePath: clientPath, apiUri
             }
         },
         created: function () {

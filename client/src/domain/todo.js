@@ -48,7 +48,7 @@ export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) =>
 };
 
 /**
- * Get the todo list based on a uri starting from the root
+ * Get the todo list items based on a uri starting from the root
  *
  * Context: (api)
  * Looks for: -(me)-[todos...{self:$todoUri}]-[todos...]
@@ -60,13 +60,24 @@ export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) =>
  */
 export const getTodoListByUri = (apiResource, todoUri, options) => {
 
+    return getNamedListByUri(apiResource, todoUri, options)
+        .then(itemResource => cache.getNamedCollectionAndItems(itemResource, 'todos', /todos/, options));
+};
+
+/**
+* Get the name todo list based on a uri starting from the root
+*
+* Context: (api)
+* Looks for: -(me)-[todos...{self:$todoUri}]
+*
+* @param {ApiRepresentation} apiResource
+* @param {string} todoUri
+* @param {UtilOptions?} options
+* @returns {Promise<LinkedRepresentation>}
+*/
+export const getNamedListByUri = (apiResource, todoUri, options) => {
     return getTodoList(apiResource, options)
-        .then(todosList => {
-
-            const itemResource = findResourceInCollectionByUri(todosList, todoUri);
-
-            return cache.getNamedCollectionAndItems(itemResource, 'todos', /todos/, options);
-        });
+        .then(todosList => findResourceInCollectionByUri(todosList, todoUri));
 };
 
 /**

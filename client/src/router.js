@@ -82,30 +82,38 @@ const makePrefix = clientPath => `/${clientPath}/a/`;
  */
 const makePath = clientPath => `${makePrefix(clientPath)}:apiUri(.*)`;
 
-const clientPath = {
-    Todo: 'todo',
-};
-
+/**
+ * Available routes for the client
+ * @type {{Todo: string, Home: string, Admin: string}}
+ */
 export const routeName = {
     Todo: 'Todo',
     Home: 'Home',
     Admin: 'Admin',
 };
 
-export const routePath = {
+/**
+ * Available client views
+ * @type {{Home: string, Admin: string, Todo: string}}
+ */
+export const clientPath = {
+    // absolute paths (with leading slash)
     Home: '/',
     Admin: '/admin',
+
+    // bookmarkable stateless paths (without leading slash)
+    Todo: 'todo',
 };
 
 const router = new VueRouter({
     routes: [
         {
-            path: routePath.Home,
+            path: clientPath.Home,
             name: routeName.Home,
             component: SelectTodo,
         },
         {
-            path: routePath.Admin,
+            path: clientPath.Admin,
             name: routeName.Admin,
             component: Admin,
         },
@@ -118,9 +126,24 @@ const router = new VueRouter({
     ]
 });
 
-const redirect = (representation, path, query = {}) => router.push({...{path: toSitePath(link.getUri(representation, /self/), path)}, ...query});
+/***********
+ * Redirects
+ * =========
+ */
 
+const redirect = (representation, path, query = {}) =>
+    router.push({...{path: toSitePath(link.getUri(representation, /self/), path)}, ...query});
 
+/**
+ * Redirects the page to the Todo view with client-side filtering (All, Active & Completed)
+ *
+ * @example  http://localhost:8080/#/todo/a/todo/b843e3edfe   (all)
+ * @example  http://localhost:8080/#/todo/a/todo/b843e3edfe?completed=
+ * @example  http://localhost:8080/#/todo/a/todo/b843e3edfe?active=
+ *
+ * @param {LinkedRepresentation} todoRepresentation
+ * @param {*} filter key, value pairs for query params
+ */
 export const redirectToTodo = (todoRepresentation, filter) => {
     return redirect(todoRepresentation, makePrefix(clientPath.Todo), filter);
 };

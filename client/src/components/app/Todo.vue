@@ -66,7 +66,7 @@
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';
-    import {defaultTodo, getTodoListByUri, getTodos} from "domain/todo";
+    import {defaultTodo, getNamedListByUri, getTodoListByUri} from "domain/todo";
     import {mapCompletedToState} from "semantic-link-utils/form-type-mappings";
 
     /**
@@ -335,7 +335,7 @@
                         break;
                 }
 
-                return getTodo(this.$root.$api, this.apiUri)
+                return getNamedListByUri(this.$root.$api, this.apiUri)
                     .then(todo => redirectToTodo(todo, query));
 
             }
