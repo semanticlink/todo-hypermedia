@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Toolkit;
 using Marvin.Cache.Headers;
 using SemanticLink;
+using SemanticLink.AspNetCore;
 using SemanticLink.Form;
 
 namespace Api.Controllers

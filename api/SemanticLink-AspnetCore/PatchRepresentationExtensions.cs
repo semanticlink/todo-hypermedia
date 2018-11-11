@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Domain.Representation;
 using Microsoft.AspNetCore.Http;
-using SemanticLink;
 using Toolkit;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     public static class PatchRepresentationExtensions
     {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SemanticLink.AspNetCore;
 using Toolkit;
 
 namespace Api.Web
@@ -45,7 +46,7 @@ namespace Api.Web
                 .HttpContext
                 .Features
                 .Get<IHttpResponseFeature>();
-            
+
             if (!httpResponse.HasStarted)
             {
                 if (!ReasonPhrase.IsNullOrWhitespace())

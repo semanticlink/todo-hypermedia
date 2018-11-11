@@ -103,7 +103,6 @@ namespace Api.Web
                     new Dictionary<RightType, Permission>
                     {
                         {RightType.Root, Permission.ControlAccess | Permission.Get},
-                        {RightType.RootTenantCollection, Permission.ControlAccess | Permission.Get | Permission.Post},
                         {RightType.RootUserCollection, Permission.FullControl},
                     });
 

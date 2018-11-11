@@ -1,7 +1,6 @@
 ﻿using App;
 using App.RepresentationExtensions;
 using App.UriFactory;
-using Api.Web;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
@@ -10,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using SemanticLink;
+using SemanticLink.AspNetCore;
 using Toolkit;
 
 namespace Api.Controllers

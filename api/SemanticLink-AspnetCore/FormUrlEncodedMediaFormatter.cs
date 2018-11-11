@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
 using Toolkit;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     /// <summary>
     ///     <para>

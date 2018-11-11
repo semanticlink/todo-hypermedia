@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     public static class UrlExtensions
     {

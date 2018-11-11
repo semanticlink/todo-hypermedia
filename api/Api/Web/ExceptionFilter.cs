@@ -5,6 +5,7 @@ using Amazon.Runtime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+using SemanticLink.AspNetCore;
 using Toolkit;
 
 namespace Api.Web

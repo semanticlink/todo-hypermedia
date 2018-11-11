@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     /// <summary>
     ///     <para>HTTP 409 Conflict</para>

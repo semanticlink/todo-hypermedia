@@ -1,4 +1,4 @@
-﻿namespace Api.Web
+﻿namespace SemanticLink.AspNetCore
 {
     /// <summary>
     /// 

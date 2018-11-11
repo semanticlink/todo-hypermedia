@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>SemanticLink.AspNetCore</RootNamespace>
+    <AssemblyName>SemanticLink-AspNetCore</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.AspNetCore.Http.Abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.http.abstractions\2.0.0\lib\netstandard2.0\Microsoft.AspNetCore.Http.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Mvc.Abstractions, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.mvc.abstractions\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Mvc.Core, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.mvc.core\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Routing, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.routing\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Routing.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Routing.Abstractions, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.routing.abstractions\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Routing.Abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SemanticLink\SemanticLink.csproj" />
+    <ProjectReference Include="..\Toolkit\Toolkit.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FastMember" Version="1.4.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Net.Http.Headers" Version="2.1.0" />
+  </ItemGroup>
+</Project>

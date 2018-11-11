@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     /// <summary>
     /// <para>

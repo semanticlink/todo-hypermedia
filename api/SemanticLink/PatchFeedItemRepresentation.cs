@@ -1,6 +1,4 @@
-﻿using SemanticLink;
-
-namespace Domain.Representation
+﻿namespace SemanticLink
 {
     /// <summary>
     ///     Server-side representation of a <see cref="FeedItemRepresentation"/> used with the <see cref="JsonPatchDocument"/>

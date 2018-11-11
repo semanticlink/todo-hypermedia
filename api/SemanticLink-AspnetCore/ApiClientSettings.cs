@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     /// <summary>
     ///     Setting for the api client html to pick the external javascript

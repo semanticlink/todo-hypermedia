@@ -1,6 +1,4 @@
-﻿using SemanticLink;
-
-namespace Domain.Representation
+﻿namespace SemanticLink
 {
     /// <summary>
     ///     Used for returning error pages, such as 401, so that we can return an html representation for the humble browser test

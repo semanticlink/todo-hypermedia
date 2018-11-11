@@ -11,6 +11,7 @@ using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SemanticLink;
+using SemanticLink.AspNetCore;
 using SemanticLink.Form;
 using Toolkit;
 

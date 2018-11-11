@@ -5,12 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Toolkit;
 using Microsoft.Extensions.Logging;
-using SemanticLink;
-using MediaType = SemanticLink.MediaType;
+using Toolkit;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     /// <summary>
     ///     Support http requests with the mime type 'text/uri-list'

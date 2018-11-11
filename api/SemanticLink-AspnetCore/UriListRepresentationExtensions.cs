@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Toolkit;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     public static class UriListRepresentationExtensions
     {

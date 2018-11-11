@@ -8,6 +8,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Toolkit\Toolkit.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.0" />
   </ItemGroup>
 </Project>

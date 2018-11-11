@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     /// <summary>
     ///     Extension helpers for a application to return simple result codes

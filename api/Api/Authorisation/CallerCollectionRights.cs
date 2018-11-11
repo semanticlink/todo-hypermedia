@@ -44,7 +44,6 @@ namespace Api.Authorisation
 
         public static readonly IDictionary<RightType, Permission> Tenant = new Dictionary<RightType, Permission>
         {
-            {RightType.RootTenantCollection, Permission.Get},
             {RightType.RootUserCollection, Permission.FullControl},
             //
             {RightType.TenantUserCollection, Permission.Get | Permission.Post},

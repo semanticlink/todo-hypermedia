@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using SemanticLink;
 
-namespace Domain.Representation
+namespace SemanticLink
 {
     /// <summary>
     ///     Server-side representation of a <see cref="FeedRepresentation"/> used with the <see cref="JsonPatchDocument"/>
