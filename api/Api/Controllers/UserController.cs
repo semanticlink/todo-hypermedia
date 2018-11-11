@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
-using App;
-using App.RepresentationExtensions;
-using App.UriFactory;
+using Api;
+using Api.RepresentationExtensions;
+using Api.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
@@ -13,6 +13,9 @@ using Marvin.Cache.Headers;
 using SemanticLink;
 using SemanticLink.AspNetCore;
 using SemanticLink.Form;
+using CacheDuration = SemanticLink.AspNetCore.CacheDuration;
+using TrustDefaults = Api.Web.TrustDefaults;
+using UserUriFactory = Api.UriFactory.UserUriFactory;
 
 namespace Api.Controllers
 {

@@ -1,7 +1,5 @@
 ﻿using System.Reflection;
 using Api.Authorisation;
-using App;
-using Domain.Models;
 using Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,10 +11,10 @@ namespace Api.Web
     {
         /// <summary>
         ///     These services should only be registered in the context of a server because they require the
-        ///     <see cref="HttpContext"/>.
+        ///     <see cref="HttpContext" />.
         /// </summary>
         /// <remarks>
-        ///    Test libraries will need to create each of these registrations for themselves.
+        ///     Test libraries will need to create each of these registrations for themselves.
         /// </remarks>
         public static IServiceCollection RegisterApiIoC(this IServiceCollection services)
         {
@@ -26,11 +24,11 @@ namespace Api.Web
             // see https://github.com/aspnet/Hosting/issues/793 (TODO: clarify)
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<IUserResolverService, UserResolverService>();
-            services.AddScoped<User>(context => context.GetService<IUserResolverService>().GetUser());
+            services.AddScoped(context => context.GetService<IUserResolverService>().GetUser());
 
             // Version from the assmembly (displayed on home resource)
             services.AddSingleton(Assembly.GetEntryAssembly().GetName().Version);
-            
+
 
             ////////////////////////////////
             // Authorisation

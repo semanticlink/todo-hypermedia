@@ -1,4 +1,4 @@
-﻿namespace Api.Web
+﻿namespace SemanticLink.AspNetCore
 {
     /// <summary>
     ///     The names of cache files registered with ASP.NET Core MVC for use on controllers.

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Linq;
-using Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Cors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Toolkit;
 
 namespace Api.Web
 {
@@ -16,7 +13,7 @@ namespace Api.Web
     ///     The API should allow any origin, whereas there is a case for only
     ///     allowing the web site access to the web sites internal API.
     /// </remarks>
-    /// <see cref = "https://docs.microsoft.com/en-us/aspnet/core/security/cors" />
+    /// <see cref="https://docs.microsoft.com/en-us/aspnet/core/security/cors" />
     public static class CorsMiddlewareExtensions
     {
         public const string TodoCorsPolicyName = "TodoCors";
@@ -25,7 +22,7 @@ namespace Api.Web
         ///     This registration needs to be added because the .AddMvcCore
         ///     doesn't add it by default. It works without it when using .AddMvc.
         /// </summary>
-        /// <seealso cref = "https://stackoverflow.com/questions/39265215/exception-when-trying-to-enable-cors-globally" />
+        /// <seealso cref="https://stackoverflow.com/questions/39265215/exception-when-trying-to-enable-cors-globally" />
         public static IServiceCollection AddTodoCors(this IServiceCollection services)
         {
             services.TryAddTransient<CorsAuthorizationFilter, CorsAuthorizationFilter>();

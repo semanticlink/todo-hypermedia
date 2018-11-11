@@ -6,13 +6,13 @@ using Infrastructure.NoSQL;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace App
+namespace Api.Web
 {
     public static class IocRegistrations
     {
         /// <summary>
         ///     All the services that are required for the Api to run. This is a wrapper bundling all the
-        ///     services so that the bundling is in the same file as the groupings of registrations. 
+        ///     services so that the bundling is in the same file as the groupings of registrations.
         /// </summary>
         /// <remarks>
         ///     Test libraries will replicate this bundling for themselves picking and choosing as needed.
@@ -57,7 +57,8 @@ namespace App
         ///     Register all the persistence layer services (eg repositories/stores)
         /// </summary>
         /// <remarks>
-        ///    Most of these services will *also* require other services that are not registered in here (eg id generators, time, currency)
+        ///     Most of these services will *also* require other services that are not registered in here (eg id generators, time,
+        ///     currency)
         /// </remarks>
         public static IServiceCollection RegisterRepositories(this IServiceCollection services)
         {

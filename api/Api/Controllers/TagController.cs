@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Api.Authorisation;
-using App.RepresentationExtensions;
+using Api.RepresentationExtensions;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
@@ -26,7 +26,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Tags that live across all tenants
         /// </summary>
-        [HttpGet("", Name = TagUriFactory.AllTagsRouteName)]
+        [HttpGet("", Name = UriFactory.TagUriFactory.AllTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [Authorise(RightType.RootTagCollection, Permission.Get, ResourceKey.Root)]
@@ -37,7 +37,7 @@ namespace Api.Controllers
                 .ToFeedRepresentation(Url);
         }
 
-        [HttpGet("{id}", Name = TagUriFactory.TagRouteName)]
+        [HttpGet("{id}", Name = UriFactory.TagUriFactory.TagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [Authorise(RightType.Tag, Permission.Get)]
@@ -48,7 +48,7 @@ namespace Api.Controllers
                 .ToRepresentation(Url);
         }
 
-        [HttpGet("{id}/todo", Name = TagUriFactory.TagTodoCollectionRouteName)]
+        [HttpGet("{id}/todo", Name = UriFactory.TagUriFactory.TagTodoCollectionRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [Authorise(RightType.TagTodoCollection, Permission.Get)]

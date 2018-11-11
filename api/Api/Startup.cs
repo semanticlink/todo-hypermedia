@@ -1,5 +1,5 @@
 ﻿using Api.Web;
-using App;
+using Api;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +12,7 @@ using Newtonsoft.Json.Serialization;
 using Morcatko.AspNetCore.JsonMergePatch;
 using SemanticLink.AspNetCore;
 using Toolkit;
+using AuthenticatorDefaults = SemanticLink.AspNetCore.AuthenticatorDefaults;
 
 namespace Api
 {

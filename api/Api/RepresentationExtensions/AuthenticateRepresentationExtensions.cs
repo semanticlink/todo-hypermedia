@@ -1,11 +1,13 @@
 ﻿using System.Linq;
-using App.UriFactory;
+using Api;
+using Api.UriFactory;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
+using AuthenticatorDefaults = SemanticLink.AspNetCore.AuthenticatorDefaults;
 
-namespace App.RepresentationExtensions
+namespace Api.RepresentationExtensions
 {
     public static class AuthenicateRepresentationExtensions
     {

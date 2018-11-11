@@ -1,8 +1,11 @@
 ﻿using System.Threading.Tasks;
-using App;
+using Api.Web;
+using Api;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using SemanticLink.AspNetCore;
+using AuthenticatorDefaults = SemanticLink.AspNetCore.AuthenticatorDefaults;
 
 namespace Api.Authorisation
 {

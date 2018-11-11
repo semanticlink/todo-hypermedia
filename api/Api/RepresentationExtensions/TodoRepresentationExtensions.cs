@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using App.UriFactory;
+using Api.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
@@ -10,7 +10,7 @@ using SemanticLink;
 using SemanticLink.Form;
 using Toolkit;
 
-namespace App.RepresentationExtensions
+namespace Api.RepresentationExtensions
 {
     public static class TodoRepresentationExtensions
     {

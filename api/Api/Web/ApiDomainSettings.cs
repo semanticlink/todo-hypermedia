@@ -5,25 +5,24 @@ namespace Api.Web
 {
     /// <summary>
     ///     Setting for the api authorization header
-    ///
-    ///   TODO: this needs to be injected from the request context
+    ///     TODO: this needs to be injected from the request context
     /// </summary>
     /// <example>
-    ///
-    /// <code>
-    ///    "Api":{
-    ///         "Domain": "https://api.example.com/"
-    /// </code>    
-    ///</example>
+    ///     <code>
+    ///     "Api":{
+    ///          "Domain": "https://api.example.com/"
+    ///  </code>
+    /// </example>
     public class ApiDomainSettings
     {
         public const string SectionName = "Api";
-        public string Domain { get; set; }
 
         /// <summary>
-        ///     This is hard coded to <see cref="AuthenticateController.UserAuthenticator"/>
+        ///     This is hard coded to <see cref="AuthenticateController.UserAuthenticator" />
         /// </summary>
-        private string path = "authenticate/auth0";
+        private readonly string path = "authenticate/auth0";
+
+        public string Domain { get; set; }
 
         public string AuthorizationUri()
         {

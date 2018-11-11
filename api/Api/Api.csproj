@@ -20,10 +20,6 @@
     <DotNetCliToolReference Include="Amazon.Lambda.Tools" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\App\App.csproj">
-      <Project>{64EEEAA8-2515-4082-A048-3A99A3E39558}</Project>
-      <Name>App</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Domain\Domain.csproj">
       <Project>{EFA20D4D-36E7-4120-B8F7-FE5141348511}</Project>
       <Name>Domain</Name>
@@ -33,6 +29,7 @@
       <Name>Infrastructure</Name>
     </ProjectReference>
     <ProjectReference Include="..\SemanticLink-AspnetCore\SemanticLink-AspnetCore.csproj" />
+    <ProjectReference Include="..\SemanticLink\SemanticLink.csproj" />
     <ProjectReference Include="..\Toolkit\Toolkit.csproj">
       <Project>{2DF1EAB4-3F06-4C85-8769-D61CE50296B9}</Project>
       <Name>Utils</Name>
@@ -50,5 +47,16 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="AWSSDK.DynamoDBv2, Version=3.3.0.0, Culture=neutral, PublicKeyToken=885c28607f98e604">
+      <HintPath>..\..\..\..\.nuget\packages\awssdk.dynamodbv2\3.3.10.2\lib\netstandard1.3\AWSSDK.DynamoDBv2.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Hosting.Abstractions, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.hosting.abstractions\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Hosting.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.AspNetCore.Mvc.Abstractions, Version=2.1.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+      <HintPath>..\..\..\..\.nuget\packages\microsoft.aspnetcore.mvc.abstractions\2.1.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Abstractions.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

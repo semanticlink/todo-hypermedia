@@ -1,11 +1,13 @@
 ﻿using System.Threading.Tasks;
-using App;
+using Api;
+using Api.Web;
 using Domain.Models;
 using Domain.Persistence;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using Toolkit;
+using TrustDefaults = Api.Web.TrustDefaults;
 
 namespace Api.Authorisation
 {

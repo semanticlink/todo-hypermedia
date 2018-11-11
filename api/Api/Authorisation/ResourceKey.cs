@@ -1,4 +1,5 @@
-﻿using App;
+﻿using Api.Web;
+using Api;
 
 namespace Api.Authorisation
 {
@@ -21,7 +22,7 @@ namespace Api.Authorisation
         /// <summary>
         ///     Top level collections. Hence they won't have a resource Id to get. But we already know what it is.
         /// </summary>
-        /// <seealso cref="TrustDefaults.KnownHomeResourceId"/>
+        /// <seealso cref="Web.TrustDefaults.KnownHomeResourceId"/>
         public const string Root = "/";
 
         /// <summary>

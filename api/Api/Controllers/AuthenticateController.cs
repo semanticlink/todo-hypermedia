@@ -1,6 +1,6 @@
-﻿using App;
-using App.RepresentationExtensions;
-using App.UriFactory;
+﻿using Api;
+using Api.RepresentationExtensions;
+using Api.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using SemanticLink;
 using SemanticLink.AspNetCore;
 using Toolkit;
+using CacheDuration = SemanticLink.AspNetCore.CacheDuration;
 
 namespace Api.Controllers
 {

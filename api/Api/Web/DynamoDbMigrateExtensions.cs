@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using App;
+using Api;
 using Domain;
 using Domain.Models;
 using Domain.Persistence;

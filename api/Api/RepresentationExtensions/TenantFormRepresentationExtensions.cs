@@ -1,11 +1,11 @@
-﻿using App.UriFactory;
+﻿using Api.UriFactory;
 using Domain.LinkRelations;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
 using SemanticLink.Form;
 
-namespace App.RepresentationExtensions
+namespace Api.RepresentationExtensions
 {
     /// <seealso cref="TenantRepresentation" />
     /// <seealso cref="TenantRepresentationExtensions" />

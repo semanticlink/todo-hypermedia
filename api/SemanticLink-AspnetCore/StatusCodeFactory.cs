@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Api.Web
+namespace SemanticLink.AspNetCore
 {
     public static class StatusCodeFactory
     {

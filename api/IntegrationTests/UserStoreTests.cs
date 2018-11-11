@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Api.Authorisation;
-using App;
+using Api.Web;
 using Domain.Models;
 using Domain.Persistence;
 using Xunit;

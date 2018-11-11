@@ -1,11 +1,11 @@
-﻿using App.UriFactory;
+﻿using Api.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
 
-namespace App.RepresentationExtensions
+namespace Api.RepresentationExtensions
 {
     public static class ApiRepresentationExtensions
     {

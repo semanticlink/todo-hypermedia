@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using App.UriFactory;
+using Api.UriFactory;
 using Domain.LinkRelations;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
 
-namespace App.RepresentationExtensions
+namespace Api.RepresentationExtensions
 {
     /// <summary>
     ///     A class to be able to read the Auth0 Id format and take in the the domain and spit out something

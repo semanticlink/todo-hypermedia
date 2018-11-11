@@ -1,4 +1,4 @@
-﻿namespace App
+﻿namespace Api.Web
 {
     public class TrustDefaults
     {

@@ -1,4 +1,4 @@
-﻿namespace App
+﻿namespace SemanticLink.AspNetCore
 {
     public static class CacheDuration
     {

@@ -6,16 +6,16 @@ using Domain.Models;
 using Microsoft.Extensions.Logging;
 using Toolkit;
 
-namespace App
+namespace Api.Web
 {
     public static class AuthenticationExtensions
     {
         private const string UserIdClaimKey = "userId";
 
         /// <summary>
-        ///     Add a <see cref="User.Id"/> onto the claim as a <see cref="JwtRegisteredClaimNames.Jti"/>
+        ///     Add a <see cref="User.Id" /> onto the claim as a <see cref="JwtRegisteredClaimNames.Jti" />
         /// </summary>
-        /// <seealso cref="GetId"/>
+        /// <seealso cref="GetId" />
         public static void AddIdentityIdToClaims(this ClaimsPrincipal user, string userId)
         {
             // Add the user id to the claim 
@@ -29,7 +29,7 @@ namespace App
         }
 
         /// <summary>
-        /// Retrieves the user Id from the <see cref="User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Sub"/>).
+        ///     Retrieves the user Id from the <see cref="User" /> from the JWT (<see cref="JwtRegisteredClaimNames.Sub" />).
         /// </summary>
         public static string GetExternalId(this ClaimsPrincipal user, ILogger log = null)
         {
@@ -37,7 +37,8 @@ namespace App
         }
 
         /// <summary>
-        /// Retrieves the user name (email) from the <see cref="User"/> from the JWT (<see cref="JwtRegisteredClaimNames.Email"/>).
+        ///     Retrieves the user name (email) from the <see cref="User" /> from the JWT (
+        ///     <see cref="JwtRegisteredClaimNames.Email" />).
         /// </summary>
         public static string GetName(this ClaimsPrincipal user)
         {
@@ -45,7 +46,7 @@ namespace App
         }
 
         /// <summary>
-        /// Retrieves the user Identity Id from the <see cref="User"/> from the claim via <see cref="UserIdClaimKey"/>.
+        ///     Retrieves the user Identity Id from the <see cref="User" /> from the claim via <see cref="UserIdClaimKey" />.
         /// </summary>
         public static string GetId(this ClaimsPrincipal user, ILogger log = null)
         {

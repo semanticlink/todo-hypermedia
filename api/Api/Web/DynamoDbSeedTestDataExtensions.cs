@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Api.Authorisation;
-using App;
+using Api;
 using Domain;
 using Domain.Models;
 using Domain.Persistence;

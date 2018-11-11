@@ -9,45 +9,43 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Toolkit;
 
-namespace App
+namespace Api.Web
 {
     /// <summary>
     ///     A wrapper to return the internal system identity of the authenticated user
     /// </summary>
     /// <remarks>
-    ///     This code reproduces some of the <see cref="UserStore.GetByExternalId"/> to avoid circular dependencies
+    ///     This code reproduces some of the <see cref="UserStore.GetByExternalId" /> to avoid circular dependencies
     ///     when the user is injected into it.
     /// </remarks>
     public class UserResolverService : IUserResolverService
     {
-        private ILogger Log { get; }
         private readonly IHttpContextAccessor _context;
         private readonly IDynamoDBContext _dbContext;
 
-        public UserResolverService(IHttpContextAccessor context, IDynamoDBContext dbContext, ILogger<UserResolverService> log)
+        public UserResolverService(IHttpContextAccessor context, IDynamoDBContext dbContext,
+            ILogger<UserResolverService> log)
         {
             Log = log;
             _context = context;
             _dbContext = dbContext;
         }
 
+        private ILogger Log { get; }
+
         /// <summary>
-        ///    Grabs the external <see cref="Claim"/> Id and resolves that to the internal <see cref="User"/>.
+        ///     Grabs the external <see cref="Claim" /> Id and resolves that to the internal <see cref="User" />.
         /// </summary>
         /// <remarks>
-        ///    This is a specific purpose method for overriding the <see cref="ClaimsPrincipal"/> that the general
-        ///    method<see cref="GetUserAsync"/> gets injected. We need this for earlier stages of the pipeline that
-        ///    yet have the HttpContext.User fully setup. TODO: understand why
+        ///     This is a specific purpose method for overriding the <see cref="ClaimsPrincipal" /> that the general
+        ///     method<see cref="GetUserAsync" /> gets injected. We need this for earlier stages of the pipeline that
+        ///     yet have the HttpContext.User fully setup. TODO: understand why
         /// </remarks>
         public async Task<User> GetPrincipleUserAsync(ClaimsPrincipal user)
         {
             var externalId = user.GetExternalId(Log);
 
-            if (externalId.IsNullOrWhitespace())
-            {
-                // no user current authenticated
-                return new User();
-            }
+            if (externalId.IsNullOrWhitespace()) return new User();
 
             // check for registered user
             return await _dbContext
@@ -56,22 +54,19 @@ namespace App
 
 
         /// <summary>
-        ///    This looks inside the current <see cref="HttpContext.User"/> that is resolved as a <see cref="ClaimsPrincipal"/>
-        ///    and grabs the external <see cref="Claim"/> Id and resolves that to the internal <see cref="User"/>.
+        ///     This looks inside the current <see cref="HttpContext.User" /> that is resolved as a <see cref="ClaimsPrincipal" />
+        ///     and grabs the external <see cref="Claim" /> Id and resolves that to the internal <see cref="User" />.
         /// </summary>
         public async Task<User> GetUserAsync()
         {
-            if (_context.HttpContext == null)
-            {
-                return new User();
-            }
+            if (_context.HttpContext == null) return new User();
 
             return await GetPrincipleUserAsync(_context.HttpContext.User);
         }
 
         /// <summary>
-        ///    This looks inside the current <see cref="HttpContext.User"/> that is resolved as a <see cref="ClaimsPrincipal"/>
-        ///    and grabs the external <see cref="Claim"/> Id and resolves that to the internal <see cref="User"/>.
+        ///     This looks inside the current <see cref="HttpContext.User" /> that is resolved as a <see cref="ClaimsPrincipal" />
+        ///     and grabs the external <see cref="Claim" /> Id and resolves that to the internal <see cref="User" />.
         /// </summary>
         public User GetUser()
         {

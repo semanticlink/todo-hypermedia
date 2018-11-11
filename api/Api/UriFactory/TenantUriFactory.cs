@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace App.UriFactory
+namespace Api.UriFactory
 {
     public static class TenantUriFactory
     {

@@ -29,6 +29,9 @@ namespace SemanticLink.AspNetCore
 
         private readonly List<string> scripts = new List<string>();
 
+        /// <summary>
+        ///     TODO: create constructor that hands in resource html
+        /// </summary>
         public HtmlFormMediaFormatter(ApiClientSettings configuration, ILogger log)
         {
             Log = log;
