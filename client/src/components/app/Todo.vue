@@ -160,10 +160,7 @@
 
 
             return getTodoListByUri(this.$root.$api, this.apiUri)
-                .then(todos => {
-
-                     return this.todoCollection = todos;
-                })
+                .then(todos => this.todoCollection = todos)
                 .then(() => this.reset())
                 .catch(err => log.error(err));
 
