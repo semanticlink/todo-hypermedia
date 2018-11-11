@@ -1,4 +1,4 @@
-﻿using Toolkit.Representation.LinkedRepresentation;
+﻿using SemanticLink;
 
 namespace Domain.Representation
 {

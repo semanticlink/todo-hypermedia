@@ -20,7 +20,6 @@
         API_AUTH0_REALM,
         renewToken
     } from 'semantic-link-utils/http-interceptors';
-    import Form from '../api/Form.vue';
     import AuthService from "semantic-link-utils/AuthService";
 
     /**
@@ -39,7 +38,6 @@
      *    - waits for the unauthorised event (triggered by no network)
      */
     export default {
-        components: {Form},
         data() {
             return {
                 authenticated: true,
@@ -138,6 +136,8 @@
                 this.error = '';
             },
             /**
+             * Ensure that the Authorization header is set correctly and then pass back control to replay any requests queued up
+             *
              * @param {string} accessToken
              */
             onSuccess(accessToken) {

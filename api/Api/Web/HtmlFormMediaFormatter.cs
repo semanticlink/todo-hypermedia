@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
+using SemanticLink;
 using Toolkit;
-using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Web
 {

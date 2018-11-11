@@ -2,9 +2,8 @@
 using Domain.LinkRelations;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
-using Toolkit.LinkRelations;
-using Toolkit.Representation.Forms;
-using Toolkit.Representation.LinkedRepresentation;
+using SemanticLink;
+using SemanticLink.Form;
 
 namespace App.RepresentationExtensions
 {

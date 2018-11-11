@@ -3,7 +3,7 @@ using System.Linq;
 using App.UriFactory;
 using Domain.LinkRelations;
 using Microsoft.AspNetCore.Mvc;
-using Toolkit.Representation.LinkedRepresentation;
+using SemanticLink;
 
 namespace App.RepresentationExtensions
 {

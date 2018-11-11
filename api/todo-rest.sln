@@ -26,6 +26,8 @@ ProjectSection(SolutionItems) = preProject
 	..\Readme.md = ..\Readme.md
 EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SemanticLink", "SemanticLink\SemanticLink.csproj", "{62847B8E-1E13-4D0A-9F90-18054339E61B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5F15C6B-AE49-4F0F-AAC2-841F59D77F26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62847B8E-1E13-4D0A-9F90-18054339E61B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62847B8E-1E13-4D0A-9F90-18054339E61B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62847B8E-1E13-4D0A-9F90-18054339E61B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62847B8E-1E13-4D0A-9F90-18054339E61B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A514F5F5-4008-4040-A523-2064AF5F1551} = {D9502D34-4121-4964-B121-D264736477FA}

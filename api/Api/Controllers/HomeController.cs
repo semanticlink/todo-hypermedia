@@ -12,9 +12,9 @@ using Domain.Representation;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SemanticLink;
+using SemanticLink.Form;
 using Toolkit;
-using Toolkit.Representation.Forms;
-using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
 {

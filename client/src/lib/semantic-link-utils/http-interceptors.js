@@ -140,6 +140,9 @@ export const setInterceptors = options => {
         });
 };
 
+/**
+ * Hold a reference so that it can be rejected/cleared
+ */
 let jwtInterceptor;
 
 /**

@@ -9,8 +9,8 @@ using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using SemanticLink;
 using Toolkit;
-using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Controllers
 {

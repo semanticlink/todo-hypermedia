@@ -6,7 +6,7 @@ using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.Mvc;
-using Toolkit.Representation.LinkedRepresentation;
+using SemanticLink;
 
 namespace Api.Controllers
 {

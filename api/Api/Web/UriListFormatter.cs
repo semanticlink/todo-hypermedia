@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Toolkit;
-using Toolkit.Representation.LinkedRepresentation;
 using Microsoft.Extensions.Logging;
-using MediaType = Toolkit.MediaType;
+using SemanticLink;
+using MediaType = SemanticLink.MediaType;
 
 namespace Api.Web
 {

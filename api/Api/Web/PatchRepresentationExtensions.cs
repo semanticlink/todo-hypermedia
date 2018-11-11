@@ -2,8 +2,8 @@
 using System.Linq;
 using Domain.Representation;
 using Microsoft.AspNetCore.Http;
+using SemanticLink;
 using Toolkit;
-using Toolkit.Representation.LinkedRepresentation;
 
 namespace Api.Web
 {

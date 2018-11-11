@@ -9,9 +9,9 @@ using Domain.Persistence;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
 using Toolkit;
-using Toolkit.Representation.Forms;
-using Toolkit.Representation.LinkedRepresentation;
 using Marvin.Cache.Headers;
+using SemanticLink;
+using SemanticLink.Form;
 
 namespace Api.Controllers
 {

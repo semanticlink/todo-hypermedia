@@ -19,6 +19,7 @@
       <Project>{D41ECF3A-49F5-4C7C-8CC9-435AF190EA82}</Project>
       <Name>Infrastructure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SemanticLink\SemanticLink.csproj" />
     <ProjectReference Include="..\Toolkit\Toolkit.csproj">
       <Project>{2DF1EAB4-3F06-4C85-8769-D61CE50296B9}</Project>
       <Name>Utils</Name>

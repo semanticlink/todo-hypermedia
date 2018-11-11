@@ -6,10 +6,9 @@ using Domain.Models;
 using Domain.Representation;
 using Domain.Representation.Enum;
 using Microsoft.AspNetCore.Mvc;
+using SemanticLink;
+using SemanticLink.Form;
 using Toolkit;
-using Toolkit.LinkRelations;
-using Toolkit.Representation.Forms;
-using Toolkit.Representation.LinkedRepresentation;
 
 namespace App.RepresentationExtensions
 {
