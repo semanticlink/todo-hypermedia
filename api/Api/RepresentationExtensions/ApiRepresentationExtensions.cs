@@ -28,9 +28,7 @@ namespace Api.RepresentationExtensions
                     url.MakeAllTagsCollectionUri().MakeWebLink(CustomLinkRelation.Tags),
 
                     //  tenant collection which has the tenant search on it
-/*
                     url.MakeHomeTenantsUri().MakeWebLink(CustomLinkRelation.Tenants),
-*/
 
                     //  user collection which has the tenant search on it
                     url.MakeHomeUsersUri().MakeWebLink(CustomLinkRelation.Users),

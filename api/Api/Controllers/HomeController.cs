@@ -58,13 +58,14 @@ namespace Api.Controllers
         [HttpGet(@"a/{tenantCode:regex(^[[\w\d\-\.]]+$)}")]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
+        [AuthoriseRedirect]
         public async Task<IActionResult> GetTenant(string tenantCode)
         {
             return (await _tenantStore
                     .GetByCode(tenantCode))
                 .ThrowObjectNotFoundExceptionIfNull("Invalid tenant")
                 .Id
-                .MakeTenantUri(Url)
+                .MakeTenantForUserUri(User.GetId(), Url)
                 .MakeRedirect();
         }
 
@@ -80,7 +81,7 @@ namespace Api.Controllers
         [HttpGet("tenant/", Name = HomeUriFactory.TenantsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
-        [Authorize]
+        [AuthoriseMeAsap]
         public async Task<FeedRepresentation> GetTenants([FromQuery(Name = "q")] string search = null)
         {
             return (!string.IsNullOrWhiteSpace(search)
@@ -96,12 +97,12 @@ namespace Api.Controllers
 
                         // The user is not authenticated and there is no query, so the caller gets no tenants.
                         : new Tenant[] { })
-                .ToRepresentation(search, Url);
+                .ToSearchFeedRepresentation(User.GetId(), search, Url);
         }
 
 
         /// <summary>
-        ///     Perform a search for a tenant. This is a highly constrainted that will only disclose a single tenant
+        ///     Perform a search for a tenant. This is a highly constrained that will only disclose a single tenant
         ///     if the caller knows its code.
         /// </summary>
         [HttpPost("tenant/search/", Name = HomeUriFactory.HomeTenantSearchRouteName)]
@@ -120,6 +121,7 @@ namespace Api.Controllers
         /// </summary>
         [HttpGet("tenant/form/search", Name = HomeUriFactory.HomeTenantSearchFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
+        [AuthoriseForm]
         public SearchFormRepresentation GetTenantsSearchForm()
         {
             return new TenantRepresentation()

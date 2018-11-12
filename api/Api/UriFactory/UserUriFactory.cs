@@ -47,12 +47,19 @@ namespace Api.UriFactory
         {
             return url.Link(UserTenantRouteName, new {id = id, tenantId = tenantId});
         }
-        
+
+        /// <summary>
+        ///     A wrapper to reverse having a tenantId before a userid
+        /// </summary>
+        /// <see cref="MakeUserTenantUri"/>
+        public static string MakeTenantForUserUri(this string tenantId, string id, IUrlHelper url)
+        {
+            return id.MakeUserTenantUri(tenantId, url);
+        }
+
         public static string MakeUserTenantTodoListUri(this string id, string tenantId, IUrlHelper url)
         {
             return url.Link(UserTenantTodoRouteName, new {id = id, tenantId = tenantId});
         }
-        
-       
     }
 }

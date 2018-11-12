@@ -74,8 +74,8 @@ namespace Api.RepresentationExtensions
         }
 
 
-        public static FeedRepresentation ToRepresentation(
-            this IEnumerable<Tenant> tenants,
+        public static FeedRepresentation ToSearchFeedRepresentation(this IEnumerable<Tenant> tenants,
+            string userId,
             string criteria,
             IUrlHelper url)
         {
@@ -89,14 +89,16 @@ namespace Api.RepresentationExtensions
                     // home is the logical parent
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // edit form
+                    // create form
+/*
                     url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm),
+*/
 
                     // make a search for a tenant
                     url.MakeHomeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Search)
                 },
                 Items = tenants
-                    .Select(c => ToFeedRepresentationItem(c, url))
+                    .Select(c => ToSearchFeedRepresentationItem(c, userId, url))
                     .ToArray()
             };
             return feedRepresentation;
@@ -162,11 +164,14 @@ namespace Api.RepresentationExtensions
             };
         }
 
-        private static FeedItemRepresentation ToFeedRepresentationItem(this Tenant tenant, IUrlHelper url)
+        private static FeedItemRepresentation ToSearchFeedRepresentationItem(
+            this Tenant tenant,
+            string userId,
+            IUrlHelper url)
         {
             return new FeedItemRepresentation
             {
-                Id = tenant.Id.MakeTenantUri(url),
+                Id = userId.MakeUserTenantUri(tenant.Id, url),
                 Title = tenant.Name
             };
         }
