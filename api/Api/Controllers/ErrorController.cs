@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
+using SemanticLink.AspNetCore;
 
 namespace Api.Controllers
 {
@@ -12,10 +13,10 @@ namespace Api.Controllers
         ///    Error page allowing for content negotiation 
         /// </summary>
         /// <remarks>
-        ///    We need this if we are browsing the api through the browser and receieve a 401, for example. The html
-        ///     version will return the rich html version that will allow the user to authenticate beyond 'Basic'.
+        ///    We need this if we are browsing the api through the browser and receive a 401, for example. The html
+        ///    version will return the rich html version that will allow the user to authenticate beyond 'Basic'.
         /// </remarks>
-        /// <seealso cref="Api.Web.HtmlFormMediaFormatter"/>
+        /// <seealso cref="HtmlFormMediaFormatter"/>
         [HttpGet("{statusCode}")]
         public ErrorRepresentation Index(int statusCode)
         {

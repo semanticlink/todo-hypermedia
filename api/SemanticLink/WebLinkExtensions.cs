@@ -3,15 +3,13 @@ using JetBrains.Annotations;
 
 namespace SemanticLink
 {
-    /// <summary>
-    /// </summary>
     /// <seealso cref="IanaLinkRelation" />
     public static class WebLinkExtensions
     {
         public static WebLink MakeWebLink(
             this string url,
-            [ValueProvider("Domain.ApiRepresentaion.Relations.IanaLinkRelation")]
-            [ValueProvider("Domain.ApiRepresentaion.Relations.CustomLinkRelation")]
+            [ValueProvider("SemanticLink.IanaLinkRelation")]
+            [ValueProvider("Domain.LinkRelations.CustomLinkRelation")]
             string linkRelation,
             string title = null,
             string type = null)
@@ -29,10 +27,8 @@ namespace SemanticLink
 
         public static WebLink MakeWebLink(
             this Uri url,
-            [ValueProvider("Relations.IanaLinkRelation")]
-            [ValueProvider("Relations.CustomLinkRelation")]
-            [ValueProvider("IanaLinkRelation")]
-            [ValueProvider("CustomLinkRelation")]
+            [ValueProvider("SemanticLink.IanaLinkRelation")]
+            [ValueProvider("Domain.LinkRelations.CustomLinkRelation")]
             string linkRelation)
         {
             return url?.ToString().MakeWebLink(linkRelation);

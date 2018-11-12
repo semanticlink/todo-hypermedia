@@ -12,6 +12,9 @@ namespace Api.RepresentationExtensions
 {
     public static class TagRepresentationExtensions
     {
+        /// <summary>
+        ///     A tag representation
+        /// </summary>
         public static TagRepresentation ToRepresentation(this Tag tag, IUrlHelper url)
         {
             return new TagRepresentation
@@ -32,6 +35,9 @@ namespace Api.RepresentationExtensions
             };
         }
 
+        /// <summary>
+        ///     A tag represenation in the context of a todo representation
+        /// </summary>
         public static TagRepresentation ToTodoRepresentation(this Tag tag, string todoId, IUrlHelper url)
         {
             return new TagRepresentation
@@ -51,8 +57,11 @@ namespace Api.RepresentationExtensions
                 Name = tag.Name
             };
         }
-        
-        
+
+
+        /// <summary>
+        ///     Reverse map with validation across-the-wire representation into in-memory representation
+        /// </summary>
         public static TagCreateData FromRepresentation(this TagCreateDataRepresentation todo)
         {
             return new TagCreateData
@@ -62,6 +71,9 @@ namespace Api.RepresentationExtensions
             };
         }
 
+        /// <summary>
+        ///     Feed representation of tags (at the root level)
+        /// </summary>
         public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Tag> tags, IUrlHelper url)
         {
             return new FeedRepresentation
@@ -82,33 +94,40 @@ namespace Api.RepresentationExtensions
             };
         }
 
-        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Tag> tags, string id, IUrlHelper url)
+        /// <summary>
+        ///     Feed representation of tags in the context of a todo representation.
+        /// </summary>
+        /// <remarks>
+        ///    This representation links to PUT and PATCH operations using <see cref="MediaType.UriList"/>
+        ///     and <see cref="MediaType.JsonPatch"/> respectfully.
+        /// </remarks>
+        public static FeedRepresentation ToFeedRepresentation(this IEnumerable<Tag> tags, string todoId, IUrlHelper url)
         {
             return new FeedRepresentation
             {
                 Links = new[]
                 {
                     // self
-                    id.MakeTodoTagCollectionUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    todoId.MakeTodoTagCollectionUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // up link to the referring todo
-                    id.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Up),
+                    todoId.MakeTodoUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // no create form because this is readonly collection
-                    id.MakeTagCreateFormUri(url).MakeWebLink(IanaLinkRelation.CreateForm),
+                    todoId.MakeTagCreateFormUri(url).MakeWebLink(IanaLinkRelation.CreateForm),
 
                     // create form because for text/uri-list
-                    id
+                    todoId
                         .MakeTagEditFormUriListUri(url)
                         .MakeWebLink(IanaLinkRelation.EditForm, type: MediaType.UriList),
 
                     // create form because for text/uri-list
-                    id
+                    todoId
                         .MakeTagEditFormJsonPatchUri(url)
                         .MakeWebLink(IanaLinkRelation.EditForm, type: MediaType.JsonPatch)
                 },
                 Items = tags
-                    .Select(t => t.MakeTodoFeedItemRepresentation(id, url))
+                    .Select(t => t.MakeTodoFeedItemRepresentation(todoId, url))
                     .ToArray()
             };
         }

@@ -12,8 +12,10 @@ namespace Api.RepresentationExtensions
 {
     public static class UserRepresentationExtensions
     {
-        public static UserRepresentation ToRepresentation(this User user,
-            IUrlHelper url)
+        /// <summary>
+        ///     A user representation
+        /// </summary>
+        public static UserRepresentation ToRepresentation(this User user, IUrlHelper url)
         {
             return new UserRepresentation
             {
@@ -45,6 +47,9 @@ namespace Api.RepresentationExtensions
         }
 
 
+        /// <summary>
+        ///     Reverse map with validation across-the-wire representation into in-memory representation
+        /// </summary>
         public static UserCreateData FromRepresentation(this UserCreateDataRepresentation data)
         {
             return new UserCreateData

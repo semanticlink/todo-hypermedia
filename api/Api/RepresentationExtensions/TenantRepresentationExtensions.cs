@@ -11,6 +11,9 @@ namespace Api.RepresentationExtensions
 {
     public static class TenantRepresentationExtensions
     {
+        /// <summary>
+        ///     A tenant representation
+        /// </summary>
         public static TenantRepresentation ToRepresentation(this Tenant tenant, IUrlHelper url)
         {
             return new TenantRepresentation
@@ -71,8 +74,14 @@ namespace Api.RepresentationExtensions
             };
         }
 
-
-        public static FeedRepresentation ToSearchFeedRepresentation(this IEnumerable<Tenant> tenants,
+        /// <summary>
+        ///    A feed representation of search results of tenants in the context of a user.      
+        /// </summary>
+        /// <remarks>
+        ///    This collection doesn't require a create form because the results are from search
+        /// </remarks>
+        public static FeedRepresentation ToSearchFeedRepresentation(
+            this IEnumerable<Tenant> tenants,
             string userId,
             string criteria,
             IUrlHelper url)
@@ -81,16 +90,11 @@ namespace Api.RepresentationExtensions
             {
                 Links = new[]
                 {
-                    // self
+                    // self is a collection with the query param of the criteria
                     criteria.MakeHomeTenantsUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // home is the logical parent
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
-
-                    // create form
-/*
-                    url.MakeTenantCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm),
-*/
 
                     // make a search for a tenant
                     url.MakeHomeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Search)
@@ -102,7 +106,10 @@ namespace Api.RepresentationExtensions
             return feedRepresentation;
         }
 
-        public static FeedRepresentation ToRepresentation(
+        /// <summary>
+        ///     A feed representation of users in the context of a tenant
+        /// </summary>
+        public static FeedRepresentation ToUserFeedRepresentation(
             this IEnumerable<string> userIds,
             string tenantId,
             IUrlHelper url)
@@ -118,12 +125,15 @@ namespace Api.RepresentationExtensions
                     url.MakeUserCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = userIds
-                    .Select(id => ToFeedRepresentationItem(id, url))
+                    .Select(id => ToUserFeedRepresentationItem(id, url))
                     .ToArray()
             };
         }
 
 
+        /// <summary>
+        ///     A feed representation of tenants in the context of a user
+        /// </summary>
         public static FeedRepresentation ToTenantFeedRepresentation(
             this IEnumerable<Tenant> tenants,
             string userId,
@@ -174,13 +184,12 @@ namespace Api.RepresentationExtensions
             };
         }
 
-        private static FeedItemRepresentation ToFeedRepresentationItem(this string userId, IUrlHelper url)
+        private static FeedItemRepresentation ToUserFeedRepresentationItem(this string userId, IUrlHelper url)
         {
             return new FeedItemRepresentation
             {
                 Id = userId.MakeUserUri(url)
             };
         }
-
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Api.UriFactory;
+using Domain.Representation;
 using Domain.Representation.Enum;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
@@ -6,6 +7,8 @@ using SemanticLink.Form;
 
 namespace Api.RepresentationExtensions
 {
+    /// <seealso cref="TodoRepresentation" />
+    /// <seealso cref="TodoRepresentationExtensions" />
     public static class TodoFormRepresentationExtensions
     {
 

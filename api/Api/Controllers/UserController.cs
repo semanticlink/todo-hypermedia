@@ -86,7 +86,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     A public stateless edit form that is fully cacheable.
+        ///     A public stateless create form that is fully cacheable.
         /// </summary>
         [HttpGet("form/create", Name = UserUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
@@ -97,6 +97,9 @@ namespace Api.Controllers
         }
 
 
+        /// <summary>
+        ///     Update a user resource
+        /// </summary>
         [HttpPut("{id}")]
         [AuthoriseUser(Permission.Put)]
         public async Task<IActionResult> UpdateUser([FromBody] UserEditData model, string id)
@@ -126,7 +129,7 @@ namespace Api.Controllers
         {
             return (await _todoStore
                     .GetByUser(id))
-                .ToUserTodoFeedRepresentation(id, Url);
+                .ToUserTodoListFeedRepresentation(id, Url);
         }
 
         /////////////////////////
@@ -159,9 +162,12 @@ namespace Api.Controllers
         }
 
 
+        /// <summary>
+        ///     Create a tenant in the context of a user
+        /// </summary>
         [HttpPost("{id}/tenant", Name = UserUriFactory.UserTenantsRouteName)]
         [AuthoriseUserTenantCollection(Permission.Post)]
-        public async Task<CreatedResult> Create([FromBody] TenantCreateDataRepresentation data, string id)
+        public async Task<CreatedResult> CreateTenant([FromBody] TenantCreateDataRepresentation data, string id)
         {
             (await _tenantStore.GetByCode(data.Code))
                 .ThrowInvalidDataExceptionIfNotNull("Invalid tenant"); // already exists
@@ -195,7 +201,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Todos available for the user on a tenant
+        ///     Todo list collection available for the user on a tenant
         /// </summary>
         [HttpGet("{id}/tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodoRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
@@ -207,7 +213,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Create a user named todo list
+        ///     Create a todo list on a tenant in the context of a user
         /// </summary>
         /// <seealso cref="TodoController.CreateTodo"/>
         [HttpPost("{id}/tenant/{tenantId}/todo", Name = UserUriFactory.UserTenantTodoRouteName)]

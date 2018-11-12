@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.RepresentationExtensions;
+using Api.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
@@ -16,7 +17,6 @@ namespace Api.Controllers
         private readonly ITagStore _tagStore;
         private readonly ITodoStore _todoStore;
 
-
         public TagController(ITagStore tagStore, ITodoStore todoStore)
         {
             _tagStore = tagStore;
@@ -24,9 +24,13 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Tags that live across all tenants
+        ///     Tags that live across all tenants for users that are authorised to read root tag collections
         /// </summary>
-        [HttpGet("", Name = UriFactory.TagUriFactory.AllTagsRouteName)]
+        /// <remarks>
+        ///    This collection is available to tenants (by design) so that we get reuse.
+        ///    Of course, this could be implemented quite differently.
+        /// </remarks>
+        [HttpGet("", Name = TagUriFactory.AllTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [Authorise(RightType.RootTagCollection, Permission.Get, ResourceKey.Root)]
@@ -37,7 +41,10 @@ namespace Api.Controllers
                 .ToFeedRepresentation(Url);
         }
 
-        [HttpGet("{id}", Name = UriFactory.TagUriFactory.TagRouteName)]
+        /// <summary>
+        ///     A tag resource
+        /// </summary>
+        [HttpGet("{id}", Name = TagUriFactory.TagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [Authorise(RightType.Tag, Permission.Get)]
@@ -48,7 +55,20 @@ namespace Api.Controllers
                 .ToRepresentation(Url);
         }
 
-        [HttpGet("{id}/todo", Name = UriFactory.TagUriFactory.TagTodoCollectionRouteName)]
+        ///////////////////////////////////////////////////////////////
+        //
+        //  The collection of todo resource
+        //  ===============================
+        //
+
+        /// <summary>
+        ///     A collection of todos that have a tag on them
+        /// </summary>
+        /// <remarks>
+        ///    This collection has a disclosure issue that you can see the total number of todos across tenants
+        ///    that have a tag. Access to the todo itself will be unauthorised. 
+        /// </remarks>
+        [HttpGet("{id}/todo", Name = TagUriFactory.TagTodoCollectionRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [Authorise(RightType.TagTodoCollection, Permission.Get)]

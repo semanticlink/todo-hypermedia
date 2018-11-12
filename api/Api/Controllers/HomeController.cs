@@ -13,9 +13,6 @@ using SemanticLink;
 using SemanticLink.AspNetCore;
 using SemanticLink.Form;
 using Toolkit;
-using CacheDuration = SemanticLink.AspNetCore.CacheDuration;
-using HomeUriFactory = Api.UriFactory.HomeUriFactory;
-using TrustDefaults = Api.Web.TrustDefaults;
 
 namespace Api.Controllers
 {
@@ -33,6 +30,13 @@ namespace Api.Controllers
             _userStore = userStore;
         }
 
+        /// <summary>
+        ///     The root/home of the API
+        /// </summary>
+        /// <remarks>
+        ///    This is always unauthenticated and must not disclose information and **must** also be general enough to
+        ///     everyone so that it can be publicly cacheable.
+        /// </remarks>
         [HttpGet("", Name = HomeUriFactory.DefaultRoute)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public ApiRepresentation GetApi()
@@ -114,7 +118,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     A simple search form resource.
+        ///     A simple search form resource that is publicly cacheable
         /// </summary>
         [HttpGet("tenant/form/search", Name = HomeUriFactory.HomeTenantSearchFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]

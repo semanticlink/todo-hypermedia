@@ -4,12 +4,18 @@ using Domain.Models;
 using Domain.Representation;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
-using AuthenticatorDefaults = SemanticLink.AspNetCore.AuthenticatorDefaults;
+using SemanticLink.AspNetCore;
 
 namespace Api.RepresentationExtensions
 {
     public static class AuthenticateRepresentationExtensions
     {
+        /// <summary>
+        ///     A singleton authenticator representation with links to the available authenticators
+        /// </summary>
+        /// <remarks>
+        ///    Currently, this is single authenticator strategy. This could alternatively be a collection.
+        /// </remarks>
         public static AuthenticateRepresentation ToAuthenticateRepresentation(this string authenticator, IUrlHelper url)
         {
             return new AuthenticateRepresentation
@@ -28,8 +34,15 @@ namespace Api.RepresentationExtensions
             };
         }
 
+        /// <summary>
+        ///     A singleton configuration for a Auth0 configuration.
+        /// </summary>
+        /// <remarks>
+        ///    This is a pretty simple (non-polymorphic) approach to be extended as needed. This should be publicly
+        ///     cacheable
+        /// </remarks>
         public static Auth0Representation ToAuthenticatorRepresentation(
-            this Auth0Configuration auth0Representation,
+            this Auth0Configuration configuration,
             string authenticator,
             IUrlHelper url)
         {
@@ -44,12 +57,12 @@ namespace Api.RepresentationExtensions
                     url.MakeAuthenticatorUri().MakeWebLink(IanaLinkRelation.Up),
                 },
 
-                Audience = auth0Representation.Audience,
-                ClientId = auth0Representation.ClientId,
-                Domain = auth0Representation.Domain,
-                Leeway = auth0Representation.Leeway,
-                RequestedScopes = auth0Representation.RequestedScopes.Split(' ').ToList(),
-                ResponseType = auth0Representation.ResponseType.Split(' ').ToList(),
+                Audience = configuration.Audience,
+                ClientId = configuration.ClientId,
+                Domain = configuration.Domain,
+                Leeway = configuration.Leeway,
+                RequestedScopes = configuration.RequestedScopes.Split(' ').ToList(),
+                ResponseType = configuration.ResponseType.Split(' ').ToList(),
                 Realm = AuthenticatorDefaults.AuthenticatorAuth0Realm
             };
         }

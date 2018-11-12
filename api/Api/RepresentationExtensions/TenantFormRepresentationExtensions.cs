@@ -110,6 +110,9 @@ namespace Api.RepresentationExtensions
         }
 
 
+        /// <summary>
+        ///     Reverse map with validation across-the-wire representation into in-memory representation
+        /// </summary>
         public static TenantCreateData FromRepresentation(this TenantCreateDataRepresentation tenant)
         {
             return new TenantCreateData

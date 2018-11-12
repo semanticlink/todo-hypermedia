@@ -72,6 +72,9 @@ namespace Api.Controllers
             return Url.ToTodoEditFormRepresentation();
         }
 
+        /// <summary>
+        ///     A public stateless create form that is fully cacheable.
+        /// </summary>
         [HttpGet("form/create", Name = TodoUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
@@ -94,8 +97,11 @@ namespace Api.Controllers
         // ===============
 
         /// <summary>
-        ///     User todo collection
+        ///     Retrieve a todo items collection in the context of a todo list
         /// </summary>
+        /// <remarks>
+        ///    While the persistence of the todo is recursive the controller interface codes out the list/item structure
+        /// </remarks>
         /// <see cref="TodoController.GetById"/>
         [HttpGet("{id}/todo", Name = TodoUriFactory.TodoTodoListRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
@@ -109,7 +115,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// 
+        ///     Create a todo item on a todo list
         /// </summary>
         /// <seealso cref="UserController.CreateTodo"/>
         [HttpPost("{id}/todo", Name = TodoUriFactory.TodoTodoListRouteName)]
@@ -130,6 +136,7 @@ namespace Api.Controllers
                 .MakeTodoUri(Url)
                 .MakeCreated();
         }
+        
         ////////////////////////////////////////////////
         // 
         //  The tags on the todo collection
@@ -285,7 +292,7 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        ///     Tag form
+        ///     A public stateless create form that is fully cacheable.
         /// </summary>
         [HttpGet("{id}/tag/form/create", Name = TagUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
@@ -298,7 +305,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Tag form for <see cref="MediaType.UriList"/>
         /// </summary>
-        [HttpGet("{id}/tag/uri-list/create", Name = TagUriFactory.CreateFormUriListRouteName)]
+        [HttpGet("{id}/tag/uri-list/create", Name = TagUriFactory.EditFormUriListRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
         public EditFormRepresentation GetCreateFormUriList(string id)
@@ -309,7 +316,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Tag form for <see cref="MediaType.JsonPatch"/>
         /// </summary>
-        [HttpGet("{id}/tag/json-patch/create", Name = TagUriFactory.CreateFormJsonPatchRouteName)]
+        [HttpGet("{id}/tag/json-patch/create", Name = TagUriFactory.EditFormJsonPatchRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
         public EditFormRepresentation GetEditFormJsonPatch(string id)
@@ -320,9 +327,6 @@ namespace Api.Controllers
         /// <summary>
         ///     A tag on a todo
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="tagId"></param>
-        /// <returns></returns>
         [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]

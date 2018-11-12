@@ -9,6 +9,9 @@ namespace Api.RepresentationExtensions
 {
     public static class ApiRepresentationExtensions
     {
+        /// <summary>
+        ///     The root/home API
+        /// </summary>
         public static ApiRepresentation ToRepresentation(this ApiVersion api, IUrlHelper url)
         {
             return new ApiRepresentation
@@ -17,13 +20,13 @@ namespace Api.RepresentationExtensions
                 {
                     // root of the api
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Self),
-                                        
+
                     // a virtual resource that redirects to the user
                     url.MakeUserMeUri().MakeWebLink(CustomLinkRelation.Me),
-                    
+
                     // all authentication approaches
                     url.MakeAuthenticatorUri().MakeWebLink(CustomLinkRelation.Authenticate),
-                    
+
                     // all tags currently created across todos
                     url.MakeAllTagsCollectionUri().MakeWebLink(CustomLinkRelation.Tags),
 

@@ -49,6 +49,9 @@ namespace Api.Controllers
                 .ToRepresentation(Url);
         }
 
+        /// <summary>
+        ///     A public stateless create form that is fully cacheable.
+        /// </summary>
         [HttpGet("form/create", Name = TenantUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public CreateFormRepresentation TenantCreateForm()
@@ -56,6 +59,9 @@ namespace Api.Controllers
             return Url.ToTenantCreateFormRepresentation();
         }
 
+        /// <summary>
+        ///     A public stateless edit form that is fully cacheable.
+        /// </summary>
         [HttpGet("form/edit", Name = TenantUriFactory.EditFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public EditFormRepresentation TenantEditForm()
@@ -84,7 +90,7 @@ namespace Api.Controllers
         public async Task<FeedRepresentation> GetUsers(string id)
         {
             return (await _tenantStore.GetUsersByTenant(id))
-                .ToRepresentation(id, Url);
+                .ToUserFeedRepresentation(id, Url);
         }
 
         /// <summary>

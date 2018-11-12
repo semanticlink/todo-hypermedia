@@ -76,13 +76,16 @@ namespace Api.Controllers
         ///     A virtual resource such that each user (based on the Id from the authenticator)
         ///     may have different forms of authenticator.
         /// </summary>
+        /// <remarks>
+        ///    This code only accepts one type of authenticator <see cref="CustomLinkRelation.Auth0"/> 
+        /// </remarks>
         [HttpGet("{authenticatorId}/{authenticator}", Name = AuthenticateUriFactory.UserAuthenticatorRouteName)]
         public IActionResult UserAuthenticator(string authenticatorId, string authenticator)
         {
-            authenticator
-                .ThrowArgumentExceptionIf(a => a != CustomLinkRelation.Auth0,
-                    nameof(authenticator),
-                    "Authenticator not found");
+            authenticator.ThrowArgumentExceptionIf(
+                a => a != CustomLinkRelation.Auth0,
+                nameof(authenticator),
+                "Authenticator not found");
 
             return CustomLinkRelation.Auth0
                 .MakeAuthenticatorUri(Url)

@@ -24,13 +24,13 @@ namespace Api.UriFactory
         ///    This is experimental as a way to describe the uri-list
         /// </remarks>
         ///  <see cref="MediaType.UriList"/>
-        public const string CreateFormUriListRouteName = "TagsUriListCreateForm";
+        public const string EditFormUriListRouteName = "TagsUriListCreateForm";
 
         /// <summary>
         ///     The route name for an edit form for JSON patch media type
         /// </summary>
         ///  <see cref="MediaType.JsonPatch"/>
-        public const string CreateFormJsonPatchRouteName = "TagsJsonPatchCreateForm";
+        public const string EditFormJsonPatchRouteName = "TagsJsonPatchCreateForm";
 
         /// <summary>
         ///     The route name for create form for a tag 
@@ -104,7 +104,7 @@ namespace Api.UriFactory
         ///  <see cref="MediaType.UriList"/>
         public static string MakeTagEditFormUriListUri(this string id, IUrlHelper url)
         {
-            return url.Link(CreateFormUriListRouteName, new {id = id});
+            return url.Link(EditFormUriListRouteName, new {id = id});
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Api.UriFactory
         ///  <see cref="MediaType.JsonPatch"/>
         public static string MakeTagEditFormJsonPatchUri(this string id, IUrlHelper url)
         {
-            return url.Link(CreateFormJsonPatchRouteName, new {id = id});
+            return url.Link(EditFormJsonPatchRouteName, new {id = id});
         }
 
         /// <summary>

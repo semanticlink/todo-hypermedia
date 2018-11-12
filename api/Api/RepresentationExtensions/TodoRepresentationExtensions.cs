@@ -14,9 +14,13 @@ namespace Api.RepresentationExtensions
     public static class TodoRepresentationExtensions
     {
         /// <summary>
-        ///     Feed representation of todos parented on a user
+        ///     Feed representation of todo list collection parented on a user
         /// </summary>
-        public static FeedRepresentation ToUserTodoFeedRepresentation(
+        /// <remarks>
+        ///    Todo lists are parented on a tenant, we aren't going to offer to create here (because we don't have
+        ///     a tenant, although we could)
+        /// </remarks>
+        public static FeedRepresentation ToUserTodoListFeedRepresentation(
             this IEnumerable<Todo> todos,
             string todoListId,
             IUrlHelper url)
@@ -32,7 +36,6 @@ namespace Api.RepresentationExtensions
                     todoListId.MakeUserUri(url).MakeWebLink(IanaLinkRelation.Up),
 
                     // create-form - you  must create on user tenant
-//                    url.MakeTodoCreateFormUri().MakeWebLink(IanaLinkRelation.CreateForm)
                 },
                 Items = todos
                     .Select(t => t.MakeTodoFeedItemRepresentation(url))
@@ -41,8 +44,9 @@ namespace Api.RepresentationExtensions
         }
 
         /// <summary>
-        ///     Feed representation of todos parented on a named todo list
+        ///     Feed representation of todo items collection parented on a named todo list
         /// </summary>
+        /// <see cref="ToUserTodoListFeedRepresentation"/>
         public static FeedRepresentation ToFeedRepresentation(
             this IEnumerable<Todo> todos,
             string todoListId,
@@ -70,6 +74,10 @@ namespace Api.RepresentationExtensions
         /// <summary>
         ///     Feed representation of todos parented on a tags
         /// </summary>
+        /// <remarks>
+        ///    While the <see cref="Todo"/>s could be lists (because they could be) in practice <see cref="Tag"/>s
+        ///    live on a todo item
+        /// </remarks>
         public static FeedRepresentation ToTodosOnTagFeedRepresentation(
             this IEnumerable<Todo> todos,
             string tagId,
@@ -101,6 +109,9 @@ namespace Api.RepresentationExtensions
         }
 
 
+        /// <summary>
+        ///     Reverse map with validation across-the-wire representation into in-memory representation
+        /// </summary>
         public static TodoCreateData FromRepresentation(
             this TodoCreateDataRepresentation todo,
             string parentId,
@@ -115,13 +126,17 @@ namespace Api.RepresentationExtensions
                     .ThrowInvalidDataExceptionIfNullOrWhiteSpace("A todo requires a tenant"),
                 
                 Type = type,
-
                 Due = todo.Due,
-
                 State = todo.State
             };
         }
 
+        /// <summary>
+        ///    A todo representation in the context of a user         
+        /// </summary>
+        /// <remarks>
+        ///    The <see cref="TodoRepresentation"/> is either a todo list or a todo item
+        /// </remarks>
         public static TodoRepresentation ToRepresentation(this Todo todo, string userId, IUrlHelper url)
         {
             // up is dependent on context of whether it is a list or an item

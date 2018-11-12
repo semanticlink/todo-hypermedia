@@ -11,7 +11,7 @@ namespace Api.RepresentationExtensions
     {
         /// <summary>
         ///     Get the create form to describe to clients of the API how to
-        ///     modify instances on the resource
+        ///     modify instances on the resource <see cref="TagRepresentation"/>
         /// </summary>
         /// <seealso cref = "TagCreateDataRepresentation" />
         public static CreateFormRepresentation ToTagCreateFormRepresentation(this string id, IUrlHelper url)
