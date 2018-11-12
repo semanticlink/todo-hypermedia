@@ -22,7 +22,7 @@ namespace Api.RepresentationExtensions
                     url.MakeUserMeUri().MakeWebLink(CustomLinkRelation.Me),
                     
                     // all authentication approaches
-                    url.MakeAuthenicateUri().MakeWebLink(CustomLinkRelation.Authenticate),
+                    url.MakeAuthenticatorUri().MakeWebLink(CustomLinkRelation.Authenticate),
                     
                     // all tags currently created across todos
                     url.MakeAllTagsCollectionUri().MakeWebLink(CustomLinkRelation.Tags),

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Authorisation;
-using Api.Web;
-using Api;
 using Api.RepresentationExtensions;
 using Api.UriFactory;
+using Api.Web;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
@@ -15,9 +14,6 @@ using SemanticLink;
 using SemanticLink.AspNetCore;
 using SemanticLink.Form;
 using Toolkit;
-using CacheDuration = SemanticLink.AspNetCore.CacheDuration;
-using TodoUriFactory = Api.UriFactory.TodoUriFactory;
-using TrustDefaults = Api.Web.TrustDefaults;
 
 namespace Api.Controllers
 {
@@ -143,7 +139,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Tag collection. The todo is the logical parent of a set of (global) tags.
         /// </summary>
-        [HttpGet("{id}/tag/", Name = UriFactory.TagUriFactory.TodoTagsRouteName)]
+        [HttpGet("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [AuthoriseTodoTagCollection(Permission.Get)]
@@ -202,7 +198,7 @@ namespace Api.Controllers
         ///     <li>see https://tools.ietf.org/html/rfc6901#section-7 (JSON Pointer)</li>
         ///     <li>good examples http://benfoster.io/blog/aspnet-core-json-patch-partial-api-updates</li>
         /// </remarks>
-        [HttpPatch("{id}/tag/", Name = UriFactory.TagUriFactory.TodoTagsRouteName)]
+        [HttpPatch("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes(MediaType.JsonPatch)]
         [AuthoriseTodoTagCollection(Permission.Patch)]
         public async Task<NoContentResult> PatchTagCollection(
@@ -221,8 +217,8 @@ namespace Api.Controllers
                 // tags can come in various routes
                 var todoTags = document.ToTags(new List<RouteAndParam>
                     {
-                        new RouteAndParam {Route = UriFactory.TagUriFactory.TodoTagRouteName, Param = "tagId"},
-                        new RouteAndParam {Route = UriFactory.TagUriFactory.TagRouteName, Param = "id"},
+                        new RouteAndParam {Route = TagUriFactory.TodoTagRouteName, Param = "tagId"},
+                        new RouteAndParam {Route = TagUriFactory.TagRouteName, Param = "id"}
                     },
                     HttpContext);
                 todo.Tags = todoTags;
@@ -245,7 +241,7 @@ namespace Api.Controllers
         /// </remarks>
         /// <param name="id">Todo</param>
         /// <param name="uriList">A todo tag uri (not a global tag uri)</param>
-        [HttpPut("{id}/tag/", Name = UriFactory.TagUriFactory.TodoTagsRouteName)]
+        [HttpPut("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [Consumes(MediaType.UriList)]
         [AuthoriseTodoTagCollection(Permission.Put)]
         public async Task<NoContentResult> PutTagCollection(string id, [FromBody] string[] uriList)
@@ -253,8 +249,8 @@ namespace Api.Controllers
             // check that global tags exist in the todo set sent through as a uriList
             var tagIds = uriList.ToTags(new List<RouteAndParam>
                 {
-                    new RouteAndParam {Route = UriFactory.TagUriFactory.TodoTagRouteName, Param = "tagId"},
-                    new RouteAndParam {Route = UriFactory.TagUriFactory.TagRouteName, Param = "id"},
+                    new RouteAndParam {Route = TagUriFactory.TodoTagRouteName, Param = "tagId"},
+                    new RouteAndParam {Route = TagUriFactory.TagRouteName, Param = "id"}
                 },
                 HttpContext);
 
@@ -270,7 +266,7 @@ namespace Api.Controllers
         ///    This is a two-step process. First add to the global collection (if it doesn't already exist)
         ///     and then include in the todo.
         /// </remarks>
-        [HttpPost("{id}/tag/", Name = UriFactory.TagUriFactory.TodoTagCreateRouteName)]
+        [HttpPost("{id}/tag/", Name = TagUriFactory.TodoTagsRouteName)]
         [AuthoriseTodoTagCollection(Permission.Post)]
         public async Task<CreatedResult> CreateTag([FromBody] TagCreateDataRepresentation tag, string id)
         {
@@ -291,7 +287,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Tag form
         /// </summary>
-        [HttpGet("{id}/tag/form/create", Name = UriFactory.TagUriFactory.CreateFormRouteName)]
+        [HttpGet("{id}/tag/form/create", Name = TagUriFactory.CreateFormRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
         public CreateFormRepresentation GetCreateForm(string id)
@@ -302,7 +298,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Tag form for <see cref="MediaType.UriList"/>
         /// </summary>
-        [HttpGet("{id}/tag/uri-list/create", Name = UriFactory.TagUriFactory.CreateFormUriListRouteName)]
+        [HttpGet("{id}/tag/uri-list/create", Name = TagUriFactory.CreateFormUriListRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
         public EditFormRepresentation GetCreateFormUriList(string id)
@@ -313,7 +309,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Tag form for <see cref="MediaType.JsonPatch"/>
         /// </summary>
-        [HttpGet("{id}/tag/json-patch/create", Name = UriFactory.TagUriFactory.EditFormJsonPatchRouteName)]
+        [HttpGet("{id}/tag/json-patch/create", Name = TagUriFactory.CreateFormJsonPatchRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         [AuthoriseForm]
         public EditFormRepresentation GetEditFormJsonPatch(string id)
@@ -327,7 +323,7 @@ namespace Api.Controllers
         /// <param name="id"></param>
         /// <param name="tagId"></param>
         /// <returns></returns>
-        [HttpGet("{id}/tag/{tagId}", Name = UriFactory.TagUriFactory.TodoTagRouteName)]
+        [HttpGet("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
         [AuthoriseTodo(Permission.Get)]
@@ -346,7 +342,7 @@ namespace Api.Controllers
         /// <summary>
         ///     Remove a tag from a todo. This is not a delete. The tag still exists in the global collection of tags
         /// </summary>
-        [HttpDelete("{id}/tag/{tagId}", Name = UriFactory.TagUriFactory.TodoTagRouteName)]
+        [HttpDelete("{id}/tag/{tagId}", Name = TagUriFactory.TodoTagRouteName)]
         [AuthoriseTodoTagCollection(Permission.Patch, "tagId")]
         public async Task<IActionResult> DeleteTag(string id, string tagId)
         {

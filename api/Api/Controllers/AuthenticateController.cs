@@ -1,5 +1,4 @@
-﻿using Api;
-using Api.RepresentationExtensions;
+﻿using Api.RepresentationExtensions;
 using Api.UriFactory;
 using Domain.LinkRelations;
 using Domain.Models;
@@ -86,7 +85,7 @@ namespace Api.Controllers
                     "Authenticator not found");
 
             return CustomLinkRelation.Auth0
-                .MakeAuthenicatorUri(Url)
+                .MakeAuthenticatorUri(Url)
                 .MakeRedirect();
         }
     }

@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
-using Api;
 using Api.RepresentationExtensions;
 using Api.UriFactory;
 using Domain.Models;
 using Domain.Persistence;
 using Domain.Representation;
 using Marvin.Cache.Headers;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
 using SemanticLink.AspNetCore;
@@ -36,7 +33,7 @@ namespace Api.Controllers
             _userStore = userStore;
         }
 
-        [HttpGet("", Name = HomeUriFactory.SelfRouteName)]
+        [HttpGet("", Name = HomeUriFactory.DefaultRoute)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Public, MaxAge = CacheDuration.Long)]
         public ApiRepresentation GetApi()
         {

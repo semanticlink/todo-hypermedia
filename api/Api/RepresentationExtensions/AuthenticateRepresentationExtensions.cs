@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Api;
 using Api.UriFactory;
 using Domain.Models;
 using Domain.Representation;
@@ -9,7 +8,7 @@ using AuthenticatorDefaults = SemanticLink.AspNetCore.AuthenticatorDefaults;
 
 namespace Api.RepresentationExtensions
 {
-    public static class AuthenicateRepresentationExtensions
+    public static class AuthenticateRepresentationExtensions
     {
         public static AuthenticateRepresentation ToAuthenticateRepresentation(this string authenticator, IUrlHelper url)
         {
@@ -18,13 +17,13 @@ namespace Api.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    url.MakeAuthenicateUri().MakeWebLink(IanaLinkRelation.Self),
+                    url.MakeAuthenticatorUri().MakeWebLink(IanaLinkRelation.Self),
 
                     // logical parent of authenticate is root
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
-                    // authenicator (note: future is an array of authenticators
-                    authenticator.MakeAuthenicatorUri(url).MakeWebLink(authenticator)
+                    // authenticator (note: future is an array of authenticators
+                    authenticator.MakeAuthenticatorUri(url).MakeWebLink(authenticator)
                 },
             };
         }
@@ -39,10 +38,10 @@ namespace Api.RepresentationExtensions
                 Links = new[]
                 {
                     // self
-                    authenticator.MakeAuthenicatorUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    authenticator.MakeAuthenticatorUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // logical parent is authenticate
-                    url.MakeAuthenicateUri().MakeWebLink(IanaLinkRelation.Up),
+                    url.MakeAuthenticatorUri().MakeWebLink(IanaLinkRelation.Up),
                 },
 
                 Audience = auth0Representation.Audience,

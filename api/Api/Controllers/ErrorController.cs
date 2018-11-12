@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Domain.Representation;
 using SemanticLink;
 
 namespace Api.Controllers

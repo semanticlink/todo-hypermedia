@@ -5,7 +5,7 @@ using Domain.LinkRelations;
 using Microsoft.AspNetCore.Mvc;
 using SemanticLink;
 
-namespace Api.RepresentationExtensions
+namespace Api.Web
 {
     /// <summary>
     ///     A class to be able to read the Auth0 Id format and take in the the domain and spit out something

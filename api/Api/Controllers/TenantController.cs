@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Api.Authorisation;
 using Api.Web;
-using Api;
 using Api.RepresentationExtensions;
 using Api.UriFactory;
 using Domain.Models;
@@ -14,8 +13,6 @@ using SemanticLink;
 using SemanticLink.AspNetCore;
 using SemanticLink.Form;
 using Toolkit;
-using CacheDuration = SemanticLink.AspNetCore.CacheDuration;
-using TenantUriFactory = Api.UriFactory.TenantUriFactory;
 
 namespace Api.Controllers
 {

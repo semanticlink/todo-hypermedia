@@ -4,30 +4,41 @@ namespace Api.UriFactory
 {
     public static class HomeUriFactory
     {
-        public const string SelfRouteName = "Home";
-
+        /// <summary>
+        ///     The route name for home/root of the API
+        /// </summary>
+        public const string DefaultRoute = "Home";
 
         /// <summary>
-        ///     A logical resource that is the collection of all tenants
+        ///     The route name for a logical resource that is the collection of all searchable tenants
         /// </summary>
         public const string TenantsRouteName = "HomeTenants";
 
         /// <summary>
-        ///     A logical resource that is the collection of all users
+        ///     The route name for a logical resource that is the collection of all users
         /// </summary>
         public const string UsersRouteName = "HomeUsers";
 
+        /// <summary>
+        ///     The route name for a logical resource that is a search collection of all searchable tenants
+        /// </summary>
         public const string HomeTenantSearchRouteName = "HomeTenantSearch";
+        
+        /// <summary>
+        ///     The route name for a tenant search form resource
+        /// </summary>
         public const string HomeTenantSearchFormRouteName = "HomeTenantSearchForm";
 
+        /// <summary>
+        ///     The url of the home/root of the API
+        /// </summary>
         public static string MakeHomeUri(this IUrlHelper url)
         {
-            return url.Link(SelfRouteName, new { });
+            return url.Link(DefaultRoute, new { });
         }
 
-
         /// <summary>
-        ///     A collection resource for the list of tenants, given a string search criteria
+        ///     The url for a collection resource for the list of tenants, given a string search criteria
         /// </summary>
         /// <remarks>
         ///     From a disclosure point-of-view this list is not presented via the API to
@@ -39,7 +50,7 @@ namespace Api.UriFactory
         }
 
         /// <summary>
-        ///     A collection resource for the list of tenants (without a search criteria).
+        ///     The url for a collection resource for the list of tenants (without a search criteria).
         /// </summary>
         /// <remarks>
         ///     From a disclosure point-of-view this list is not presented via the API to
@@ -51,7 +62,7 @@ namespace Api.UriFactory
         }
 
         /// <summary>
-        ///     The Url for POSTing a search form
+        ///     The url for POSTing a search form
         /// </summary>
         /// <remarks>
         ///     This is <b>not</b> the URL of the collection as we use this for create
@@ -62,14 +73,16 @@ namespace Api.UriFactory
             return url.Link(HomeTenantSearchRouteName, new { });
         }
 
-
+        /// <summary>
+        ///     The url for the search form for locating a matched tenant for a user
+        /// </summary>
         public static string MakeHomeTenantsSearchFormUri(this IUrlHelper url)
         {
             return url.Link(HomeTenantSearchFormRouteName, new { });
         }
 
         /// <summary>
-        ///     A collection resource for the list of users.
+        ///     The url for a collection resource for the list of users.
         /// </summary>
         /// <remarks>
         ///     From a disclosure point-of-view this list is not presented via the API to
