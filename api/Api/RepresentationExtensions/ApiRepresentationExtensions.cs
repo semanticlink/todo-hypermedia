@@ -35,6 +35,8 @@ namespace Api.RepresentationExtensions
 
                     //  user collection which has the tenant search on it
                     url.MakeHomeUsersUri().MakeWebLink(CustomLinkRelation.Users),
+                    
+                    // TODO: profile
                 },
                 Version = api.Version
             };

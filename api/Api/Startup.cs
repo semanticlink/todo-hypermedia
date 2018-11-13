@@ -198,7 +198,7 @@ namespace Api
                 .UseTodoCors()
                 /*
                  *
-                 * Auth 2.0 now only has a single authenticatio middleware and invokes
+                 * Auth 2.0 now only has a single authentication middleware and invokes
                  *  based on registration in 'AddAuthentication' in ConfigureServices
                  *
                  * see https://github.com/aspnet/Security/issues/1310

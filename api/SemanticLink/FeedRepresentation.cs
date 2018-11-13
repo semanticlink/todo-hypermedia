@@ -2,7 +2,7 @@
 
 namespace SemanticLink
 {
-    // cref="http://en.wikipedia.org/wiki/Atom_(standard)#Example_of_an_Atom_1.0_feed"
+    /// http://en.wikipedia.org/wiki/Atom_(standard)#Example_of_an_Atom_1.0_feed
     [DataContract(Name = "feed")]
     public class FeedRepresentation : LinkedRepresentation
     {

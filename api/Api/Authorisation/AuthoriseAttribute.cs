@@ -106,6 +106,9 @@ namespace Api.Authorisation
     /// <summary>
     ///     Wrapper around Authorize so that we can audit forms that they just need authentication
     /// </summary>
+    /// <remarks>
+    ///    Controllers require a <see cref="AuthoriseAttribute"/> in order to inject context of <see cref="User"/>
+    /// </remarks>
     public class AuthoriseFormAttribute : AuthorizeAttribute
     {
     }
@@ -113,6 +116,9 @@ namespace Api.Authorisation
     /// <summary>
     ///     Wrapper around Authorize so that we can audit forms that they just need authentication
     /// </summary>
+    /// <remarks>
+    ///    Controllers require a <see cref="AuthoriseAttribute"/> in order to inject context of <see cref="User"/>
+    /// </remarks>
     public class AuthoriseRedirectAttribute : AuthorizeAttribute
     {
     }
@@ -120,6 +126,9 @@ namespace Api.Authorisation
     /// <summary>
     ///     Wrapper around Authorize so that we can add authentication later on—this is a transitional stage
     /// </summary>
+    /// <remarks>
+    ///    Controllers require a <see cref="AuthoriseAttribute"/> in order to inject context of <see cref="User"/>
+    /// </remarks>
     public class AuthoriseMeAsapAttribute : AuthorizeAttribute
     {
     }
