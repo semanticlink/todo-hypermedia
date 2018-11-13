@@ -17,9 +17,7 @@ namespace Domain.Models
 
         Root = 100,
 
-        [Obsolete("No longer access off root")]
         [Description("Tenants")] RootTenantCollection = 101,
-        
         [Description("Users")] RootUserCollection = 102,
         [Description("Tags")] RootTagCollection = 103,
 
