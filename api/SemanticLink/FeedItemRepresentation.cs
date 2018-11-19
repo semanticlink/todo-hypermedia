@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace SemanticLink
 {
     [DataContract(Name = "feed-item")]
-    public class FeedItemRepresentation : LinkedRepresentation
+    public class FeedItemRepresentation
     {
         /// <summary>
         ///     The canonical URI for the item.
