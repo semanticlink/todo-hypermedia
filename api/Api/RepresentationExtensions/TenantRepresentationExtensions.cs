@@ -86,24 +86,23 @@ namespace Api.RepresentationExtensions
             string criteria,
             IUrlHelper url)
         {
-            var feedRepresentation = new FeedRepresentation
+            return new FeedRepresentation
             {
                 Links = new[]
                 {
                     // self is a collection with the query param of the criteria
-                    criteria.MakeHomeTenantsUri(url).MakeWebLink(IanaLinkRelation.Self),
+                    criteria.MakeTenantsUri(url).MakeWebLink(IanaLinkRelation.Self),
 
                     // home is the logical parent
                     url.MakeHomeUri().MakeWebLink(IanaLinkRelation.Up),
 
                     // make a search for a tenant
-                    url.MakeHomeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Search)
+                    url.MakeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Search)
                 },
                 Items = tenants
                     .Select(c => ToSearchFeedRepresentationItem(c, userId, url))
                     .ToArray()
             };
-            return feedRepresentation;
         }
 
         /// <summary>
@@ -139,7 +138,7 @@ namespace Api.RepresentationExtensions
             string userId,
             IUrlHelper url)
         {
-            var feedRepresentation = new FeedRepresentation
+            return new FeedRepresentation
             {
                 Links = new[]
                 {
@@ -156,7 +155,6 @@ namespace Api.RepresentationExtensions
                     .Select(tenant => tenant.ToUserTenantFeedRepresentationItem(userId, url))
                     .ToArray()
             };
-            return feedRepresentation;
         }
 
 

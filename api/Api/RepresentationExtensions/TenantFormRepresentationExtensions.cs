@@ -25,9 +25,9 @@ namespace Api.RepresentationExtensions
             {
                 Links = new[]
                 {
-                    url.MakeHomeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Self),
-                    url.MakeHomeTenantsUri().MakeWebLink(IanaLinkRelation.Up),
-                    url.MakeHomeTenantSearchUri().MakeWebLink(CustomLinkRelation.Submit),
+                    url.MakeTenantsSearchFormUri().MakeWebLink(IanaLinkRelation.Self),
+                    url.MakeTenantsUri().MakeWebLink(IanaLinkRelation.Up),
+                    url.MakeTenantSearchUri().MakeWebLink(CustomLinkRelation.Submit),
                 },
                 Items = MakeSearchFormItems(),
             };
@@ -44,7 +44,7 @@ namespace Api.RepresentationExtensions
                 },
             };
         }
-        
+
         /// <summary>
         ///     Get the create form to describe to clients of the API how to
         ///     modify instances on the resource
@@ -125,6 +125,5 @@ namespace Api.RepresentationExtensions
                 Description = tenant.Description
             };
         }
-        
     }
 }
