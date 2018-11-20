@@ -14,9 +14,9 @@ namespace Api.RepresentationExtensions
     public static class TenantFormRepresentationExtensions
     {
         /// <summary>
-        ///     A form to describe <see cref="TeantSearchRepresentation" />
+        ///     A form to describe <see cref="TenantSearchRepresentation" />
         /// </summary>
-        /// <seealso cref="TeantSearchRepresentation" />
+        /// <seealso cref="TenantSearchRepresentation" />
         public static SearchFormRepresentation ToTenantSearchFormRepresentation(
             this TenantRepresentation nullTenant,
             IUrlHelper url)

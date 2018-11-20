@@ -3,7 +3,7 @@
 namespace Domain.Representation
 {
     [DataContract(Name = "tenant-search")]
-    public class TeantSearchRepresentation
+    public class TenantSearchRepresentation
     {
         [DataMember(Name = "search", Order = 20)]
         public string Search { get; set; }

@@ -8,10 +8,7 @@ namespace SemanticLink.AspNetCore
     /// </summary>
     public static class HttpRequestMessageExtensions
     {
-        public static CreatedResult MakeCreated(
-            this string uri,
-            HttpRequest request,
-            string status = "")
+        public static CreatedResult MakeCreated( this string uri, HttpRequest request, string status = "")
         {
             return new CreatedResult(
                 uri,

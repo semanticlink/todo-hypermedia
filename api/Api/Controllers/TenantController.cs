@@ -112,7 +112,7 @@ namespace Api.Controllers
         /// </summary>
         /// <see cref="GetTenantsWithOptionalSearch"/>
         [HttpPost("search/", Name = TenantUriFactory.TenantSearchRouteName)]
-        public IActionResult Search([FromBody] TeantSearchRepresentation criteria)
+        public IActionResult Search([FromBody] TenantSearchRepresentation criteria)
         {
             return criteria
                 .ThrowInvalidDataExceptionIfNull("Invalid search form")
