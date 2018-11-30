@@ -25,7 +25,10 @@ namespace SemanticLink.AspNetCore
         /// <param name="routeName">Name of the route as specified in the controller</param>
         /// <param name="context">Static <see cref="HttpContext"/> found on the <see cref="ControllerBase"/></param>
         /// <returns>Value of the param as a string</returns>
-        public static string GetParamFromNamedRoute(this string uri, string routeParam, string routeName,
+        public static string GetParamFromNamedRoute(
+            this string uri,
+            string routeParam,
+            string routeName,
             HttpContext context)
         {
             return RouteMatcher.GetParam(routeParam, routeName, uri, context);

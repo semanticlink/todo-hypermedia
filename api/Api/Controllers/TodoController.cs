@@ -32,6 +32,9 @@ namespace Api.Controllers
             _userStore = userStore;
         }
 
+        /// <summary>
+        ///     A todo list or item
+        /// </summary>
         [HttpGet("{id}", Name = TodoUriFactory.TodoRouteName)]
         [HttpCacheExpiration(CacheLocation = CacheLocation.Private)]
         [HttpCacheValidation(NoCache = true)]
@@ -44,6 +47,10 @@ namespace Api.Controllers
                 .ToRepresentation(User.GetId(), Url);
         }
 
+
+        /// <summary>
+        ///     Update a todo list or item
+        /// </summary>
         [HttpPut("{id}", Name = TodoUriFactory.TodoRouteName)]
         [AuthoriseTodo(Permission.Put)]
         public async Task<NoContentResult> Update(string id, [FromBody] TodoRepresentation item)

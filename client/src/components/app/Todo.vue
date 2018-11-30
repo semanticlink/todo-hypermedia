@@ -232,8 +232,7 @@
              */
             reset() {
                 this.newTodo = {...defaultTodo(this.todoCollection)};
-            }
-            ,
+            },
 
             /**
              * Adds the new todo document into the existing todo collection
@@ -243,8 +242,7 @@
                     .then(todoResource => cache.getResource(todoResource)
                         .then(() => this.reset()))
                     .catch(err => log.error(err));
-            }
-            ,
+            },
 
             /**
              * Clear Completed: iterates through all the completed todos and deletes them from the collection.
@@ -255,8 +253,7 @@
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
                         .map(todo => cache.deleteCollectionItem(this.todoCollection, todo)))
                     .catch(err => log.error(err));
-            }
-            ,
+            },
 
             // **********************************
             // FILTERS
@@ -279,36 +276,29 @@
                         this.visibility = filterEnum.ALL;
                         break;
                 }
-            }
-            ,
+            },
 
             isAll() {
                 return this.visibility === filterEnum.ALL;
-            }
-            ,
+            },
             isActive() {
                 return this.visibility === filterEnum.ACTIVE;
-            }
-            ,
+            },
             isCompleted() {
                 return this.visibility === filterEnum.COMPLETED;
-            }
-            ,
+            },
 
             // Change filters
 
             showAll() {
                 this.redirectOnVisibilityChange(filterEnum.ALL);
-            }
-            ,
+            },
             showActive() {
                 this.redirectOnVisibilityChange(filterEnum.ACTIVE);
-            }
-            ,
+            },
             showCompleted() {
                 this.redirectOnVisibilityChange(filterEnum.COMPLETED);
-            }
-            ,
+            },
 
 
             /**
