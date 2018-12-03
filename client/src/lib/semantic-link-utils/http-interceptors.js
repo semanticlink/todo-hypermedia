@@ -4,7 +4,7 @@ import {httpQueue} from './HTTPQueue';
 import * as authorization from 'auth-header';
 import {authConfirmed, authRequired, offline, serverError} from './authEvent';
 import {eventBus} from './EventBus';
-import {wwwAuthenticateHeader, amazonAuthenticateHeader, parseAuthenticateHeader} from './WWWAuthenticate';
+import {parseAuthenticateHeader} from './WWWAuthenticate';
 
 
 /**
