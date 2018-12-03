@@ -1,7 +1,7 @@
 import auth0 from 'auth0-js';
 import {log} from 'logger';
 import axios from 'axios';
-import {getAuthenticationUri} from './http-interceptors';
+import {getAuthenticationUri} from './semantic-link-utils/http-interceptors';
 import {loader} from 'semantic-link-cache/Loader';
 
 

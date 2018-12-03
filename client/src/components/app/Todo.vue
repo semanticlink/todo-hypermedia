@@ -67,7 +67,7 @@
     import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';
     import {defaultTodo, getNamedListByUri, getTodoListByUri} from "domain/todo";
-    import {mapCompletedToState} from "semantic-link-utils/form-type-mappings";
+    import {mapCompletedToState} from "../../domain/form-type-mappings";
 
     /**
      * This component displays and allows updates to the todo list

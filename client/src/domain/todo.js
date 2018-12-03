@@ -1,6 +1,6 @@
 import {cache} from 'semantic-link-cache';
 import * as link from 'semantic-link';
-import {TEXT} from 'semantic-link-utils/form-type-mappings';
+import {TEXT} from './form-type-mappings';
 import {log} from 'logger';
 import {findResourceInCollectionByUri} from 'semantic-link-cache/mixins/collection';
 import {mapWaitAll} from 'semantic-link-cache/mixins/asyncCollection';

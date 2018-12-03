@@ -20,7 +20,7 @@
         API_AUTH0_REALM,
         renewToken
     } from 'semantic-link-utils/http-interceptors';
-    import AuthService from "semantic-link-utils/AuthService";
+    import AuthService from "../../lib/AuthService";
 
     /**
      * This is a simple boolean 'lock'. When the event is triggered we don't

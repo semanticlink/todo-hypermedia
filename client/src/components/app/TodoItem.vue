@@ -54,7 +54,7 @@
     import {cache} from 'semantic-link-cache';
     import * as link from 'semantic-link';
     import {log} from 'logger';
-    import {mapCompletedToState, mapStateToCompleted} from "semantic-link-utils/form-type-mappings";
+    import {mapCompletedToState, mapStateToCompleted} from "../../domain/form-type-mappings";
 
     export default {
         props: {

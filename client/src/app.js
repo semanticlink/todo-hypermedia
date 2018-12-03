@@ -2,7 +2,7 @@
  * Intercept incoming authentication callbacks with Tokens on the hash
  *
  */
-import AuthService, {authService} from 'semantic-link-utils/AuthService';
+import AuthService, {authService} from './lib/AuthService';
 
 authService.handleAuthentication();
 
