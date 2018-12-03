@@ -207,12 +207,22 @@ namespace Infrastructure.NoSQL
             });
         }
 
+        /// <summary>
+        ///     Delete a todo. 
+        /// </summary>
+        /// <remarks>
+        ///    Currently a simple implementation for a list/item structure. If the todo is a list then delete it
+        ///    and all its children other just delete itself because it is an item. 
+        /// </remarks>
         public async Task Delete(string id)
         {
             var todo = (await Get(id))
                 .ThrowObjectNotFoundExceptionIfNull();
 
-            await DeleteByParent(id);
+            if (todo.Type.Equals(TodoType.List))
+            {
+                await DeleteByParent(id);
+            }
 
             if (todo.Tags.IsNotNull())
             {
@@ -224,9 +234,17 @@ namespace Infrastructure.NoSQL
             await _context.DeleteAsync(todo);
         }
 
+        /// <summary>
+        ///     Delete a todo list and all its children
+        /// </summary>
         public async Task DeleteByParent(string parentId)
         {
+            (await Get(parentId))
+                .ThrowObjectNotFoundExceptionIfNull()
+                .ThrowInvalidDataExceptionIf(list => !list.Type.Equals(TodoType.List), "Todo is an item not a list");
+
             var tasks = (await GetByParent(parentId)).Select(todo => Delete(todo.Id));
+
             await Task.WhenAll(tasks);
 
             await _userRightStore.RemoveRight(_creatorId, parentId);
