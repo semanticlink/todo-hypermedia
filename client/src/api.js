@@ -17,7 +17,7 @@ import Login from './components/authentication/Login.vue';
 import Resource from './components/api/Resource.vue';
 import Spinner from './components/Spinner.vue';
 
-import {setJsonWebTokenOnHeaders, setInterceptors} from 'semantic-link-utils/http-interceptors';
+import {setJwtOnHeaders, setInterceptors} from 'semantic-link-utils/http-interceptors';
 import {setEventBus} from 'semantic-link-utils/EventBus';
 import EventBus from './lib/EventBus';
 
@@ -40,9 +40,9 @@ Vue.config.productionTip = false;
  */
 Vue.use(VueLocalStorage, {name: 'localStorage'});
 
-setJsonWebTokenOnHeaders(AuthService.accessToken);
+setJwtOnHeaders(AuthService.accessToken);
 setEventBus(EventBus);
-setInterceptors({queue401s: false});
+setInterceptors({queue401s: true});
 
 /**
  * This view sets up the application including the ondemand authentication (login) and

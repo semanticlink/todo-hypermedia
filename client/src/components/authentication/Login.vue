@@ -15,7 +15,7 @@
     import {
         getAuthenticationScheme,
         JWT,
-        setJsonWebTokenOnHeaders,
+        setJwtOnHeaders,
         getAuthenticationRealm,
         API_AUTH0_REALM,
         renewToken
@@ -103,12 +103,17 @@
 
                                 if (authenticationRealm === cfg.realm && authenticationRealm === API_AUTH0_REALM) {
 
+                                    log.debug('Starting login');
+
                                     AuthService
                                         .makeFromRepresentation(cfg)
                                         .login()
                                         .then(authResult => {
 
+                                            log.debug('Login complete');
+
                                             if (authResult) {
+                                                log.debug('Login - auth result returned access token');
                                                 return this.onSuccess(authResult.accessToken);
                                             } else {
                                                 log.debug('[Authenticator] Json web token not returned on the key: \'accessToken\'');
@@ -143,7 +148,7 @@
             onSuccess(accessToken) {
 
                 if (accessToken) {
-                    setJsonWebTokenOnHeaders(accessToken);
+                    setJwtOnHeaders(accessToken);
                 }
 
                 isPerformingAuthentication = false;
@@ -154,14 +159,14 @@
             },
             /**
              *
-             * @param {Error} error
+             * @param {Error | string} error
              */
             onFailure(error) {
 
                 // TODO: does this need trigger log in again?
                 // eventBus.$on(loginRequired, this.loginRequired);
 
-                log.error(error);
+                log.error(error.message);
 
                 this.$notify({
                     title: 'An error means that the login process won\'t work',

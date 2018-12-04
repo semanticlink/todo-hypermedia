@@ -9,7 +9,7 @@
 <script>
     import {eventBus} from 'semantic-link-utils/EventBus';
     import AuthService from '../../lib/AuthService';
-    import {clearJsonWebTokenOnHeaders} from "semantic-link-utils/http-interceptors";
+    import {clearJwtOnHeaders} from "semantic-link-utils/http-interceptors";
     import {authConfirmed} from 'semantic-link-utils/authEvent';
 
     /**
@@ -47,8 +47,10 @@
                 this.authenticated = AuthService.isAuthenticated;
             },
             submit() {
-                AuthService.logout();
-                clearJsonWebTokenOnHeaders();
+                AuthService
+                    .makeFromStorage()
+                    .logout();
+                clearJwtOnHeaders();
                 this.authenticated = false;
                 this.onLogout();
             }

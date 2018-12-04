@@ -179,14 +179,19 @@ export default class AuthService {
                 audience: '',
                 scope: '',
                 redirectUri: window.location.origin,
-                nonce: AuthService.makeNonce()
+                nonce: AuthService.makeNonce(),
+                prompt: 'login'
             },
-            ...options
+            ...options,
+
         };
 
         this.auth0 = new auth0.WebAuth(opts);
 
+        opts.leeway = 0;
+
         log.debug('[Auth] loaded');
+
     }
 
     /**
@@ -207,6 +212,7 @@ export default class AuthService {
     login() {
 
         log.debug('[Auth] Opening popup login window');
+
 
         return new Promise((resolve, reject) => {
 
@@ -239,6 +245,7 @@ export default class AuthService {
 
     }
 
+
     /**
      * Emulates a logout by deleting token information. Currently, there is no repudiation of token anywhere.
      */
@@ -247,6 +254,10 @@ export default class AuthService {
         clearTimeout(tokenRenewalTimeout);
     }
 
+    logout() {
+        this.auth0.logout({returnTo: window.location.origin});
+        AuthService.logout();
+    }
 
     /**
      * Renew the access token
@@ -265,6 +276,8 @@ export default class AuthService {
                  */
                 (err, authResult) => {
                     if (err) {
+                        log.debug('[Auth] clearing session for manual login');
+                        AuthService.clearSession();
                         reject(new Error(`Could not get a new token using silent authentication (${err.error_description}).`));
                     } else {
                         log.info('[Auth] Successfully renewed auth!');
@@ -523,6 +536,18 @@ export default class AuthService {
      */
     static makeFromRepresentation(cfg) {
         return new AuthService(AuthService.toConfiguration(cfg));
+    }
+
+    /**
+     *
+     * @returns {AuthService}
+     */
+    static makeFromStorage() {
+        const cfg = AuthService.clientConfiguration;
+        if (cfg) {
+            return new AuthService(cfg);
+        }
+        log.warn('[Auth] no client storage configuration found - unable to create Auth service');
     }
 
 }

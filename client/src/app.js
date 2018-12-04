@@ -19,7 +19,7 @@ import {filter} from 'semantic-link';
 
 import App from './App.vue';
 
-import {setJsonWebTokenOnHeaders, setInterceptors} from 'semantic-link-utils/http-interceptors';
+import {setJwtOnHeaders, setInterceptors} from 'semantic-link-utils/http-interceptors';
 import {setEventBus} from 'semantic-link-utils/EventBus';
 import EventBus from './lib/EventBus';
 
@@ -67,7 +67,7 @@ Vue.use(VueLocalStorage, {name: 'localStorage'});
 
 setInterceptors({queue401s: false});
 setEventBus(EventBus);
-setJsonWebTokenOnHeaders(AuthService.accessToken);
+setJwtOnHeaders(AuthService.accessToken);
 
 /**
  * This view sets up the application including the on-demand authentication (login) and

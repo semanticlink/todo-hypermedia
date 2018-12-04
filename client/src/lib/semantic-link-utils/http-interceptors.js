@@ -6,6 +6,11 @@ import {authConfirmed, authRequired, offline, serverError} from './authEvent';
 import {eventBus} from './EventBus';
 import {parseAuthenticateHeader} from './WWWAuthenticate';
 
+/**
+ * JWT received from the auth provider, unset on login, set on login
+ * @type {string}
+ */
+let jwtToken;
 
 /**
  * @class InterceptorsOptions
@@ -29,6 +34,16 @@ export const setInterceptors = options => {
      *  @see https://github.com/axios/axios#interceptors
      */
 
+    axios.interceptors.request.use(
+        config => {
+            if (jwtToken) {
+                config.withCredentials = true;
+                config.headers[AUTHORIZATION_HEADER] = authorization.format({scheme: JWT, token: jwtToken});
+            }
+            return config;
+        },
+        err => Promise.reject(err));
+
     /**
      * Setup the headers on the xhr object so that we can play nice with the API
      */
@@ -36,6 +51,7 @@ export const setInterceptors = options => {
         config => {
             /*
              * We are going to be a monolingual JSON application
+             * TODO: allow for other types if already set
              */
             config.headers['Accept'] = 'application/json;q=1.0';
             config.headers['X-Requested-With'] = 'XMLHttpRequest';
@@ -141,47 +157,26 @@ export const setInterceptors = options => {
 };
 
 /**
- * Hold a reference so that it can be rejected/cleared
- */
-let jwtInterceptor;
-
-/**
  * Set the bearer token in the headers for this axios instance
+ * @param {string?} token
  */
-export const setJsonWebTokenOnHeaders = (token) => {
+export const setJwtOnHeaders = token => {
+
+    jwtToken = token;
 
     if (!token) {
-        log.info('[Authentication] no access token found');
+        log.info('[Authentication] access token not used for authentication');
+    } else {
+        log.debug(`[Authentication] setting token on www-authenticate header interceptor scheme '${JWT}'`);
     }
-
-    clearJsonWebTokenOnHeaders();
-
-    log.debug(`[Authentication] setting token on www-authenicate header interceptor scheme '${JWT}'`);
-
-    jwtInterceptor = axios.interceptors.request.use(
-        config => {
-            config.withCredentials = true;
-            config.headers[AUTHORIZATION_HEADER] = authorization.format({scheme: JWT, token: token});
-            return config;
-        },
-        err => Promise.reject(err));
 };
 
 /**
- * Clears the bearer token in the headers for this axios instance (part of logging out process)
+ * Clear the Authorization header from using jwt
  */
-export const clearJsonWebTokenOnHeaders = () => {
-
-    log.debug('[Authentication] clearing access token');
-
-    if (jwtInterceptor) {
-        log.debug('[Authentication] clear jwt token');
-        axios.interceptors.request.eject(jwtInterceptor);
-    } else {
-        log.debug('[Authentication] no access token to clear');
-    }
+export const clearJwtOnHeaders = () => {
+    setJwtOnHeaders();
 };
-
 
 /**
  * Name of the Authorization header.
