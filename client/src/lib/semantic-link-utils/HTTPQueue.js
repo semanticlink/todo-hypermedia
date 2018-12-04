@@ -52,21 +52,23 @@ class HTTPQueue {
      */
     retryAll(retry = this.retry) {
 
-        const all = Promise.all(this.buffer.map(request => {
-            log.debug(`[Http] retry '${request.url}'`);
-            return retry(request);
-        }));
-
-        this.buffer = [];
-
         // while we dequeue all the requests, we are only returning the first. In practice,
         // there is likely to be only one when not in a provisioning mode. We should also see that
         // there is at least one. Hence, reject reject if the list is empty.
         // TODO: make sequential so that promises are actually returned
-        // TODO: put a loader in front for duplicates
-        return all
+
+        const requests = [...this.buffer];
+        this.buffer = [];
+
+        return Promise.all(
+            requests.map(request => {
+                log.debug(`[Http] retry '${request.url}'`);
+                return retry(request);
+            }))
             .then(results => results.filter(result => !!result)[0]
                 || Promise.reject('No representation returned'));
+
+
     }
 }
 

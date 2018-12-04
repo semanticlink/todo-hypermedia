@@ -79,8 +79,6 @@
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
-    import {eventBus} from 'semantic-link-utils/EventBus';
-    import {authConfirmed} from 'semantic-link-utils/authEvent';
     import {loader} from 'semantic-link-cache';
 
     import FormDragDrop from './FormDragDrop.vue';
@@ -135,16 +133,6 @@
             this.getRepresentation();
         },
         mounted: function () {
-
-            /////////////////////////////
-            //
-            // Authentication
-            // ==============
-            //
-            // After (re)authentication load up the representation (we could have just redirected)
-
-
-            eventBus.$on(authConfirmed, this.getRepresentation);
 
 
             /////////////////////////////
@@ -393,8 +381,8 @@
                              *   - buttons (ie forms that are filled out by the user
                              *   - drop (and drag) targets
                              *
-                             * These will get placed in-line as components. You should be able to register
-                             * more as you go. Hopefully, this pluggable approach is readable and workable.
+                             * These will geomponents. You should be able to register
+                             * more as you go. Hopefully, this plt placed in-line as cuggable approach is readable and workable.
                              *
                              * Add components dynamically is a well known approach
                              * @see see https://css-tricks.com/creating-vue-js-component-instances-programmatically/
