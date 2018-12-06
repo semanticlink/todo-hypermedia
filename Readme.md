@@ -1,6 +1,6 @@
 This is the sample implementations of clients and API for [How to Hypermedia](https://howtohypermedia.semanticlink.io).
 
-!()[todo.png]
+![](todo.png)
 
 1. clone the respository
 
