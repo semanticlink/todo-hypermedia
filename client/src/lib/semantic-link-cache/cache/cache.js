@@ -68,7 +68,7 @@ const getResourceState = resource => State.get(resource);
  *
  * @param {LinkedRepresentation} resource
  * @param {UtilOptions=} options
- * @return {Promise} promise contains a {@link LinkedRepresentation}
+ * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
  */
 export function getResource(resource, options = {}) {
     return getResourceState(resource)
@@ -470,7 +470,7 @@ export function tryGetNamedCollectionOnSingletons(singletons, collectionName, co
  *
  * @param {CollectionRepresentation} collection
  * @param {UtilOptions} options (with a cancellable)
- * @return {Promise} with the collection resource
+ * @return {Promise<CollectionRepresentation>} with the collection resource
  */
 export function tryGetCollectionItems(collection, options = {}) {
 
