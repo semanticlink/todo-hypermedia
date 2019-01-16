@@ -1,6 +1,7 @@
 import * as link from 'semantic-link';
 import * as cache from './cache';
 import * as sync from './sync';
+import * as query from './query';
 import {LogLevel as LEVEL, setLogLevel, log} from 'logger';
 import _ from './mixins/index';
 import {uriMappingResolver} from './sync/UriMappingResolver';
@@ -13,6 +14,7 @@ export {
     link,
     cache,
     sync,
+    query,
     _,
     log,
     setLogLevel,

@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {create} from './create';
 import sinon from 'sinon';
-import * as cache from 'semantic-link-cache/cache/cache';
+import * as cache from 'src/lib/semantic-link-cache/cache/cache';
 
 global.Element = () => {
 };

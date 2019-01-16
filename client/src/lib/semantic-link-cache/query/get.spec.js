@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import * as query from './query';
+import {get} from './get';
 import sinon from 'sinon';
-import * as cache from 'semantic-link-cache/cache/cache';
+import * as cache from 'src/lib/semantic-link-cache/cache/cache';
 // make sure that you stub the js implementation and not the type declaration
 import * as http from 'semantic-link/lib/http';
 
@@ -22,27 +22,27 @@ describe('Cache', () => {
 
     it(cache.getResource.name, () => {
         resourceFactory = stub(cache.getResource.name);
-        return query.get(singleton);
+        return get(singleton);
     });
 
     it(cache.tryGetResource.name, () => {
         resourceFactory = stub(cache.tryGetResource.name);
-        return query.get(singleton, {defaultRepresentation: {}});
+        return get(singleton, {defaultRepresentation: {}});
     });
 
     it(cache.getCollection.name, () => {
         resourceFactory = stub(cache.getCollection.name);
-        return query.get(collection);
+        return get(collection);
     });
 
     it(cache.getCollectionItem.name, () => {
         resourceFactory = stub(cache.getCollectionItem.name);
-        return query.get(collection, {where: {links: [{rel: 'self', href: 'https://api.example.com/item/1'}]}});
+        return get(collection, {where: {links: [{rel: 'self', href: 'https://api.example.com/item/1'}]}});
     });
 
     it(cache.getCollectionItemByUri.name, () => {
         resourceFactory = stub(cache.getCollectionItemByUri.name);
-        return query.get(collection, {where: 'https://api.example.com/item/1'});
+        return get(collection, {where: 'https://api.example.com/item/1'});
     });
 
     describe('Named resources', () => {
@@ -57,17 +57,17 @@ describe('Cache', () => {
 
             it(`${cache.getSingleton.name} on resource`, () => {
                 resourceFactory = stub(cache.getSingleton.name);
-                return query.get(singleton, {rel: 'tags'});
+                return get(singleton, {rel: 'tags'});
             });
 
             it(`${cache.getSingleton.name} on collection`, () => {
                 resourceFactory = stub(cache.getSingleton.name);
-                return query.get(collection, {rel: 'tags'});
+                return get(collection, {rel: 'tags'});
             });
 
             it(`${cache.tryGetSingleton.name} on resource`, () => {
                 resourceFactory = stub(cache.tryGetSingleton.name);
-                return query.get(singleton, {rel: 'tags', defaultRepresentation: {}});
+                return get(singleton, {rel: 'tags', defaultRepresentation: {}});
             });
 
 
@@ -81,27 +81,27 @@ describe('Cache', () => {
 
             it(`${cache.getNamedCollection.name} on singleton`, () => {
                 resourceFactory = stub(cache.getNamedCollection.name);
-                return query.get(singleton, {rel: 'tags'});
+                return get(singleton, {rel: 'tags'});
             });
 
             it(`${cache.getNamedCollection.name} on collection`, () => {
                 resourceFactory = stub(cache.getNamedCollection.name);
-                return query.get(collection, {rel: 'tags'});
+                return get(collection, {rel: 'tags'});
             });
 
             it(cache.getNamedCollectionAndItems.name, () => {
                 resourceFactory = stub(cache.getNamedCollectionAndItems.name);
-                return query.get(singleton, {rel: 'tags', includeItems: 'items'});
+                return get(singleton, {rel: 'tags', includeItems: 'items'});
             });
 
             it(cache.tryGetNamedCollectionAndItemsOnCollectionItems.name, () => {
                 resourceFactory = stub(cache.tryGetNamedCollectionAndItemsOnCollectionItems.name);
-                return query.get(collection, {rel: 'tags', includeItems: 'items'});
+                return get(collection, {rel: 'tags', includeItems: 'items'});
             });
 
             it(cache.getNamedCollectionItemByUri.name, () => {
                 resourceFactory = stub(cache.getNamedCollectionItemByUri.name);
-                return query.get(singleton, {rel: 'tags', where: 'https://api.example.com/item/1'});
+                return get(singleton, {rel: 'tags', where: 'https://api.example.com/item/1'});
             });
 
         });
@@ -115,7 +115,7 @@ describe('Cache', () => {
 
     it(cache.getNamedCollectionOnSingletons.name, () => {
         resourceFactory = stub(cache.getNamedCollectionOnSingletons.name);
-        return query.get([singleton, singleton], {rel: 'tags'});
+        return get([singleton, singleton], {rel: 'tags'});
     });
 
 

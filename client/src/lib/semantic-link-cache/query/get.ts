@@ -12,8 +12,8 @@ import {
     tryGetNamedCollectionAndItemsOnCollectionItems,
     tryGetResource,
     tryGetSingleton
-} from "../semantic-link-cache/cache";
-import {relTypeToCamel} from "../semantic-link-cache/mixins/linkRel";
+} from "../cache";
+import {relTypeToCamel} from "../mixins/linkRel";
 import {QueryOptions, Representation} from "./interfaces";
 import {instanceOfCollection} from "./utils";
 

@@ -18,7 +18,7 @@
 */
 
 /**
- * This module is experimental as a way to simplify for developers
+ * This query module is experimental as a way to simplify for developers
  */
 
 export * from './get';

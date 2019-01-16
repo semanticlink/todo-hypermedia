@@ -1,6 +1,6 @@
 import {QueryOptions, Representation} from "./interfaces";
 import {instanceOfCollection} from "./utils";
-import {deleteCollectionItem, deleteResource} from "../semantic-link-cache/cache";
+import {deleteCollectionItem, deleteResource} from "../cache";
 import {instanceOfLinkedRepresentation} from "semantic-link";
 
 /**

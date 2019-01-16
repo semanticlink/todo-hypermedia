@@ -1,6 +1,6 @@
 import {QueryOptions, Representation} from "./interfaces";
 import {instanceOfLinkedRepresentation, LinkType} from "semantic-link";
-import {createCollectionItem, create as createResource} from "../semantic-link-cache/cache";
+import {createCollectionItem, create as createResource} from "../cache";
 
 /**
  * Delete a resource: either an item in a collection or a singleton.
