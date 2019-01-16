@@ -1,7 +1,7 @@
 import {getUri} from 'semantic-link';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from 'domain/tags';
-import {uriMappingResolver, sync, cache} from 'semantic-link-cache';
+import {uriMappingResolver, sync, query} from 'semantic-link-cache';
 import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 
@@ -23,8 +23,8 @@ import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
  * @returns {Promise<TenantCollectionRepresentation>}
  */
 export const getTenantsOnUser = (apiResource, options) =>
-    cache.getSingleton(apiResource, 'me', /me/, options)
-        .then(user => cache.getNamedCollectionAndItems(user, 'tenants', /tenants/, options));
+    query.get(apiResource, {rel: /me/, ...options})
+        .then(user => query.get(user, {rel: /tenants/, includeItems: true, ...options}));
 /**
  * Get the users that exist on a user tenant
  *
@@ -33,7 +33,7 @@ export const getTenantsOnUser = (apiResource, options) =>
  * @returns {Promise<CollectionRepresentation>}
  */
 export const getTenantUsers = (userTenantsCollection, options) =>
-    cache.getNamedCollectionAndItems(userTenantsCollection, 'users', /users/, options);
+    query.get(userTenantsCollection, {rel: /users/, includeItems: true, ...options});
 
 /**
  * Loads up a tenant to be copied with todos and users

@@ -62,7 +62,7 @@
 
 <script>
 
-    import {_, cache} from 'semantic-link-cache';
+    import {_, cache, query} from 'semantic-link-cache';
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';
@@ -217,7 +217,7 @@
                          item = Object.assign({}, item, {completed: value});
 
                          */
-                        return cache.updateResource(todo, {...todo, state: mapCompletedToState(value)});
+                        return query.update(todo, {...todo, state: mapCompletedToState(value)});
                     }))
                         .catch(err => log.error(err));
 
@@ -238,8 +238,8 @@
              * Adds the new todo document into the existing todo collection
              */
             addTodo() {
-                return cache.createCollectionItem(this.todoCollection, {...this.newTodo})
-                    .then(todoResource => cache.getResource(todoResource)
+                return query.create(this.todoCollection, {where: {...this.newTodo}})
+                    .then(todoResource => query.get(todoResource)
                         .then(() => this.reset()))
                     .catch(err => log.error(err));
             },

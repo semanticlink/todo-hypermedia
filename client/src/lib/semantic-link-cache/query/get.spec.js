@@ -4,6 +4,10 @@ import sinon from 'sinon';
 import * as cache from 'src/lib/semantic-link-cache/cache/cache';
 // make sure that you stub the js implementation and not the type declaration
 import * as http from 'semantic-link/lib/http';
+import {
+    makeSparseCollectionResourceFromUri,
+    makeSparseResourceFromUri
+} from 'semantic-link-cache/cache/sparseResource';
 
 global.Element = () => {
 };
@@ -13,12 +17,12 @@ const stub = methodName => sinon.stub(cache, methodName)
 
 const stubGet = result => sinon.stub(http, http.get.name).returns(Promise.resolve({data: result}));
 
-describe('Cache', () => {
+describe('Get', () => {
 
     let resourceFactory;
 
-    const singleton = {};
-    const collection = {items: []};
+    const singleton = makeSparseResourceFromUri('https://api.example.com/1');
+    const collection = makeSparseCollectionResourceFromUri('https://api.example.com/coll/1');
 
     it(cache.getResource.name, () => {
         resourceFactory = stub(cache.getResource.name);

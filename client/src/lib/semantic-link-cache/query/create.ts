@@ -13,7 +13,7 @@ import {createCollectionItem, create as createResource} from "../cache";
  * @param options query options to remove an item from a collection
  * @returns the resource that was logically deleted
  */
-export function create<T extends Representation>(resource: LinkType, options?: QueryOptions): Promise<T> | T {
+export function create<T extends Representation>(resource: T | LinkType, options?: QueryOptions): Promise<T> | T {
 
     const {rel, where}: QueryOptions = {...options, opts: <QueryOptions>{}};
 

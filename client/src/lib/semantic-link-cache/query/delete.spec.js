@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {del} from './delete';
 import sinon from 'sinon';
 import * as cache from 'src/lib/semantic-link-cache/cache/cache';
+import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
 
 global.Element = () => {
 };
@@ -14,8 +15,8 @@ describe('Delete', () => {
 
     let resourceFactory;
 
-    const singleton = {links: []};
-    const collection = {...{items: []}, ...singleton};
+    const singleton = makeSparseResourceFromUri('https://api.example.com/1');
+    const collection = makeSparseCollectionResourceFromUri('https://api.example.com/coll/1');
 
     it(cache.deleteResource.name, () => {
         resourceFactory = stub(cache.deleteResource.name);

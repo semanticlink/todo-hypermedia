@@ -17,7 +17,7 @@
     import Spinner from './components/Spinner.vue';
     import Offline from './components/Offline.vue';
     import Login from './components/authentication/Login.vue';
-    import {cache} from 'semantic-link-cache';
+    import {query} from 'semantic-link-cache';
     import {routeName, clientPath} from "router";
     import {apiUri} from 'semantic-link-utils/UriMapping';
 
@@ -64,7 +64,7 @@
              *
              * @type {ApiRepresentation}
              */
-            this.$root.$api = this.$root.$api || cache.create('HEAD', 'api');
+            this.$root.$api = this.$root.$api || query.create('HEAD', {rel: 'api'});
 
         }
     };

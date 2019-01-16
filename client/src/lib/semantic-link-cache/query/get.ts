@@ -12,10 +12,10 @@ import {
     tryGetNamedCollectionAndItemsOnCollectionItems,
     tryGetResource,
     tryGetSingleton
-} from "../cache";
+} from "../cache/cache";
 import {relTypeToCamel} from "../mixins/linkRel";
 import {QueryOptions, Representation} from "./interfaces";
-import {instanceOfCollection} from "./utils";
+import {instanceOfCollection, instanceOfForm} from "./utils";
 
 /**
  * Helper part of get for duplicated code that deals with allowing transparently for whether the context
@@ -30,6 +30,10 @@ function getOnContext<T extends Representation>(context: T, resource: T, options
     : Promise<T> {
 
     const {rel, name, includeItems, defaultRepresentation, where} = options;
+
+    if (instanceOfForm(context)) {
+        return getSingleton(resource, name, rel, options);
+    }
 
     if (instanceOfCollection(context)) {
 
@@ -96,9 +100,10 @@ export function get<T extends Representation>(resource: T | T[], options?: Query
             // T - to fetch
             // look ahead to be able to deal with whether it is a collection or not
             // shouldn't be too much of a penalty
+            return getResource(resource)
             // @ts-ignore (difficulty inter-operating with js library)
-            return link.get(resource, rel /*, options.cancellable */)
-            // @ts-ignore
+                .then(resource => link.get(resource, rel /*, options.cancellable */))
+                // @ts-ignore
                 .then(response => {
                     return getOnContext(response.data, resource, options);
                 });

@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {update} from './update';
 import sinon from 'sinon';
 import * as cache from 'src/lib/semantic-link-cache/cache/cache';
+import {makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
 
 global.Element = () => {
 };
@@ -14,7 +15,7 @@ describe('Update', () => {
 
     let resourceFactory;
 
-    const singleton = {links: []};
+    const singleton = makeSparseResourceFromUri('https://api.example.com/1');
 
     it(cache.updateResource.name, () => {
         resourceFactory = stub(cache.updateResource.name);

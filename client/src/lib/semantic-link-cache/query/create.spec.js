@@ -2,6 +2,10 @@ import {expect} from 'chai';
 import {create} from './create';
 import sinon from 'sinon';
 import * as cache from 'src/lib/semantic-link-cache/cache/cache';
+import {
+    makeSparseCollectionResourceFromUri,
+    makeSparseResourceFromUri
+} from 'semantic-link-cache/cache/sparseResource';
 
 global.Element = () => {
 };
@@ -14,8 +18,8 @@ describe('Create', () => {
 
     let resourceFactory;
 
-    const singleton = {links: []};
-    const collection = {...{items: [singleton]}, ...singleton};
+    const singleton = makeSparseResourceFromUri('https://api.example.com/1');
+    const collection = makeSparseCollectionResourceFromUri('https://api.example.com/coll/1');
 
     it(cache.create.name, () => {
         resourceFactory = stub(cache.create.name);
