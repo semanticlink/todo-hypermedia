@@ -1,7 +1,20 @@
-import {cache} from '../semantic-link-cache';
 import * as link from "semantic-link";
-import {CollectionRepresentation, LinkedRepresentation} from "semantic-link";
-import {getCollection, getNamedCollection, getSingleton} from "../semantic-link-cache/cache";
+import {CollectionRepresentation, LinkedRepresentation, RelationshipType, Uri} from "semantic-link";
+import {
+    getCollection,
+    getCollectionItem,
+    getCollectionItemByUri,
+    getNamedCollection,
+    getNamedCollectionAndItems,
+    getNamedCollectionItemByUri,
+    getNamedCollectionOnSingletons,
+    getResource,
+    getSingleton,
+    tryGetNamedCollectionAndItemsOnCollectionItems,
+    tryGetResource,
+    tryGetSingleton
+} from "../semantic-link-cache/cache";
+import {relTypeToCamel} from "../semantic-link-cache/mixins/linkRel";
 
 const items = 'items';
 /**
@@ -10,14 +23,9 @@ const items = 'items';
 type Representation = (CollectionRepresentation | any) & LinkedRepresentation;
 
 /**
- * Include the items in a collection to be {@link StateEnum.hydrated}
- */
-type Include = 'items' | true;
-
-/**
  * Options for be able to traverse the semantic network of data
  */
-type GetOptions = {
+type QueryOptions = {
     /**
      * If this is set then the get will perform a `tryGet` and return default representation on failure
      */
@@ -25,13 +33,23 @@ type GetOptions = {
     /**
      * Identifies the child resource in a collection by its identity (either as 'self' link rel or a Uri)
      */
-    where?: Representation | string,
+    where?: Representation | Uri,
     /**
-     *
+     * Identifies the link rel to follow to add {@link LinkedRepresentation} onto the resource.
      */
-    rel?: string,
-
-    include?: Include
+    rel?: RelationshipType,
+    /**
+     * The name of the attribute that the {@link LinkedRepresentation} is added on the resource. Note: this
+     * value is defaulted based on the {@link QueryOptions.rel} if not specified. If the {@link QueryOptions.rel} is
+     * an array then this value must be explicitly set.
+     */
+    name?: string
+    /**
+     * Alters the hydration strategy for collections. By default collections are sparsely populated (that is
+     * the `items` attribute has not gone to the server to get all the details for each item).
+     * {@link QueryOptions.include} currently flags that it should go and fetch each item.
+     */
+    includeItems?: boolean
 } & {} | any;
 
 /**
@@ -47,35 +65,35 @@ function instanceOfCollection(object: any): object is CollectionRepresentation {
 }
 
 
-function getOnContext<T extends Representation>(context: T, resource: T, options: GetOptions)
+function getOnContext<T extends Representation>(context: T, resource: T, options: QueryOptions)
     : Promise<T> {
 
-    const {rel, include, defaultRepresentation, where} = options;
+    const {rel, name, includeItems, defaultRepresentation, where} = options;
 
     if (instanceOfCollection(context)) {
 
         if (where != undefined) {
             if (typeof where === 'string') {
-                return cache.getNamedCollectionItemByUri(resource, rel, rel, where, options);
+                return getNamedCollectionItemByUri(resource, name, rel, where, options);
             } else {
                 throw new Error('Loading an item based on a representation on where is not implemented');
             }
         }
 
-        if (instanceOfCollection(resource) && rel != undefined && include === items) {
+        if (instanceOfCollection(resource) && rel != undefined && includeItems) {
             // @ts-ignore (cannot understand why this has type warning)
-            return cache.tryGetNamedCollectionAndItemsOnCollectionItems(resource, rel, rel, options);
+            return tryGetNamedCollectionAndItemsOnCollectionItems(resource, name, rel, options);
         }
 
-        if (include === items) {
-            return cache.getNamedCollectionAndItems(resource, rel, rel, options);
+        if (includeItems) {
+            return getNamedCollectionAndItems(resource, name, rel, options);
         }
 
-        return cache.getNamedCollection(resource, rel, rel, options);
+        return getNamedCollection(resource, name, rel, options);
     }
     return defaultRepresentation != undefined
-        ? cache.tryGetSingleton(resource, rel, rel, defaultRepresentation, options)
-        : cache.getSingleton(resource, rel, rel, options);
+        ? tryGetSingleton(resource, name, rel, defaultRepresentation, options)
+        : getSingleton(resource, name, rel, options);
 }
 
 /**
@@ -84,16 +102,23 @@ function getOnContext<T extends Representation>(context: T, resource: T, options
  * @param options
  * @returns the target resource which may be the originating or target resource
  */
-export function get<T extends Representation>(resource: T | T[], options?: GetOptions): Promise<T | T[]> {
+export function get<T extends Representation>(resource: T | T[], options?: QueryOptions): Promise<T | T[]> {
 
-    const {rel, where, defaultRepresentation, include}: GetOptions = {...options, opts: <GetOptions>{}};
+    // basic guard that allow users to just to pass in the rel either as a string or Regexp that
+    // will get converted to a stringly name that is added the representation. The developer at
+    // anytime can provide both
+    if (options && options.rel) {
+        options.name = options.name || relTypeToCamel(options.rel);
+    }
+
+    const {rel, name, where, defaultRepresentation}: QueryOptions = {...options, opts: <QueryOptions>{}};
 
     // named resources
     if (rel != undefined) {
 
         // T[]
         if (resource instanceof Array) {
-            return cache.getNamedCollectionOnSingletons(resource, rel, rel, options) as Promise<T[]>;
+            return getNamedCollectionOnSingletons(resource, name, rel, options) as Promise<T[]>;
         }
 
         // T existing
@@ -119,17 +144,18 @@ export function get<T extends Representation>(resource: T | T[], options?: GetOp
         if (where != undefined) {
 
             if (typeof where === 'string') {
-                return cache.getCollectionItemByUri(resource, where, options);
+                return getCollectionItemByUri(resource, where, options);
+
             }
             // else Representation
-            return cache.getCollectionItem(resource, where, options);
+            return getCollectionItem(resource, where, options);
         }
 
-        return cache.getCollection(resource, options);
+        return getCollection(resource, options);
     }
 
     // singleton
     return defaultRepresentation
-        ? cache.tryGetResource(resource, defaultRepresentation, options)
-        : cache.getResource(resource, options);
+        ? tryGetResource(resource, defaultRepresentation, options)
+        : getResource(resource, options);
 }

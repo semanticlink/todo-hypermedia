@@ -1,4 +1,5 @@
 import * as _ from './linkRel';
+import {relTypeToCamel} from './linkRel';
 import {expect} from 'chai';
 
 describe('_.dashToCamel', () => {
@@ -45,3 +46,23 @@ describe('_.camelToDash', () => {
     });
 });
 
+describe('rel type to camel', function () {
+    it('should match string', function () {
+        expect(relTypeToCamel('test')).to.equal('test');
+    });
+    it('should match regex', function () {
+        expect(relTypeToCamel(/test/)).to.equal('test');
+    });
+    it('should match global regex', function () {
+        expect(relTypeToCamel(/test/g)).to.equal('test');
+    });
+    it('should match case insensitive regex', function () {
+        expect(relTypeToCamel(/test/i)).to.equal('test');
+    });
+    it('should match global case insensitive regex', function () {
+        expect(relTypeToCamel(/test/gi)).to.equal('test');
+    });
+    it('should match camel case regex', function () {
+        expect(relTypeToCamel(/create-form/)).to.equal('createForm');
+    });
+});

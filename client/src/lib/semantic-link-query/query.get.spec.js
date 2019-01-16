@@ -91,12 +91,12 @@ describe('Cache', () => {
 
             it(cache.getNamedCollectionAndItems.name, () => {
                 resourceFactory = stub(cache.getNamedCollectionAndItems.name);
-                return query.get(singleton, {rel: 'tags', include: 'items'});
+                return query.get(singleton, {rel: 'tags', includeItems: 'items'});
             });
 
             it(cache.tryGetNamedCollectionAndItemsOnCollectionItems.name, () => {
                 resourceFactory = stub(cache.tryGetNamedCollectionAndItemsOnCollectionItems.name);
-                return query.get(collection, {rel: 'tags', include: 'items'});
+                return query.get(collection, {rel: 'tags', includeItems: 'items'});
             });
 
             it(cache.getNamedCollectionItemByUri.name, () => {
