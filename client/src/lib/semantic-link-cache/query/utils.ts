@@ -1,5 +1,6 @@
 import {Representation} from "./interfaces";
 import {FormItem, FormRepresentation} from "../interfaces";
+import {RelationshipType} from "semantic-link";
 
 /**
  * A guard to detect whether the object is a collection {@link Representation}
@@ -27,4 +28,19 @@ export function instanceOfForm(object: any): object is FormRepresentation {
         return first != undefined && 'type' in first;
     }
     return false;
+}
+
+/**
+ * A guard to detect whether the object is a form {@link RelationshipType}
+ *
+ * TODO: extend for arrays specific to RegExp and string
+ *
+ * @param object
+ * @returns whether the object is an instance on the interface
+ */
+export function instanceOfRel(object: any): object is RelationshipType {
+    return typeof object === 'string'
+        || object instanceof String
+        || object instanceof RegExp;
+
 }

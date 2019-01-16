@@ -69,9 +69,25 @@ describe('Get', () => {
                 return get(collection, {rel: 'tags'});
             });
 
+
+            it(`${cache.getSingleton.name} on resource long form string`, () => {
+                resourceFactory = stub(cache.getSingleton.name);
+                return get(singleton, 'tags');
+            });
+
+            it(`${cache.getSingleton.name} on collection long form regex`, () => {
+                resourceFactory = stub(cache.getSingleton.name);
+                return get(collection, /tags/);
+            });
+
             it(`${cache.tryGetSingleton.name} on resource`, () => {
                 resourceFactory = stub(cache.tryGetSingleton.name);
                 return get(singleton, {rel: 'tags', defaultRepresentation: {}});
+            });
+
+            it(`${cache.tryGetSingleton.name} on resource longest from`, () => {
+                resourceFactory = stub(cache.tryGetSingleton.name);
+                return get(singleton, /tags/, {defaultRepresentation: {}});
             });
 
 
