@@ -1,5 +1,4 @@
 import * as link from "semantic-link";
-import {CollectionRepresentation, LinkedRepresentation, RelationshipType, Uri} from "semantic-link";
 import {
     getCollection,
     getCollectionItem,
@@ -15,56 +14,18 @@ import {
     tryGetSingleton
 } from "../semantic-link-cache/cache";
 import {relTypeToCamel} from "../semantic-link-cache/mixins/linkRel";
+import {QueryOptions, Representation} from "./interfaces";
+import {instanceOfCollection} from "./utils";
 
-const items = 'items';
 /**
+ * Helper part of get for duplicated code that deals with allowing transparently for whether the context
+ * is a singleton or collection.
  *
- */
-type Representation = (CollectionRepresentation | any) & LinkedRepresentation;
-
-/**
- * Options for be able to traverse the semantic network of data
- */
-type QueryOptions = {
-    /**
-     * If this is set then the get will perform a `tryGet` and return default representation on failure
-     */
-    defaultRepresentation?: Representation,
-    /**
-     * Identifies the child resource in a collection by its identity (either as 'self' link rel or a Uri)
-     */
-    where?: Representation | Uri,
-    /**
-     * Identifies the link rel to follow to add {@link LinkedRepresentation} onto the resource.
-     */
-    rel?: RelationshipType,
-    /**
-     * The name of the attribute that the {@link LinkedRepresentation} is added on the resource. Note: this
-     * value is defaulted based on the {@link QueryOptions.rel} if not specified. If the {@link QueryOptions.rel} is
-     * an array then this value must be explicitly set.
-     */
-    name?: string
-    /**
-     * Alters the hydration strategy for collections. By default collections are sparsely populated (that is
-     * the `items` attribute has not gone to the server to get all the details for each item).
-     * {@link QueryOptions.include} currently flags that it should go and fetch each item.
-     */
-    includeItems?: boolean
-} & {} | any;
-
-/**
- * A guard to detect whether the object is a {@link CollectionRepresentation}
- *
- * @see https://stackoverflow.com/questions/14425568/interface-type-check-with-typescript
- * @param object
- * @returns whether the object is an instance on the interface
+ * @param context
+ * @param resource
+ * @param options
  * @private
  */
-function instanceOfCollection(object: any): object is CollectionRepresentation {
-    return items in object;
-}
-
-
 function getOnContext<T extends Representation>(context: T, resource: T, options: QueryOptions)
     : Promise<T> {
 
@@ -97,9 +58,15 @@ function getOnContext<T extends Representation>(context: T, resource: T, options
 }
 
 /**
+ * Get resources and related resources.
+ *
+ * @remarks
+ *
+ * This should be simply approach that covers most situations. If not, either drop down into the {@link cache} library
+ * or extend this one.
  *
  * @param resource
- * @param options
+ * @param options query options to specify the depth and width to be retrieved
  * @returns the target resource which may be the originating or target resource
  */
 export function get<T extends Representation>(resource: T | T[], options?: QueryOptions): Promise<T | T[]> {
@@ -141,13 +108,15 @@ export function get<T extends Representation>(resource: T | T[], options?: Query
     // collection
     if (instanceOfCollection(resource)) {
 
+        // find specific item in collection
         if (where != undefined) {
 
+            // use uri for identity
             if (typeof where === 'string') {
                 return getCollectionItemByUri(resource, where, options);
 
             }
-            // else Representation
+            // use link rel 'self' for identity
             return getCollectionItem(resource, where, options);
         }
 
