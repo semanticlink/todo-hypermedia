@@ -93,6 +93,7 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
     // anytime can provide both
     if (rel) {
         options.name = options.name || relTypeToCamel(rel);
+        options.rel = rel;
     }
 
     const {name, where, defaultRepresentation}: QueryOptions = {...options, opts: <QueryOptions>{}};

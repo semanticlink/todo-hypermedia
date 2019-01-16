@@ -23,8 +23,8 @@ import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
  * @returns {Promise<TenantCollectionRepresentation>}
  */
 export const getTenantsOnUser = (apiResource, options) =>
-    query.get(apiResource, {rel: /me/, ...options})
-        .then(user => query.get(user, {rel: /tenants/, includeItems: true, ...options}));
+    query.get(apiResource, /me/, options)
+        .then(user => query.get(user, /tenants/, {includeItems: true, ...options}));
 /**
  * Get the users that exist on a user tenant
  *
@@ -33,7 +33,7 @@ export const getTenantsOnUser = (apiResource, options) =>
  * @returns {Promise<CollectionRepresentation>}
  */
 export const getTenantUsers = (userTenantsCollection, options) =>
-    query.get(userTenantsCollection, {rel: /users/, includeItems: true, ...options});
+    query.get(userTenantsCollection, /users/, {includeItems: true, ...options});
 
 /**
  * Loads up a tenant to be copied with todos and users

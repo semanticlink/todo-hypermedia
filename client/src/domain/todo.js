@@ -16,8 +16,8 @@ export const getTodoList = (apiResource, options) => {
 
     log.debug('Looking for todos on root');
 
-    return query.get(apiResource, {rel: 'me', ...options})
-        .then(user => query.get(user, {rel: /todos/, ...options}));
+    return query.get(apiResource, /me/, options)
+        .then(user => query.get(user, /todos/, options));
 };
 
 /**
@@ -30,7 +30,7 @@ export const getTodos = (todoCollection, options) => {
 
     log.debug(`Looking for todos on list ${link.getUri(todoCollection, 'self')}`);
 
-    return query.get(todoCollection, {rel: 'todos', includeItems: true, ...options});
+    return query.get(todoCollection, /todos/, {includeItems: true, ...options});
 };
 
 /**
@@ -96,7 +96,7 @@ export const getNamedListByUri = (apiResource, todoUri, options) => {
 export const defaultTodo = todoResource => {
     return query
         .get(todoResource)
-        .then(todoCollection => query.get(todoCollection, {rel: /create-form/}))
+        .then(todoCollection => query.get(todoCollection, /create-form/))
         .catch(() => log.error(`No create form for on '${link.getUri(todoResource, /self/)}'`))
         .then(form => {
             const obj = {};
