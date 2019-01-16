@@ -57,9 +57,9 @@ module.exports = {
     // A set of global variables that need to be available in all test environments
     globals: {
         'ts-jest': {
-            'tsConfigFile': 'tsconfig.json',
-            'useBabelrc': true,
-            'enableTsDiagnostics': true
+            'tsConfig': 'tsconfig.json',
+            'babelConfig': true,
+            'diagnostics': true
         }
     },
 
