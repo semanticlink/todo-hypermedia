@@ -10,10 +10,17 @@ import {
 } from "./syncLinkedRepresentation";
 import {instanceOfCollection} from "../query/utils";
 import {relTypeToCamel} from "../mixins/linkRel";
+import {getUriListOnNamedCollection} from "./syncUriList";
+import {UriList} from "../interfaces";
 
 
 function instanceOfResourceSync<T>(obj: any): obj is ResourceSync<T> {
     return obj.resource !== 'undefined' && !obj.rel;
+}
+
+
+function instanceofUriList(obj: any): obj is UriList {
+    return Array.isArray(obj) && typeof obj[0] === 'string';
 }
 
 /**
@@ -143,6 +150,10 @@ export function sync<T extends Representation>(syncAction: NamedResourceSync<T> 
 
     if (!rel) {
         throw new Error('Sync of a named resource must have a rel specified in the options');
+    }
+
+    if (instanceofUriList(document)) {
+        return getUriListOnNamedCollection(resource, name, rel, document, options);
     }
 
     if (instanceOfCollection(document)) {

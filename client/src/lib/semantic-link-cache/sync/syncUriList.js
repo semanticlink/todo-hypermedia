@@ -195,7 +195,7 @@ function synchroniseUriList(collection, documentUriList, options = {}) {
  * @param {LinkedRepresentation} parentResource
  * @param {string} uriListName
  * @param {string|RegExp|string[]|RegExp[]} uriListRel
- * @param {*[]} uriList
+ * @param {UriList} uriList
  * @param {UtilOptions} options
  * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
  */
@@ -230,7 +230,7 @@ export function getUriListOnNamedCollection(parentResource, uriListName, uriList
  * @param {LinkedRepresentation} parentResource
  * @param {string} uriListName
  * @param {string|RegExp|string[]|RegExp[]} uriListRel
- * @param {*[]} uriList
+ * @param {UriList} uriList
  * @param {UtilOptions} options
  * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
  */

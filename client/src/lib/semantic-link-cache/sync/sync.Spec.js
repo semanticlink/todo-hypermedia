@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import * as syncRepresentation from './syncLinkedRepresentation';
+import * as syncUriList from './syncUriList';
 import {sync} from './sync';
 import sinon from 'sinon';
 import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
@@ -22,19 +23,23 @@ describe('sync', () => {
         return sync({resource: singleton, document: singleton});
     });
 
-    it('resource no strategy', () => {
-        syncFactory = stub(syncRepresentation.getResource.name);
-        return sync({resource: singleton, document: singleton, options: {}});
-    });
+    describe('defaults', function () {
 
-    it('resource no options', () => {
-        syncFactory = stub(syncRepresentation.getResource.name);
-        return sync({resource: singleton, document: singleton, strategies: []});
-    });
+        it('resource no strategy', () => {
+            syncFactory = stub(syncRepresentation.getResource.name);
+            return sync({resource: singleton, document: singleton, options: {}});
+        });
 
-    it('resource no options', () => {
-        syncFactory = stub(syncRepresentation.getResource.name);
-        return sync({resource: singleton, document: singleton, strategies: [], options: {}});
+        it('resource no options', () => {
+            syncFactory = stub(syncRepresentation.getResource.name);
+            return sync({resource: singleton, document: singleton, strategies: []});
+        });
+
+        it('resource no options', () => {
+            syncFactory = stub(syncRepresentation.getResource.name);
+            return sync({resource: singleton, document: singleton, strategies: [], options: {}});
+        });
+
     });
 
     it('resource in collection', () => {
@@ -62,7 +67,22 @@ describe('sync', () => {
         return sync({resource: collection, rel: /me/, document: collection, documentRel: /me/});
     });
 
+    it('named collection in named collection', () => {
+        syncFactory = stub(syncRepresentation.getNamedCollectionInNamedCollection.name);
+        return sync({resource: collection, rel: /me/, document: collection, documentRel: /me/});
+    });
 
+    describe('UriList', function () {
+
+        const uriList = ['http://api.example.com/1', 'http://api.example.com/1'];
+
+        it('url list', () => {
+            syncFactory = sinon.stub(syncUriList, syncUriList.getUriListOnNamedCollection.name)
+                .returns(Promise.resolve());
+            return sync({resource: singleton, rel: /todos/, document: uriList});
+        });
+
+    });
     afterEach((() => {
         expect(syncFactory.called).to.be.true;
         syncFactory.restore();
