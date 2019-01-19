@@ -12,7 +12,7 @@ import {RelationshipType} from "semantic-link";
 export function instanceOfCollection(object: any): object is Representation {
     // note this check may not be strict enough as we progress. It may need to check
     // that the items of type type FeedItem
-    return 'items' in object;
+    return object && 'items' in object;
 }
 
 /**

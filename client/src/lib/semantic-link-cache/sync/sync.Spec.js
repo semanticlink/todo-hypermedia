@@ -47,7 +47,7 @@ describe('sync', () => {
         return sync({resource: collection, document: singleton});
     });
 
-    it('name singleton resource', () => {
+    it('named singleton resource', () => {
         syncFactory = stub(syncRepresentation.getSingleton.name);
         return sync({resource: singleton, rel: /me/, document: singleton});
     });
@@ -57,14 +57,9 @@ describe('sync', () => {
         return sync({resource: collection, rel: /me/, document: singleton});
     });
 
-    it('collection in named collection', () => {
-        syncFactory = stub(syncRepresentation.getCollectionInNamedCollection.name);
-        return sync({resource: collection, rel: /me/, document: collection});
-    });
-
     it('named collection in named collection', () => {
-        syncFactory = stub(syncRepresentation.getNamedCollectionInNamedCollection.name);
-        return sync({resource: collection, rel: /me/, document: collection, documentRel: /me/});
+        syncFactory = stub(syncRepresentation.getCollectionInNamedCollection.name);
+        return sync({resource: collection, rel: /todos/, document: {...collection, todos: collection}});
     });
 
     describe('UriList', function () {

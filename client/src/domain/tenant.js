@@ -2,6 +2,7 @@ import {getUri} from 'semantic-link';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from 'domain/tags';
 import {uriMappingResolver, sync, query} from 'semantic-link-cache';
+import {sync as synchronise} from 'semantic-link-cache/sync/sync';
 import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 
@@ -62,7 +63,8 @@ export const getUserTenant = (tenant, options) =>
  * @returns {Promise}
  */
 const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) =>
-    sync.getResourceInCollection(tenantCollection, aTenant, strategies, options);
+    synchronise({resource: tenantCollection, document: aTenant, strategies, options});
+
 
 /**
  * Sync the todos in the context of a user collectoin
@@ -74,7 +76,7 @@ const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) =>
  * @returns {Promise}
  */
 const syncTodosStrategy = (user, aUser, strategies, options) =>
-    sync.getNamedCollectionInNamedCollection(user, 'todos', /todos/, aUser, strategies, options);
+    synchronise({resource: user, rel: /todos/, document: aUser, strategies, options});
 
 /**
  * Sync the tags in the context of a todo
@@ -85,7 +87,7 @@ const syncTodosStrategy = (user, aUser, strategies, options) =>
  * @returns {Promise}
  */
 const syncTagsStrategy = (todo, aTodo, options) =>
-    sync.getNamedCollectionInNamedCollection(todo, 'tags', /tags/, aTodo, [], options);
+    synchronise({resource: todo, rel: /tags/, document: aTodo, options});
 
 
 /**

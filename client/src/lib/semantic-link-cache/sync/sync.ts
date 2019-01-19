@@ -41,26 +41,6 @@ function instanceofUriList(obj: any): obj is UriList {
  *
  * @example
  *
- *  ```sync({resource: parentResource, rel, document: parentDocument})
- *
- *     parent     singleton           singleton   parent
- *     Resource    Resource            Document   Document
- *
- *     +----------+                            +---------+
- *     |          |            sync            |         |
- *     |          +-----+                +-----+         |
- *     |     Named|     |  <-----------+ |     |Named    |
- *     |          |     |                |     |         |
- *     |          +-----+                +-----+         |
- *     |          |                            |         |
- *     |          |                       ^    |         |
- *     +----------+                       |    +---------+
- *                                        |
- *                                        +
- *                                        looks for
- *
- * @example
- *
  *  ```sync({resource: collection, document})```
  *
  *     resource
@@ -93,26 +73,29 @@ function instanceofUriList(obj: any): obj is UriList {
  *      +----------+   X                +---+
  *                       items
  *
- *  @example
+ * @example
  *
- *      ```sync({resource: parentResource, rel, document: documentCollection})```
+ *  ```sync({resource: parentResource, rel, document: parentDocument})
  *
- *      parent     resource              document
- *      Resource   Collection            Collection
+ *     parent     singleton           singleton   parent
+ *     Resource    Resource            Document   Document
  *
- *     +----------+
- *     |          |            sync
- *     |          +-----+                +-----+
- *     |     Named|     |  <-----------+ |     |
- *     |          |     |                |     |
- *     |          +-----+                +-----+
- *     |          |   X                     X
- *     |          |   X items               X items
- *     +----------+   X                     X
+ *     +----------+                            +---------+
+ *     |          |            sync            |         |
+ *     |          +-----+                +-----+         |
+ *     |     Named|     |  <-----------+ |     |Named    |
+ *     |          |     |                |     |         |
+ *     |          +-----+                +-----+         |
+ *     |          |                            |         |
+ *     |          |                       ^    |         |
+ *     +----------+                       |    +---------+
+ *                                        |
+ *                                        +
+ *                                        looks for
  *
  * @example
  *
- *  ```sync({resource: parentResource, rel, document: parentDocument, documentRel})```
+ *  ```sync({resource: parentResource, rel, document: parentDocument})```
  *
  *     parent      resource             document    parent
  *     Resource    Collection           Collection  Document
@@ -146,7 +129,7 @@ export function sync<T extends Representation>(syncAction: NamedResourceSync<T> 
     // resource as named on a resource or collection
     // recast and extract the rel/name values
     const namedCfg = <NamedResourceSync<T>>syncAction;
-    const {rel, name = relTypeToCamel(namedCfg.rel), documentRel} = namedCfg;
+    const {rel, name = relTypeToCamel(namedCfg.rel)} = namedCfg;
 
     if (!rel) {
         throw new Error('Sync of a named resource must have a rel specified in the options');
@@ -156,10 +139,8 @@ export function sync<T extends Representation>(syncAction: NamedResourceSync<T> 
         return getUriListOnNamedCollection(resource, name, rel, document, options);
     }
 
-    if (instanceOfCollection(document)) {
-        return instanceOfCollection(resource) && !documentRel
-            ? getCollectionInNamedCollection(resource, name, rel, document, strategies, options)
-            : getNamedCollectionInNamedCollection(resource, name, rel, document, strategies, options);
+    if (instanceOfCollection(document[name])) {
+        return getCollectionInNamedCollection(resource, name, rel, document[name], strategies, options);
     }
 
     return instanceOfCollection(resource)

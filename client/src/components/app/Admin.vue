@@ -99,7 +99,7 @@
                         // this is not a lazy-loading UI design (large sets will appear after time)
                         return getTodosWithTagsOnTenantTodos(tenants, options)
                         // lazy loading would require explicit setting inside the tenants
-                            .then(() => this.tenants = tenants)
+                            .then(() => this.$set(this, 'tenants', tenants)/*this.tenants = tenants*/)
 
                     })
                     .catch(err => {

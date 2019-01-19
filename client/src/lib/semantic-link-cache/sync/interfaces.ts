@@ -22,14 +22,6 @@ export interface NamedResourceSync<T extends Representation> extends ResourceSyn
      */
     rel: RelationshipType;
     /**
-     * Link rel used on the document resource to find context. This is used in the scenario of syncing a named collection
-     * on a named collection. Usually this value will be the same as the {@link rel} value.
-     *
-     * @remarks
-     * Decided not to make this also a boolean value where it then takes the {@link rel} value.
-     */
-    documentRel?: string;
-    /**
      * The attribute name of the named resource that is added to the in-memory resource. This is an override value
      * where the default is a stringly-type of {@link rel}.
      */
