@@ -104,7 +104,6 @@
                     })
                     .catch(err => {
                         this.$notify({
-                            title: response.statusText,
                             text: err,
                             type: 'error'
                         });

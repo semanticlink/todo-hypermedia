@@ -116,7 +116,14 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
             // shouldn't be too much of a penalty
             return getResource(resource)
             // @ts-ignore (difficulty inter-operating with js library)
-                .then(resource => link.get(resource, rel /*, options.cancellable */))
+                .then(resource => {
+
+                    if (options.includeItems && instanceOfCollection(resource)) {
+                        return Promise.resolve({data: resource})
+                    } else {
+                        return link.get(resource, rel /*, options.cancellable */);
+                    }
+                })
                 // @ts-ignore
                 .then(response => {
                     return getOnContext(response.data, resource, options);
