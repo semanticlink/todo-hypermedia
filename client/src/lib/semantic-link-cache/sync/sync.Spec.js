@@ -44,7 +44,7 @@ describe('sync', () => {
 
     it('resource in collection', () => {
         syncFactory = stub(syncRepresentation.getResourceInCollection.name);
-        return sync({resource: collection, document: singleton,});
+        return sync({resource: collection, document: singleton});
     });
 
     it('name singleton resource', () => {
@@ -60,11 +60,6 @@ describe('sync', () => {
     it('collection in named collection', () => {
         syncFactory = stub(syncRepresentation.getCollectionInNamedCollection.name);
         return sync({resource: collection, rel: /me/, document: collection});
-    });
-
-    it('named collection in named collection', () => {
-        syncFactory = stub(syncRepresentation.getNamedCollectionInNamedCollection.name);
-        return sync({resource: collection, rel: /me/, document: collection, documentRel: /me/});
     });
 
     it('named collection in named collection', () => {
