@@ -39,6 +39,10 @@ export const dashToCamel = str => str.replace(/(-[a-z])/g, $1 => $1.toUpperCase(
  */
 export function relTypeToCamel(rel) {
 
+    if (!rel) {
+        return;
+    }
+
     if (typeof rel === 'string') {
         return rel;
     }

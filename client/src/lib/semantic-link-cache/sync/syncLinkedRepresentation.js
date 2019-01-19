@@ -314,7 +314,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
  * @return {function():Promise.<void>} callback function to be attached onto a Promise.then
  * @private
  */
-function syncResources(resource, resourceDocument, strategies, options) {
+function syncResources(resource, resourceDocument, strategies = [], options = {}) {
     return () => _(strategies).sequentialWait(
         (memo, strategy) => {
             if (strategy && _(strategy).isFunction()) {
@@ -342,11 +342,11 @@ function syncResources(resource, resourceDocument, strategies, options) {
  *
  * @param {LinkedRepresentation} resource
  * @param {*} resourceDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
  * @return {Promise} containing the resource {@link LinkedRepresentation}
  */
-export function getResource(resource, resourceDocument, strategies, options = {}) {
+export function getResource(resource, resourceDocument, strategies = [], options = {}) {
     log.debug(`[Sync] resource ${link.getUri(resource, /self/)}`);
 
     return cache.getResource(resource, options)
@@ -387,11 +387,11 @@ export function getResource(resource, resourceDocument, strategies, options = {}
  * @param {string} singletonName
  * @param {string|RegExp|string[]|RegExp[]} singletonRel
  * @param {*} parentDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
  * @return {Promise} containing the parent {@link LinkedRepresentation}
  */
-export function getSingleton(parentResource, singletonName, singletonRel, parentDocument, strategies, options = {}) {
+export function getSingleton(parentResource, singletonName, singletonRel, parentDocument, strategies = [], options = {}) {
 
     log.debug(`[Sync] singleton '${singletonName}' on ${link.getUri(parentResource, /self/)}`);
 
@@ -436,11 +436,11 @@ export function getSingleton(parentResource, singletonName, singletonRel, parent
  *
  * @param {LinkedRepresentation} parentResource
  * @param {*} resourceDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
  * @return {Promise} containing the resource {@link LinkedRepresentation}
  */
-export function getResourceInCollection(parentResource, resourceDocument, strategies, options = {}) {
+export function getResourceInCollection(parentResource, resourceDocument, strategies = [], options = {}) {
 
     log.debug(`[Sync] collection ${link.getUri(parentResource, /self/)} with '${resourceDocument.name}'`);
 
@@ -475,11 +475,11 @@ export function getResourceInCollection(parentResource, resourceDocument, strate
  * @param {string} collectionName
  * @param {string|RegExp|string[]|RegExp[]} collectionRel
  * @param {*} resourceDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
  * @return {Promise} containing the resource {@link LinkedRepresentation}
  */
-export function getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, strategies, options = {}) {
+export function getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, strategies = [], options = {}) {
 
     log.debug(`[Sync] resource '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
 
@@ -515,11 +515,11 @@ export function getResourceInNamedCollection(parentResource, collectionName, col
  * @param {string} collectionName
  * @param {string|RegExp|string[]|RegExp[]} collectionRel
  * @param {*} collectionDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
  * @return {Promise} containing the collection {@link CollectionRepresentation}
  */
-export function getCollectionInNamedCollection(parentResource, collectionName, collectionRel, collectionDocument, strategies, options = {}) {
+export function getCollectionInNamedCollection(parentResource, collectionName, collectionRel, collectionDocument, strategies = [], options = {}) {
 
     log.debug(`[Sync] collection '${collectionName}' on ${link.getUri(parentResource, /self/)}`);
 
@@ -575,10 +575,10 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
  * @param {string} collectionName
  * @param {string|RegExp|string[]|RegExp[]} collectionRel
  * @param {*} parentDocument
- * @param {{function(LinkedRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
  * @return {Promise} containing the collection {@link CollectionRepresentation}
  */
-export function getNamedCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies, options) {
+export function getNamedCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies = [], options) {
     return getCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument[collectionName], strategies, options);
 }

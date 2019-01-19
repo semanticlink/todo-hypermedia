@@ -1,7 +1,6 @@
 import {expect} from 'chai';
 import sinon from 'sinon';
 import * as sync from './syncLinkedRepresentation';
-import * as cache from '../cache/cache';
 import {log} from 'logger';
 import StateEnum from 'semantic-link-cache/cache/StateEnum';
 import * as SparseResource from '../cache/sparseResource';

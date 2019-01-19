@@ -1,0 +1,71 @@
+import {expect} from 'chai';
+import * as syncRepresentation from './syncLinkedRepresentation';
+import {sync} from './sync';
+import sinon from 'sinon';
+import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
+
+global.Element = () => {
+};
+
+const stub = methodName => sinon.stub(syncRepresentation, methodName)
+    .returns(Promise.resolve());
+
+const singleton = makeSparseResourceFromUri('https://api.example.com/1');
+const collection = makeSparseCollectionResourceFromUri('https://api.example.com/coll/1');
+
+describe('sync', () => {
+
+    let syncFactory;
+
+    it('resource', () => {
+        syncFactory = stub(syncRepresentation.getResource.name);
+        return sync({resource: singleton, document: singleton});
+    });
+
+    it('resource no strategy', () => {
+        syncFactory = stub(syncRepresentation.getResource.name);
+        return sync({resource: singleton, document: singleton, options: {}});
+    });
+
+    it('resource no options', () => {
+        syncFactory = stub(syncRepresentation.getResource.name);
+        return sync({resource: singleton, document: singleton, strategies: []});
+    });
+
+    it('resource no options', () => {
+        syncFactory = stub(syncRepresentation.getResource.name);
+        return sync({resource: singleton, document: singleton, strategies: [], options: {}});
+    });
+
+    it('resource in collection', () => {
+        syncFactory = stub(syncRepresentation.getResourceInCollection.name);
+        return sync({resource: collection, document: singleton,});
+    });
+
+    it('name singleton resource', () => {
+        syncFactory = stub(syncRepresentation.getSingleton.name);
+        return sync({resource: singleton, rel: /me/, document: singleton});
+    });
+
+    it('resource in named collection', () => {
+        syncFactory = stub(syncRepresentation.getResourceInNamedCollection.name);
+        return sync({resource: collection, rel: /me/, document: singleton});
+    });
+
+    it('collection in named collection', () => {
+        syncFactory = stub(syncRepresentation.getCollectionInNamedCollection.name);
+        return sync({resource: collection, rel: /me/, document: collection});
+    });
+
+    it('named collection in named collection', () => {
+        syncFactory = stub(syncRepresentation.getNamedCollectionInNamedCollection.name);
+        return sync({resource: collection, rel: /me/, document: collection, documentRel: /me/});
+    });
+
+
+    afterEach((() => {
+        expect(syncFactory.called).to.be.true;
+        syncFactory.restore();
+    }));
+
+});
