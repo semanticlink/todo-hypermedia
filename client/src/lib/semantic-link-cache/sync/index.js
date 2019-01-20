@@ -17,5 +17,4 @@
 
 */
 
-export * from './syncLinkedRepresentation';
-export * from './syncUriList';
+export {sync} from './sync';

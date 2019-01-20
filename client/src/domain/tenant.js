@@ -2,7 +2,7 @@ import {getUri} from 'semantic-link';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from 'domain/tags';
 import {query, uriMappingResolver} from 'semantic-link-cache';
-import {sync} from 'semantic-link-cache/sync/sync';
+import {sync} from 'semantic-link-cache';
 import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 

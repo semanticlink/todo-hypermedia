@@ -5,8 +5,7 @@ import {
     getResourceInCollection,
     getResourceInNamedCollection,
     getSingleton,
-    getCollectionInNamedCollection,
-    getNamedCollectionInNamedCollection
+    getCollectionInNamedCollection
 } from "./syncLinkedRepresentation";
 import {instanceOfCollection} from "../query/utils";
 import {relTypeToCamel} from "../mixins/linkRel";
