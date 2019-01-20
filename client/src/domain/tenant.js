@@ -1,8 +1,8 @@
 import {getUri} from 'semantic-link';
 import {log} from 'logger';
 import {pooledTagResourceResolver} from 'domain/tags';
-import {uriMappingResolver, sync, query} from 'semantic-link-cache';
-import {sync as synchronise} from 'semantic-link-cache/sync/sync';
+import {query, uriMappingResolver} from 'semantic-link-cache';
+import {sync} from 'semantic-link-cache/sync/sync';
 import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 
@@ -54,44 +54,7 @@ export const getUserTenant = (tenant, options) =>
  */
 
 /**
- * Sync the tenant in the context of the tenant collection
- *
- * @param {TenantCollectionRepresentation} tenantCollection
- * @param {*|TenantCollectionRepresentation} aTenant
- * @param {{function(TenantRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
- * @param {UtilOptions?} options
- * @returns {Promise}
- */
-const syncTenantStrategy = (tenantCollection, aTenant, strategies, options) =>
-    synchronise({resource: tenantCollection, document: aTenant, strategies, options});
-
-
-/**
- * Sync the todos in the context of a user collectoin
- *
- * @param {UserCollectionRepresentation} user
- * @param {*|UserCollectionRepresentation} aUser
- * @param {{function(UserCollectionRepresentation, LinkedRepresentation, UtilOptions):Promise}[]} strategies
- * @param {UtilOptions?} options
- * @returns {Promise}
- */
-const syncTodosStrategy = (user, aUser, strategies, options) =>
-    synchronise({resource: user, rel: /todos/, document: aUser, strategies, options});
-
-/**
- * Sync the tags in the context of a todo
- *
- * @param {TodoRepresentation} todo
- * @param {*|TodoCollectionRepresentation} aTodo
- * @param {UtilOptions?} options
- * @returns {Promise}
- */
-const syncTagsStrategy = (todo, aTodo, options) =>
-    synchronise({resource: todo, rel: /tags/, document: aTodo, options});
-
-
-/**
- * Clone a graph of tenant todo lists
+ * Clone a graph of aTenant todo lists
  *
  * Context: (api)-(me)-[tenants]
  * Access: [todos...]-[todos...]-[tags]
@@ -113,31 +76,34 @@ export const syncTenant = (apiResource, aTenant, options) => {
     return getTenantsOnUser(apiResource, options)
         .then(userTenants => {
             log.debug(`[Tenant] users loaded ${getUri(userTenants, /self/)}`);
-            return syncTenantStrategy(
-                userTenants,
-                aTenant,
-                [
-                    (usersRepresentation, usersDocument, options) => syncTodosStrategy(
-                        usersRepresentation,
-                        usersDocument,
-                        [
-                            (usersRepresentation, usersDocument, options) => syncTodosStrategy(
-                                usersRepresentation,
-                                usersDocument,
-                                [
-                                    (todoRepresentation, todoDocument, options) =>
-                                        syncTagsStrategy(todoRepresentation, todoDocument, options)
-
-                                ],
-                                options)
-                        ],
-                        options),
+            return sync({
+                resource: userTenants,
+                document: aTenant,
+                strategies: [(userCollection, users, options) => sync({
+                    resource: userCollection,
+                    rel: /todos/,
+                    document: users,
+                    strategies: [(todoListCollection, todoLists, options) => sync({
+                        resource: todoListCollection,
+                        rel: /todos/,
+                        document: todoLists,
+                        strategies: [(todoCollection, todos, options) => sync({
+                            resource: todoCollection,
+                            rel: /tags/,
+                            document: todos,
+                            options
+                        })],
+                        options
+                    })],
+                    options
+                }),
                 ],
-                {
+                options: {
                     ...options,
                     ...pooledTagResourceResolver(apiResource),
                     resolver: uriMappingResolver
-                });
+                }
+            });
         });
 
 };
