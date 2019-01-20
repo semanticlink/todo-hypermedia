@@ -21,7 +21,7 @@
  * This query module is experimental as a way to simplify for developers
  */
 
-export * from './get';
-export * from './delete';
-export * from './update';
-export * from './create';
+export {get} from './get';
+export {del} from './delete';
+export {update} from './update';
+export {create} from './create';

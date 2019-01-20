@@ -12,11 +12,10 @@ import {
     tryGetNamedCollectionAndItemsOnCollectionItems,
     tryGetResource,
     tryGetSingleton
-} from "../cache/cache";
+} from "../cache";
 import {relTypeToCamel} from "../mixins/linkRel";
 import {QueryOptions, Representation} from "./interfaces";
 import {instanceOfCollection, instanceOfForm, instanceOfRel} from "./utils";
-import {RelationshipType} from "semantic-link";
 
 /**
  * Helper part of get for duplicated code that deals with allowing transparently for whether the context

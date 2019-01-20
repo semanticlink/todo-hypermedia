@@ -11,6 +11,8 @@ const LoaderEvent = Loader.event;
 
 export {sync} from './sync';
 
+export {get, update, del, create} from './query';
+
 export {
     link,
     cache,

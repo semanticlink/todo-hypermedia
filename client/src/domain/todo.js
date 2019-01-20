@@ -1,4 +1,4 @@
-import {query} from 'semantic-link-cache';
+import {get} from 'semantic-link-cache';
 import * as link from 'semantic-link';
 import {TEXT} from './form-type-mappings';
 import {log} from 'logger';
@@ -16,8 +16,8 @@ export const getTodoList = (apiResource, options) => {
 
     log.debug('Looking for todos on root');
 
-    return query.get(apiResource, /me/, options)
-        .then(user => query.get(user, /todos/, options));
+    return get(apiResource, /me/, options)
+        .then(user => get(user, /todos/, options));
 };
 
 /**
@@ -30,7 +30,7 @@ export const getTodos = (todoCollection, options) => {
 
     log.debug(`Looking for todos on list ${link.getUri(todoCollection, 'self')}`);
 
-    return query.get(todoCollection, /todos/, {includeItems: true, ...options});
+    return get(todoCollection, /todos/, {includeItems: true, ...options});
 };
 
 /**
@@ -42,12 +42,9 @@ export const getTodos = (todoCollection, options) => {
  * @returns {Promise}
  */
 export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) => {
-    return query.get(userTenantsCollection, {rel: /todos/, includeItems: true, ...options})
-    /*
-      return cache.tryGetNamedCollectionAndItemsOnCollectionItems(userTenantsCollection, 'todos', /todos/, options)
-    */
+    return get(userTenantsCollection, {rel: /todos/, includeItems: true, ...options})
         .then(todosCollection => mapWaitAll(todosCollection, item =>
-            query.get(item, {rel: /tags/, includeItems: true, ...options})));
+            get(item, {rel: /tags/, includeItems: true, ...options})));
 };
 
 /**
@@ -64,7 +61,7 @@ export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) =>
 export const getTodoListByUri = (apiResource, todoUri, options) => {
 
     return getNamedListByUri(apiResource, todoUri, options)
-        .then(itemResource => query.get(itemResource, {rel: /todos/, includeItems: true, ...options}));
+        .then(itemResource => get(itemResource, {rel: /todos/, includeItems: true, ...options}));
 };
 
 /**
@@ -94,9 +91,8 @@ export const getNamedListByUri = (apiResource, todoUri, options) => {
  * @returns {Promise<any>}
  */
 export const defaultTodo = todoResource => {
-    return query
-        .get(todoResource)
-        .then(todoCollection => query.get(todoCollection, /create-form/))
+    return get(todoResource)
+        .then(todoCollection => get(todoCollection, /create-form/))
         .catch(() => log.error(`No create form for on '${link.getUri(todoResource, /self/)}'`))
         .then(form => {
             const obj = {};
