@@ -13,7 +13,7 @@
  */
 class UriMappingResolver {
 
-    constructor () {
+    constructor() {
         /**
          * A simple 'document' uri map to a 'network of data' URI map.
          * @type {{}}
@@ -24,20 +24,20 @@ class UriMappingResolver {
     /**
      * Update a mapping to/from a network of data (NOD) URI to/from a document URI.
      *
-     * @param {string} documentUri
-     * @param {string}  nodUri
+     * @param {Uri} documentUri
+     * @param {Uri}  nodUri
      */
-    update (documentUri, nodUri) {
+    update(documentUri, nodUri) {
         this.resolutionsMap[documentUri] = nodUri;
     }
 
     /**
      * Add a mapping to/from a network of data (NOD) URI to/from a document URI.
      *
-     * @param {string} documentUri
-     * @param {string}  nodUri
+     * @param {Uri} documentUri
+     * @param {Uri}  nodUri
      */
-    add (documentUri, nodUri) {
+    add(documentUri, nodUri) {
         this.resolutionsMap[documentUri] = nodUri;
     }
 
@@ -45,9 +45,9 @@ class UriMappingResolver {
      * Signal to the resolver that a mapping is no longer relevant.
      * Remove based on the document URI a mapping to/from a network of data (NOD) URI to/from a document URI.
      *
-     * @param {string} documentUri
+     * @param {Uri} documentUri
      */
-    remove (documentUri) {
+    remove(documentUri) {
         for (let key in this.resolutionsMap) {
             if (this.resolutionsMap[key] === documentUri) {
                 delete this.resolutionsMap[key];
@@ -58,10 +58,10 @@ class UriMappingResolver {
     /**
      * Returns the network of data (NOD) URI based on a document URI or if not found itself
      *
-     * @param {string} documentURI
+     * @param {Uri} documentURI
      * @returns {*}
      */
-    resolve (documentURI) {
+    resolve(documentURI) {
         return this.resolutionsMap[documentURI] || documentURI;
     }
 
@@ -69,10 +69,14 @@ class UriMappingResolver {
      * Helper to print out the resolutions map
      * @returns {{}} cloned version of the resolutions map
      */
-    out () {
+    out() {
         return {...this.resolutionsMap};
     }
 
 }
 
+/**
+ *
+ * @type {UriResolver}
+ */
 export let uriMappingResolver = new UriMappingResolver();

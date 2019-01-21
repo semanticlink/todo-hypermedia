@@ -2,6 +2,7 @@ import {findResourceInCollection, findResourceInCollectionByUri} from '../mixins
 import {log} from 'logger';
 import * as cache from '../cache/cache';
 import * as link from 'semantic-link';
+import {defaultResolver} from './syncResolver';
 
 /**
  * Used for provisioning a pooled collection (network of data) based on providing a document (resources). Based on
@@ -55,16 +56,12 @@ import * as link from 'semantic-link';
  */
 export default class PooledCollection {
 
+    /**
+     *
+     * @returns {UriResolver}
+     */
     static get defaultResolver() {
-        return {
-            resolve: u => u,
-            remove: () => {
-            },
-            add: () => {
-            },
-            update: () => {
-            }
-        };
+        return defaultResolver;
     }
 
     /**

@@ -124,7 +124,7 @@ function syncResourceInCollection(collectionResource, resourceDocument, options 
 function synchroniseCollection(collectionResource, collectionDocument, options = {}) {
 
     /**
-     * @type {SyncResolver}
+     * @type {UriResolver}
      */
     const resolver = options.resolver || defaultResolver;
 
