@@ -22,7 +22,7 @@ export default class ResourceMerger {
 
     /**
      * Returns the fields that the server is willing to accept. Current it defaults to finding
-     * 'name' and 'title' - this is a little off centre.
+     * 'name'.
      *
      * Note: the formResource is of the format - the `items` list the fields that the server will accept
      * <pre>
@@ -263,7 +263,7 @@ export default class ResourceMerger {
      * @param resource
      * @param fieldsToReturn
      * @param formResource
-     * @param options
+     * @param {UtilOptions} options
      * @return {*}
      * @private
      */
@@ -325,7 +325,7 @@ export default class ResourceMerger {
      * Makes the new document with all links and fields resolved.
      * @param document
      * @param formResource
-     * @param options
+     * @param {UtilOptions} options
      * @return {Promise.<*>|Promise} containing the document updates to be merged
      * @private
      */
@@ -522,13 +522,6 @@ export default class ResourceMerger {
     createMerge(resource, formResource, options = {}) {
         return this.mergeLinksAndFields(resource, formResource, options);
     }
-
-    /**
-     * @class EditMergeOptions
-     * @property {?string[]} defaultFields
-     * @property {?bool} undefinedWhenNoUpdateRequired
-     * @property (function(resource:LinkedRepresentation):bool} isTracked
-     */
 
     /**
      * A three-way merge between a form (edit or create) resource and existing {@link LinkedRepresentation}

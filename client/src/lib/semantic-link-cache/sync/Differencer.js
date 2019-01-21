@@ -1,6 +1,6 @@
 import _ from '../mixins';
 import {log} from 'logger';
-import Comparator from './Comparator';
+import {defaultEqualityOperators} from './Comparator';
 import * as link from 'semantic-link';
 
 /**
@@ -15,46 +15,11 @@ export default class Differencer {
      * The most specific and robust equality check is first, with the most vague and
      * optimistic last.
      *
-     * @type {function()[]}
+     * @type {Comparator[]}
      */
     static get defaultEqualityOperators() {
-        return [
-            Comparator.canonicalOrSelf,
-            Comparator.name,
-            Comparator.title
-        ];
+        return defaultEqualityOperators;
     }
-
-    /**
-     * A data structure provided by the {@link diffCollection} method as a return value
-     * in the promise.
-     *
-     * @class SynchroniseInfo
-     * @property {LinkedRepresentation} resource
-     * @property {LinkedRepresentation} document
-     * @property {string} action where the resource has been created ('create') or updated ('update')
-     */
-
-    /**
-     * A data structure provided by the {@link diffCollection} method as a return value
-     * in the promise.
-     *
-     * @class SynchroniseOptions
-     * @extends UtilOptions
-     *
-     * @property {function(LinkedRepresentation:createDataDocument):Promise} createStrategy A function that should create
-     *    a single resource. It must return a promise with the resource (created on the collection resource)
-     *
-     * @property {function(LinkedRepresentation:collectionResourceItem, LinkedRepresentation:updateDataDocument):Promise} updateStrategy
-     *   Conditionally update the given resource using the provides document. The implementation can
-     *   choose to not update the resource if its state is equivalent. return a promise with no parameters
-     *
-     * @property {function(LinkedRepresentation:collectionResourceItem):Promise} deleteStrategy return a promise with no parameters
-     *
-     * @property {function(LinkedRepresentation, LinkedRepresentation):boolean=} comparators
-     * compute the identity of an object based on a transformation
-     *
-     */
 
     /**
      *  Processes difference sets (create, update, delete) for between two client-side collections {@Link CollectionRepresentation}
@@ -88,28 +53,10 @@ export default class Differencer {
      * @param {CollectionRepresentation} collectionDocument a document with a collection CollectionRepresentation
      * format that describes the state of the resources.
      *
-     * @param {SynchroniseOptions} options a document with a collection CollectionRepresentation
+     * @param {UtilOptions} options a document with a collection CollectionRepresentation
      * format that describes the state of the resources.
      *
-     * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>}
-     *   <p>An array of 4 values for the form [SynchroniseInfo[], createlist, updatelist, deletelist].</p>
-     *   <p>
-     *   Where the first collection is the collection resource grouped with the document data. The createlist is
-     *   an array describing the resources created. The update list is an array that describes the resources
-     *   updated. The delete list describes the resources deleted.</p>
-     *   <p>
-     *   The create list items are an array of two values. The first item is the new item returned from the
-     *   createStrategy promise. The second item is the create data provided to the createStrategy.
-     *   </p>
-     *   <p>
-     *   The update list item are an array of two values. The first value is the resource from the
-     *   collection resource that is provided to the updateStrategy. The second item is the update
-     *   data from the document resource used to update the resource.
-     *   </p>
-     *   <p>
-     *   The delete list items are an array with a single value. The value is the resource from
-     *   the collection resource prior to being deleted.
-     *   </p>
+     * @return {SyncInfoResult}
      */
     static diffCollection(collectionResource, collectionDocument = {items: []}, options = {}) {
 
@@ -233,7 +180,7 @@ export default class Differencer {
                  * The synchronise info describes the new state, that is the state of the
                  * updated and created items. (.c.f the old state, c.f. the changes made).
                  *
-                 * @return {SynchroniseInfo[]}
+                 * @return {SyncInfo[]}
                  */
                 const makeSynchronisationInfos = (createResults, updateItems) => {
                     return _(createResults)
@@ -270,7 +217,7 @@ export default class Differencer {
      * @param {UriList} resourceUriList
      * @param {UriList} documentUriList
      * @param {UtilOptions} options
-     * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} containing [syncInfos, created, updated, deleted]
+     * @return {SyncInfoResult}
      */
     static diffUriList(resourceUriList, documentUriList, options = {}) {
 
@@ -315,7 +262,7 @@ export default class Differencer {
                  * The synchronise info describes the new state, that is the state of the
                  * updated and created items. (.c.f the old state, c.f. the changes made).
                  *
-                 * @return {SynchroniseInfo[]}
+                 * @return {SyncInfo[]}
                  */
                 const makeSynchronisationInfos = createResults => {
                     return _(createResults)

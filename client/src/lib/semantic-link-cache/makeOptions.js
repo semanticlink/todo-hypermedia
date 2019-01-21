@@ -123,7 +123,7 @@ const lowercase = (str) => {
 
 /**
  * Make options fpr message that need to  be displayed to the user
- * @param options
+ * @param {UtilOptions} options
  * @param {LinkedRepresentation} resource
  * @param {string} type - the stringly type of the resource that would make sense to a user
  * @param {string} action the type of action [create, delete, update]
@@ -137,7 +137,7 @@ export const makeOptionsWithResourceMessages = (options, resource, type, action)
 
 /**
  * Make options fpr message that need to  be displayed to the user
- * @param options
+ * @param {UtilOptions} options
  * @param {LinkedRepresentation} resource
  * @param {string} type - the stringly type of the resource that would make sense to a user
  */
@@ -146,7 +146,7 @@ export const makeOptionsWithCreateMessages = (options, resource, type) =>
 
 /**
  * Make options fpr message that need to  be displayed to the user
- * @param options
+ * @param {UtilOptions} options
  * @param {LinkedRepresentation} resource
  * @param {string} type - the stringly type of the resource that would make sense to a user
  */
@@ -155,7 +155,7 @@ export const makeOptionsWithUpdateMessages = (options, resource, type) =>
 
 /**
  * Make options fpr message that need to  be displayed to the user
- * @param options
+ * @param {UtilOptions} options
  * @param {LinkedRepresentation} resource
  * @param {string} type - the stringly type of the resource that would make sense to a user
  */

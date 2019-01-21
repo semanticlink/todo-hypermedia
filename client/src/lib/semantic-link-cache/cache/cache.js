@@ -9,7 +9,7 @@ import {filter} from 'semantic-link/lib/filter';
 /**
  *
  * This is just a utility that has a series of helpers that allows the client to layout the network of data
- * in a way that it wants allowoing the client-side application cache data to have self-consistency.
+ * in a way that it wants allowing the client-side application cache data to have self-consistency.
  *
  */
 

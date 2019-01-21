@@ -1,11 +1,6 @@
 import {Representation} from "../query/interfaces";
 import {LinkedRepresentation, RelationshipType, Uri} from "semantic-link";
-
-/**
- * TODO: link back up with UtilOptions
- */
-export interface SyncOptions {
-}
+import {SyncOptions} from "../interfaces";
 
 export interface SyncResult<T extends Representation> {
     resource: T;
@@ -41,7 +36,7 @@ export interface NamedResourceSync<T extends Representation> extends ResourceSyn
 export type SyncInfoAction = 'create' | 'update' | 'delete';
 
 /**
- * Internal data structure for working out which active to perform on documents.
+ * Internal data structure for working out which action to perform on documents when syncing.
  * @private
  */
 export interface SyncInfo {
@@ -49,6 +44,27 @@ export interface SyncInfo {
     document: Representation
     action: SyncInfoAction
 }
+
+/**
+ *   An array of 4 values for the form [SyncInfo[], createlist, updatelist, deletelist].
+ *
+ *   Where the first collection is the collection resource grouped with the document data. The createlist is
+ *   an array describing the resources created. The update list is an array that describes the resources
+ *   updated. The delete list describes the resources deleted.</p>
+ *
+ *   The create list items are an array of two values. The first item is the new item returned from the
+ *   createStrategy promise. The second item is the create data provided to the createStrategy.
+ *
+ *   The update list item are an array of two values. The first value is the resource from the
+ *   collection resource that is provided to the updateStrategy. The second item is the update
+ *   data from the document resource used to update the resource.
+ *
+ *   The delete list items are an array with a single value. The value is the resource from
+ *   the collection resource prior to being deleted.
+ */
+export type SyncResultItem = [SyncInfo[], [LinkedRepresentation[], LinkedRepresentation[]], [LinkedRepresentation[], LinkedRepresentation[]], LinkedRepresentation[]];
+
+export type SyncInfoResult = Promise<SyncResultItem[]>;
 
 /**
  * Used for provisioning the resources (network of data) based on providing new document (resources). Based

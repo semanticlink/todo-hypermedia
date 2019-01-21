@@ -16,7 +16,7 @@ describe('NOD Differencer', () => {
         };
     };
 
-    /* @type {SynchroniseOptions} */
+    /* @type {DifferencerOptions} */
     const options = {
         createStrategy: strategy('create'),
         updateStrategy: strategy('update'),

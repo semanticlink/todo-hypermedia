@@ -15,10 +15,11 @@ import {toUriListMimeTypeFormat} from '../mixins/uri-list';
  *
  * The default strategy is to look for 'self' link relation if it is a linked representation
  *
- * However, in most cases, you will need to write your own resolver, before synchronisation. In this example,
- * the resolver the notifications collection also looks into the `question-item` link relation:
+ * However, in most cases, you will need to write your own resolver, before synchronisation.
  *
  * @example
+ *
+ * In this example, the resolver the notifications collection also looks into the `question-item` link relation:
  *
  *  options = {
  *      ...options,
@@ -58,7 +59,7 @@ function defaultUriListResolver(uriListOrResource) {
  * @param {CollectionRepresentation} collection
  * @param {string[]} documentUriList
  * @param {UtilOptions} options
- * @return {Promise.Array.<SynchroniseInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} syncInfos
+ * @return {Promise.Array.<SyncInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} syncInfos
  * @private
  */
 function synchroniseUriList(collection, documentUriList, options = {}) {

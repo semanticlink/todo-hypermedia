@@ -117,7 +117,7 @@ function syncResourceInCollection(collectionResource, resourceDocument, options 
  *
  * @param collectionResource
  * @param collectionDocument
- * @param options
+ * @param {UtilOptions} options
  * @returns {Promise}
  * @private
  */
