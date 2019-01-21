@@ -7,7 +7,14 @@ import {RelationshipType} from "semantic-link";
 export interface SyncOptions {
 }
 
-export type StrategyType = <T extends Representation>(resource: T, document: T, options: SyncOptions) => Promise<void>;
+export interface SyncResult<T extends Representation> {
+    resource: T;
+    document: T;
+    options: SyncOptions;
+}
+
+// export type StrategyType = <T extends Representation>(resource: T, document: T, options: SyncOptions) => Promise<void>;
+export type StrategyType = <T extends Representation>(syncResult: SyncResult<T>) => Promise<void>;
 
 export interface ResourceSync<T extends Representation> {
     resource: T;
@@ -27,4 +34,6 @@ export interface NamedResourceSync<T extends Representation> extends ResourceSyn
      */
     name?: string;
 }
+
+
 

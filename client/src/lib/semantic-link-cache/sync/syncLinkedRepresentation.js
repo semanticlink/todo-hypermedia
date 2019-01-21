@@ -24,9 +24,9 @@ const defaultFindResourceInCollectionStrategy = findResourceInCollection;
  * When syncing a tree/graph, each path of resources is sync'd via a set of strategies. The syncInfo is the state action
  * (update, create, delete) on the resource and the strategy is how resources are traversed.
  *
- * @param strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
- * @param syncInfos
+ * @param {SyncInfo[]} syncInfos
  * @return {Promise.<void>}
  * @private
  */
@@ -35,10 +35,18 @@ function tailRecursionThroughStrategies(strategies, options, syncInfos) {
 
         if (options.childStrategyBatchSize === 0 || _(options.childStrategyBatchSize).isUndefined()) {
             // invoke a parallel strategy when want to go for it
-            return _(syncInfos).mapWaitAll(syncInfo => strategy(syncInfo.resource, syncInfo.document, options));
+            return _(syncInfos).mapWaitAll(syncInfo => strategy({
+                resource: syncInfo.resource,
+                document: syncInfo.document,
+                options
+            }));
         } else {
             // invoke a sequential strategy - and for now, single at a time
-            return _(syncInfos).sequentialWait((unusedMemo2, syncInfo) => strategy(syncInfo.resource, syncInfo.document, options));
+            return _(syncInfos).sequentialWait((unusedMemo2, syncInfo) => strategy({
+                resource: syncInfo.resource,
+                document: syncInfo.document,
+                options
+            }));
         }
 
     });
@@ -46,7 +54,7 @@ function tailRecursionThroughStrategies(strategies, options, syncInfos) {
 
 /**
  * Recurse through all the strategies working through change sets.
- * @param {*[]} strategies
+ * @param {StrategyType[]} strategies
  * @param {UtilOptions} options
  * @return {function(syncInfo:SyncInfo):Promise.<LinkedRepresentation>} containing the representation (@link LinkedRepresentation}
  * @private
@@ -308,17 +316,21 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
  * Recurse through all the strategies passing through the resources.
  *
  * @param {LinkedRepresentation} resource
- * @param {LinkedRepresentation} resourceDocument
+ * @param {LinkedRepresentation} document
  * @param {*[]} strategies
  * @param {UtilOptions} options
- * @return {function():Promise.<void>} callback function to be attached onto a Promise.then
+ * @return {function(syncResult:SyncResult<Representation>):Promise.<void>} callback function to be attached onto a Promise.then
  * @private
  */
-function syncResources(resource, resourceDocument, strategies = [], options = {}) {
+function syncResources(resource, document, strategies = [], options = {}) {
     return () => _(strategies).sequentialWait(
         (memo, strategy) => {
             if (strategy && _(strategy).isFunction()) {
-                return strategy(resource, resourceDocument, options);
+                /**
+                 * @type {SyncResult<Representation>}
+                 */
+                const sync = {resource, document, options};
+                return strategy(sync);
             }
             log.warn('[Sync] Calling function has not handed in correct strategy and will not provision');
         });

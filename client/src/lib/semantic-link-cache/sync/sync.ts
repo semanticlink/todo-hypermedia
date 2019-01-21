@@ -11,6 +11,7 @@ import {instanceOfCollection} from "../query/utils";
 import {relTypeToCamel} from "../mixins/linkRel";
 import {getUriListOnNamedCollection} from "./syncUriList";
 import {UriList} from "../interfaces";
+import {log} from "../index";
 
 
 function instanceOfResourceSync<T>(obj: any): obj is ResourceSync<T> {
@@ -21,6 +22,8 @@ function instanceOfResourceSync<T>(obj: any): obj is ResourceSync<T> {
 function instanceofUriList(obj: any): obj is UriList {
     return Array.isArray(obj) && typeof obj[0] === 'string';
 }
+
+export type SyncType<T> = ResourceSync<T> | NamedResourceSync<T>;
 
 /**
  * Retrieves a resource (singleton or collection, either directly or through a link relation) and synchronises from
@@ -111,7 +114,7 @@ function instanceofUriList(obj: any): obj is UriList {
  *
  * @param syncAction
  */
-export function sync<T extends Representation>(syncAction: NamedResourceSync<T> | ResourceSync<T>): Promise<T> | never {
+export function sync<T extends Representation>(syncAction: SyncType<T>): Promise<T> | never {
 
     // shared configuration
     let cfg: ResourceSync<T> = <ResourceSync<T>>syncAction;
@@ -135,6 +138,9 @@ export function sync<T extends Representation>(syncAction: NamedResourceSync<T> 
     }
 
     if (instanceofUriList(document)) {
+        if (strategies) {
+            log.warn('Strategies not available for uri-list');
+        }
         return getUriListOnNamedCollection(resource, name, rel, document, options);
     }
 

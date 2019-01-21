@@ -78,23 +78,14 @@ export const syncTenant = (apiResource, aTenant, options) => {
             return sync({
                 resource: userTenants,
                 document: aTenant,
-                strategies: [(userCollection, users, options) => sync({
-                    resource: userCollection,
+                strategies: [syncResult => sync({
+                    ...syncResult,
                     rel: /todos/,
-                    document: users,
-                    strategies: [(todoListCollection, todoLists, options) => sync({
-                        resource: todoListCollection,
+                    strategies: [syncResult => sync({
+                        ...syncResult,
                         rel: /todos/,
-                        document: todoLists,
-                        strategies: [(todoCollection, todos, options) => sync({
-                            resource: todoCollection,
-                            rel: /tags/,
-                            document: todos,
-                            options
-                        })],
-                        options
+                        strategies: [syncResult => sync({...syncResult, rel: /tags/})],
                     })],
-                    options
                 }),
                 ],
                 options: {

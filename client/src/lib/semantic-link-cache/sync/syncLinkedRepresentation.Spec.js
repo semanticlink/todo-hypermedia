@@ -976,6 +976,70 @@ describe('Synchroniser', () => {
 
         });
 
+        describe('strategies', () => {
+
+            let strategy;
+
+            it('should ', function () {
+
+                const hydratedParent = SparseResource.makeLinkedRepresentation(SparseResource.makeSparseResourceOptions(StateEnum.hydrated), parent);
+
+                const updatedUser = {
+                    ...resource,
+                    name: 'updated'
+                };
+                const changedSingletonOnParent = {
+                    ...parent,
+                    user: updatedUser
+                };
+
+                get.onCall(0).callsFake(() => {
+                    log.info('[Test] GET named resource (singleton)');
+                    return Promise.resolve({data: resource});
+                });
+
+                get.onCall(1).callsFake(() => {
+                    log.info('[Test] GET edit form');
+                    return Promise.resolve({data: editForm});
+                });
+
+                put.onCall(0).callsFake(() => {
+                    log.info('[Test] PUT updated resource');
+                    return Promise.resolve({});
+                });
+
+                strategy = sinon.stub().onCall(0).callsFake(({resource, document, options}) => {
+                    expect(resource).to.not.be.undefined;
+                    expect(document).to.not.be.undefined;
+                    expect(options).to.not.be.undefined;
+                    return Promise.resolve();
+                });
+
+                // strategy.resolves(undefined);
+
+                return sync.getSingleton(
+                    hydratedParent,
+                    'user',
+                    /user/,
+                    changedSingletonOnParent,
+                    [opts => strategy({...opts})],
+                    options
+                )
+                    .then(result => {
+                        expect(result).to.not.be.undefined;
+                        expect(get.callCount).to.eq(2);
+                        expect(put.callCount).to.eq(1);
+                        expect(post.callCount).to.eq(0);
+                        expect(del.callCount).to.eq(0);
+                        expect(result).to.deep.eq(hydratedParent);
+
+                        // expect(strategy.wasCalled).to.be.true;
+                        expect(strategy.called).to.be.true;
+                    });
+
+            });
+        });
+
 
     });
 
