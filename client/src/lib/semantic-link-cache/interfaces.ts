@@ -11,7 +11,7 @@ import {QueryOptions} from "./query/interfaces";
 
 export type UriList = string | string[];
 
-export type Representation = (CollectionRepresentation | FormRepresentation | UriList | any) & LinkedRepresentation;
+export type Representation = (LinkedRepresentation | CollectionRepresentation | FormRepresentation | UriList | any);
 
 /**
  * Known set of field types from the semantic link. Maps the representation types to the known types that
