@@ -67,6 +67,13 @@ export interface FormRepresentation extends LinkedRepresentation {
     items: FormItem[]
 }
 
+/**
+ * The options that get propagated through the system to alter behaviour.
+ *
+ * @remarks
+ *
+ * Using inheritance seems wrong and needs reworking.
+ */
 export interface CacheOptions extends LinkOptions,
     StateOptions,
     SyncOptions,
