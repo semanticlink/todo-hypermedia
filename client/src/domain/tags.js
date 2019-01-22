@@ -5,7 +5,7 @@ import {makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResourc
 
 /**
  * A pooled resource is required by a resource to be resolved but lives outside the current scope of the resource for
- * resolution. This function provides that resolution service that is plugged in via the {@link UtilOptions} when syncing
+ * resolution. This function provides that resolution service that is plugged in via the {@link CacheOptions} when syncing
  * resources.
  *
  * @example
@@ -27,7 +27,7 @@ import {makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResourc
  *                  }));
  *
  * @param {LinkedRepresentation} contextResource
- * @return {{resourceFactory: (function(*): LinkedRepresentation), resourceResolver: (function(string):Array<function(*, *)>)}} see {@link UtilOptions.resourceFactory} and {@link UtilOptions.resourceResolver}
+ * @return {{resourceFactory: (function(*): LinkedRepresentation), resourceResolver: (function(string):Array<function(*, *)>)}} see {@link CacheOptions.resourceFactory} and {@link CacheOptions.resourceResolver}
  */
 export function pooledTagResourceResolver(contextResource) {
 

@@ -56,7 +56,7 @@ export default class ResourceMerger {
      *
      * @param {*} doc
      * @param {FormRepresentation} form
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {Promise} containing the merged document
      * @private
      */
@@ -188,7 +188,7 @@ export default class ResourceMerger {
      * @param doc
      * @param formResource
      * @param {Link} aLink
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {*} document with matched fields
      * @private
      */
@@ -243,7 +243,7 @@ export default class ResourceMerger {
      * @param resource
      * @param fieldsToReturn
      * @param formResource
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {*}
      * @private
      */

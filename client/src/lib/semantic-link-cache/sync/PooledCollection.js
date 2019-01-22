@@ -68,7 +68,7 @@ export default class PooledCollection {
      * Add to the resolver the mapping between the new document uri and the existing nod uri
      * @param document
      * @param resource
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {*}
      * @private
      */
@@ -85,7 +85,7 @@ export default class PooledCollection {
      * Make a resource item inside a collection, add it to the resolver and
      * @param collectionResource
      * @param resourceDocument
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {Promise} containing the created resource
      * @private
      */
@@ -105,7 +105,7 @@ export default class PooledCollection {
      * @param {string} collectionName
      * @param {string|RegExp|string[]|RegExp[]} collectionRel
      * @param {*} resourceDocument
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {Promise<string>} containing the uri resource {@link LinkedRepresentation}
      */
     static getPooledCollection(resource, collectionName, collectionRel, resourceDocument, options) {

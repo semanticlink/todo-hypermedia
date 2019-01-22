@@ -1,5 +1,5 @@
 import {AcrossTheWire, Cancellable, Link, LinkedRepresentation, RelationshipType, Uri} from "semantic-link";
-import {FormRepresentation, Representation, UtilOptions} from "../interfaces";
+import {FormRepresentation, Representation, CacheOptions} from "../interfaces";
 import {ResourceResolver, UriResolver} from "../sync/interfaces";
 
 export interface StateOptions {
@@ -23,9 +23,9 @@ export interface StateOptions {
 
 export interface LinkOptions {
     getFactory?: <T extends Representation>(resource: T, rel: RelationshipType, cancellable: Cancellable) => Promise<T | void>
-    postFactory?: <T extends Representation>(resource: T, data: T, options?: UtilOptions) => Promise<T | void>
-    putFactory?: <T extends Representation>(resource: T, data: T, options?: UtilOptions) => Promise<T | void>
-    deleteFactory?: <T extends Representation>(resource: T, options?: UtilOptions) => Promise<void>
+    postFactory?: <T extends Representation>(resource: T, data: T, options?: CacheOptions) => Promise<T | void>
+    putFactory?: <T extends Representation>(resource: T, data: T, options?: CacheOptions) => Promise<T | void>
+    deleteFactory?: <T extends Representation>(resource: T, options?: CacheOptions) => Promise<void>
 }
 
 

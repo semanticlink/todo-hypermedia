@@ -162,7 +162,7 @@ export default class State {
      * Simple cache bust strategy which is an override switch. To be expanded as needed. Currently, only
      * cache bust on {@link StateEnum.hydrated} resources. There is no time-based, refresh st
      * @param {StateEnum} status
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return boolean
      * @private
      */
@@ -178,7 +178,7 @@ export default class State {
      * strategy that will need improvemnt
      *
      * @param {StateEnum} status
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return boolean
      * @private
      */
@@ -424,7 +424,7 @@ export default class State {
      *
      * @param {LinkedRepresentation} resource
      * @param {string|RegExp} rel
-     * @param {UtilOptions|{}} options
+     * @param {CacheOptions|{}} options
      * @return {Promise.<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
      */
     loadResource(resource, rel, options = {}) {
@@ -523,7 +523,7 @@ export default class State {
      *
      * @param {LinkedRepresentation} resource
      * @param {string|RegExp} rel the link relation name
-     * @param {UtilOptions|{}} options
+     * @param {CacheOptions|{}} options
      * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
     synchronise(resource, rel, options = {}) {
@@ -544,7 +544,7 @@ export default class State {
      *
      * @param {CollectionRepresentation|FeedRepresentation} collection
      * @param {string|RegExp} rel
-     * @param {UtilOptions|{}} options
+     * @param {CacheOptions|{}} options
      * @return {Promise<CollectionRepresentation>}
      */
     synchroniseOnCollection(collection, rel, options = {}) {
@@ -580,7 +580,7 @@ export default class State {
     /**
      * Ensures that resource with 'self' or 'canonical' is synchronised
      * @param {LinkedRepresentation} resource
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
     getResource(resource, options) {
@@ -592,7 +592,7 @@ export default class State {
      * @param {LinkedRepresentation} resource
      * @param {string} singletonName
      * @param {string|RegExp} rel the link relation name
-     * @param {UtilOptions=} options
+     * @param {CacheOptions=} options
      * @return {Promise} promise contains new {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
     makeSingletonResource(resource, singletonName, rel, options) {
@@ -628,7 +628,7 @@ export default class State {
      * @param {LinkedRepresentation} resource
      * @param {string} collectionName
      * @param {string|RegExp} rel
-     * @param {UtilOptions=} options
+     * @param {CacheOptions=} options
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      */
     makeCollectionResource(resource, collectionName, rel, options) {
@@ -664,7 +664,7 @@ export default class State {
      *
      * @param {CollectionRepresentation} collection
      * @param {string} itemUri
-     * @param {UtilOptions|{}} options
+     * @param {CacheOptions|{}} options
      * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
      */
     makeItemOnCollectionResource(collection, itemUri, options = {}) {
@@ -689,7 +689,7 @@ export default class State {
      * attribute with its items all to feedOnly state - ie one call across the wire
      *
      * @param {LinkedRepresentation} resource
-     * @param {UtilOptions|{}} options
+     * @param {CacheOptions|{}} options
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      */
     getCollectionResource(resource, options = {}) {
@@ -701,7 +701,7 @@ export default class State {
      * resource goes into the network of data. All the headers will get set on GET retrieval
      * @param resource
      * @param data
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {Promise} containing created resource (@link LinkedRepresentation}
      */
     createResource(resource, data, options = {}) {
@@ -746,7 +746,7 @@ export default class State {
      * Makes an across-the-wire update of a resource.
      * @param {LinkedRepresentation} resource
      * @param {*} data
-     * @param {UtilOptions|{}} options
+     * @param {CacheOptions|{}} options
      * @return {Promise}  containing the original {@link LinkedRepresentation}
      */
     updateResource(resource, data, options = {}) {
@@ -797,7 +797,7 @@ export default class State {
      * It rejects when receiving all other codes but in practice is a 50x or general 400.
      *
      * @param {LinkedRepresentation} item
-     * @param {UtilOptions=} options
+     * @param {CacheOptions=} options
      * @return {Promise}  containing the original {@link LinkedRepresentation}
      */
     deleteResource(item, options = {}) {

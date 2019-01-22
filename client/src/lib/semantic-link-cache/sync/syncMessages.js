@@ -8,7 +8,7 @@ const lowercase = (str) => {
 
 /**
  * Make options fpr message that need to  be displayed to the user
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @param {LinkedRepresentation} resource
  * @param {UserMessage} type - the stringly type of the resource that would make sense to a user
  * @param {SyncInfoAction} action the type of action [create, delete, update]

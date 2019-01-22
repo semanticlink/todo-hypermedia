@@ -19,7 +19,7 @@ import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
  * Access: -(me)-[tenants...]
  *
  * @param {ApiRepresentation} apiResource
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<TenantCollectionRepresentation>}
  */
 export const getTenantsOnUser = (apiResource, options) =>
@@ -29,7 +29,7 @@ export const getTenantsOnUser = (apiResource, options) =>
  * Get the users that exist on a user tenant
  *
  * @param userTenantsCollection
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<CollectionRepresentation>}
  */
 export const getTenantUsers = (userTenantsCollection, options) =>
@@ -39,7 +39,7 @@ export const getTenantUsers = (userTenantsCollection, options) =>
  * Loads up a tenant to be copied with todos and users
  *
  * @param {TenantRepresentation} tenant
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<TenantRepresentation>}
  */
 export const getUserTenant = (tenant, options) =>
@@ -61,7 +61,7 @@ export const getUserTenant = (tenant, options) =>
  *
  * @param {ApiRepresentation} apiResource
  * @param {TenantRepresentation} aTenant
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<TenantCollectionRepresentation>}
  */
 export const syncTenant = (apiResource, aTenant, options) => {

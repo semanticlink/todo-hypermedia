@@ -58,7 +58,7 @@ const getResourceState = resource => State.get(resource);
  *   }
  *
  * @param {LinkedRepresentation} resource
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
  */
 export function getResource(resource, options = {}) {
@@ -71,7 +71,7 @@ export function getResource(resource, options = {}) {
  * at least the link relation `self` or 'canonical' in place otherwise it will return the defaultValue
  * @param {LinkedRepresentation} resource
  * @param defaultValue
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} promise contains a {@link LinkedRepresentation}
  * @return {Promise<LinkedRepresentation>}
  */
@@ -107,7 +107,7 @@ export function tryGetResource(resource, defaultValue = undefined, options = {})
  *        X           +---+
  *
  * @param {CollectionRepresentation} collection
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise<CollectionRepresentation>} collection is {@link StateEnum.hydrated}, sparsely
  * populate the items as {@link LinkedRepr  esentation} to {@link StateEnum.locationOnly} in the current
  * set (but not refresh the item set itself)
@@ -137,7 +137,7 @@ export function getCollection(collection, options) {
  *
  * @param {CollectionRepresentation} collection
  * @param {LinkedRepresentation} resource
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
  */
 export function getCollectionItem(collection, resource, options) {
@@ -164,7 +164,7 @@ export function getCollectionItem(collection, resource, options) {
  *
  * @param {CollectionRepresentation} collection
  * @param {string} itemUri the id of the resource
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation>} collection item synchronised with the server
  */
 export function getCollectionItemByUri(collection, itemUri, options) {
@@ -198,7 +198,7 @@ export function getCollectionItemByUri(collection, itemUri, options) {
  * @param {LinkedRepresentation} resource
  * @param {string} singletonName the attribute name on the context resource
  * @param {string|RegExp} rel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation>} promise contains a {@link LinkedRepresentation}
  */
 export function getSingleton(resource, singletonName, rel, options) {
@@ -239,7 +239,7 @@ export function getSingleton(resource, singletonName, rel, options) {
  * @param {string} singletonName the attribute name on the context resource
  * @param {string|RegExp} rel the link relation name
  * @param {LinkedRepresentation} defaultValue
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise} promise contains a {@link LinkedRepresentation}, which could be a {@link FeedRepresentation}
  */
 export function tryGetSingleton(resource, singletonName, rel, defaultValue, options = {}) {
@@ -291,7 +291,7 @@ export function tryGetSingleton(resource, singletonName, rel, defaultValue, opti
  * @param {LinkedRepresentation} resource
  * @param {string} collectionName the name of a {@link FeedRepresentation}
  * @param {string|RegExp} collectionRel the link relation name
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise<CollectionRepresentation>} promise contains a {@link CollectionRepresentation}
  *
  */
@@ -334,7 +334,7 @@ export function getNamedCollection(resource, collectionName, collectionRel, opti
  * @param {LinkedRepresentation} resource
  * @param {string} collectionName the name of a {@link FeedRepresentation}
  * @param {string|RegExp} collectionRel the link relation name
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise<CollectionRepresentation|undefined>} promise contains a {@link CollectionRepresentation}
  */
 export function tryGetNamedCollection(resource, collectionName, collectionRel, options = {}) {
@@ -376,7 +376,7 @@ export function tryGetNamedCollection(resource, collectionName, collectionRel, o
  * @param {LinkedRepresentation[]} singletons
  * @param {string} collectionName
  * @param {string|RegExp} collectionRel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation[]>} promise contains original singletons
  */
 export function getNamedCollectionOnSingletons(singletons, collectionName, collectionRel, options) {
@@ -425,7 +425,7 @@ export function getNamedCollectionOnSingletons(singletons, collectionName, colle
  * @param {LinkedRepresentation[]} singletons
  * @param {string} collectionName
  * @param {string|RegExp} collectionRel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation[]>} promise contains original singletons
  */
 export function tryGetNamedCollectionOnSingletons(singletons, collectionName, collectionRel, options = {}) {
@@ -460,7 +460,7 @@ export function tryGetNamedCollectionOnSingletons(singletons, collectionName, co
  *        X           +---+
  *
  * @param {CollectionRepresentation} collection
- * @param {UtilOptions} options (with a cancellable)
+ * @param {CacheOptions} options (with a cancellable)
  * @return {Promise<CollectionRepresentation>} with the collection resource
  */
 export function tryGetCollectionItems(collection, options = {}) {
@@ -493,7 +493,7 @@ export function tryGetCollectionItems(collection, options = {}) {
  *        X           +---+
  *
  * @param {LinkedRepresentation} collection
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<CollectionRepresentation>}
  */
 export function getCollectionAndItems(collection, options) {
@@ -524,7 +524,7 @@ export function getCollectionAndItems(collection, options) {
  * @param {LinkedRepresentation} resource
  * @param {string} collectionName the name of the collection in the context container
  * @param {string|RegExp} collectionRel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
  */
 export function getNamedCollectionAndItems(resource, collectionName, collectionRel, options) {
@@ -567,7 +567,7 @@ export function getNamedCollectionAndItems(resource, collectionName, collectionR
  * @param {LinkedRepresentation} resource
  * @param {string} collectionName
  * @param {string} uriListName
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation[]>} contains an array of populated resources
  */
 export function getNamedCollectionAndItemsFromUriList(resource, collectionName, uriListName, options) {
@@ -602,7 +602,7 @@ export function getNamedCollectionAndItemsFromUriList(resource, collectionName, 
  * @param {LinkedRepresentation} resource the context to the collection
  * @param {string} collectionName the name of the collection in the context
  * @param {string|RegExp} collectionRel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<CollectionRepresentation|undefined>}
  */
 export function tryGetCollectionAndItems(resource, collectionName, collectionRel, options = {}) {
@@ -671,7 +671,7 @@ export function tryGetCollectionAndItems(resource, collectionName, collectionRel
  * @param {string} collectionName the name of the collection in the context container
  * @param {string|RegExp} collectionRel the link relation name
  * @param {string} title the title of the resource in the collection to be hydrated
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise} with the item by uri from the collection resource of type {@link FeedRepresentation}
  */
 export function getNamedCollectionByTitle(resource, collectionName, collectionRel, title, options) {
@@ -723,7 +723,7 @@ export function getNamedCollectionByTitle(resource, collectionName, collectionRe
  * @param {string} collectionName the name of the collection in the context
  * @param {string|RegExp} collectionRel the link relation name
  * @param {string} itemUri the uri of the item resource in the collection to be hydrated
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<LinkedRepresentation>} with the item by uri from the collection item resource
  */
 export function getNamedCollectionItemByUri(resource, collectionName, collectionRel, itemUri, options) {
@@ -770,7 +770,7 @@ export function getNamedCollectionItemByUri(resource, collectionName, collection
  * @param {CollectionRepresentation} contextCollection
  * @param {string} childCollectionName the name of the collection on each item resource
  * @param {string|RegExp} childCollectionRel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise<CollectionRepresentation>} original collection
  */
 export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection, childCollectionName, childCollectionRel, options = {}) {
@@ -813,7 +813,7 @@ export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection
  * @param {CollectionRepresentation} collection the context to the collection
  * @param {string} childCollectionName the name of the collection in the context collection items
  * @param {string|RegExp} rel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise} with the collection resource of type {@link FeedRepresentation} (i.e. the collection resource object)
  */
 export function tryGetNamedCollectionOnCollectionItems(collection, childCollectionName, rel, options) {
@@ -847,7 +847,7 @@ export function tryGetNamedCollectionOnCollectionItems(collection, childCollecti
  * @param {CollectionRepresentation} collection the context to the collection
  * @param {string} childSingletonName the name of the collection in the context collection items
  * @param {string|RegExp} childSingletonRel the link relation name
- * @param {UtilOptions=} options
+ * @param {CacheOptions=} options
  * @return {Promise} with the array of singleton resources that succeed
  */
 export function tryGetSingletonOnCollectionItems(collection, childSingletonName, childSingletonRel, options) {
@@ -1014,7 +1014,7 @@ export function createCollectionItem(collectionRepresentation, document, options
  *    +-----+
  *
  * @param {LinkedRepresentation} resource
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} contains the original resource {@link LinkedRepresentation}
  */
 export function deleteResource(resource, options = {}) {
@@ -1042,7 +1042,7 @@ export function deleteResource(resource, options = {}) {
  *
  * @param {CollectionRepresentation} collection
  * @param {LinkedRepresentation} item
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise}
  */
 export function deleteCollectionItem(collection, item, options = {}) {

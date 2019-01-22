@@ -67,7 +67,7 @@ export interface FormRepresentation extends LinkedRepresentation {
     items: FormItem[]
 }
 
-export interface UtilOptions extends LinkOptions,
+export interface CacheOptions extends LinkOptions,
     StateOptions,
     SyncOptions,
     DifferencerOptions,

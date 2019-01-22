@@ -216,7 +216,7 @@ export default class Differencer {
      *
      * @param {UriList} resourceUriList
      * @param {UriList} documentUriList
-     * @param {UtilOptions} options
+     * @param {CacheOptions} options
      * @return {SyncInfoResult}
      */
     static diffUriList(resourceUriList, documentUriList, options = {}) {

@@ -69,7 +69,7 @@ describe('Resource Merger:', () => {
         };
 
         /*
-         * @type {UtilOptions}
+         * @type {CacheOptions}
          */
         const options = {
             resourceResolver: () => u => Promise.resolve(u),
@@ -228,7 +228,7 @@ describe('Resource Merger:', () => {
                     };
 
                     /*
-                     * @type {UtilOptions}
+                     * @type {CacheOptions}
                      */
                     const options = {
                         resourceResolver: () => resource => {
@@ -255,7 +255,7 @@ describe('Resource Merger:', () => {
 
                 it('should return undefined', () => {
                     /*
-                     * @type {UtilOptions}
+                     * @type {CacheOptions}
                      */
                     const options = {
                         undefinedWhenNoUpdateRequired: true,
@@ -271,7 +271,7 @@ describe('Resource Merger:', () => {
 
                 xit('should return defined', () => {
                     /*
-                     * @type {UtilOptions}
+                     * @type {CacheOptions}
                      */
                     const options = {
                         undefinedWhenNoUpdateRequired: true,
@@ -359,7 +359,7 @@ describe('Resource Merger:', () => {
                     };
 
                     /*
-                     * @type {UtilOptions}
+                     * @type {CacheOptions}
                      */
                     const options = {
                         undefinedWhenNoUpdateRequired: true,
@@ -499,7 +499,7 @@ describe('Resource Merger:', () => {
                 describe('match match http://types/group', () => {
 
                     /*
-                     * @type {UtilOptions}
+                     * @type {CacheOptions}
                      */
                     const options = {
                         // TODO: needs upgrade for keys on
@@ -547,7 +547,7 @@ describe('Resource Merger:', () => {
             describe('link relations', () => {
 
                 /*
-                 * @type {UtilOptions}
+                 * @type {CacheOptions}
                  */
                 let options = {
                     resourceResolver: () => () => Promise.resolve({}),
@@ -871,7 +871,7 @@ describe('Resource Merger:', () => {
                 };
 
                 /*
-                 * @type {UtilOptions}
+                 * @type {CacheOptions}
                  */
                 let options = {
                     resourceResolver: () => () => Promise.resolve(undefined),

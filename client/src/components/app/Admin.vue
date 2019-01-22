@@ -81,7 +81,7 @@
             /**
              * Strategy One: use the first tenant from a provided list (when authenticated)
              * @param {ApiRepresentation} apiResource
-             * @param {UtilOptions?} options
+             * @param {CacheOptions?} options
              * @returns {Promise|*}
              */
             const loadTenantsWithTodoLists = (apiResource, options) => {

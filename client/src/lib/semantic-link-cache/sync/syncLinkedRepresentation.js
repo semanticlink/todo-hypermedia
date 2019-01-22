@@ -19,13 +19,13 @@ export const defaultFindResourceInCollectionStrategy = findResourceInCollection;
  * on the change sets required (syncInfos). The calls can be processed either all at once (parallel using a map wait all
  * which is implemented as a Promise.all) or one at a time (sequentially, note there is no partial batching).
  *
- * The approach is set using {@link UtilOptions.childStrategyBatchSize} when non-zero (defined)
+ * The approach is set using {@link CacheOptions.childStrategyBatchSize} when non-zero (defined)
  *
  * When syncing a tree/graph, each path of resources is sync'd via a set of strategies. The syncInfo is the state action
  * (update, create, delete) on the resource and the strategy is how resources are traversed.
  *
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @param {SyncInfo[]} syncInfos
  * @return {Promise.<void>}
  * @private
@@ -55,7 +55,7 @@ function tailRecursionThroughStrategies(strategies, options, syncInfos) {
 /**
  * Recurse through all the strategies working through change sets.
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {function(syncInfo:SyncInfo):Promise.<LinkedRepresentation>} containing the representation (@link LinkedRepresentation}
  * @private
  */
@@ -71,7 +71,7 @@ function syncInfos(strategies, options) {
  * note: updates do not check for differences
  * @param collectionResource
  * @param {*} resourceDocument
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise.<SyncInfo>} contains a syncInfo
  * @private
  */
@@ -117,7 +117,7 @@ function syncResourceInCollection(collectionResource, resourceDocument, options 
  *
  * @param collectionResource
  * @param collectionDocument
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @returns {Promise}
  * @private
  */
@@ -318,7 +318,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
  * @param {LinkedRepresentation} resource
  * @param {LinkedRepresentation} document
  * @param {*[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {function(syncResult:SyncResult<Representation>):Promise.<void>} callback function to be attached onto a Promise.then
  * @private
  */
@@ -355,7 +355,7 @@ function syncResources(resource, document, strategies = [], options = {}) {
  * @param {LinkedRepresentation} resource
  * @param {*} resourceDocument
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the resource {@link LinkedRepresentation}
  */
 export function getResource(resource, resourceDocument, strategies = [], options = {}) {
@@ -400,7 +400,7 @@ export function getResource(resource, resourceDocument, strategies = [], options
  * @param {string|RegExp|string[]|RegExp[]} singletonRel
  * @param {*} parentDocument
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the parent {@link LinkedRepresentation}
  */
 export function getSingleton(parentResource, singletonName, singletonRel, parentDocument, strategies = [], options = {}) {
@@ -449,7 +449,7 @@ export function getSingleton(parentResource, singletonName, singletonRel, parent
  * @param {LinkedRepresentation} parentResource
  * @param {*} resourceDocument
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the resource {@link LinkedRepresentation}
  */
 export function getResourceInCollection(parentResource, resourceDocument, strategies = [], options = {}) {
@@ -488,7 +488,7 @@ export function getResourceInCollection(parentResource, resourceDocument, strate
  * @param {string|RegExp|string[]|RegExp[]} collectionRel
  * @param {*} resourceDocument
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the resource {@link LinkedRepresentation}
  */
 export function getResourceInNamedCollection(parentResource, collectionName, collectionRel, resourceDocument, strategies = [], options = {}) {
@@ -528,7 +528,7 @@ export function getResourceInNamedCollection(parentResource, collectionName, col
  * @param {string|RegExp|string[]|RegExp[]} collectionRel
  * @param {*} collectionDocument
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the collection {@link CollectionRepresentation}
  */
 export function getCollectionInNamedCollection(parentResource, collectionName, collectionRel, collectionDocument, strategies = [], options = {}) {
@@ -588,7 +588,7 @@ export function getCollectionInNamedCollection(parentResource, collectionName, c
  * @param {string|RegExp|string[]|RegExp[]} collectionRel
  * @param {*} parentDocument
  * @param {StrategyType[]} strategies
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the collection {@link CollectionRepresentation}
  */
 export function getNamedCollectionInNamedCollection(parentResource, collectionName, collectionRel, parentDocument, strategies = [], options) {

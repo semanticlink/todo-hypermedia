@@ -58,7 +58,7 @@ function defaultUriListResolver(uriListOrResource) {
  *
  * @param {CollectionRepresentation} collection
  * @param {string[]} documentUriList
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise.Array.<SyncInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} syncInfos
  * @private
  */
@@ -197,7 +197,7 @@ function synchroniseUriList(collection, documentUriList, options = {}) {
  * @param {string} uriListName
  * @param {string|RegExp|string[]|RegExp[]} uriListRel
  * @param {UriList} uriList
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
  */
 export function getUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {
@@ -232,7 +232,7 @@ export function getUriListOnNamedCollection(parentResource, uriListName, uriList
  * @param {string} uriListName
  * @param {string|RegExp|string[]|RegExp[]} uriListRel
  * @param {UriList} uriList
- * @param {UtilOptions} options
+ * @param {CacheOptions} options
  * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
  */
 export function patchUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {

@@ -9,7 +9,7 @@ import {FieldType} from 'semantic-link-cache/interfaces';
  * Get the first level of todos (regardless of tenants)
  *
  * @param {ApiRepresentation} apiResource
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<TodoCollectionRepresentation>} sparsely populated
  */
 export const getTodoList = (apiResource, options) => {
@@ -23,7 +23,7 @@ export const getTodoList = (apiResource, options) => {
 /**
  * Get the todos on the todo list
  * @param {TodoCollectionRepresentation} todoCollection
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<TodoCollectionRepresentation>}
  */
 export const getTodos = (todoCollection, options) => {
@@ -38,7 +38,7 @@ export const getTodos = (todoCollection, options) => {
  * Context: (user)-[todos...]
  * Looks for: -[todos...]+->[tags...]
  * @param {TenantCollectionRepresentation} userTenantsCollection
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise}
  */
 export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) => {
@@ -55,7 +55,7 @@ export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) =>
  *
  * @param {ApiRepresentation} apiResource
  * @param {string} todoUri
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<CollectionRepresentation>}
  */
 export const getTodoListByUri = (apiResource, todoUri, options) => {
@@ -72,7 +72,7 @@ export const getTodoListByUri = (apiResource, todoUri, options) => {
  *
  * @param {ApiRepresentation} apiResource
  * @param {string} todoUri
- * @param {UtilOptions?} options
+ * @param {CacheOptions?} options
  * @returns {Promise<LinkedRepresentation>}
  */
 export const getNamedListByUri = (apiResource, todoUri, options) => {
