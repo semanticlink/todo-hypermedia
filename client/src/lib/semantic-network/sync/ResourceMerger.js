@@ -3,6 +3,7 @@ import * as SparseResource from '../cache/sparseResource';
 import * as link from 'semantic-link';
 import {FieldType} from '../interfaces';
 import {log} from 'logger';
+import {defaultResolver} from 'semantic-network/sync/syncResolver';
 
 /**
  * Processes difference sets (created, update, delete) for between two client-side collections {@Link CollectionRepresentation}
@@ -310,7 +311,7 @@ export default class ResourceMerger {
      * @private
      */
     mergeLinksAndFields(document, formResource, options) {
-        options.resolver = options.resolver || {resolve: url => url};
+        options.resolver = options.resolver || defaultResolver;
         options.resourceResolver = options.resourceResolver || (() => () => Promise.resolve(undefined));
 
         // preparation: get all the fields to return back to the API
