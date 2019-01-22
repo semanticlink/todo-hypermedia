@@ -1,4 +1,4 @@
-import {_} from '../semantic-link-cache/index';
+import {_} from '../semantic-network/index';
 import {log} from 'logger';
 
 /**

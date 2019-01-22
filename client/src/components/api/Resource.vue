@@ -79,7 +79,7 @@
     import bTab from 'bootstrap-vue/es/components/tabs/tab';
     import bTooltip from 'bootstrap-vue/es/components/tooltip/tooltip';
     import {log} from 'logger';
-    import {loader} from 'semantic-link-cache';
+    import {loader} from 'semantic-network';
 
     import FormDragDrop from './FormDragDrop.vue';
 

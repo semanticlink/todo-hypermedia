@@ -1,9 +1,9 @@
-import {get} from 'semantic-link-cache';
+import {get} from 'semantic-network';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import {findResourceInCollectionByUri} from 'semantic-link-cache/mixins/collection';
-import {mapWaitAll} from 'semantic-link-cache/mixins/asyncCollection';
-import {FieldType} from 'semantic-link-cache/interfaces';
+import {findResourceInCollectionByUri} from 'semantic-network/mixins/collection';
+import {mapWaitAll} from 'semantic-network/mixins/asyncCollection';
+import {FieldType} from 'semantic-network/interfaces';
 
 /**
  * Get the first level of todos (regardless of tenants)

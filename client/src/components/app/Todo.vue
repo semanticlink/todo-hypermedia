@@ -62,7 +62,7 @@
 
 <script>
 
-    import {_, cache, query} from 'semantic-link-cache';
+    import {_, cache, query} from 'semantic-network';
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';

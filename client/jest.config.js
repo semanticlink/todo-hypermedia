@@ -80,7 +80,7 @@ module.exports = {
     // A map from regular expressions to module names that allow to stub out resources with a single module
     // moduleNameMapper: {},
     moduleNameMapper: {
-        'semantic-link-cache(.*)$': '<rootDir>/src/lib/semantic-link-cache$1',
+        'semantic-network(.*)$': '<rootDir>/src/lib/semantic-network$1',
         'semantic-link-utils(.*)$': '<rootDir>/src/lib/semantic-link-utils$1',
         '^domain(.*)$': '<rootDir>/src/domain$1',
         '^logger$': '<rootDir>/node_modules/semantic-link/lib/logger',

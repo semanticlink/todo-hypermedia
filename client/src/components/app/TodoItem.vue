@@ -51,7 +51,7 @@
      *
      */
 
-    import {query} from 'semantic-link-cache';
+    import {query} from 'semantic-network';
     import * as link from 'semantic-link';
     import {log} from 'logger';
     import {mapCompletedToState, mapStateToCompleted} from "../../domain/form-type-mappings";

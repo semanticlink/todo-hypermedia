@@ -3,7 +3,7 @@ import * as syncRepresentation from './syncLinkedRepresentation';
 import * as syncUriList from './syncUriList';
 import {sync} from './sync';
 import sinon from 'sinon';
-import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
+import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from 'semantic-network/cache/sparseResource';
 
 global.Element = () => {
 };

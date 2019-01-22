@@ -1,5 +1,5 @@
 import {log} from 'logger';
-import {FieldType} from 'semantic-link-cache/interfaces';
+import {FieldType} from 'semantic-network/interfaces';
 
 /**
  * Maps the representation types to the known types that can be rendered (input not select at this stage)

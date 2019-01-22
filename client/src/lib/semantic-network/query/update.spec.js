@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {update} from './update';
 import sinon from 'sinon';
-import * as cache from 'src/lib/semantic-link-cache/cache/cache';
-import {makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
+import * as cache from '../cache/cache';
+import {makeSparseResourceFromUri} from 'semantic-network/cache/sparseResource';
 
 global.Element = () => {
 };

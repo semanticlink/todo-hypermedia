@@ -1,13 +1,13 @@
 import {expect} from 'chai';
 import {get} from './get';
 import sinon from 'sinon';
-import * as cache from 'src/lib/semantic-link-cache/cache/cache';
+import * as cache from '../cache/cache';
 // make sure that you stub the js implementation and not the type declaration
 import * as http from 'semantic-link/lib/http';
 import {
     makeSparseCollectionResourceFromUri,
     makeSparseResourceFromUri
-} from 'semantic-link-cache/cache/sparseResource';
+} from 'semantic-network/cache/sparseResource';
 
 global.Element = () => {
 };

@@ -4,7 +4,7 @@ import {log} from 'logger';
 import * as cache from '../cache/cache';
 import Differencer from './Differencer';
 import {defaultResolver} from './syncResolver';
-import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
+import {findResourceInCollection} from '../mixins/collection';
 
 /**
  * Default resource finder assumes that resources are in a collection via the 'items' attribute/array.

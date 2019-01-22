@@ -1,6 +1,6 @@
 import _ from 'underscore';
-import State from 'semantic-link-cache/cache/State';
-import StateEnum from 'semantic-link-cache/cache/StateEnum';
+import State from 'semantic-network/cache/State';
+import StateEnum from 'semantic-network/cache/StateEnum';
 import * as link from 'semantic-link/lib/index';
 
 

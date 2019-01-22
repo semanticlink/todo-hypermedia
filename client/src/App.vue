@@ -17,7 +17,7 @@
     import Spinner from './components/Spinner.vue';
     import Offline from './components/Offline.vue';
     import Login from './components/authentication/Login.vue';
-    import {query} from 'semantic-link-cache';
+    import {query} from 'semantic-network';
     import {routeName, clientPath} from "router";
     import {apiUri} from 'semantic-link-utils/UriMapping';
 

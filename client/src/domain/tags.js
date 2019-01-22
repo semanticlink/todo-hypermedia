@@ -1,6 +1,6 @@
-import {PooledCollection} from 'semantic-link-cache';
+import {PooledCollection} from 'semantic-network';
 import {log} from 'logger';
-import {makeSparseResourceFromUri} from 'semantic-link-cache/cache/sparseResource';
+import {makeSparseResourceFromUri} from 'semantic-network/cache/sparseResource';
 
 
 /**
