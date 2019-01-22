@@ -68,7 +68,7 @@ export default class ResourceMerger {
 
                 const resolveFieldToFieldByType = (textUriOrResource, formItem, options) => {
 
-                    if (formItem.type === FieldType.text
+                    if (formItem.type === FieldType.Text
                         || formItem.type === FieldType.Date
                         || formItem.type === FieldType.DateTime
                         || formItem.type === FieldType.Email
