@@ -95,12 +95,6 @@ export interface UriResolver {
     remove: (key: Uri) => void
 }
 
-
-/**
- * Messages of a string format that are propagated up to the user when syncing networks of data
- */
-export type UserMessage = string;
-
 /**
  * A resolver on {@link UriList}
  */
@@ -141,13 +135,6 @@ export interface SyncOptions {
     readonly contributeonly?: boolean
 
     /**
-     * General
-     */
-    readonly message?: UserMessage
-    readonly error?: UserMessage
-    readonly success?: UserMessage
-
-    /**
      * Change the strategy to locate a resource in a collection when syncing eg the resource in the collection
      * will be searched by only on link relation (default: canonical|self)
      *
@@ -155,6 +142,11 @@ export interface SyncOptions {
      */
     readonly findResourceInCollectionStrategy?: <T extends Representation>(collection: CollectionRepresentation, document: T) => T
 
+    /**
+     *
+     *
+     * @see defaultUriListResolver
+     */
     readonly uriListResolver?: UriListResolver
 }
 

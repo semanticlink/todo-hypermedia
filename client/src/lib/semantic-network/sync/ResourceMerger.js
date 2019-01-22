@@ -1,6 +1,7 @@
 import _ from '../mixins';
 import * as SparseResource from '../cache/sparseResource';
 import * as link from 'semantic-link';
+import {FieldType} from '../interfaces';
 import {log} from 'logger';
 
 /**
@@ -67,11 +68,10 @@ export default class ResourceMerger {
 
                 const resolveFieldToFieldByType = (textUriOrResource, formItem, options) => {
 
-                    if (formItem.type === 'http://types/text'
-                        || formItem.type === 'http://types/date'
-                        || formItem.type === 'http://types/date/time'
-                        || formItem.type === 'http://types/text/email'
-                        || formItem.type === 'http://types/datetime'
+                    if (formItem.type === FieldType.text
+                        || formItem.type === FieldType.Date
+                        || formItem.type === FieldType.DateTime
+                        || formItem.type === FieldType.Email
                     ) {
                         if (formItem.multiple) {
                             return _(textUriOrResource).mapWaitAll(text => Promise.resolve(text));
@@ -79,7 +79,7 @@ export default class ResourceMerger {
                             return Promise.resolve(textUriOrResource);
                         }
 
-                    } else if (formItem.type === 'http://types/select') {
+                    } else if (formItem.type === FieldType.Select) {
 
                         /**
                          * When returning https://types/select, you can return:
@@ -149,7 +149,7 @@ export default class ResourceMerger {
                          * note: groups have a items (but unlike http://types/select) it is dealt with as part
                          *       of the recursion structure of a form item
                          */
-                    } else if (formItem.type === 'http://types/group') {
+                    } else if (formItem.type === FieldType.Group) {
 
                         if (formItem.multiple) {
                             // multiple is an array of group structures
@@ -208,7 +208,7 @@ export default class ResourceMerger {
             return doc;
         }
 
-        if (formItem.type === 'http://types/select') {
+        if (formItem.type === FieldType.Select) {
 
             if (formItem.multiple) {
                 doc[field] = doc[field] || [];
@@ -218,7 +218,7 @@ export default class ResourceMerger {
                 doc[field] = options.resolver.resolve(href, formItem);
             }
 
-        } else if (formItem.type === 'http://types/collection') {
+        } else if (formItem.type === FieldType.Collection) {
             // this should return back an array
             doc[field] = doc[field] || [];
             doc[field].push(options.resolver.resolve(href, formItem));
@@ -229,7 +229,7 @@ export default class ResourceMerger {
             //     resource[field] = resource[field] || [];
             //     resource[field].push(resolver.resolver.resolve(aLink.href, formItem));
             //
-        } else if (formItem.type === 'http://types/text') {
+        } else if (formItem.type === FieldType.Text) {
             log.warn(`Unexpected form type on link relation: ${rel}`);
             doc[field] = href;
         } else {

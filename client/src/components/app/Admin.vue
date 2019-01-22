@@ -133,7 +133,7 @@
 
                 // Ensure the survey name and code are 'unique' (To Be Deleted)
                 tenantDocument.name = `${tenantDocument.name || 'New tenant'} (${Date.now() % 1000000})`;
-                tenantDocument.code = `${Date.now() % 1000000}.${tenantDocument.code }`;
+                tenantDocument.code = `${Date.now() % 1000000}.${tenantDocument.code}`;
                 if ('links' in tenantDocument) {
                     delete tenantDocument.links;
                 }

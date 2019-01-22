@@ -11,6 +11,7 @@ import {defaultResolver} from './syncResolver';
 import {toUriListMimeTypeFormat} from '../mixins/uri-list';
 
 /**
+ * @type {UriListResolver}
  * Returns a array of uris from either uris or resources. Basically, this downgrades to uris from source representations.
  *
  * The default strategy is to look for 'self' link relation if it is a linked representation
@@ -29,10 +30,11 @@ import {toUriListMimeTypeFormat} from '../mixins/uri-list';
  *
  *  getUriListOnNamedCollection(userResource, 'notifications', /notifications/, notificationUriList, options)
  *
- * @param {CollectionRepresentation|LinkedRepresentation|string[]} uriListOrResource
- * @return {string[]}
+ * @param {Representation|CollectionRepresentation} uriListOrResource
+ * @return {UriList}
+ * @private
  */
-function defaultUriListResolver(uriListOrResource) {
+export function defaultUriListResolver(uriListOrResource) {
 
     if (uriListOrResource.items) {
 
@@ -57,9 +59,9 @@ function defaultUriListResolver(uriListOrResource) {
 /**
  *
  * @param {CollectionRepresentation} collection
- * @param {string[]} documentUriList
+ * @param {UriList} documentUriList
  * @param {CacheOptions} options
- * @return {Promise.Array.<SyncInfo[], Array.<LinkedRepresentation[], LinkedRepresentation[]>, Array.<LinkedRepresentation[], LinkedRepresentation[]>, LinkedRepresentation[]>} syncInfos
+ * @return {SyncInfoResult}
  * @private
  */
 function synchroniseUriList(collection, documentUriList, options = {}) {
@@ -195,10 +197,10 @@ function synchroniseUriList(collection, documentUriList, options = {}) {
  *
  * @param {LinkedRepresentation} parentResource
  * @param {string} uriListName
- * @param {string|RegExp|string[]|RegExp[]} uriListRel
+ * @param {RelationshipType} uriListRel
  * @param {UriList} uriList
  * @param {CacheOptions} options
- * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
+ * @return {Promise.<CollectionRepresentation>} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
  */
 export function getUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {
 
@@ -230,10 +232,10 @@ export function getUriListOnNamedCollection(parentResource, uriListName, uriList
  *
  * @param {LinkedRepresentation} parentResource
  * @param {string} uriListName
- * @param {string|RegExp|string[]|RegExp[]} uriListRel
+ * @param {RelationshipType} uriListRel
  * @param {UriList} uriList
  * @param {CacheOptions} options
- * @return {Promise} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
+ * @return {Promise.<CollectionRepresentation>} containing the collection resource and items {@link LinkedRepresentation} but not resolved uri-list items
  */
 export function patchUriListOnNamedCollection(parentResource, uriListName, uriListRel, uriList, options = {}) {
 

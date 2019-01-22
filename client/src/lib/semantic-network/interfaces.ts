@@ -30,6 +30,7 @@ export type Representation = (LinkedRepresentation | CollectionRepresentation | 
  *      - Regardless of input type, the value is always returned as a string representation.
  */
 export enum FieldType {
+    // html field types
     Text = 'http://types/text',
     Password = 'http://types/text/password',
     Email = 'http://types/text/email',
@@ -37,6 +38,9 @@ export enum FieldType {
     Date = 'http://types/text/date',
     DateTime = 'http://types/text/datetime',
     Select = 'http://types/text/select',
+    // Non-html field types
+    Collection = 'http://types/collection',
+    Group = 'http://types/group',
 }
 
 /**
@@ -47,13 +51,15 @@ export enum FieldType {
  * Note: these are hard coded in {@link ResourceMerger} and have avoided enums because of the mix of typescript and javascript
  */
 export type FormType =
-    FieldType.Text |
-    FieldType.Password |
-    FieldType.Email |
-    FieldType.Checkbox |
-    FieldType.Date |
-    FieldType.DateTime |
-    FieldType.Select
+    FieldType.Text
+    | FieldType.Password
+    | FieldType.Email
+    | FieldType.Checkbox
+    | FieldType.Date
+    | FieldType.DateTime
+    | FieldType.Select
+    | FieldType.Collection
+    | FieldType.Group
 
 export interface FormItem {
     readonly type: FormType | string;
