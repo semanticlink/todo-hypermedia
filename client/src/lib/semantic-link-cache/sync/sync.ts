@@ -1,4 +1,3 @@
-import {Representation} from "../query/interfaces";
 import {NamedResourceSync, ResourceSync, SyncOptions} from "./interfaces";
 import {
     getResource,
@@ -10,7 +9,7 @@ import {
 import {instanceOfCollection} from "../query/utils";
 import {relTypeToCamel} from "../mixins/linkRel";
 import {getUriListOnNamedCollection} from "./syncUriList";
-import {UriList} from "../interfaces";
+import {UriList, Representation} from "../interfaces";
 import {log} from "../index";
 
 

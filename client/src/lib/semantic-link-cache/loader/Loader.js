@@ -5,13 +5,6 @@ import {log} from 'logger';
 const CancelToken = axios.CancelToken;
 const source = CancelToken.source();
 
-/**
- * @class LoaderOptions
- * @extends {module:bottleneck.ConstructorOptions}
- * @properties {number} maxConcurrent=5
- * @properties {number} minTime=0
- * @properties {number} highWater=-1
- */
 
 /**
  * Loading service to allow for rate limiting and prioritising concurrent requests and
@@ -62,7 +55,7 @@ export default class Loader {
     }
 
     /**
-     * @returns {module:bottleneck.ConstructorOptions}
+     * @returns {LoaderOptions}
      */
     static get defaultOptions() {
         return {

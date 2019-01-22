@@ -5,7 +5,7 @@ import StateEnum from './StateEnum';
 import * as SparseResource from './sparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
-import {loader} from '../Loader';
+import {loader} from '../loader/Loader';
 import {findResourceInCollection} from '../mixins/collection';
 
 const stateFlagName = Symbol('state');
@@ -70,12 +70,12 @@ export default class State {
      * object onto the resource using the object literal notation
      *
      * @param {StateEnum=} state
-     * @return {{Symbol(state): State}}
+     * @return {{[state]: State}}
      */
     static make(state) {
-        const obj = {};
-        obj[stateFlagName] = new State(state);
-        return obj;
+        return {
+            [stateFlagName]: new State(state)
+        };
     }
 
     /**
@@ -388,8 +388,7 @@ export default class State {
 
         if (_(uriOrLinkRelation).isString() || !uriOrLinkRelation) {
             return SparseResource.makeCollectionFromUri(uriOrLinkRelation, options, defaultValues);
-        }
-        else {
+        } else {
             return SparseResource.makeCollection(options, {}, uriOrLinkRelation);
         }
     }
@@ -813,24 +812,19 @@ export default class State {
             this.status === StateEnum.hydrated ||
             this.status === StateEnum.locationOnly || StateEnum) {
             this.status = StateEnum.deleteInProgress;
-        }
-        else if (this.status === StateEnum.deleteInProgress) {
+        } else if (this.status === StateEnum.deleteInProgress) {
             log.info(`[State] Delete already in progress ${uri}`);
             return Promise.resolve(item);
-        }
-        else if (this.status === StateEnum.virtual) {
+        } else if (this.status === StateEnum.virtual) {
             log.info(`[State] Virtual resources can just be removed ${uri}`);
             return Promise.resolve(item);
-        }
-        else if (StateEnum.deleted) {
+        } else if (StateEnum.deleted) {
             log.info(`[State] Already deleted, please remove from collection ${uri}`);
             return Promise.resolve(item);
-        }
-        else if (StateEnum.forbidden) {
+        } else if (StateEnum.forbidden) {
             log.info(`[State] Forbidden access ${uri}`);
             return Promise.resolve(item);
-        }
-        else {
+        } else {
             log.warn(`Unexpected state on deletion ${uri}`);
         }
 

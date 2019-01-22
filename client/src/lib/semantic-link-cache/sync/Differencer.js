@@ -53,7 +53,7 @@ export default class Differencer {
      * @param {CollectionRepresentation} collectionDocument a document with a collection CollectionRepresentation
      * format that describes the state of the resources.
      *
-     * @param {UtilOptions} options a document with a collection CollectionRepresentation
+     * @param {DifferencerOptions} options a document with a collection CollectionRepresentation
      * format that describes the state of the resources.
      *
      * @return {SyncInfoResult}

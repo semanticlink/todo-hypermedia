@@ -239,26 +239,6 @@ export default class ResourceMerger {
     }
 
     /**
-     * @class CreateMergeOptions
-     * @extends UtilOptions
-     * @property {?string[]} defaultFields
-     */
-
-    /**
-     * @name LinkRelationWithDescriptionItem
-     * @property {{rel:string,href:string}} link
-     * @property {string} description
-     */
-
-    /**
-     * @name FormSelectType
-     * @property {string} type
-     * @property {string} name
-     * @property {string} description
-     * @property {LinkRelationWithDescriptionItem[]} items
-     */
-
-    /**
      *
      * @param resource
      * @param fieldsToReturn
@@ -313,7 +293,7 @@ export default class ResourceMerger {
     fieldsRequiringUpdate(resource, mergedDocument, fields) {
         return _.reject(fields, field => {
             if (_(mergedDocument).has(field)) {
-                // WARNING: This might have problems if the field is a 'multiple'    <<<<<<<<<<<<<<<< ---- todd could you please review
+                // WARNING: This might have problems if the field is a 'multiple'    <<<<<<<<<<<<<<<< ---- please review
                 return resource[field] === mergedDocument[field];
             } else {
                 return true;
@@ -325,7 +305,7 @@ export default class ResourceMerger {
      * Makes the new document with all links and fields resolved.
      * @param document
      * @param formResource
-     * @param {UtilOptions} options
+     * @param {MergeOptions} options
      * @return {Promise.<*>|Promise} containing the document updates to be merged
      * @private
      */
@@ -514,6 +494,7 @@ export default class ResourceMerger {
      *      width: 20
      *    }
      *  }
+     * @type {CreateFormMergeStrategy}
      * @param {*} resource
      * @param {FormRepresentation} formResource
      * @param {CreateMergeOptions=} options
@@ -533,7 +514,7 @@ export default class ResourceMerger {
      * The basic merge is:
      *      1. remove any fields document representation that are not field items in the form
      *      2. merge the document into the client-side representation
-     *
+     * @type {EditFormMergeStrategy}
      * @param {LinkedRepresentation} resource a clean over wire version
      * @param {*} document
      * @param {FormRepresentation} formResource

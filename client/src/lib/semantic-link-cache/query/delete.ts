@@ -1,7 +1,8 @@
-import {QueryOptions, Representation} from "./interfaces";
+import {QueryOptions} from "./interfaces";
 import {instanceOfCollection} from "./utils";
 import {deleteCollectionItem, deleteResource} from "../cache";
 import {instanceOfLinkedRepresentation} from "semantic-link";
+import {Representation} from "../interfaces";
 
 /**
  * Delete a resource: either an item in a collection or a singleton.

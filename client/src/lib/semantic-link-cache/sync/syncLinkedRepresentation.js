@@ -11,7 +11,7 @@ import {findResourceInCollection} from 'semantic-link-cache/mixins/collection';
  * @return {function(CollectionRepresentation=, LinkedRepresentation=): LinkedRepresentation}
  * @private
  */
-const defaultFindResourceInCollectionStrategy = findResourceInCollection;
+export const defaultFindResourceInCollectionStrategy = findResourceInCollection;
 
 /**
  *

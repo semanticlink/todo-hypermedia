@@ -1,6 +1,7 @@
-import {QueryOptions, Representation} from "./interfaces";
+import {QueryOptions} from "./interfaces";
 import {instanceOfCollection} from "./utils";
 import {deleteCollectionItem, deleteResource, updateResource} from "../cache";
+import {Representation} from "../interfaces";
 
 /**
  * Update a resource

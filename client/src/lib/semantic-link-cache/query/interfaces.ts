@@ -1,7 +1,6 @@
-import {CollectionRepresentation, LinkedRepresentation, RelationshipType, Uri} from "semantic-link";
-import {FormRepresentation, UriList} from "../interfaces";
+import {LinkedRepresentation, RelationshipType, Uri} from "semantic-link";
+import {Representation} from "../interfaces";
 
-export type Representation = (CollectionRepresentation | FormRepresentation | UriList | any) & LinkedRepresentation;
 
 /**
  * Options for be able to traverse the semantic network of data

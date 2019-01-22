@@ -1,5 +1,4 @@
-import {Representation} from "./interfaces";
-import {FormItem, FormRepresentation} from "../interfaces";
+import {FormItem, FormRepresentation, Representation} from "../interfaces";
 import {RelationshipType} from "semantic-link";
 
 /**

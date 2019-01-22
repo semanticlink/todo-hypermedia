@@ -3,7 +3,6 @@
  *
  * TODO: paging is not catered for
  *
- * Note: Jest cannot test typescript enums
  *
  * @class StateEnum
  * @readonly

@@ -1,9 +1,9 @@
 import {get} from 'semantic-link-cache';
 import * as link from 'semantic-link';
-import {TEXT} from './form-type-mappings';
 import {log} from 'logger';
 import {findResourceInCollectionByUri} from 'semantic-link-cache/mixins/collection';
 import {mapWaitAll} from 'semantic-link-cache/mixins/asyncCollection';
+import {FieldType} from 'semantic-link-cache/interfaces';
 
 /**
  * Get the first level of todos (regardless of tenants)
@@ -99,7 +99,7 @@ export const defaultTodo = todoResource => {
 
             if (form && form.items) {
                 [...form.items].forEach(item => {
-                    obj[item.name] = item.type === TEXT ? '' : null;
+                    obj[item.name] = item.type === FieldType.Text ? '' : null;
                 });
             } else {
                 log.warn(`Form has no fields: '${link.getUri(form, /self/)}'`);

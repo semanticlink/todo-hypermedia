@@ -6,7 +6,7 @@ import Differencer from './Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';
 import {uriMappingResolver} from './UriMappingResolver';
-import {loader} from 'semantic-link-cache/Loader';
+import {loader} from 'semantic-link-cache/loader/Loader';
 import {defaultResolver} from './syncResolver';
 import {toUriListMimeTypeFormat} from '../mixins/uri-list';
 

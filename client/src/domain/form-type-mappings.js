@@ -1,10 +1,5 @@
 import {log} from 'logger';
-
-/**
- * Text known input type from the server
- * @type {string}
- */
-const TEXT = 'http://types/text';
+import {FieldType} from 'semantic-link-cache/interfaces';
 
 /**
  * Maps the representation types to the known types that can be rendered (input not select at this stage)
@@ -28,19 +23,19 @@ const TEXT = 'http://types/text';
  */
 const mapApiToUiType = type => {
     switch (type) {
-        case TEXT:
+        case FieldType.Text:
             return 'text';
-        case 'http://types/text/password':
+        case FieldType.Password:
             return 'password';
-        case 'http://types/text/email':
+        case FieldType.Email:
             return 'email';
-        case 'http://types/check':
+        case FieldType.Checkbox:
             return 'check';
-        case 'http://types/date':
+        case FieldType.Date:
             return 'date';
-        case 'http://types/datetime':
+        case FieldType.DateTime:
             return 'datetime';
-        case 'http://types/select':
+        case FieldType.Select:
             return 'select';
         default:
             log.warn(`Form type not found: '${type}'`);
@@ -68,4 +63,4 @@ const mapStateToCompleted = state => {
     return state === 'http://example.com/todo/state/complete';
 };
 
-export {mapApiToUiType, mapCompletedToState, mapStateToCompleted, TEXT};
+export {mapApiToUiType, mapCompletedToState, mapStateToCompleted};

@@ -3,11 +3,6 @@ import State from 'semantic-link-cache/cache/State';
 import StateEnum from 'semantic-link-cache/cache/StateEnum';
 import * as link from 'semantic-link/lib/index';
 
-/**
- * @class SparseResourceOptions
- * @extends UtilOptions
- * @property {{Symbol:State}} stateFactory creates a state object to be added to a resource
- */
 
 /**
  * A set of factory methods to create sparse resources
@@ -31,7 +26,7 @@ export const defaultStateFactory = () => {
 /**
  *
  * @param {StateEnum} state
- * @return {{stateFactory: *}} see {@link SparseResourceOptions}
+ * @return {SparseResourceOptions}
  */
 export const makeSparseResourceOptions = (state) => {
     return {stateFactory: () => State.make(state)};

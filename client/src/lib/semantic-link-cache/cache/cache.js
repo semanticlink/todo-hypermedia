@@ -14,22 +14,13 @@ import {filter} from 'semantic-link/lib/filter';
  */
 
 /**
- * @class CreateFormMergeStrategy
  * @param {LinkedRepresentation} resource
  * @param {FormRepresentation} createForm
  * @param {CreateCollectionResourceItemOptions} options
- * @return {Promise}
+ * @type {CreateFormMergeStrategy}
  */
 const defaultCreateFormStrategy = (resource, createForm, options) =>
     resourceMerger.createMerge(resource, createForm, options);
-
-/**
- * @class CreateCollectionResourceItemOptions
- * @extends {UtilOptions}
- * @property {CreateFormMergeStrategy} createFormCallback
- * @property createForm
- * @property {*} resolver
- */
 
 /**
  * Internal helper returning the resource state. This shifts the context of the network of data the specified resource.
@@ -754,16 +745,6 @@ export function getNamedCollectionItemByUri(resource, collectionName, collection
 }
 
 /**
- * @class UpdateCollectionResourceItemOptions
- * @extends {UtilOptions}
- * @extends {EditMergeOptions}
- * @property {EditFormMergeStrategy} editFormCallback
- * @property {*} resolver
- * @property putStrategy
- */
-
-
-/**
  * Get each item resource in the named child collection resource in the context of collection items. This is a
  * pre-emptive load of the child collection items.
  *
@@ -877,12 +858,7 @@ export function tryGetSingletonOnCollectionItems(collection, childSingletonName,
 }
 
 /**
- * @class EditFormMergeStrategy
- * @param {LinkedRepresentation} resource
- * @param {LinkedRepresentation} documentResource
- * @param {FormRepresentation} editForm
- * @param {UpdateCollectionResourceItemOptions} options
- * @return {Promise}
+ * @type EditFormMergeStrategy
  */
 const defaultEditFormStrategy = (resource, documentResource, editForm, options = {}) => {
 
@@ -974,8 +950,8 @@ export function updateResource(resource, document, options = {}) {
         });
 }
 
-export function tryUpdateResource(resource, documentResource, editFormCallback, options = {}) {
-    return updateResource(resource, documentResource, editFormCallback, options);
+export function tryUpdateResource(resource, documentResource, options = {}) {
+    return updateResource(resource, documentResource, options);
 }
 
 /**
