@@ -1,6 +1,5 @@
 import {getUri} from 'semantic-link';
 import {log} from 'logger';
-import {pooledTagResourceResolver} from 'domain/tags';
 import {get, uriMappingResolver, sync} from 'semantic-network';
 import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
@@ -97,7 +96,6 @@ export const syncTenant = (apiResource, aTenant, options) => {
                 ],
                 options: {
                     ...options,
-                    ...pooledTagResourceResolver(apiResource),
                     resolver: uriMappingResolver
                 }
             });

@@ -111,6 +111,42 @@ export type SyncType<T> = ResourceSync<T> | NamedResourceSync<T>;
  *     |          |   X items         items X  |          |
  *     +----------+   X                     X  +----------+
  *
+ * @code
+ *
+ *  Clone a graph of aTenant todo lists
+ *
+ * Context: (api)-(me)-[tenants]
+ * Access: [todos...]-[todos...]-[tags]
+ * Pool: (api)-[tags]
+ *
+ * ```
+ *   return sync({
+ *      resource: userTenants,
+ *      document: aTenant,
+ *      strategies: [syncResult => sync({
+ *          ...syncResult,
+ *          rel: /todos/,
+ *          strategies: [syncResult => sync({
+ *              ...syncResult,
+ *              rel: /todos/,
+ *              strategies: [({resource, document, options}) => sync(
+ *                  {
+ *                      resource,
+ *                      rel: /tags/,
+ *                      document,
+ *                      options: {...options, batchSize: 1}
+ *                  }),]
+ *          })],
+ *      }),
+ *      ],
+ *      options: {
+ *          ...options,
+ *          ...pooledTagResourceResolver(apiResource),
+ *          resolver: uriMappingResolver
+ *      }
+ *   );
+ * ```
+ *
  * @param syncAction
  */
 export function sync<T extends Representation>(syncAction: SyncType<T>): Promise<T> | never {

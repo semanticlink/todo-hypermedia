@@ -103,7 +103,7 @@ export interface UriListResolver {
 }
 
 export interface ResourceResolver {
-    (resource: any): Representation
+    (resource: string | any): Representation
 }
 
 export interface SyncOptions {

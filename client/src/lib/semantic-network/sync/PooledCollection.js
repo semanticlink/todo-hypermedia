@@ -2,7 +2,9 @@ import {findResourceInCollection, findResourceInCollectionByUri} from '../mixins
 import {log} from 'logger';
 import * as cache from '../cache/cache';
 import * as link from 'semantic-link';
-import {defaultResolver} from './syncResolver';
+import {defaultResolver as resolver} from './syncResolver';
+
+export {defaultResolver} from './syncResolver';
 
 /**
  * Used for provisioning a pooled collection (network of data) based on providing a document (resources). Based on
@@ -17,21 +19,18 @@ import {defaultResolver} from './syncResolver';
  * @example
  *
  * import * as cache from './cache';
- * import PooledCollection from './sync/PooledCollection';
+ * import {getPooledCollection} from './sync/PooledCollection';
  * import {log} from 'logger';
  *
  * export default function (contextResource) {
  *
  *     let resolve = (collectionName, collectionRel, type) =>
- *         (resource, options) => PooledCollection
- *             .getResourceInNamedCollection(contextResource, collectionName, collectionRel, resource, options)
+ *         (resource, options) => getPooledCollection(contextResource, collectionName, collectionRel, resource, options)
  *             .then(document => {
- *                 if (document) {
- *                     return document;
- *                 } else {
- *                     log.error(`TODO: make new pooled resource: ${type} '${resource.name || ''}'`);
- *                     return undefined;
- *                 }
+ *                  if (!document) {
+ *                      log.error(`TODO: make new pooled resource: ${type} '${resource.name || ''}'`);
+ *                  }
+ *                  return document;
  *             });
  *
  *     return {
@@ -54,103 +53,94 @@ import {defaultResolver} from './syncResolver';
  * }
  *
  */
-export default class PooledCollection {
 
-    /**
-     *
-     * @returns {UriResolver}
-     */
-    static get defaultResolver() {
-        return defaultResolver;
+
+/**
+ * Add to the resolver the mapping between the new document uri and the existing nod uri
+ * @param document
+ * @param resource
+ * @param {CacheOptions} options
+ * @return {*}
+ * @private
+ */
+function resolve(document, resource, options) {
+    if (link.matches(document, /self|canonical/)) {
+        (options.resolver || resolver).add(
+            link.getUri(document, /self|canonical/),
+            link.getUri(resource, /self|canonical/));
     }
+    return resource;
+}
 
-    /**
-     * Add to the resolver the mapping between the new document uri and the existing nod uri
-     * @param document
-     * @param resource
-     * @param {CacheOptions} options
-     * @return {*}
-     * @private
-     */
-    static resolve(document, resource, options) {
-        if (link.matches(document, /self|canonical/)) {
-            (options.resolver || PooledCollection.defaultResolver).add(
-                link.getUri(document, /self|canonical/),
-                link.getUri(resource, /self|canonical/));
-        }
-        return resource;
-    }
+/**
+ * Make a resource item inside a collection, add it to the resolver and
+ * @param collectionResource
+ * @param resourceDocument
+ * @param {CacheOptions} options
+ * @return {Promise} containing the created resource
+ * @private
+ */
+function makeAndResolveResource(collectionResource, resourceDocument, options) {
+    return cache
+        .createCollectionItem(collectionResource, resourceDocument, options)
+        .then(createdResource => {
+            log.info(`Pooled: created ${link.getUri(createdResource, /self|canonical/)}`);
+            return resolve(resourceDocument, createdResource, options);
+        });
+}
 
-    /**
-     * Make a resource item inside a collection, add it to the resolver and
-     * @param collectionResource
-     * @param resourceDocument
-     * @param {CacheOptions} options
-     * @return {Promise} containing the created resource
-     * @private
-     */
-    static makeAndResolveResource(collectionResource, resourceDocument, options) {
-        return cache
-            .createCollectionItem(collectionResource, resourceDocument, options)
-            .then(createdResource => {
-                log.info(`Pooled: created ${link.getUri(createdResource, /self|canonical/)}`);
-                return PooledCollection.resolve(resourceDocument, createdResource, options);
-            });
-    }
+/**
+ * Retrieves a resource from a named collection from the context of a given resource.
+ *
+ * @param {LinkedRepresentation} resource
+ * @param {string} collectionName
+ * @param {string|RegExp|string[]|RegExp[]} collectionRel
+ * @param {*} resourceDocument
+ * @param {CacheOptions} options
+ * @return {Promise<string>} containing the uri resource {@link LinkedRepresentation}
+ */
+export function getPooledCollection(resource, collectionName, collectionRel, resourceDocument, options) {
 
-    /**
-     * Retrieves a resource from a named collection from the context of a given resource.
-     *
-     * @param {LinkedRepresentation} resource
-     * @param {string} collectionName
-     * @param {string|RegExp|string[]|RegExp[]} collectionRel
-     * @param {*} resourceDocument
-     * @param {CacheOptions} options
-     * @return {Promise<string>} containing the uri resource {@link LinkedRepresentation}
-     */
-    static getPooledCollection(resource, collectionName, collectionRel, resourceDocument, options) {
+    //options = Object.assign({}, {mappedTitle: 'name'}, options);
 
-        //options = Object.assign({}, {mappedTitle: 'name'}, options);
+    return cache
+        .getNamedCollection(resource, collectionName, collectionRel, options)
+        .then(collectionResource => {
 
-        return cache
-            .getNamedCollection(resource, collectionName, collectionRel, options)
-            .then(collectionResource => {
+            let uri = link.getUri(resource, /self|canonical/);
 
-                let uri = link.getUri(resource, /self|canonical/);
+            // strategy one & two: it is simply found map it based on self and/or mappedTitle
+            let existingResource = findResourceInCollection(collectionResource, resourceDocument, options.mappedTitle);
 
-                // strategy one & two: it is simply found map it based on self and/or mappedTitle
-                let existingResource = findResourceInCollection(collectionResource, resourceDocument, options.mappedTitle);
+            if (existingResource) {
 
-                if (existingResource) {
+                log.info(`Pooled: ${collectionName} on ${uri} - found: ${link.getUri(existingResource, /self|canonical/)}`);
+                return resolve(resourceDocument, existingResource, options);
 
-                    log.info(`Pooled: ${collectionName} on ${uri} - found: ${link.getUri(existingResource, /self|canonical/)}`);
-                    return PooledCollection.resolve(resourceDocument, existingResource, options);
+            } else if (link.getUri(resourceDocument, /self|canonical/)) {
 
-                } else if (link.getUri(resourceDocument, /self|canonical/)) {
+                //strategy three: check to see if self is an actual resource anyway and map it if it is, otherwise make
+                let documentURI = link.getUri(resourceDocument, /self|canonical/);
+                let resolvedUri = (options.resolver || resolver).resolve(documentURI);
 
-                    //strategy three: check to see if self is an actual resource anyway and map it if it is, otherwise make
-                    let documentURI = link.getUri(resourceDocument, /self|canonical/);
-                    let resolvedUri = (options.resolver || PooledCollection.defaultResolver).resolve(documentURI);
-
-                    if (resolvedUri !== documentURI) {
-                        let tryGetResource = findResourceInCollectionByUri(collectionResource, resolvedUri);
-                        if (tryGetResource) {
-                            return tryGetResource;
-                        } else {
-                            log.error(`Resource '${resolvedUri}' is not found on ${uri} - very unexpected`);
-                        }
+                if (resolvedUri !== documentURI) {
+                    let tryGetResource = findResourceInCollectionByUri(collectionResource, resolvedUri);
+                    if (tryGetResource) {
+                        return tryGetResource;
                     } else {
-                        return PooledCollection.makeAndResolveResource(collectionResource, resourceDocument, options);
+                        log.error(`Resource '${resolvedUri}' is not found on ${uri} - very unexpected`);
                     }
-
                 } else {
-                    // strategy four: make if we can because we at least might have the attributes
-                    log.info(`Pooled: ${collectionName} on ${uri} - not found}`);
-                    return PooledCollection.makeAndResolveResource(collectionResource, resourceDocument, options);
+                    return makeAndResolveResource(collectionResource, resourceDocument, options);
                 }
 
-            });
-    }
+            } else {
+                // strategy four: make if we can because we at least might have the attributes
+                log.info(`Pooled: ${collectionName} on ${uri} - not found}`);
+                return makeAndResolveResource(collectionResource, resourceDocument, options);
+            }
 
+        });
 }
+
 

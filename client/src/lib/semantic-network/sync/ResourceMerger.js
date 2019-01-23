@@ -195,8 +195,7 @@ export default class ResourceMerger {
      */
     resolveLinkRelationToFieldByType(doc, formResource, aLink, options) {
 
-        const rel = aLink.rel;
-        const href = aLink.href;
+        const {rel, href} = aLink;
 
         // attributes are camel case, so let's ensure we have the normalised form to be added as a field to resource
         const field = _(rel).dashToCamel();

@@ -1,6 +1,7 @@
-import {PooledCollection} from 'semantic-network';
+import * as PooledCollection from 'semantic-network';
 import {log} from 'logger';
 import {makeSparseResourceFromUri} from 'semantic-network/cache/sparseResource';
+import {getPooledCollection} from 'semantic-network/sync/PooledCollection';
 
 
 /**
@@ -12,49 +13,48 @@ import {makeSparseResourceFromUri} from 'semantic-network/cache/sparseResource';
  *
  *  The 'todos' collection in the userCollection requires a 'tags' collection that lives outside todos
  **
- *      return cache
- *          .getResource(user)
+ *      return get(user)
  *          .then(user =>
- *               sync.getResourceInNamedCollection(
- *                  user,
- *                  'todos',
- *                  /todos/,
- *                  userDocument,
- *                  [],
- *                  {
+ *               sync({
+ *                  resource: user,
+ *                  rel: /todos/,
+ *                  document: userDocument,
+ *                  strategies: [],
+ *                  options: {
  *                      ...options,
  *                      ...pooledTagResourcesResolver(tenant)
  *                  }));
  *
  * @param {LinkedRepresentation} contextResource
- * @return {{resourceFactory: (function(*): LinkedRepresentation), resourceResolver: (function(string):Array<function(*, *)>)}} see {@link CacheOptions.resourceFactory} and {@link CacheOptions.resourceResolver}
+ * @return {CacheOptions}
+ * @see ResourceFactory
+ * @see ResourceResolver
  */
 export function pooledTagResourceResolver(contextResource) {
 
     let resolve = (collectionName, collectionRel, type) =>
-        (resource, options) => PooledCollection
-            .getPooledCollection(contextResource, collectionName, collectionRel, resource, options)
-            .then(document => {
-                if (document) {
+        (resource, options) => {
+            return getPooledCollection(contextResource, collectionName, collectionRel, resource, options)
+                .then(document => {
+                    if (!document) {
+                        log.error(`TODO: make new pooled resource: ${type} '${resource.name || ''}'`);
+                    }
                     return document;
-                } else {
-                    log.error(`TODO: make new pooled resource: ${type} '${resource.name || ''}'`);
-                    return undefined;
-                }
-            });
+                });
+        };
 
     return {
-        resourceFactory: linkRel => makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
-        resourceResolver: (type/*, context */) => {
+        //resourceFactory: linkRel => makeSparseResourceFromUri(linkRel.href, {name: linkRel.title}),
+        resourceResolver: (fieldNameOrLinkRel/*, context */) => {
 
             const rel = {
-                tag: resolve('tags', /tags/, type),
+                tag: resolve('tags', /tags/, fieldNameOrLinkRel),
             };
 
-            if (rel[type]) {
-                return rel[type];
+            if (rel[fieldNameOrLinkRel]) {
+                return rel[fieldNameOrLinkRel];
             } else {
-                log.info(`Unable to resolve pooled resource '${type}', available: [${Object.keys(rel).join(',')}]`);
+                log.info(`Unable to resolve pooled resource '${fieldNameOrLinkRel}', available: [${Object.keys(rel).join(',')}]`);
                 return () => Promise.resolve(undefined);
             }
         }

@@ -2,6 +2,10 @@ import {AcrossTheWire, Cancellable, Link, LinkedRepresentation, RelationshipType
 import {FormRepresentation, Representation, CacheOptions} from "../interfaces";
 import {ResourceResolver, UriResolver} from "../sync/interfaces";
 
+export interface ResourceFactory {
+    (link: Link): Representation
+}
+
 export interface StateOptions {
     /**
      * Override where the resource uses a different attribute for identification (eg 'title').
@@ -13,12 +17,12 @@ export interface StateOptions {
      * @param resource
      * @param rel
      */
-    getUri: <T extends Representation>(resource: T, rel: RelationshipType) => Uri
+    getUri: (resource: Representation, rel: RelationshipType) => Uri
     /**
      * Allows for a specific implementation to override the default semantic link implementation
      * @param link
      */
-    resourceFactory: <T extends Representation>(link: Link) => T
+    resourceFactory: ResourceFactory
 }
 
 export interface LinkOptions {
