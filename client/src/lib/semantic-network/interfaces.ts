@@ -1,5 +1,5 @@
 import {LinkedRepresentation, CollectionRepresentation} from "semantic-link";
-import {SyncOptions, DifferencerOptions} from "./sync/interfaces";
+import {SyncOptions} from "./sync/interfaces";
 import {
     LinkOptions,
     EditMergeOptions,
@@ -83,7 +83,6 @@ export interface FormRepresentation extends LinkedRepresentation {
 export interface CacheOptions extends LinkOptions,
     StateOptions,
     SyncOptions,
-    DifferencerOptions,
     EditMergeOptions,
     CreateMergeOptions,
     SparseResourceOptions,

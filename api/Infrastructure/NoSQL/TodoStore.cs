@@ -196,6 +196,11 @@ namespace Infrastructure.NoSQL
         /// <summary>
         ///     Add tags to the todo. You are not able to add duplicates.
         /// </summary>
+        /// <remarks>
+        ///    This implementation has a known problem. Adding multiple tags at once will result in a error. There
+        ///     is no handling for optimistic locking. This has been left in to demonstrate the need for sequential
+        ///     requests on the client.
+        /// </remarks>
         public async Task AddTag(string id, string tagId, Action<string> add = null)
         {
             await Update(id, todo =>

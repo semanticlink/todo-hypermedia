@@ -53,7 +53,7 @@ export default class Differencer {
      * @param {CollectionRepresentation} collectionDocument a document with a collection CollectionRepresentation
      * format that describes the state of the resources.
      *
-     * @param {DifferencerOptions} options a document with a collection CollectionRepresentation
+     * @param {SyncOptions} options a document with a collection CollectionRepresentation
      * format that describes the state of the resources.
      *
      * @return {SyncInfoResult}
@@ -216,7 +216,7 @@ export default class Differencer {
      *
      * @param {UriList} resourceUriList
      * @param {UriList} documentUriList
-     * @param {CacheOptions} options
+     * @param {SyncOptions} options
      * @return {SyncInfoResult}
      */
     static diffUriList(resourceUriList, documentUriList, options = {}) {

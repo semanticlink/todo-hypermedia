@@ -19,13 +19,13 @@ export const defaultFindResourceInCollectionStrategy = findResourceInCollection;
  * on the change sets required (syncInfos). The calls can be processed either all at once (parallel using a map wait all
  * which is implemented as a Promise.all) or one at a time (sequentially, note there is no partial batching).
  *
- * The approach is set using {@link CacheOptions.childStrategyBatchSize} when non-zero (defined)
+ * The approach is set using {@link CacheOptions.strategyBatchSize} when non-zero (defined)
  *
  * When syncing a tree/graph, each path of resources is sync'd via a set of strategies. The syncInfo is the state action
  * (update, create, delete) on the resource and the strategy is how resources are traversed.
  *
  * @param {StrategyType[]} strategies
- * @param {CacheOptions} options
+ * @param {SyncOptions} options
  * @param {SyncInfo[]} syncInfos
  * @return {Promise.<void>}
  * @private
@@ -33,7 +33,7 @@ export const defaultFindResourceInCollectionStrategy = findResourceInCollection;
 function tailRecursionThroughStrategies(strategies, options, syncInfos) {
     return _(strategies).sequentialWait((unusedMemo, strategy) => {
 
-        if (options.childStrategyBatchSize === 0 || _(options.childStrategyBatchSize).isUndefined()) {
+        if (options.strategyBatchSize === 0 || _(options.strategyBatchSize).isUndefined()) {
             // invoke a parallel strategy when want to go for it
             return _(syncInfos).mapWaitAll(syncInfo => strategy({
                 resource: syncInfo.resource,
@@ -55,7 +55,7 @@ function tailRecursionThroughStrategies(strategies, options, syncInfos) {
 /**
  * Recurse through all the strategies working through change sets.
  * @param {StrategyType[]} strategies
- * @param {CacheOptions} options
+ * @param {SyncOptions} options
  * @return {function(syncInfo:SyncInfo):Promise.<LinkedRepresentation>} containing the representation (@link LinkedRepresentation}
  * @private
  */

@@ -81,12 +81,17 @@ export const syncTenant = (apiResource, aTenant, options) => {
                 strategies: [syncResult => sync({
                     ...syncResult,
                     rel: /todos/,
-                    strategies: [({resource, document, options}) => sync({
-                        resource,
+                    strategies: [syncResult => sync({
+                        ...syncResult,
                         rel: /todos/,
-                        document,
-                        strategies: [syncResult => sync({...syncResult, rel: /tags/}),],
-                        options: {...options, childStrategyBatchSize: 1}
+                        strategies: [({resource, document, options}) => sync(
+                            {
+                                resource,
+                                rel: /tags/,
+                                document,
+                                options: {...options, batchSize: 1}
+                            }),]
+
                     })],
                 }),
                 ],

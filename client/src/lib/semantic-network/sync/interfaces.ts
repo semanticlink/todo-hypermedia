@@ -114,8 +114,21 @@ export interface SyncOptions {
      * When `sync` is moving through its child strategies the requests can be either sequential or parallel. Currently,
      * a non-zero number sets the strategy as sequential. The default value is 'undefined' or 0 to invoke a parallel
      * strategy.
+     *
+     * @see batchSize for controlling batching requests on individual resources
      */
-    readonly childStrategyBatchSize?: number
+    readonly strategyBatchSize?: number
+
+    /**
+     * Set the size of the batches of requests on differencing for the creation and deletion of individual resources.
+     *
+     * When moving through differencing the requests can be either sequential or parallel. Currently,
+     * a non-zero number sets the strategy as sequential. The default value is 'undefined' or 0 to invoke a parallel
+     * strategy.
+     *
+     * @see strategyBatchSize for controlling strategies
+     */
+    readonly batchSize?: number
     /**
      * When set to true, the next check on the resource ensures that it flushes through the stack
      */
@@ -148,6 +161,30 @@ export interface SyncOptions {
      * @see defaultUriListResolver
      */
     readonly uriListResolver?: UriListResolver
+    /**
+     * A function that should create a single resource. It must return a promise with the resource (created on the collection resource)
+     * @param createDataDocument
+     */
+    readonly createStrategy?: <T extends Representation>(createDataDocument: T) => Promise<T>
+    /**
+     * Conditionally update the given resource using the provides document. The implementation can
+     *  choose to not update the resource if its state is equivalent. return a promise with no parameters
+     * @param resource
+     * @param update
+     */
+    readonly updateStrategy?: <T extends Representation>(resource: T, update: T) => Promise<void>
+    /**
+     * Delete a resource
+     * @param resource
+     */
+    readonly deleteStrategy?: <T extends Representation>(resource: T) => Promise<void>
+
+    /**
+     * A set of comparators for matching resources in the network of data (@link Differencer} to compute the identity
+     * of an object based on a transformation
+     */
+    readonly comparators?: Comparator[]
+
 }
 
 /**
@@ -190,42 +227,4 @@ export interface SyncOptions {
  */
 export interface Comparator {
     (lvalue: Representation, rvalue: Representation): boolean;
-}
-
-/**
- * A data structure provided by the {@link diffCollection} method as a return value
- * in the promise.
- */
-export interface DifferencerOptions {
-    /**
-     * Set the size of the batches of requests on differencing.
-     *
-     * When moving through differencing the requests can be either sequential or parallel. Currently,
-     * a non-zero number sets the strategy as sequential. The default value is 'undefined' or 0 to invoke a parallel
-     * strategy.
-     */
-    readonly batchSize?: number
-    /**
-     * A function that should create a single resource. It must return a promise with the resource (created on the collection resource)
-     * @param createDataDocument
-     */
-    readonly createStrategy?: <T extends Representation>(createDataDocument: T) => Promise<T>
-    /**
-     * Conditionally update the given resource using the provides document. The implementation can
-     *  choose to not update the resource if its state is equivalent. return a promise with no parameters
-     * @param resource
-     * @param update
-     */
-    readonly updateStrategy?: <T extends Representation>(resource: T, update: T) => Promise<void>
-    /**
-     * Delete a resource
-     * @param resource
-     */
-    readonly deleteStrategy?: <T extends Representation>(resource: T) => Promise<void>
-
-    /**
-     * A set of comparators for matching resources in the network of data (@link Differencer} to compute the identity
-     * of an object based on a transformation
-     */
-    readonly comparators?: Comparator[]
 }
