@@ -15,7 +15,7 @@
             </drag-and-droppable-model>
         </h1>
         <ul>
-            <li v-for="tenant in tenants.items" v-cloak>
+            <li v-for="tenant in tenantCollection" v-cloak>
                 <span>{{ tenant.name }}</span>
                 <drag-and-droppable-model
                         :model="tenant"
@@ -57,6 +57,7 @@
     import {eventBus} from 'semantic-link-utils/EventBus';
     import {getTenantsOnUser, getUserTenant} from 'domain/tenant';
     import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
+    import {isCollectionEmpty} from 'semantic-network/mixins/collection';
 
 
     export default {
@@ -74,6 +75,11 @@
                 tenants: {},
             };
         },
+        computed: {
+            tenantCollection() {
+                return this.tenants.items ? this.tenants.items : [];
+            }
+        },
         created: function () {
 
             log.info(`Loading tenants for user`);
@@ -88,7 +94,7 @@
 
                 return getTenantsOnUser(apiResource, options)
                     .then(tenants => {
-                        if (tenants && _(tenants.items).isEmpty()) {
+                        if (isCollectionEmpty(tenants)) {
                             this.$notify({
                                 title: "You no longer have any organisation to belong to",
                                 type: 'info'
