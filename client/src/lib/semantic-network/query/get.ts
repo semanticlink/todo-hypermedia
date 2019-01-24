@@ -17,6 +17,7 @@ import {relTypeToCamel} from "../mixins/linkRel";
 import {QueryOptions} from "./interfaces";
 import {instanceOfCollection, instanceOfForm, instanceOfRel} from "./utils";
 import {Representation} from "../interfaces";
+import {RelationshipType} from "semantic-link";
 
 /**
  * Helper part of get for duplicated code that deals with allowing transparently for whether the context
@@ -24,13 +25,15 @@ import {Representation} from "../interfaces";
  *
  * @param context
  * @param resource
+ * @param rel
+ * @param name
  * @param options
  * @private
  */
-function getOnContext<T extends Representation>(context: T, resource: T, options: QueryOptions)
+function getOnContext<T extends Representation>(context: T, resource: T, rel: string | RegExp, name: string, options: QueryOptions)
     : Promise<T> {
 
-    const {rel, name, includeItems, defaultRepresentation, where} = options;
+    const {includeItems, defaultRepresentation, where} = options;
 
     if (instanceOfForm(context)) {
         return getSingleton(resource, name, rel, options);
@@ -82,21 +85,14 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
         options = {};
     }
 
-    // normalise the paramters
+    // shift the parameters
     if (!instanceOfRel(rel)) {
         options = rel || options;
         rel = options.rel;
     }
 
-    // basic guard that allow users to just to pass in the rel either as a string or Regexp that
-    // will get converted to a stringly name that is added the representation. The developer at
-    // anytime can provide both
-    if (rel) {
-        options.name = options.name || relTypeToCamel(rel);
-        options.rel = rel;
-    }
-
-    const {name, where, defaultRepresentation}: QueryOptions = {...options, opts: <QueryOptions>{}};
+    // set the name based on the rel unless there is an override
+    const name = options.name || relTypeToCamel(rel);
 
     // named resources
     if (rel != undefined) {
@@ -108,7 +104,7 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
 
         // T existing
         if (resource[name]) {
-            return getOnContext(resource[name], resource, options);
+            return getOnContext(resource[name], resource, rel, name, options);
         } else {
 
             // T - to fetch
@@ -126,10 +122,12 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
                 })
                 // @ts-ignore
                 .then(response => {
-                    return getOnContext(response.data, resource, options);
+                    return getOnContext(response.data, resource, rel, name, options);
                 });
         }
     }
+
+    const {where, defaultRepresentation}: QueryOptions = {...options, opts: <QueryOptions>{}};
 
     // collection
     if (instanceOfCollection(resource)) {
