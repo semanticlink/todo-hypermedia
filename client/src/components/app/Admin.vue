@@ -119,7 +119,7 @@
                     });
             };
 
-            return loadTenantsWithTodoLists(this.$root.$api, {set: this.$set});
+            return loadTenantsWithTodoLists(this.$root.$api, this.$root.options);
 
         },
         methods: {
@@ -156,7 +156,7 @@
              */
             createOrUpdateTenant(tenantDocument) {
 
-                syncTenant(this.$root.$api, tenantDocument, {set: this.$set})
+                syncTenant(this.$root.$api, tenantDocument, this.$root.options)
                     .then(this.notifySuccess)
                     .catch(this.notifyError);
 

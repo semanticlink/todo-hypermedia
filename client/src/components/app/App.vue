@@ -14,11 +14,11 @@
 </template>
 
 <script>
-    import Spinner from './components/Spinner.vue';
-    import Offline from './components/Offline.vue';
-    import Login from './components/authentication/Login.vue';
+    import Spinner from '../Spinner.vue';
+    import Offline from '../Offline.vue';
+    import Login from '../authentication/Login.vue';
     import {query} from 'semantic-network';
-    import {routeName, clientPath} from "router";
+    import {routeName, clientPath} from "../../router";
     import {apiUri} from 'semantic-link-utils/UriMapping';
 
     export default {

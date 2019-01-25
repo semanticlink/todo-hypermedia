@@ -17,7 +17,7 @@ import VueLocalStorage from 'vue-localstorage';
 import {uriMapping} from 'semantic-link-utils/UriMapping';
 import {filter} from 'semantic-link';
 
-import App from './App.vue';
+import App from './components/app/App.vue';
 
 import {setJwtOnHeaders, setInterceptors} from 'semantic-link-utils/http-interceptors';
 import {setEventBus} from 'semantic-link-utils/EventBus';
@@ -95,6 +95,13 @@ new Vue({
         log.info(`[App] Api uri: '${apiUri}'`);
 
         uriMapping(clientUri, apiUri);
+
+        /**
+         * Setup the global options for the api application cache
+         *
+         * @type {CacheOptions}
+         */
+        this.$root.options = {set: Vue.set};
 
     }
 });
