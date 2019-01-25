@@ -156,7 +156,7 @@
              */
             createOrUpdateTenant(tenantDocument) {
 
-                syncTenant(this.$root.$api, tenantDocument)
+                syncTenant(this.$root.$api, tenantDocument, {set: this.$set})
                     .then(this.notifySuccess)
                     .catch(this.notifyError);
 

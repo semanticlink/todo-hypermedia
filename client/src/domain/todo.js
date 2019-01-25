@@ -94,7 +94,7 @@ export const defaultTodo = todoResource => {
     return get(todoResource)
         .then(todoCollection => get(todoCollection, /create-form/))
         .catch(() => log.error(`No create form for on '${link.getUri(todoResource, /self/)}'`))
-        .then(form => {
+        .then(/** type {FormRepresentation} */form => {
             const obj = {};
 
             if (form && form.items) {

@@ -64,7 +64,7 @@ export const getUserTenant = (tenant, options = {}) =>
  * @param {CacheOptions?} options
  * @returns {Promise<TenantCollectionRepresentation>}
  */
-export const syncTenant = (apiResource, aTenant, options = {}) => {
+export const syncTenant = (apiResource, aTenant, options) => {
 
     if (!aTenant) {
         throw new Error('Tenant is empty');
