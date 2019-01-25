@@ -2,7 +2,7 @@ import {get} from 'semantic-network';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 import {findResourceInCollectionByUri} from 'semantic-network/mixins/collection';
-import {mapWaitAll} from 'semantic-network/mixins/asyncCollection';
+import {sequentialWait} from 'semantic-network/mixins/asyncCollection';
 import {FieldType} from 'semantic-network/interfaces';
 
 /**
@@ -42,9 +42,9 @@ export const getTodos = (todoCollection, options) => {
  * @returns {Promise}
  */
 export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) => {
-    return get(userTenantsCollection, {rel: /todos/, includeItems: true, ...options})
-        .then(todosCollection => mapWaitAll(todosCollection, item =>
-            get(item, {rel: /tags/, includeItems: true, ...options})));
+    return get(userTenantsCollection, {rel: /todos/, includeItems: true, batchSize: 1, ...options})
+        .then(todosCollection =>
+            sequentialWait(todosCollection, (_, item) => get(item, {rel: /tags/, includeItems: true, ...options})));
 };
 
 /**

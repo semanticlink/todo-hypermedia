@@ -32,7 +32,7 @@
                     </b-button>
                 </drag-and-droppable-model>
 
-                <ul>
+                <ul v-if="tenant && tenant.todos">
                     <li v-for="todo in tenant.todos.items" v-cloak>
                         <b-link @click="gotoTodo(todo)">{{ todo.name }}</b-link>
                     </li>
@@ -57,7 +57,7 @@
     import {eventBus} from 'semantic-link-utils/EventBus';
     import {getTenantsOnUser, getUserTenant} from 'domain/tenant';
     import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
-    import {isCollectionEmpty} from 'semantic-network/mixins/collection';
+    import {isCollectionEmpty, normalise} from 'semantic-network/mixins/collection';
 
 
     export default {
@@ -94,6 +94,7 @@
 
                 return getTenantsOnUser(apiResource, options)
                     .then(tenants => {
+
                         if (isCollectionEmpty(tenants)) {
                             this.$notify({
                                 title: "You no longer have any organisation to belong to",
@@ -102,12 +103,13 @@
                             log.info('No tenants found');
                         }
 
-                        // this is not a lazy-loading UI design (large sets will appear after time)
-                        return getTodosWithTagsOnTenantTodos(tenants, options)
-                        // lazy loading would require explicit setting inside the tenants
-                            .then(() => this.$set(this, 'tenants', tenants)/*this.tenants = tenants*/)
+                        // need to bind the api into the vm data so that
+                        // UI renders with the tree
+                        this.tenants = tenants;
 
+                        return tenants;
                     })
+                    .then(tenants => getTodosWithTagsOnTenantTodos(tenants, options))
                     .catch(err => {
                         this.$notify({
                             text: err,
@@ -117,7 +119,7 @@
                     });
             };
 
-            return loadTenantsWithTodoLists(this.$root.$api);
+            return loadTenantsWithTodoLists(this.$root.$api, {set: this.$set});
 
         },
         methods: {

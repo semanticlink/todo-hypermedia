@@ -296,20 +296,12 @@ export function tryGetSingleton(resource, singletonName, rel, defaultValue, opti
  *
  */
 export function getNamedCollection(resource, collectionName, collectionRel, options) {
-    if (resource[collectionName]) {
-        return getCollection(resource[collectionName], options);
-    } else {
-        return getResource(resource)
+    return resource[collectionName]
+        ? getCollection(resource[collectionName], options)
+        : getResource(resource)
             .then((resource) => getResourceState(resource)
                 .makeCollectionResource(resource, collectionName, collectionRel, options))
-            .then((collection) => {
-                if (collection) {
-                    return getCollection(collection, options);
-                } else {
-                    return collection;
-                }
-            });
-    }
+            .then((collection) => getCollection(collection, options));
 }
 
 /**
@@ -339,7 +331,7 @@ export function getNamedCollection(resource, collectionName, collectionRel, opti
  */
 export function tryGetNamedCollection(resource, collectionName, collectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
-    options = {...options, getUri: link.getUri};
+    options = {...{}, ...options, getUri: link.getUri};
     return getNamedCollection(resource, collectionName, collectionRel, options);
 }
 
@@ -781,10 +773,15 @@ export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection
 
     // TODO ?? should this return the child collection items ??
     return _(contextCollection)
-        .mapWaitAll(item => getNamedCollection(item, childCollectionName, childCollectionRel, options)
-            .then(childCollection => tryGetCollectionItems(childCollection, options))
+        .mapWaitAll(
+            item => {
+                return getNamedCollection(item, childCollectionName, childCollectionRel, options)
+                    .then(childCollection => {
+                        return tryGetCollectionItems(childCollection, options);
+                    });
+            }
         )
-        .then(collection => collection);
+    // .then(collection => collection);
 }
 
 /**

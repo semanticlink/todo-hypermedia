@@ -73,6 +73,10 @@ export interface FormRepresentation extends LinkedRepresentation {
     items: FormItem[]
 }
 
+export interface BindOptions {
+    set<T>(object: object, key: string, value: T): T;
+}
+
 /**
  * The options that get propagated through the system to alter behaviour.
  *
@@ -89,4 +93,9 @@ export interface CacheOptions extends LinkOptions,
     CreateCollectionResourceItemOptions,
     UpdateCollectionResourceItemOptions,
     QueryOptions {
+
+    /**
+     * Option to inject the reactive setter for the framework.
+     */
+    set?: BindOptions | undefined
 }

@@ -218,9 +218,10 @@ export default class State {
      * @param {LinkedRepresentation} resource
      * @param {string} resourceName
      * @param {Function} linkedRepresentationFactory
+     * @param {CacheOptions=} options
      * @return {LinkedRepresentation} newly created resource
      */
-    addResourceByName(resource, resourceName, linkedRepresentationFactory) {
+    addResourceByName(resource, resourceName, linkedRepresentationFactory, options = {}) {
 
         if (this.resourceExists(resourceName) && resource[resourceName]) {
             return resource[resourceName];
@@ -228,7 +229,12 @@ export default class State {
 
         if (!this.resourceExists(resourceName) && !resource[resourceName]) {
             this.resources.push(resourceName);
-            resource[resourceName] = linkedRepresentationFactory() || State.makeLinkedRepresentationWithState();
+            const representation = linkedRepresentationFactory() || State.makeLinkedRepresentationWithState();
+            if (options.set) {
+                options.set(resource, resourceName, representation);
+            } else {
+                resource[resourceName] = representation;
+            }
             return resource[resourceName];
         }
 
@@ -246,14 +252,20 @@ export default class State {
      * @param {Function} linkedRepresentationFactory
      * @return {CollectionRepresentation} newly created resource
      */
-    addCollectionResourceByName(resource, collectionResourceName, linkedRepresentationFactory) {
+    addCollectionResourceByName(resource, collectionResourceName, linkedRepresentationFactory, options = {}) {
         if (this.collectionExists(collectionResourceName) && resource[collectionResourceName]) {
             return resource[collectionResourceName];
         }
 
         if (!this.collectionExists(collectionResourceName) && !resource[collectionResourceName]) {
             this.collection.push(collectionResourceName);
-            resource[collectionResourceName] = linkedRepresentationFactory() || State.makeCollection();
+
+            const representation = linkedRepresentationFactory() || State.makeCollection();
+            if (options.set) {
+                options.set(resource, collectionResourceName, representation);
+            } else {
+                resource[collectionResourceName] = representation;
+            }
             return resource[collectionResourceName];
         }
 
@@ -280,6 +292,7 @@ export default class State {
 
         // only add to the collection if it doesn't already exist
         if (!findResourceInCollection(collection, representation)) {
+            // push causes no problems for reactive bindings
             collection.items.push(representation);
         } else {
             log.info(`Resource ${link.getUri(representation, /self/)} already exists in collection ${link.getUri(collection, /self/)}`);
@@ -300,24 +313,31 @@ export default class State {
         const indexOfItemToBeRemoved = _(collection.items).findIndex(item => link.getUri(item, /canonical|self/) === resourceUri);
         if (indexOfItemToBeRemoved >= 0) {
             this.status = StateEnum.stale;
+            // splice causes no problems for reactive bindings
             return _(collection.items.splice(indexOfItemToBeRemoved, 1)).first();
         }
         return undefined;
     }
 
     /**
-     * Updates a previous {@link LinkedRepresentation} resource with a new one including updating the {@link State}
+     * Updates a previous {@link LinkedRepresentation} resource with a new one
      *
      * @param {LinkedRepresentation} resource
-     * @param {*} updateValues
-     * @return {*}
-     * TODO: this really needs to be a merge
+     * @param {object|LinkedRepresentation} updateValues
+     * @param {CacheOptions} options
+     * @return {LinkedRepresentation}
      * see {@link ResourceMerger}
      */
-    static mergeResource(resource, updateValues) {
-        // this implementation is naively assuming that there is effectively a one-to-one match
-        // of attributes across the two objects
-        return Object.assign(resource, updateValues);
+    static mergeResource(resource, updateValues, options = {}) {
+        if (options.set) {
+            // iterate through each property so that observer can be registered
+            for (const key in updateValues) {
+                options.set(resource, key, updateValues[key]);
+            }
+            return resource;
+        } else {
+            return Object.assign(resource, updateValues);
+        }
     }
 
     /**
@@ -400,12 +420,13 @@ export default class State {
      * @param {?string} resourceTitleAttributeName an option name for where the title from the feed
      *    item should be mapped to a {@link LinkedRepresentation}
      * @param state
+     * @param options
      * @return {CollectionRepresentation}
      */
-    makeSparseCollectionItemsFromFeed(collection, resourceTitleAttributeName, state) {
+    makeSparseCollectionItemsFromFeed(collection, resourceTitleAttributeName, state = StateEnum.locationOnly, options = {}) {
         this.mappedTitle = resourceTitleAttributeName;
         return SparseResource
-            .makeCollectionItemsFromFeedItems(collection, resourceTitleAttributeName, State.makeSparseResourceOptions(state || StateEnum.locationOnly));
+            .makeCollectionItemsFromFeedItems(collection, resourceTitleAttributeName, State.makeSparseResourceOptions(state || StateEnum.locationOnly), options);
     }
 
     /**
@@ -531,7 +552,7 @@ export default class State {
         if (State.needsFetch(this.status, options)) {
             log.debug(`[State] Fetch resource ${this.status.toString()}: '${link.getUri(resource, rel)}'`);
             return this.loadResource(resource, rel, options)
-                .then(response => State.mergeResource(resource, response));
+                .then(response => State.mergeResource(resource, response, options));
         } else {
             log.debug(`[State] Fetch cached resource ${this.status.toString()}: '${link.getUri(resource, rel)}'`);
             return Promise.resolve(resource);
@@ -554,7 +575,7 @@ export default class State {
             return this.loadResource(collection, rel, options)
                 .then(representation => {
                     //
-                    return State.mergeResource(collection, representation);
+                    return State.mergeResource(collection, representation, options);
                 })
                 .then(collection => {
                     // make into a sparsely populated collection
@@ -568,7 +589,7 @@ export default class State {
                      * Third option, push this functionality back up to the cache to where it probably belongs
                      * and hand through explicitly as a callback factory. See {@links this.addResourceByName} below
                      */
-                    return this.makeSparseCollectionItemsFromFeed(collection, options.mappedTitle);
+                    return this.makeSparseCollectionItemsFromFeed(collection, options.mappedTitle, undefined, options);
                 });
         } else {
             log.debug(`[State] Fetch cached collection ${this.status.toString()}: '${link.getUri(collection, rel)}'`);
@@ -614,8 +635,12 @@ export default class State {
 
             log.debug(`[State] add singleton '${rel}' as ${this.status.toString()} '${uri}' on ${link.getUri(resource, /self|canonical/)}`);
 
-            // add a sparsely populated resource ready to be synchronised
-            resource[singletonName] = this.addResourceByName(resource, singletonName, () => State.makeFromUri(uri));
+            if (options.set) {
+                options.set(resource, singletonName, this.addResourceByName(resource, singletonName, () => State.makeFromUri(uri), options));
+            } else {
+                // add a sparsely populated resource ready to be synchronised
+                resource[singletonName] = this.addResourceByName(resource, singletonName, () => State.makeFromUri(uri), options);
+            }
         }
 
         return Promise.resolve(resource[singletonName]);
@@ -631,7 +656,7 @@ export default class State {
      * @param {CacheOptions=} options
      * @return {Promise} promise contains a {@link CollectionRepresentation}
      */
-    makeCollectionResource(resource, collectionName, rel, options) {
+    makeCollectionResource(resource, collectionName, rel, options = {}) {
         options = options || {};
 
         if (this.resourceExists(collectionName)) {
@@ -649,7 +674,7 @@ export default class State {
             }
 
             // add a sparsely populated resource ready to be synchronised because it has the link relation
-            resource[collectionName] = this.addCollectionResourceByName(resource, collectionName, () => State.makeCollectionFromUri(uri));
+            this.addCollectionResourceByName(resource, collectionName, () => State.makeCollectionFromUri(uri), options);
         }
 
         if (!resource[collectionName]) {
@@ -764,7 +789,7 @@ export default class State {
                 this.status = StateEnum.hydrated;
                 this.retrieved = new Date();
                 this.headers = response.headers;
-                return State.mergeResource(resource, data);
+                return State.mergeResource(resource, data, options);
             })
             .catch(response => {
 

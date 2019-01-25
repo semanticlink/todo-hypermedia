@@ -126,12 +126,16 @@ export const makeResourceFromFeedItem = (feedItem, resourceTitleAttributeName, o
  * @param {CollectionRepresentation} collection
  * @param {string} resourceTitleAttributeName an option name for where the title from the feed
  *    item should be mapped to a {@link LinkedRepresentation}
- * @param {SparseResourceOptions} options
+ * @param {CacheOptions} options
  * @return {CollectionRepresentation}
  */
-export const makeCollectionItemsFromFeedItems = (collection, resourceTitleAttributeName, options) => {
-    collection.items = _(collection.items).map(
-        item => makeResourceFromFeedItem(item, resourceTitleAttributeName, options));
+export const makeCollectionItemsFromFeedItems = (collection, resourceTitleAttributeName, options = {}) => {
+    const items = _(collection.items).map(item => makeResourceFromFeedItem(item, resourceTitleAttributeName, options));
+    if (options.set) {
+        options.set(collection, 'items', items);
+    } else {
+        collection.items = items;
+    }
     return collection;
 };
 
@@ -176,14 +180,12 @@ export const makeSparseCollectionResourceFromUri = (uri, defaultValues, state) =
  * @param {LinkedRepresentation} resource a parent resource container
  * @param {string} collectionResourceName
  * @param {LinkedRepresentation=} defaultValues optional default values for the resource
+ * @param {CacheOptions} options
  * @return {CollectionRepresentation}
  */
-export const makeUnknownCollectionAddedToResource = (resource, collectionResourceName, defaultValues) => {
+export const makeUnknownCollectionAddedToResource = (resource, collectionResourceName, defaultValues, options = {}) => {
     return (resource => State.get(resource))(resource)
-        .addCollectionResourceByName(
-            resource,
-            collectionResourceName,
-            () => makeCollection(makeSparseResourceOptions(StateEnum.unknown), defaultValues));
+        .addCollectionResourceByName(resource, collectionResourceName, () => makeCollection(makeSparseResourceOptions(StateEnum.unknown), defaultValues), options);
 };
 
 /**
@@ -205,14 +207,12 @@ export const makeUnknownResourceAddedToCollection = (collection, defaultValues) 
  *   for the named child resource.
  * @param {string} resourceName the name of the child resource in the container
  * @param {LinkedRepresentation=} defaultValues optional default values for the resource
+ * @param {CacheOptions} options
  * @return {LinkedRepresentation} resource existing as a child
  */
-export const makeUnknownResourceAddedToResource = (resource, resourceName, defaultValues) => {
+export const makeUnknownResourceAddedToResource = (resource, resourceName, defaultValues, options = {}) => {
     return (resource => State.get(resource))(resource)
-        .addResourceByName(
-            resource,
-            resourceName,
-            () => makeLinkedRepresentation(makeSparseResourceOptions(StateEnum.unknown), defaultValues));
+        .addResourceByName(resource, resourceName, () => makeLinkedRepresentation(makeSparseResourceOptions(StateEnum.unknown), defaultValues), options);
 };
 
 
@@ -275,19 +275,17 @@ export const makeCollectionItemsFromFeedAddedToCollection = (collection, feedRep
  * @param {string} collectionUri
  * @param {string[]} itemsUriList
  * @param {StateEnum} state
+ * @param {CacheOptions} options
  * @return {LinkedRepresentation}
  */
-export const makeNamedCollectionFromUriAndResourceFromUriList = (resource, collectionResourceName, collectionUri, itemsUriList, state) => {
+export const makeNamedCollectionFromUriAndResourceFromUriList = (resource, collectionResourceName, collectionUri, itemsUriList, state, options = {}) => {
     let collection = (resource => State.get(resource))(resource)
-        .addCollectionResourceByName(
-            resource,
-            collectionResourceName,
-            () => {
-                if (!collectionUri) {
-                    state = StateEnum.virtual;
-                }
-                return makeCollectionFromUri(collectionUri, makeSparseResourceOptions(state || StateEnum.locationOnly));
-            });
+        .addCollectionResourceByName(resource, collectionResourceName, () => {
+            if (!collectionUri) {
+                state = StateEnum.virtual;
+            }
+            return makeCollectionFromUri(collectionUri, makeSparseResourceOptions(state || StateEnum.locationOnly));
+        }, options);
 
     // only add items not currently loaded
     _(itemsUriList).each(uri => makeCollectionResourceItemByUri(collection, uri));
@@ -326,14 +324,20 @@ export const makeSingletonSparseListFromAttributeUriList = (resource, singletonN
  * @param {LinkedRepresentation} resource
  * @param {string} singletonName
  * @param {string} uri
+ * @param {CacheOptions} options
  * @return {Promise} contains an array of populated resources
  */
-export const makeSingletonSparseFromUri = (resource, singletonName, uri) => {
+export const makeSingletonSparseFromUri = (resource, singletonName, uri, options) => {
     return State.get(resource)
         .then(resource => {
 
             if (!resource[singletonName]) {
-                resource[singletonName] = makeSparseResourceFromUri(uri);
+                if (options.set) {
+                    options.set(resource, singletonName, makeSparseResourceFromUri(uri));
+                } else {
+
+                    resource[singletonName] = makeSparseResourceFromUri(uri);
+                }
             }
 
             return resource[singletonName];

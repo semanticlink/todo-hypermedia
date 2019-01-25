@@ -12,7 +12,7 @@ import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
 
 
 /**
- * Get the tenants that an authenticated user has access to
+ * Get the tenants that an authenticated user has access to (sparsely populated by default)
  *
  * Context: (api)
  * Access: -(me)-[tenants...]
@@ -23,7 +23,8 @@ import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
  */
 export const getTenantsOnUser = (apiResource, options) =>
     get(apiResource, /me/, options)
-        .then(user => get(user, /tenants/, {includeItems: true, ...options}));
+        .then(user => get(user, /tenants/, options));
+
 /**
  * Get the users that exist on a user tenant
  *
@@ -41,7 +42,7 @@ export const getTenantUsers = (userTenantsCollection, options) =>
  * @param {CacheOptions?} options
  * @returns {Promise<TenantRepresentation>}
  */
-export const getUserTenant = (tenant, options) =>
+export const getUserTenant = (tenant, options = {}) =>
     Promise.all([getTodosWithTagsOnTenantTodos(tenant.todos, options), getTenantUsers(tenant, options)])
         .then(() => tenant);
 
@@ -63,7 +64,7 @@ export const getUserTenant = (tenant, options) =>
  * @param {CacheOptions?} options
  * @returns {Promise<TenantCollectionRepresentation>}
  */
-export const syncTenant = (apiResource, aTenant, options) => {
+export const syncTenant = (apiResource, aTenant, options = {}) => {
 
     if (!aTenant) {
         throw new Error('Tenant is empty');
