@@ -246,9 +246,7 @@ export function getSingleton(resource, singletonName, rel, options) {
  */
 export function tryGetSingleton(resource, singletonName, rel, defaultValue, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
-    options = _({}).extend(options, {
-        getUri: link.getUri
-    });
+    options = {...options, getUri: link.getUri};
 
     if (!link.getUri(resource, rel, undefined)) {
         log.debug(`Missing uri for rel '${rel}' - resolving with default value`);
@@ -333,7 +331,7 @@ export function getNamedCollection(resource, collectionName, collectionRel, opti
  */
 export function tryGetNamedCollection(resource, collectionName, collectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
-    options = {...{}, ...options, getUri: link.getUri};
+    options = {...options, getUri: link.getUri};
     return getNamedCollection(resource, collectionName, collectionRel, options);
 }
 
@@ -598,9 +596,7 @@ export function getNamedCollectionAndItemsFromUriList(resource, collectionName, 
  */
 export function tryGetCollectionAndItems(resource, collectionName, collectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
-    options = _({}).extend(options, {
-        getUri: link.getUri
-    });
+    options = {...options, getUri: link.getUri};
 
     return getNamedCollection(resource, collectionName, collectionRel, options)
         .then(collection => {
@@ -765,9 +761,7 @@ export function getNamedCollectionItemByUri(resource, collectionName, collection
  */
 export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection, childCollectionName, childCollectionRel, options = {}) {
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
-    options = _({}).extend(options, {
-        getUri: link.getUri
-    });
+    options = {...options, getUri: link.getUri};
 
     // TODO ?? should this return the child collection items ??
     return mapWaitAll(contextCollection,
@@ -777,8 +771,8 @@ export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection
                     return tryGetCollectionItems(childCollection, options);
                 });
         }
-    )
-    // .then(collection => collection);
+    );
+// .then(collection => collection);
 }
 
 /**
@@ -864,7 +858,7 @@ const defaultEditFormStrategy = (resource, documentResource, editForm, options =
         }
     };
 
-    options = _({}).extend(options, {isTracked});
+    options = {...options, isTracked};
 
     return resourceMerger.editMerge(resource, documentResource, editForm, options)
         .catch(() => {
@@ -903,9 +897,7 @@ export function updateResource(resource, document, options = {}) {
 
 
     /* @type {EditMergeOptions} */
-    options = _({}).extend(options, {
-        undefinedWhenNoUpdateRequired: true
-    });
+    options = {...options, undefinedWhenNoUpdateRequired: true};
 
     if (!document) {
         log.warn(`No document provided to update for resource ${link.getUri(resource, /self/)}`);
