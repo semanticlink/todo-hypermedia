@@ -5,6 +5,8 @@ import * as link from 'semantic-link';
 import {log} from 'logger';
 import State from './State';
 import {filter} from 'semantic-link/lib/filter';
+import {mapWaitAll} from '../mixins/asyncCollection';
+import {findResourceInCollection, findResourceInCollectionByRelOrAttribute} from '../mixins/collection';
 
 /**
  *
@@ -372,10 +374,9 @@ export function tryGetNamedCollection(resource, collectionName, collectionRel, o
  * @return {Promise<LinkedRepresentation[]>} promise contains original singletons
  */
 export function getNamedCollectionOnSingletons(singletons, collectionName, collectionRel, options) {
-    return _(singletons)
-        .mapWaitAll(singleton =>
-            getResource(singleton)
-                .then(resource => tryGetNamedCollection(resource, collectionName, collectionRel, options)))
+    return mapWaitAll(singletons, singleton =>
+        getResource(singleton)
+            .then(resource => tryGetNamedCollection(resource, collectionName, collectionRel, options)))
         .catch(err => {
             log.info('Singleton error:', err);
             return Promise.resolve(singletons);
@@ -424,10 +425,9 @@ export function tryGetNamedCollectionOnSingletons(singletons, collectionName, co
     // TODO: allow for explicit default value in interface. Underlying library has changed implementation to return default
     options = {...options, getUri: link.getUri};
 
-    return _(singletons)
-        .mapWaitAll(singleton =>
-            getResource(singleton)
-                .then(resource => tryGetNamedCollection(resource, collectionName, collectionRel, options)))
+    return mapWaitAll(singletons, singleton =>
+        getResource(singleton)
+            .then(resource => tryGetNamedCollection(resource, collectionName, collectionRel, options)))
         .catch(err => {
             log.info('Singleton error:', err);
             return Promise.resolve(singletons);
@@ -457,12 +457,11 @@ export function tryGetNamedCollectionOnSingletons(singletons, collectionName, co
  */
 export function tryGetCollectionItems(collection, options = {}) {
 
-    return _(collection)
-        .mapWaitAll((item) => {
-            return getResource(item, options)
-                .catch(() =>
-                    Promise.resolve(getResourceState(collection).removeItemFromCollectionResource(collection, item)));
-        })
+    return mapWaitAll(collection, item => {
+        return getResource(item, options)
+            .catch(() =>
+                Promise.resolve(getResourceState(collection).removeItemFromCollectionResource(collection, item)));
+    })
         .then(() => {
             return collection;
         });
@@ -564,7 +563,7 @@ export function getNamedCollectionAndItems(resource, collectionName, collectionR
  */
 export function getNamedCollectionAndItemsFromUriList(resource, collectionName, uriListName, options) {
     return SparseResource.makeSingletonSparseListFromAttributeUriList(resource, collectionName, uriListName)
-        .then(collection => _(collection).mapWaitAll(item => getResource(item, options)));
+        .then(collection => mapWaitAll(collection, item => getResource(item, options)));
 }
 
 /**
@@ -609,8 +608,7 @@ export function tryGetCollectionAndItems(resource, collectionName, collectionRel
             if (!collection) {
                 return Promise.resolve(undefined);
             }
-            return _(collection)
-                .mapWaitAll(item => getResource(item, options))
+            return mapWaitAll(collection, item => getResource(item, options))
                 .then(() => collection);
         });
 }
@@ -727,7 +725,7 @@ export function getNamedCollectionItemByUri(resource, collectionName, collection
                 throw new Error(`A collection should have been created ${link.getUri(resource, /self|canonical/)} with ${collectionName}`);
             }
 
-            let itemResource = _(collection).findResourceInCollectionByRelOrAttribute(itemUri);
+            let itemResource = findResourceInCollectionByRelOrAttribute(collection, itemUri);
 
             if (!itemResource) {
                 itemResource = SparseResource.makeResourceFromUriAddedToCollection(collection, itemUri);
@@ -772,15 +770,14 @@ export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection
     });
 
     // TODO ?? should this return the child collection items ??
-    return _(contextCollection)
-        .mapWaitAll(
-            item => {
-                return getNamedCollection(item, childCollectionName, childCollectionRel, options)
-                    .then(childCollection => {
-                        return tryGetCollectionItems(childCollection, options);
-                    });
-            }
-        )
+    return mapWaitAll(contextCollection,
+        item => {
+            return getNamedCollection(item, childCollectionName, childCollectionRel, options)
+                .then(childCollection => {
+                    return tryGetCollectionItems(childCollection, options);
+                });
+        }
+    )
     // .then(collection => collection);
 }
 
@@ -815,8 +812,7 @@ export function tryGetNamedCollectionAndItemsOnCollectionItems(contextCollection
  */
 export function tryGetNamedCollectionOnCollectionItems(collection, childCollectionName, rel, options) {
 
-    return _(collection)
-        .mapWaitAll(item => tryGetNamedCollection(item, childCollectionName, rel, options));
+    return mapWaitAll(collection, item => tryGetNamedCollection(item, childCollectionName, rel, options));
 }
 
 /**
@@ -848,9 +844,8 @@ export function tryGetNamedCollectionOnCollectionItems(collection, childCollecti
  * @return {Promise} with the array of singleton resources that succeed
  */
 export function tryGetSingletonOnCollectionItems(collection, childSingletonName, childSingletonRel, options) {
-    return _(collection)
-        .mapWaitAll(item => tryGetSingleton(item, childSingletonName, childSingletonRel, undefined, options))
-        // now discard any in the tryGet that returned the default value 'undefined'
+    return mapWaitAll(collection, item => tryGetSingleton(item, childSingletonName, childSingletonRel, undefined, options))
+    // now discard any in the tryGet that returned the default value 'undefined'
         .then(result => _(result).reject(item => !item));
 }
 
@@ -1046,7 +1041,7 @@ export function deleteCollectionItem(collection, item, options = {}) {
 
     return getCollection(collection, options)
         .then((collectionResource) => {
-            const itemResource = _(collectionResource).findResourceInCollection(item);
+            const itemResource = findResourceInCollection(collectionResource, item);
             if (itemResource) {
                 return deleteResource(itemResource, options);
             } else {
