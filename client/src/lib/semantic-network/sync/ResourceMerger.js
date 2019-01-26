@@ -257,7 +257,7 @@ export default class ResourceMerger {
             return Promise.resolve({});
         }
 
-        return _(resource.links).sequentialWait(
+        return _(resource.links).sequentialWaitAll(
             (memo, aLink) => {
 
                 const containsLinkRel = (arr, doc, rel) => (_(arr).contains(rel) && !doc[rel]);

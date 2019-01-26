@@ -149,7 +149,7 @@ export default class Differencer {
                 if (options.batchSize === 0 || _(options.batchSize).isUndefined()) {
                     return _(updateItems).mapWaitAll(item => updateStrategy(item[0], item[1]));
                 } else {
-                    return _(updateItems).sequentialWait((memo, item) => updateStrategy(item[0], item[1]));
+                    return _(updateItems).sequentialWaitAll((memo, item) => updateStrategy(item[0], item[1]));
                 }
             })
             //
@@ -167,7 +167,7 @@ export default class Differencer {
                 } else {
                     return _(createItems)
                     // TODO - this should return an array rather than use push
-                        .sequentialWait((memo, createItem) => createStrategy(createItem)
+                        .sequentialWaitAll((memo, createItem) => createStrategy(createItem)
                             .then(newItem => {
                                 createResults.push([newItem, createItem]);
                             }))

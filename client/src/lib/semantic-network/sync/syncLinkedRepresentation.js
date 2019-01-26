@@ -31,7 +31,7 @@ export const defaultFindResourceInCollectionStrategy = findResourceInCollection;
  * @private
  */
 function tailRecursionThroughStrategies(strategies, options, syncInfos) {
-    return _(strategies).sequentialWait((unusedMemo, strategy) => {
+    return _(strategies).sequentialWaitAll((unusedMemo, strategy) => {
 
         if (options.strategyBatchSize === 0 || _(options.strategyBatchSize).isUndefined()) {
             // invoke a parallel strategy when want to go for it
@@ -42,7 +42,7 @@ function tailRecursionThroughStrategies(strategies, options, syncInfos) {
             }));
         } else {
             // invoke a sequential strategy - and for now, single at a time
-            return _(syncInfos).sequentialWait((unusedMemo2, syncInfo) => strategy({
+            return _(syncInfos).sequentialWaitAll((unusedMemo2, syncInfo) => strategy({
                 resource: syncInfo.resource,
                 document: syncInfo.document,
                 options
@@ -323,7 +323,7 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
  * @private
  */
 function syncResources(resource, document, strategies = [], options = {}) {
-    return () => _(strategies).sequentialWait(
+    return () => _(strategies).sequentialWaitAll(
         (memo, strategy) => {
             if (strategy && _(strategy).isFunction()) {
                 /**

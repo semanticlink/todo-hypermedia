@@ -1,16 +1,16 @@
 import 'underscore';
 import _ from './index';
-import { expect } from 'chai';
+import {expect} from 'chai';
+import {sequentialWaitAll, mapAttributeWaitAll} from './asyncCollection';
 
 describe('Async collection mixins', () => {
 
-    describe('_.sequentialWait()', () => {
+    describe('sequentialWait()', () => {
 
         it('should total up a list', () => {
-            return _([1, 2])
-                .sequentialWait((memo, i) => {
-                    return Promise.resolve(memo + i);
-                }, 0)
+            return sequentialWaitAll([1, 2], (memo, i) => {
+                return Promise.resolve(memo + i);
+            }, 0)
                 .then(result => {
                     expect(result).to.equal(3);
 
@@ -19,15 +19,14 @@ describe('Async collection mixins', () => {
         });
 
         it('should total up using nested promises', () => {
-            return _([1, 2])
-                .sequentialWait((memo, i) => {
+            return sequentialWaitAll([1, 2], (memo, i) => {
 
-                    if (i === 2) {
-                        return Promise.resolve(memo + i * i)
-                            .then(m => m + 5);
-                    }
-                    return Promise.resolve(memo + i);
-                }, 0)
+                if (i === 2) {
+                    return Promise.resolve(memo + i * i)
+                        .then(m => m + 5);
+                }
+                return Promise.resolve(memo + i);
+            }, 0)
                 .then(result => {
                     expect(result).to.equal(1 + 2 * 2 + 5);
 
@@ -36,13 +35,12 @@ describe('Async collection mixins', () => {
         });
 
         it('should map across an object synchronise', () => {
-            return _({state: 'this', title: 'that'})
-                .mapAttributeWaitAll((value, key) => {
-                    if (key === 'state') {
-                        return Promise.resolve('that');
-                    }
-                    return Promise.resolve(value);
-                })
+            return mapAttributeWaitAll({state: 'this', title: 'that'}, (value, key) => {
+                if (key === 'state') {
+                    return Promise.resolve('that');
+                }
+                return Promise.resolve(value);
+            })
                 .then(result => {
                     expect(result).to.deep.equal({state: 'that', title: 'that'});
 
@@ -51,14 +49,13 @@ describe('Async collection mixins', () => {
 
         it('should map across an object aysnc', () => {
             const resource = {state: 'this', title: 'that'};
-            return _(resource)
-                .mapAttributeWaitAll((value, key) => {
-                    if (key === 'state') {
-                        return Promise.resolve()
-                            .then(() => 'that');
-                    }
-                    return Promise.resolve(value);
-                })
+            return mapAttributeWaitAll(resource, (value, key) => {
+                if (key === 'state') {
+                    return Promise.resolve()
+                        .then(() => 'that');
+                }
+                return Promise.resolve(value);
+            })
                 .then(result => {
                     expect(result).to.deep.equal({state: 'that', title: 'that'});
                     expect(result).not.to.equal(resource);
@@ -68,8 +65,7 @@ describe('Async collection mixins', () => {
 
         it('should map across an object and replace keys', () => {
             const resource = {'question-item': 'this', title: 'that'};
-            return _(resource)
-                .mapAttributeWaitAll(value => Promise.resolve(value), _.dashToCamel)
+            return mapAttributeWaitAll(resource, value => Promise.resolve(value), _.dashToCamel)
                 .then(result => {
                     expect(result).to.deep.equal({questionItem: 'this', title: 'that'});
                     expect(result).not.to.equal(resource);
