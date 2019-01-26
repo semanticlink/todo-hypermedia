@@ -18,6 +18,8 @@ import {QueryOptions} from "./interfaces";
 import {instanceOfCollection, instanceOfForm, instanceOfRel} from "./utils";
 import {Representation} from "../interfaces";
 import {RelationshipType} from "semantic-link";
+import {mapWaitAll, sequentialWaitAll} from "../mixins/asyncCollection";
+import {log} from "../index";
 
 /**
  * Helper part of get for duplicated code that deals with allowing transparently for whether the context
@@ -93,6 +95,18 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
 
     // set the name based on the rel unless there is an override
     const name = options.name || relTypeToCamel(rel);
+
+    /**
+     * Iterating over the resource(s) and use the options for the iterator
+     */
+    if (options.iterateOver) {
+        delete options.iterateOver;
+        if (!options.batchSize || options.batchSize == 0) {
+            return mapWaitAll(resource, (item) => get(item, {...options}));
+        } else {
+            return sequentialWaitAll(resource, (_, item) => get(item, {...options}));
+        }
+    }
 
     // named resources
     if (rel != undefined) {

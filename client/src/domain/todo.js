@@ -30,7 +30,7 @@ export const getTodos = (todoCollection, options) => {
 
     log.debug(`Looking for todos on list ${link.getUri(todoCollection, 'self')}`);
 
-    return get(todoCollection, /todos/, {includeItems: true, ...options});
+    return get(todoCollection, /todos/, {...options, includeItems: true});
 };
 
 /**
@@ -43,8 +43,14 @@ export const getTodos = (todoCollection, options) => {
  */
 export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) => {
     return get(userTenantsCollection, {rel: /todos/, includeItems: true, batchSize: 1, ...options})
-        .then(todosCollection =>
-            sequentialWaitAll(todosCollection, (_, item) => get(item, {rel: /tags/, includeItems: true, ...options})));
+        .then(userTenantsTodos => get(
+            userTenantsTodos,
+            {
+                ...options,
+                iterateOver: true,
+                rel: /tags/,
+                includeItems: true,
+            }));
 };
 
 /**
@@ -61,7 +67,7 @@ export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) =>
 export const getTodoListByUri = (apiResource, todoUri, options) => {
 
     return getNamedListByUri(apiResource, todoUri, options)
-        .then(itemResource => get(itemResource, {rel: /todos/, includeItems: true, ...options}));
+        .then(itemResource => get(itemResource, {...options, rel: /todos/, includeItems: true}));
 };
 
 /**

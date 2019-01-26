@@ -42,7 +42,7 @@ export const getTenantUsers = (userTenantsCollection, options) =>
  * @param {CacheOptions?} options
  * @returns {Promise<TenantRepresentation>}
  */
-export const getUserTenant = (tenant, options = {}) =>
+export const getUserTenant = (tenant, options) =>
     Promise.all([getTodosWithTagsOnTenantTodos(tenant.todos, options), getTenantUsers(tenant, options)])
         .then(() => tenant);
 

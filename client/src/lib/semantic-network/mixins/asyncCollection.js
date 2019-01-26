@@ -54,12 +54,12 @@ export const waitAll = promises => Promise.all(normalise(promises));
  *
  * It rejects with the reason of the first promise that rejects.
  *
- * @param {CollectionRepresentation|*[]|*|function():Promise} collection
- * @param {function():Promise=} iterator
- * @param {*=} context
- * @return {Promise<Array<T>>}
+ * @param {T|T[]|*} collection
+ * @param {function(value: T, index: number, array: T[]):Promise} iterator
+ * @param {T|T[]|*} context?
+ * @return {Promise<T[]>}
  */
-export const mapWaitAll = (collection, iterator, context) => Promise.all(normalise(collection).map(iterator, context));
+export const mapWaitAll = (collection, iterator, context = {}) => Promise.all(normalise(collection).map(iterator, context));
 
 
 /**
@@ -113,10 +113,10 @@ export const mapAttributeWaitAll = (resource, callbackFunction, keyReplacer) => 
  * an item one at a time.
  *
  * @alias wait
- * @param {Promise<T>[]} collection
- * @param {function(*, *):{Promise}} promise
- * @param context
- * @return {Promise<undefined|*>}
+ * @param {T|T[]} collection
+ * @param {function(T|*, T):Promise} promise
+ * @param {T|*} context
+ * @return {Promise<T|undefined|*>}
  */
 export const sequentialWaitAll = (collection, promise, context = {}) =>
     normalise(collection)

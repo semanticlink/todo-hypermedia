@@ -30,4 +30,12 @@ export type QueryOptions = {
      * {@link QueryOptions.include} currently flags that it should go and fetch each item.
      */
     includeItems?: boolean
+
+    /**
+     * Alters the hydration strategy that it treats the resource as an array of resource and then does a further
+     * get using the options as an iterator.
+     */
+    iterateOver?: boolean
+
+    batchSize?: number
 } & {} | any;
