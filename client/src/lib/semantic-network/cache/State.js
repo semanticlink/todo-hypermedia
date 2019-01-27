@@ -474,7 +474,7 @@ export default class State {
 
         let id = link.getUri(resource, rel);
 
-        return loader.schedule(id, getFactory, resource, rel, loader.cancellable)
+        return loader.schedule(id, getFactory, resource, rel)
             .then(response => {
 
                 if (response) {

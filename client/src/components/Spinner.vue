@@ -78,8 +78,10 @@
                 this.itemsQueued = RECEIVED + QUEUED + RUNNING + EXECUTING;
             },
             cancel() {
-                loader.clearAll();
-                this.itemsQueued = 0;
+                loader.clearAll()
+                    .then(() => {
+                        this.itemsQueued = 0;
+                    });
             }
         }
     }

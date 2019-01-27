@@ -1,10 +1,5 @@
 import Bottleneck from 'bottleneck';
-import axios from 'axios';
 import {log} from 'logger';
-
-const CancelToken = axios.CancelToken;
-const source = CancelToken.source();
-
 
 /**
  * Loading service to allow for rate limiting and prioritising concurrent requests and
@@ -26,13 +21,7 @@ export default class Loader {
 
         this.requests = {};
 
-        /**
-         *
-         * @type {CancelTokenStatic}
-         */
-        const cancelToken = axios.CancelToken;
-        this._cancelleable = source.token;
-        this._cancel = () => cancelToken.cancel;
+        this._cancel = () => this._limiter.stop();
 
         this._limiter.on(Loader.event.ERROR, error => {
             log.error(`[Limiter] Error: ${error}`);
@@ -98,14 +87,6 @@ export default class Loader {
      */
     get limiter() {
         return this._limiter;
-    }
-
-    /**
-     * Access to the cancel token
-     * @return {CancelToken | *}
-     */
-    get cancellable() {
-        return this._cancelleable;
     }
 
     /**
@@ -190,12 +171,20 @@ export default class Loader {
 
     /**
      * Stop all current and pending requests and reset all queues.
+     *
+     * @returns {Request|PromiseLike<T | never>|Promise<T | never>|*}
      */
     clearAll() {
+        const {RECEIVED, RUNNING, EXECUTING, QUEUED} = this._limiter.counts();
+        const itemsQueued = RECEIVED + QUEUED + RUNNING + EXECUTING;
+        log.debug(`[Loader] aborting all request (${itemsQueued} in queue)`);
         // this will abort any xhr requests
-        this._cancel();
-        // unfortunately, we still need one! TODO: ask library for update to be able to clear queues and keep running
-        this._limiter = Loader.limiterFactory(this._currentOptions);
+        return this._cancel()
+            .then(() => {
+                log.debug('[Limiter] Limiter stopped');
+                // unfortunately, we still need one! TODO: ask library for update to be able to clear queues and keep running
+                this._limiter = Loader.limiterFactory(this._currentOptions);
+            });
     }
 
 }
