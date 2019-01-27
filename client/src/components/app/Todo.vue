@@ -234,7 +234,7 @@
             removeAllCompleted() {
                 return Promise
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
-                        .map(todo => del(this.todoCollection, todo)))
+                        .map(todo => del(this.todoCollection, {where: todo})))
                     .catch(err => log.error(err));
             },
 
