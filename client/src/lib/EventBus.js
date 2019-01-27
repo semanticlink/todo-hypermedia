@@ -59,7 +59,7 @@ import Vue from 'vue';
  *  Options Three: de-regisiter all listeners to all events
  *
  *      EventBus.$off()
- *
+ * @type {EventBus}
  */
 const EventBus = new Vue();
 
