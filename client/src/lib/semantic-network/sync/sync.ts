@@ -6,20 +6,15 @@ import {
     getSingleton,
     getCollectionInNamedCollection
 } from "./syncLinkedRepresentation";
-import {instanceOfCollection} from "../query/utils";
+import {instanceOfCollection, instanceOfUriList} from "../query/utils";
 import {relTypeToCamel} from "../mixins/linkRel";
 import {getUriListOnNamedCollection} from "./syncUriList";
-import {UriList, Representation} from "../interfaces";
+import {Representation} from "../interfaces";
 import {log} from "../index";
 
 
 function instanceOfResourceSync<T>(obj: any): obj is ResourceSync<T> {
     return obj.resource !== 'undefined' && !obj.rel;
-}
-
-
-function instanceofUriList(obj: any): obj is UriList {
-    return Array.isArray(obj) && typeof obj[0] === 'string';
 }
 
 export type SyncType<T> = ResourceSync<T> | NamedResourceSync<T>;
@@ -172,7 +167,7 @@ export function sync<T extends Representation>(syncAction: SyncType<T>): Promise
         throw new Error('Sync of a named resource must have a rel specified in the options');
     }
 
-    if (instanceofUriList(document)) {
+    if (instanceOfUriList(document)) {
         if (strategies) {
             log.warn('Strategies not available for uri-list');
         }

@@ -112,7 +112,7 @@ export const mapAttributeWaitAll = (resource, callbackFunction, keyReplacer) => 
  * In practice, this is used in return Promise<void> situations because you are just processing
  * an item one at a time.
  *
- * @alias wait
+ * @alias reduceWaitAll
  * @param {T|T[]} collection
  * @param {function(T|*, T):Promise} promise
  * @param {T|*} context

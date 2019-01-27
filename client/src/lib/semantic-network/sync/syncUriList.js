@@ -44,8 +44,7 @@ export function defaultUriListResolver(uriListOrResource) {
 
         log.debug(`[Sync] Uri resolving resource items on 'self' [${uriList.join(',')}]`);
         return uriList;
-    }
-    else if (uriListOrResource.links) {
+    } else if (uriListOrResource.links) {
         const uri = link.getUri(uriListOrResource, /self|canonical/);
         log.debug(`[Sync] Uri resolving resource on 'self' ${uri}`);
         return [uri];
@@ -131,8 +130,7 @@ function synchroniseUriList(collection, documentUriList, options = {}) {
                     _(uriList).each(uri => {
                         resolver.remove(uri);
                     });
-                }
-                else {
+                } else {
                     log.error(`[Sync] Unable to DELETE resources  '${uriList.join(',')}'`);
                 }
                 return uriList;
@@ -149,8 +147,7 @@ function synchroniseUriList(collection, documentUriList, options = {}) {
                                 _(uriList).each(uri => {
                                     resolver.remove(uri);
                                 });
-                            }
-                            else {
+                            } else {
                                 log.error(`[Sync] Unable to DELETE resources  '${uriList.join(',')}'`);
                             }
                             return uriList;
@@ -261,5 +258,29 @@ export function patchUriListOnNamedCollection(parentResource, uriListName, uriLi
                         .then(() => cache.getCollectionAndItems(collection, {...options, ...{forceLoad: true}}));
                 }
             }));
+}
+
+export function patchUriList(collection, uriList, options = {}) {
+
+    log.debug(`[Sync] uriList on ${link.getUri(collection, /self/)} [${[uriList].join(',')}]`);
+    return cache
+        .getResource(collection)
+        .then(collection => {
+            if (!collection) {
+                log.info(`[Sync] No update: uri-list '${uriListName}' not found on ${link.getUri(collection, /self/)}`);
+                return Promise.resolve(undefined);
+            } else {
+                // make all the necessary changes to create and remove individual uri
+                return synchroniseUriList(collection, uriList, options)
+                    .then(() => {
+                        // now make it so and the server should pay nicely and accept all the changes
+                        log.debug('[Sync] update collection with uri-list');
+                        return cache
+                            .getSingleton(collection, 'editForm', /edit-form/, options)
+                            .then(form => put(form, /submit/, 'text/uri-list', uriList.join('\n')));
+                    })
+                    .then(() => cache.getCollectionAndItems(collection, {...options, ...{forceLoad: true}}));
+            }
+        });
 }
 

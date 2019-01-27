@@ -938,6 +938,31 @@ export function tryUpdateResource(resource, documentResource, options = {}) {
     return updateResource(resource, documentResource, options);
 }
 
+
+/**
+ * Update a collection through PATCH using a UriList to remove/add collection items.
+ *
+ * @remarks
+ *
+ * This is a simply "make it so" operation that really should only be used sparingly because it doesn't play
+ * that nicely with lifecyles of collections and items in many cases (put differently, this is an operation that acts
+ * on the lifecycle of the collection not the members of the collection).
+ *
+ * Also, note, it doesn't use an edit form because the uri-list is a known mime-type and knowledge from a form is not
+ * required. It possible to model all this in the edit form but seems an unnecessary overhead.
+ *
+ * @param {CollectionRepresentation} collection
+ * @param {UriList} uriList
+ * @param {CacheOptions} options
+ * @returns {Promise<CollectionRepresentation | never>}
+ */
+export const updateCollection = (collection, uriList, options) => {
+
+    return getCollection(collection, options)
+        .then((collection => link.patch(collection, /self/, 'text/uri-list', uriList)))
+        .then(() => getCollection(collection, {...options, forceLoad: true}));
+};
+
 /**
  * @example
  *
@@ -1058,4 +1083,3 @@ export function deleteCollectionItem(collection, item, options = {}) {
  * @return {LinkedRepresentation|CollectionRepresentation}
  */
 export const create = (links, rel) => SparseResource.makeSparseResourceFromUri(link.getUri(links, rel));
-

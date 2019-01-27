@@ -62,12 +62,13 @@
 
 <script>
 
-    import {_, cache, query} from 'semantic-network';
+    import {_, del, get, create, update} from 'semantic-network';
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';
     import {defaultTodo, getNamedListByUri, getTodoListByUri} from "domain/todo";
-    import {mapCompletedToState} from "../../domain/form-type-mappings";
+    import {mapCompletedToState} from "domain/form-type-mappings";
+    import {mapWaitAll} from 'semantic-network/mixins/asyncCollection';
 
     /**
      * This component displays and allows updates to the todo list
@@ -187,18 +188,8 @@
                 },
                 set(value) {
 
-                    // TODO: utilities
-                    const all = (...promises) => {
-                        const results = [];
 
-                        const merged = promises.reduce(
-                            (acc, p) => acc.then(() => p).then(r => results.push(r)),
-                            Promise.resolve(null));
-
-                        return merged.then(() => results);
-                    };
-
-                    all(this.collection.map(todo => {
+                    mapWaitAll(this.collection, (todo) => {
                         /**
                          * One of the issues with representations is that many fields are optional (eg completed).
                          * In such cases, we need to ensure that Vue is bound to them.
@@ -207,19 +198,11 @@
                          * a helper property that is a rule of a subset of state.
                          */
                         todo.completed = this.$set(todo, 'completed', value);
+                        const options = this.$root.options;
 
-                        /**
-                         * I cannot explain why either of the two assignments below don't work.
-                         *
-                         * @see https://vuejs.org/v2/guide/reactivity.html
-
-                         item = {...item, completed: value};
-                         item = Object.assign({}, item, {completed: value});
-
-                         */
-                        return query.update(todo, {...todo, state: mapCompletedToState(value)});
-                    }))
-                        .catch(err => log.error(err));
+                        return update(todo, {...todo, state: mapCompletedToState(value), options});
+                    })
+                        .catch(log.error);
 
                 }
             }
@@ -238,8 +221,8 @@
              * Adds the new todo document into the existing todo collection
              */
             addTodo() {
-                return query.create(this.todoCollection, {where: {...this.newTodo}})
-                    .then(todoResource => query.get(todoResource)
+                return create(this.todoCollection, {where: {...this.newTodo}})
+                    .then(todoResource => get(todoResource)
                         .then(() => this.reset()))
                     .catch(err => log.error(err));
             },
@@ -251,7 +234,7 @@
             removeAllCompleted() {
                 return Promise
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
-                        .map(todo => cache.deleteCollectionItem(this.todoCollection, todo)))
+                        .map(todo => del(this.todoCollection, todo)))
                     .catch(err => log.error(err));
             },
 

@@ -17,9 +17,7 @@ import {relTypeToCamel} from "../mixins/linkRel";
 import {QueryOptions} from "./interfaces";
 import {instanceOfCollection, instanceOfForm, instanceOfRel} from "./utils";
 import {Representation} from "../interfaces";
-import {RelationshipType} from "semantic-link";
 import {mapWaitAll, sequentialWaitAll} from "../mixins/asyncCollection";
-import {log} from "../index";
 
 /**
  * Helper part of get for duplicated code that deals with allowing transparently for whether the context

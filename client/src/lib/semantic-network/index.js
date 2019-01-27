@@ -5,13 +5,11 @@ import {LogLevel as LEVEL, setLogLevel, log} from 'logger';
 import _ from './mixins/index';
 import {uriMappingResolver} from './sync/UriMappingResolver';
 import Loader, {loader} from './loader/Loader';
-import PooledCollection from './sync/PooledCollection';
+import {sync} from './sync';
+import {get, update, del, create} from './query';
 
 const LoaderEvent = Loader.event;
 
-export {sync} from './sync';
-
-export {get, update, del, create} from './query';
 
 export {
     link,
@@ -24,5 +22,10 @@ export {
     uriMappingResolver,
     loader,
     LoaderEvent,
-    PooledCollection
+    get,
+    update,
+    del,
+    del as delete,
+    create,
+    sync
 };

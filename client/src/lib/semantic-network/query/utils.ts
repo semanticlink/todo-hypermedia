@@ -1,4 +1,4 @@
-import {FormItem, FormRepresentation, Representation} from "../interfaces";
+import {FormItem, FormRepresentation, Representation, UriList} from "../interfaces";
 import {RelationshipType} from "semantic-link";
 
 /**
@@ -41,5 +41,18 @@ export function instanceOfRel(object: any): object is RelationshipType {
     return typeof object === 'string'
         || object instanceof String
         || object instanceof RegExp;
+
+}
+
+/**
+ * A guard to detect whether the object is a {@link UriList}
+ *
+ * @param object
+ * @returns whether the object is an instance on the interface
+ */
+export function instanceOfUriList(object: any): object is UriList {
+    const [first,] = object;
+    // a very naive type check for a UriList
+    return Array.isArray(object) && typeof first === 'string';
 
 }

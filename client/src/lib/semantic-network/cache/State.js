@@ -175,7 +175,7 @@ export default class State {
      *
      * We can only do a fetch when we actually have a potentially valid uri and that we haven't already
      * got the resource. Currently, the forceLoad allows an override which is an initial cache busting
-     * strategy that will need improvemnt
+     * strategy that will need improvement
      *
      * @param {StateEnum} status
      * @param {CacheOptions} options
