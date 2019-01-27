@@ -1,8 +1,6 @@
-import {get} from 'semantic-network';
-import * as link from 'semantic-link';
+import {get, link} from 'semantic-network';
 import {log} from 'logger';
 import {findResourceInCollectionByUri} from 'semantic-network/mixins/collection';
-import {sequentialWaitAll} from 'semantic-network/mixins/asyncCollection';
 import {FieldType} from 'semantic-network/interfaces';
 
 /**
