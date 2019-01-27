@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import sinon from 'sinon';
 import * as link from 'semantic-link';
 import * as sync from './syncLinkedRepresentation';
-import * as cache from '../cache/cache';
+import * as cache from '../cache';
 import Differencer from './Differencer';
 import axios from 'axios';
 import {log} from 'logger';

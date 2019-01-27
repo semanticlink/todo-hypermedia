@@ -1,7 +1,7 @@
 import _ from '../mixins/index';
 import * as link from 'semantic-link';
 import {log} from 'logger';
-import * as cache from '../cache/cache';
+import * as cache from '../cache';
 import Differencer from './Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';

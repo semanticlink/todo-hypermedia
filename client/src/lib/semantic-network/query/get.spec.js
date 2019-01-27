@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {get} from './get';
 import sinon from 'sinon';
-import * as cache from '../cache/cache';
+import * as cache from '../cache';
 // make sure that you stub the js implementation and not the type declaration
 import * as http from 'semantic-link/lib/http';
 import {

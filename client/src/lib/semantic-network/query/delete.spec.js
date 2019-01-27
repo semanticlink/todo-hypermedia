@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {del} from './delete';
 import sinon from 'sinon';
-import * as cache from '../cache/cache';
+import * as cache from '../cache';
 import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from '../cache/sparseResource';
 
 global.Element = () => {

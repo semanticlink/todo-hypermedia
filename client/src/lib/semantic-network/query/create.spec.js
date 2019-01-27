@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {create} from './create';
 import sinon from 'sinon';
-import * as cache from '../cache/cache';
+import * as cache from '../cache';
 import {
     makeSparseCollectionResourceFromUri,
     makeSparseResourceFromUri

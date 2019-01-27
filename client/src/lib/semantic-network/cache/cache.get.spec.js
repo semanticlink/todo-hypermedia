@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import * as cache from './cache';
+import * as cache from '.';
 import sinon from 'sinon';
 import State from './State';
 
