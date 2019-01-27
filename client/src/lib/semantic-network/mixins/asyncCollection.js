@@ -112,6 +112,14 @@ export const mapAttributeWaitAll = (resource, callbackFunction, keyReplacer) => 
  * In practice, this is used in return Promise<void> situations because you are just processing
  * an item one at a time.
  *
+ * @remarks
+ *
+ * This is not a sequential version of {@link mapWaitAll} because it does not return an array.
+ * It could be implemented this way but hasn't yet been necessary because where map is required (rather
+ * than a sequential map) order is unlike to matter. Places where this is used is to sequentially process
+ * requests back to the server that mutate state (eg POST, PUT) and order needs to be ensured to avoid
+ * unnecessary conflicts (or more complex error checking on the server)
+ *
  * @alias reduceWaitAll
  * @param {T|T[]} collection
  * @param {function(T|*, T):Promise} promise
@@ -123,7 +131,6 @@ export const sequentialWaitAll = (collection, promise, context = {}) =>
         .reduce(
             (acc, item) => acc.then(result => promise(result, item)),
             Promise.resolve(context || null));
-
 
 export const AsyncCollectionMixins = {
     waitAll,
