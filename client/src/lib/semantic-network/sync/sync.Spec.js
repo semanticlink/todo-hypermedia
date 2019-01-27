@@ -1,9 +1,9 @@
 import {expect} from 'chai';
 import * as syncRepresentation from './syncLinkedRepresentation';
 import * as syncUriList from './syncUriList';
-import {sync} from './sync';
+import {sync} from './';
 import sinon from 'sinon';
-import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from 'semantic-network/cache/sparseResource';
+import {makeSparseCollectionResourceFromUri, makeSparseResourceFromUri} from '../cache/sparseResource';
 
 global.Element = () => {
 };
