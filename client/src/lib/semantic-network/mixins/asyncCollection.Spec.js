@@ -1,7 +1,7 @@
 import 'underscore';
-import _ from './index';
 import {expect} from 'chai';
 import {sequentialWaitAll, mapAttributeWaitAll} from './asyncCollection';
+import {dashToCamel} from './linkRel';
 
 describe('Async collection mixins', () => {
 
@@ -65,7 +65,7 @@ describe('Async collection mixins', () => {
 
         it('should map across an object and replace keys', () => {
             const resource = {'question-item': 'this', title: 'that'};
-            return mapAttributeWaitAll(resource, value => Promise.resolve(value), _.dashToCamel)
+            return mapAttributeWaitAll(resource, value => Promise.resolve(value), dashToCamel)
                 .then(result => {
                     expect(result).to.deep.equal({questionItem: 'this', title: 'that'});
                     expect(result).not.to.equal(resource);

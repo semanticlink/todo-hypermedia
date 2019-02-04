@@ -1,5 +1,5 @@
 /**
- * Takes an array of potentially camel cased strings and only returns those that have a dash in
+ * Takes an array of potentially camel-cased strings and only returns those that have a dash in
  * the form
  *
  * @example
@@ -21,7 +21,18 @@ export const camelToDash = array => {
     return array.map(item => item.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase()));
 };
 
-// TODO: just check that the dash '-' doesn't need escaping (webstorm says it doesn't)
+/**
+ * Takes a string and returns any dash string as camel-cased string
+ *
+ * @example
+ *   question-type --> questionType
+ *   type          --> type
+ *
+ * TODO: just check that the dash '-' doesn't need escaping (webstorm says it doesn't)
+ *
+ * @param {string} str
+ * @return {string}
+ */
 export const dashToCamel = str => str.replace(/(-[a-z])/g, $1 => $1.toUpperCase().replace('-', ''));
 
 /**
@@ -59,10 +70,3 @@ export function relTypeToCamel(rel) {
 
     throw new Error(`Rel type of array not parsable to be converted: '${typeof rel}'`);
 }
-
-
-export const linkRelMixins = {
-    filterCamelToDash,
-    camelToDash,
-    dashToCamel,
-};

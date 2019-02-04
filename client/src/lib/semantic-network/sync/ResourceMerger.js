@@ -3,7 +3,8 @@ import * as SparseResource from '../cache/sparseResource';
 import * as link from 'semantic-link';
 import {FieldType} from '../interfaces';
 import {log} from 'logger';
-import {defaultResolver} from 'semantic-network/sync/syncResolver';
+import {defaultResolver} from './syncResolver';
+import {dashToCamel, filterCamelToDash, camelToDash} from '../mixins/linkRel';
 
 /**
  * Processes difference sets (created, update, delete) for between two client-side collections {@Link CollectionRepresentation}
@@ -167,7 +168,7 @@ export default class ResourceMerger {
                 };
 
                 // attributes are camel case, so let's ensure we have the normalised form to be added as a field to resource
-                field = _(field).dashToCamel();
+                field = dashToCamel(field);
 
                 // find out whether there is a matching field in the create form to the link relation
                 let formItem = _(form.items).find(item => item.name === field);
@@ -181,7 +182,7 @@ export default class ResourceMerger {
                 }
 
             },
-            _.dashToCamel);
+            dashToCamel);
     }
 
     /**
@@ -198,7 +199,7 @@ export default class ResourceMerger {
         const {rel, href} = aLink;
 
         // attributes are camel case, so let's ensure we have the normalised form to be added as a field to resource
-        const field = _(rel).dashToCamel();
+        const field = dashToCamel(rel);
 
         // find out whether there is a matching field in the create form to the link relation
         const formItem = _(formResource.items).find(item => item.name === field);
@@ -250,7 +251,7 @@ export default class ResourceMerger {
     resolveLinkRelations(resource, fieldsToReturn, formResource, options) {
 
         // link relations exist as a dashed form and fields/create forms use camel case
-        let linkRelationsToReturn = _(fieldsToReturn).filterCamelToDash();
+        let linkRelationsToReturn = filterCamelToDash(fieldsToReturn);
 
         if (!resource) {
             log.warn(`Document does not exist for form ${link.getUri(formResource, /self/)}`);
@@ -345,7 +346,7 @@ export default class ResourceMerger {
         const trackedFields = filterTrackedFieldsOnesource(resource);
 
         const fieldsToTransformToLinkRelations = (resource, trackedFields) =>
-            _(trackedFields).filter(field => link.matches(resource, _(field).camelToDash()));
+            _(trackedFields).filter(field => link.matches(resource, camelToDash(field)));
 
         const linkRelsToUpdate = fieldsToTransformToLinkRelations(resource, trackedFields);
 
@@ -353,7 +354,7 @@ export default class ResourceMerger {
         // do a deep merge on link relations
         _(resource.links).each(link => {
             if (_(linkRelsToUpdate).contains(link.rel)) {
-                const field = _(link.rel).dashToCamel();
+                const field = dashToCamel(link.rel);
                 link.href = document[field];
                 delete document[field];
             }
