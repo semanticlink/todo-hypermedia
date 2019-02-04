@@ -135,7 +135,7 @@ const makePrettyJson = (model, replacer) => {
  * TODO: text/csv (for dragging to Excel)
  *
  * @param {LinkedRepresentation|Object} model
- * @param {Event} event
+ * @param {DragEvent} event
  * @param {function(key:string, value:string):string|undefined=} replacerStrategy JSON.stringify replacer function
  *         see https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify
  * @param {?string|string[]} mediaType media types to be included in the {@link DataTransfer} object on drag
