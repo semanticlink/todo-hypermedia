@@ -7,9 +7,9 @@ import * as link from 'semantic-link/lib/index';
  * @param {LinkedRepresentation[]|LinkedRepresentation|string|string[]} resourcesOrUris
  * @return {string[]} uriList
  * */
-export const mapResourceToUriList = resourcesOrUris => {
+export const makeUriList = resourcesOrUris => {
 
-    if (typeof resourceOrUri === 'string') {
+    if (typeof resourcesOrUris === 'string') {
         return [resourcesOrUris];
     } else if (Array.isArray(resourcesOrUris)) {
         return resourcesOrUris.map(resource => makeUri(resource));
@@ -25,7 +25,7 @@ export const mapResourceToUriList = resourcesOrUris => {
  * @param {LinkedRepresentation[]} collectionOrItems
  * @return {string[]} uri-list form of an array
  */
-export const mapCollectionItemsToUriList = collectionOrItems => {
+export const mapUriList = collectionOrItems => {
     return normalise(collectionOrItems)
         .map(item => link.getUri(item, /self|canonical/), undefined)
         .filter(item => !!item);
@@ -41,11 +41,4 @@ export const mapCollectionItemsToUriList = collectionOrItems => {
  */
 export const toUriListMimeTypeFormat = uriList => {
     uriList.join('\n');
-};
-
-
-export const uriListMixins = {
-    makeUriList: mapResourceToUriList,
-    mapUriList: mapCollectionItemsToUriList,
-    toUriListMimeTypeFormat
 };

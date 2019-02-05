@@ -1,11 +1,11 @@
-import * as _ from './uri';
 import {expect} from 'chai';
+import {makeUri} from './uri';
 
 
-describe('_.makeUri', () => {
+describe('makeUri', () => {
 
     it('should keep string as uri', () => {
-        expect(_.makeUri('http://example.com/role/1')).to.equal('http://example.com/role/1');
+        expect(makeUri('http://example.com/role/1')).to.equal('http://example.com/role/1');
     });
     it('should transform representation to string', () => {
         const resource = {
@@ -14,7 +14,7 @@ describe('_.makeUri', () => {
                 href: 'http://example.com/role/1'
             }]
         };
-        expect(_.makeUri(resource)).to.equal('http://example.com/role/1');
+        expect(makeUri(resource)).to.equal('http://example.com/role/1');
     });
 });
 
