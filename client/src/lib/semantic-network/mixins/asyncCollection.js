@@ -131,10 +131,3 @@ export const sequentialWaitAll = (collection, promise, context = {}) =>
         .reduce(
             (acc, item) => acc.then(result => promise(result, item)),
             Promise.resolve(context || null));
-
-export const AsyncCollectionMixins = {
-    waitAll,
-    mapWaitAll,
-    mapAttributeWaitAll,
-    sequentialWaitAll,
-};

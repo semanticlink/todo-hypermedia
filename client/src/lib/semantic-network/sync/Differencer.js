@@ -2,6 +2,7 @@ import _ from '../mixins';
 import {log} from 'logger';
 import {defaultEqualityOperators} from './Comparator';
 import * as link from 'semantic-link';
+import {mapWaitAll, sequentialWaitAll} from '../mixins/asyncCollection';
 
 /**
  * TODO: this is probably two classes inheriting the Differencer interface
@@ -134,22 +135,22 @@ export default class Differencer {
 
         });
 
-        return _(deleteItems)
         //
         // 1. Delete all resource first
         //
-            .mapWaitAll(item => {
-                log.debug(`[Diff] Calling delete strategy: ${link.getUri(item, /self/)}`);
-                return deleteStrategy(item);
-            })
-            //
-            //  2. Then update the existing resources
-            //
+        return mapWaitAll(deleteItems, item => {
+            log.debug(`[Diff] Calling delete strategy: ${link.getUri(item, /self/)}`);
+            return deleteStrategy(item);
+        })
+
+        //
+        //  2. Then update the existing resources
+        //
             .then(() => {
                 if (options.batchSize === 0 || _(options.batchSize).isUndefined()) {
-                    return _(updateItems).mapWaitAll(item => updateStrategy(item[0], item[1]));
+                    return mapWaitAll(updateItems, item => updateStrategy(item[0], item[1]));
                 } else {
-                    return _(updateItems).sequentialWaitAll((memo, item) => updateStrategy(item[0], item[1]));
+                    return sequentialWaitAll(updateItems, (memo, item) => updateStrategy(item[0], item[1]));
                 }
             })
             //
@@ -159,18 +160,17 @@ export default class Differencer {
                 const createResults = [];
                 if (options.batchSize === 0 || _(options.batchSize).isUndefined()) {
                     // TODO - this should return an array rather than use push
-                    return _(createItems).mapWaitAll(createItem => createStrategy(createItem)
+                    return mapWaitAll(createItems, createItem => createStrategy(createItem)
                         .then(newItem => {
                             createResults.push([newItem, createItem]);
                         }))
                         .then(() => createResults);
                 } else {
-                    return _(createItems)
                     // TODO - this should return an array rather than use push
-                        .sequentialWaitAll((memo, createItem) => createStrategy(createItem)
-                            .then(newItem => {
-                                createResults.push([newItem, createItem]);
-                            }))
+                    return sequentialWaitAll(createItems, (memo, createItem) => createStrategy(createItem)
+                        .then(newItem => {
+                            createResults.push([newItem, createItem]);
+                        }))
                         .then(() => createResults);
                 }
             })
@@ -238,22 +238,20 @@ export default class Differencer {
         deleteUriList = _(deleteUriList).isEmpty() ? deleteUriList : [deleteUriList];
         createUriList = _(createUriList).isEmpty() ? createUriList : [createUriList];
 
-        return _(deleteUriList)
-            .mapWaitAll(uriList => {
-                log.debug(`[Diff] Calling delete strategy: ${uriList}`);
-                return deleteStrategy(uriList);
-            })
+        return mapWaitAll(deleteUriList, uriList => {
+            log.debug(`[Diff] Calling delete strategy: ${uriList}`);
+            return deleteStrategy(uriList);
+        })
             .then(deletedItems => {
                 const createResults = [];
 
-                return _(createUriList)
-                    .mapWaitAll(createUriList => {
-                        log.debug(`[Diff] Calling create strategy: ${createUriList}`);
-                        return createStrategy(createUriList)
-                            .then(newUriList => {
-                                createResults.push([newUriList, createUriList]);
-                            });
-                    })
+                return mapWaitAll(createUriList, createUriList => {
+                    log.debug(`[Diff] Calling create strategy: ${createUriList}`);
+                    return createStrategy(createUriList)
+                        .then(newUriList => {
+                            createResults.push([newUriList, createUriList]);
+                        });
+                })
                     .then(() => [createResults, [], deletedItems]);
             })
             .then(([createResults, updateItems, deleteItems]) => {

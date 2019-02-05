@@ -6,6 +6,7 @@ import {log} from 'logger';
 import {defaultResolver} from './syncResolver';
 import {dashToCamel, filterCamelToDash, camelToDash} from '../mixins/linkRel';
 import {compactObject} from '../mixins/representation';
+import {mapWaitAll, sequentialWaitAll, mapAttributeWaitAll} from '../mixins/asyncCollection';
 
 /**
  * Processes difference sets (created, update, delete) for between two client-side collections {@Link CollectionRepresentation}
@@ -66,7 +67,8 @@ export default class ResourceMerger {
      */
     resolveFields(doc, form, options) {
 
-        return _(doc).mapAttributeWaitAll(
+        return mapAttributeWaitAll(
+            doc,
             (textUriOrResource, field) => {
 
                 const resolveFieldToFieldByType = (textUriOrResource, formItem, options) => {
@@ -77,7 +79,7 @@ export default class ResourceMerger {
                         || formItem.type === FieldType.Email
                     ) {
                         if (formItem.multiple) {
-                            return _(textUriOrResource).mapWaitAll(text => Promise.resolve(text));
+                            return mapWaitAll(textUriOrResource, text => Promise.resolve(text));
                         } else {
                             return Promise.resolve(textUriOrResource);
                         }
@@ -156,7 +158,7 @@ export default class ResourceMerger {
 
                         if (formItem.multiple) {
                             // multiple is an array of group structures
-                            return _(textUriOrResource).mapWaitAll(resource => this.resolveFields(resource, formItem, options));
+                            return mapWaitAll(textUriOrResource, resource => this.resolveFields(resource, formItem, options));
                         } else {
                             // otherwise it is a single group
                             return this.resolveFields(textUriOrResource, formItem, options);
@@ -259,7 +261,8 @@ export default class ResourceMerger {
             return Promise.resolve({});
         }
 
-        return _(resource.links).sequentialWaitAll(
+        return sequentialWaitAll(
+            resource.links,
             (memo, aLink) => {
 
                 const containsLinkRel = (arr, doc, rel) => (_(arr).contains(rel) && !doc[rel]);

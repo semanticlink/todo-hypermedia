@@ -5,6 +5,7 @@ import * as cache from '../cache';
 import Differencer from './Differencer';
 import {defaultResolver} from './syncResolver';
 import {findResourceInCollection} from '../mixins/collection';
+import {mapWaitAll, sequentialWaitAll} from '../mixins/asyncCollection';
 
 /**
  * Default resource finder assumes that resources are in a collection via the 'items' attribute/array.
@@ -31,18 +32,18 @@ export const defaultFindResourceInCollectionStrategy = findResourceInCollection;
  * @private
  */
 function tailRecursionThroughStrategies(strategies, options, syncInfos) {
-    return _(strategies).sequentialWaitAll((unusedMemo, strategy) => {
+    return sequentialWaitAll(strategies, (unusedMemo, strategy) => {
 
         if (options.strategyBatchSize === 0 || _(options.strategyBatchSize).isUndefined()) {
             // invoke a parallel strategy when want to go for it
-            return _(syncInfos).mapWaitAll(syncInfo => strategy({
+            return mapWaitAll(syncInfos, syncInfo => strategy({
                 resource: syncInfo.resource,
                 document: syncInfo.document,
                 options
             }));
         } else {
             // invoke a sequential strategy - and for now, single at a time
-            return _(syncInfos).sequentialWaitAll((unusedMemo2, syncInfo) => strategy({
+            return sequentialWaitAll(syncInfos, (unusedMemo2, syncInfo) => strategy({
                 resource: syncInfo.resource,
                 document: syncInfo.document,
                 options
@@ -323,7 +324,8 @@ function synchroniseCollection(collectionResource, collectionDocument, options =
  * @private
  */
 function syncResources(resource, document, strategies = [], options = {}) {
-    return () => _(strategies).sequentialWaitAll(
+    return () => sequentialWaitAll(
+        strategies,
         (memo, strategy) => {
             if (strategy && _(strategy).isFunction()) {
                 /**
