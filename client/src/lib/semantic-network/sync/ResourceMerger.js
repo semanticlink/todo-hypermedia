@@ -4,9 +4,9 @@ import * as link from 'semantic-link';
 import {FieldType} from '../interfaces';
 import {log} from 'logger';
 import {defaultResolver} from './syncResolver';
-import {dashToCamel, filterCamelToDash, camelToDash} from '../mixins/linkRel';
-import {compactObject} from '../mixins/representation';
-import {mapWaitAll, sequentialWaitAll, mapAttributeWaitAll} from '../mixins/asyncCollection';
+import {dashToCamel, filterCamelToDash, camelToDash} from '../utils/linkRel';
+import {compactObject} from '../utils/representation';
+import {mapWaitAll, sequentialWaitAll, mapAttributeWaitAll} from '../utils/asyncCollection';
 
 /**
  * Processes difference sets (created, update, delete) for between two client-side collections {@Link CollectionRepresentation}

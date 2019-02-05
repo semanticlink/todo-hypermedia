@@ -57,7 +57,7 @@
     import {eventBus} from 'semantic-link-utils/EventBus';
     import {getTenantsOnUser, getUserTenant} from 'domain/tenant';
     import {getTodosWithTagsOnTenantTodos} from 'domain/todo';
-    import {isCollectionEmpty, normalise} from 'semantic-network/mixins/collection';
+    import {isCollectionEmpty, normalise} from 'semantic-network/utils/collection';
 
 
     export default {

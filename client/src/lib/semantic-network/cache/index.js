@@ -5,8 +5,8 @@ import * as link from 'semantic-link';
 import {log} from 'logger';
 import State from './State';
 import {filter} from 'semantic-link/lib/filter';
-import {mapWaitAll} from '../mixins/asyncCollection';
-import {findResourceInCollection, findResourceInCollectionByRelOrAttribute} from '../mixins/collection';
+import {mapWaitAll} from '../utils/asyncCollection';
+import {findResourceInCollection, findResourceInCollectionByRelOrAttribute} from '../utils/collection';
 
 /**
  *

@@ -2,8 +2,8 @@ import _ from 'underscore';
 import {log} from 'logger';
 import {defaultEqualityOperators} from './Comparator';
 import * as link from 'semantic-link';
-import {mapWaitAll, sequentialWaitAll} from '../mixins/asyncCollection';
-import {pushAll} from '../mixins/collection';
+import {mapWaitAll, sequentialWaitAll} from '../utils/asyncCollection';
+import {pushAll} from '../utils/collection';
 
 /**
  * TODO: this is probably two classes inheriting the Differencer interface

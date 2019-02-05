@@ -13,11 +13,11 @@ import {
     tryGetResource,
     tryGetSingleton
 } from "../cache";
-import {relTypeToCamel} from "../mixins/linkRel";
+import {relTypeToCamel} from "../utils/linkRel";
 import {QueryOptions} from "./interfaces";
 import {instanceOfCollection, instanceOfForm, instanceOfRel} from "./utils";
 import {Representation} from "../interfaces";
-import {mapWaitAll, sequentialWaitAll} from "../mixins/asyncCollection";
+import {mapWaitAll, sequentialWaitAll} from "../utils/asyncCollection";
 
 /**
  * Helper part of get for duplicated code that deals with allowing transparently for whether the context

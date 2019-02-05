@@ -7,7 +7,7 @@ import {
     getCollectionInNamedCollection
 } from "./syncLinkedRepresentation";
 import {instanceOfCollection, instanceOfUriList} from "../query/utils";
-import {relTypeToCamel} from "../mixins/linkRel";
+import {relTypeToCamel} from "../utils/linkRel";
 import {getUriListOnNamedCollection} from "./syncUriList";
 import {Representation} from "../interfaces";
 import {log} from "../index";

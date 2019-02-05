@@ -8,7 +8,7 @@ import {put} from 'semantic-link';
 import {uriMappingResolver} from './UriMappingResolver';
 import {loader} from '../loader/Loader';
 import {defaultResolver} from './syncResolver';
-import {toUriListMimeTypeFormat} from '../mixins/uri-list';
+import {toUriListMimeTypeFormat} from '../utils/uri-list';
 
 /**
  * @type {UriListResolver}

@@ -6,7 +6,7 @@ import * as SparseResource from './sparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
 import {loader} from '../loader/Loader';
-import {findResourceInCollection, findResourceInCollectionByRelOrAttribute} from '../mixins/collection';
+import {findResourceInCollection, findResourceInCollectionByRelOrAttribute} from '../utils/collection';
 
 const stateFlagName = Symbol('state');
 

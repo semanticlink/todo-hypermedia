@@ -4,8 +4,8 @@ import {log} from 'logger';
 import * as cache from '../cache';
 import Differencer from './Differencer';
 import {defaultResolver} from './syncResolver';
-import {findResourceInCollection} from '../mixins/collection';
-import {mapWaitAll, sequentialWaitAll} from '../mixins/asyncCollection';
+import {findResourceInCollection} from '../utils/collection';
+import {mapWaitAll, sequentialWaitAll} from '../utils/asyncCollection';
 
 /**
  * Default resource finder assumes that resources are in a collection via the 'items' attribute/array.

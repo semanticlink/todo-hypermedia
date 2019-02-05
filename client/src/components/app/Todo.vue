@@ -69,7 +69,7 @@
     import TodoItem from './TodoItem.vue';
     import {defaultTodo, getNamedListByUri, getTodoListByUri} from "domain/todo";
     import {mapCompletedToState} from "domain/form-type-mappings";
-    import {mapWaitAll} from 'semantic-network/mixins/asyncCollection';
+    import {mapWaitAll} from 'semantic-network/utils/asyncCollection';
 
     /**
      * This component displays and allows updates to the todo list

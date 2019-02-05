@@ -1,6 +1,6 @@
 import {get, link} from 'semantic-network';
 import {log} from 'logger';
-import {findResourceInCollectionByUri} from 'semantic-network/mixins/collection';
+import {findResourceInCollectionByUri} from 'semantic-network/utils/collection';
 import {FieldType} from 'semantic-network/interfaces';
 
 /**
