@@ -1,4 +1,4 @@
-import _ from '../mixins/index';
+import _ from 'underscore';
 
 
 /**

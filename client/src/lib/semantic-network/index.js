@@ -1,7 +1,6 @@
 import * as link from 'semantic-link';
 import * as cache from './cache';
 import * as query from './query';
-import _ from './mixins/index';
 import Loader, {loader} from './loader/Loader';
 
 export {uriMappingResolver} from './sync/UriMappingResolver';
@@ -15,7 +14,6 @@ export {
     link,
     cache,
     query,
-    _,
     loader,
     LoaderEvent,
 };

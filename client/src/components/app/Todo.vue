@@ -62,7 +62,8 @@
 
 <script>
 
-    import {_, del, get, create, update} from 'semantic-network';
+    import {del, get, create, update} from 'semantic-network';
+    import _ from 'underscore';
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';

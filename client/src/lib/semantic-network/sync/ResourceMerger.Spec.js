@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import sinon from 'sinon';
-import _ from '../mixins/index';
+import _ from 'underscore';
 import {resourceMerger} from './ResourceMerger';
 
 global.Element = () => {

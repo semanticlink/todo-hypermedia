@@ -1,4 +1,4 @@
-import _ from '../mixins/index';
+import _ from 'underscore';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 import * as cache from '../cache';

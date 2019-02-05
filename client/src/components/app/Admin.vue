@@ -44,7 +44,7 @@
 </template>
 
 <script>
-    import {_} from 'semantic-network';
+    import {_} from 'underscore';
     import {getUri} from 'semantic-link';
     import {log} from 'logger';
     import {redirectToTodo} from 'router';

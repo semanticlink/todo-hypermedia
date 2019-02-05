@@ -1,4 +1,4 @@
-import _ from '../mixins';
+import _ from 'underscore';
 import {log} from 'logger';
 import {defaultEqualityOperators} from './Comparator';
 import * as link from 'semantic-link';

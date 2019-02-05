@@ -1,4 +1,4 @@
-import _ from '../mixins/index';
+import _ from 'underscore';
 import * as SparseResource from './sparseResource';
 import {resourceMerger} from '../sync/ResourceMerger';
 import * as link from 'semantic-link';

@@ -1,6 +1,6 @@
 /* global JSON */
 
-import _ from '../mixins/index';
+import _ from 'underscore';
 import StateEnum from './StateEnum';
 import * as SparseResource from './sparseResource';
 import {log} from 'logger';

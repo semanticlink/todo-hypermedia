@@ -1,4 +1,4 @@
-import {_} from '../semantic-network/index';
+import _ from 'underscore';
 import {log} from 'logger';
 
 /**

@@ -1,4 +1,4 @@
-import {_} from 'semantic-network';
+import {_} from 'underscore';
 
 /**
  * modified from http://jsfiddle.net/i_woody/cnL5T/

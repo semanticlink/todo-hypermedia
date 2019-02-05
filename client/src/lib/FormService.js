@@ -1,4 +1,5 @@
-import {_, loader} from './semantic-network';
+import {loader} from './semantic-network';
+import _ from 'underscore';
 import axios from 'axios';
 import {getAuthenticationUri, getBearerLinkRelation} from './semantic-link-utils/http-interceptors';
 import * as link from 'semantic-link';

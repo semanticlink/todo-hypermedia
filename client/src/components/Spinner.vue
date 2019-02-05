@@ -17,7 +17,7 @@
     import {loader, LoaderEvent} from 'semantic-network';
     import bLink from 'bootstrap-vue/src/components/link/link';
     import SimpleSpinner from 'vue-simple-spinner/src/components/Spinner.vue'
-    import {_} from 'semantic-network';
+    import _ from 'underscore';
 
     /**
      * This is a simple work-in-progress demonstration of attached a "load centre".

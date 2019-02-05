@@ -1,4 +1,4 @@
-import _ from '../mixins/index';
+import _ from 'underscore';
 import * as link from 'semantic-link';
 import {log} from 'logger';
 import * as cache from '../cache';
@@ -6,7 +6,7 @@ import Differencer from './Differencer';
 import axios from 'axios';
 import {put} from 'semantic-link';
 import {uriMappingResolver} from './UriMappingResolver';
-import {loader} from 'semantic-network/loader/Loader';
+import {loader} from '../loader/Loader';
 import {defaultResolver} from './syncResolver';
 import {toUriListMimeTypeFormat} from '../mixins/uri-list';
 

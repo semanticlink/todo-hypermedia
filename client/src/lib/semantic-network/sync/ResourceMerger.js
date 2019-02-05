@@ -1,4 +1,4 @@
-import _ from '../mixins';
+import _ from 'underscore';
 import * as SparseResource from '../cache/sparseResource';
 import * as link from 'semantic-link';
 import {FieldType} from '../interfaces';
