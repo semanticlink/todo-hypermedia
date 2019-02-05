@@ -103,17 +103,17 @@
 
                                 if (authenticationRealm === cfg.realm && authenticationRealm === API_AUTH0_REALM) {
 
-                                    log.debug('Starting login');
+                                    log.debug('[Authenticator] Starting login');
 
                                     AuthService
                                         .makeFromRepresentation(cfg)
                                         .login()
                                         .then(authResult => {
 
-                                            log.debug('Login complete');
+                                            log.debug('[Authenticator] Login complete');
 
                                             if (authResult) {
-                                                log.debug('Login - auth result returned access token');
+                                                log.debug('[Authenticator] Login - auth result returned access token');
                                                 return this.onSuccess(authResult.accessToken);
                                             } else {
                                                 log.debug('[Authenticator] Json web token not returned on the key: \'accessToken\'');

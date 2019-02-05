@@ -19,6 +19,7 @@ import {loader} from 'semantic-network';
  * @property {string} redirectUri The URL to which Auth0 will redirect the browser after authorization has been granted for the user.
  * @property {string} state An arbitrary value that should be maintained across redirects. It is useful to mitigate CSRF attacks and for any contextual information (for example, a return URL) that you might need after the authentication process is finished. For more information, see the state parameter documentation.
  * @property {string} nonce An arbitrary value shared between the request to Auth0 and then used again the popup callback to ensure it is the same sequence.
+ * @property {number} leeway=0 a A value in seconds that allows for clock skew with JWT expiration times.
  *
  * @see https://auth0.com/docs/libraries/auth0js/v9
  */
@@ -47,8 +48,8 @@ import {loader} from 'semantic-network';
  *     aud : "3CYUtb8Uf9NxwesvBJAs2gNjqYk3yfZ8"
  *     exp : 1530263423
  *     iat : 1530227423
- *     iss : "https://rewire-sample.au.auth0.com/"
- *     name : "test-todo@rewire.nz"
+ *     iss : "https://example.au.auth0.com/"
+ *     name : "test-todo@example.com"
  *     nickname : "test-todo"
  *     nonce : "1530226973997"
  *     picture : "https://s.gravatar.com/avatar/573f1ac81980b35916d97376cb1adba5?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fte.png"
@@ -76,7 +77,7 @@ import {loader} from 'semantic-network';
  * @property {string} idTokenPayload.picture
  * @property {string} idTokenPayload.sub
  * @property {string} idTokenPayload.updatedAt
- * @property {string} refereshToken
+ * @property {string} refreshToken
  * @property {string} scope
  * @property {string} state
  * @property {string} tokenType
@@ -231,7 +232,7 @@ export default class AuthService {
                     }
 
                     // KLUDGE: false negative of entering into a page when we don't want authentication
-                    // it looks like webpack dev components are having an interaction that this componsates for
+                    // it looks like webpack dev components are having an interaction that this compensates for
                     // error is on detector.js
                     if (err && err.code === null) {
                         log.debug('[Auth] re-entering');
@@ -539,7 +540,8 @@ export default class AuthService {
     }
 
     /**
-     *
+     * Factory method to create an AuthService based on the {@link Auth0ConfigurationRepresentation} in local
+     * storage
      * @returns {AuthService}
      */
     static makeFromStorage() {
