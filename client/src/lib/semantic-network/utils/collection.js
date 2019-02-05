@@ -1,6 +1,6 @@
 import * as link from 'semantic-link';
 import * as SparseResource from '../cache/sparseResource';
-import {log} from 'logger';
+import {log} from '..';
 
 /**
  * Takes a resource and normalises it to a valid iterable. Particularly if you hand in a resource that isn't a

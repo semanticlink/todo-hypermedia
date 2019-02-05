@@ -1,5 +1,5 @@
 import Bottleneck from 'bottleneck';
-import {log} from 'logger';
+import {log} from 'semantic-link/lib/logger';
 
 /**
  * Loading service to allow for rate limiting and prioritising concurrent requests and

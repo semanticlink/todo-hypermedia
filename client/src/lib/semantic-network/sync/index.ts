@@ -10,7 +10,7 @@ import {instanceOfCollection, instanceOfUriList} from "../query/utils";
 import {relTypeToCamel} from "../utils/linkRel";
 import {getUriListOnNamedCollection} from "./syncUriList";
 import {Representation} from "../interfaces";
-import {log} from "../index";
+import {log} from "..";
 
 
 function instanceOfResourceSync<T>(obj: any): obj is ResourceSync<T> {

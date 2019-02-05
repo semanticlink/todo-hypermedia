@@ -3,7 +3,7 @@
 import _ from 'underscore';
 import StateEnum from './StateEnum';
 import * as SparseResource from './sparseResource';
-import {log} from 'logger';
+import {log} from '..';
 import * as link from 'semantic-link';
 import {loader} from '../loader/Loader';
 import {findResourceInCollection, findResourceInCollectionByRelOrAttribute} from '../utils/collection';

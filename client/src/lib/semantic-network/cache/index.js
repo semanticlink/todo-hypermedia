@@ -2,7 +2,7 @@ import _ from 'underscore';
 import * as SparseResource from './sparseResource';
 import {resourceMerger} from '../sync/ResourceMerger';
 import * as link from 'semantic-link';
-import {log} from 'logger';
+import {log} from '..';
 import State from './State';
 import {filter} from 'semantic-link/lib/filter';
 import {mapWaitAll} from '../utils/asyncCollection';

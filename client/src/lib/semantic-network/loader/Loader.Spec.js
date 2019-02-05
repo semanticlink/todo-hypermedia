@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {log} from 'semantic-link/lib/logger';
+import {log} from '..';
 import sinon from 'sinon';
 import Loader from './Loader';
 

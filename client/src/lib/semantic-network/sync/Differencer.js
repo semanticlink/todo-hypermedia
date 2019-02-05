@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import {log} from 'logger';
+import {log} from '..';
 import {defaultEqualityOperators} from './Comparator';
 import * as link from 'semantic-link';
 import {mapWaitAll, sequentialWaitAll} from '../utils/asyncCollection';

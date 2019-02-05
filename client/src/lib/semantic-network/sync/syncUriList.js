@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import * as link from 'semantic-link';
-import {log} from 'logger';
+import {log} from '..';
 import * as cache from '../cache';
 import Differencer from './Differencer';
 import axios from 'axios';

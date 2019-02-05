@@ -1,5 +1,5 @@
 import {findResourceInCollection, findResourceInCollectionByUri} from '../utils/collection';
-import {log} from 'logger';
+import {log} from '..';
 import * as cache from '../cache';
 import * as link from 'semantic-link';
 import {defaultResolver as resolver} from './syncResolver';

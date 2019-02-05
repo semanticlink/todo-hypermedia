@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {log} from 'logger';
+import {log} from '..';
 import Differencer from './Differencer';
 
 /**

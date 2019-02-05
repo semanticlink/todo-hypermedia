@@ -2,7 +2,7 @@ import _ from 'underscore';
 import * as SparseResource from '../cache/sparseResource';
 import * as link from 'semantic-link';
 import {FieldType} from '../interfaces';
-import {log} from 'logger';
+import {log} from '..';
 import {defaultResolver} from './syncResolver';
 import {dashToCamel, filterCamelToDash, camelToDash} from '../utils/linkRel';
 import {compactObject} from '../utils/representation';

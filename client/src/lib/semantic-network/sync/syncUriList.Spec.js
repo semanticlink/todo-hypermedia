@@ -5,7 +5,7 @@ import * as sync from './syncLinkedRepresentation';
 import * as cache from '../cache';
 import Differencer from './Differencer';
 import axios from 'axios';
-import {log} from 'logger';
+import {log} from '..';
 
 global.Element = () => {
 };
