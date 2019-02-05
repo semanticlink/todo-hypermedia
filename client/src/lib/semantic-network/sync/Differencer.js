@@ -131,8 +131,7 @@ export default class Differencer {
                 });
 
             // Append to the 'update' list the items removed from the 'delete' and 'create' lists
-            pushAll(updateItems, _(itemsToMove)
-                .map(item => [item[2], item[3]]));
+            pushAll(updateItems, _(itemsToMove).map(item => [item[2], item[3]]));
 
         });
 
@@ -186,15 +185,15 @@ export default class Differencer {
                 const makeSynchronisationInfos = (createResults, updateItems) => {
                     return _(createResults)
                         .chain()
-                        .map(createResult => ({
-                            resource: createResult[0],
-                            document: createResult[1],
+                        .map(([resource, document]) => ({
+                            resource,
+                            document,
                             action: 'create'
                         }))
                         .union(_(updateItems)
-                            .map(updateItem => ({
-                                resource: updateItem[0],
-                                document: updateItem[1],
+                            .map(([resource, document]) => ({
+                                resource,
+                                document,
                                 action: 'update'
                             })))
                         .value();
@@ -265,13 +264,11 @@ export default class Differencer {
                  */
                 const makeSynchronisationInfos = createResults => {
                     return _(createResults)
-                        .chain()
-                        .map(createResult => ({
-                            resource: createResult[0],
-                            document: createResult[1],
+                        .map(([resource, document]) => ({
+                            resource,
+                            document,
                             action: 'create'
-                        }))
-                        .value();
+                        }));
                 };
 
                 const infos = makeSynchronisationInfos(createResults, deleteItems);
