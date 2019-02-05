@@ -6,7 +6,7 @@ import * as SparseResource from './sparseResource';
 import {log} from 'logger';
 import * as link from 'semantic-link';
 import {loader} from '../loader/Loader';
-import {findResourceInCollection} from '../mixins/collection';
+import {findResourceInCollection, findResourceInCollectionByRelOrAttribute} from '../mixins/collection';
 
 const stateFlagName = Symbol('state');
 
@@ -699,7 +699,7 @@ export default class State {
             collection.items = [];
         }
 
-        let resource = _(collection).findResourceInCollectionByRelOrAttribute(itemUri, options.rel);
+        let resource = findResourceInCollectionByRelOrAttribute(collection, itemUri, options.rel);
 
         if (!resource) {
             // we don't already know about this resource (but the client does), so so let's

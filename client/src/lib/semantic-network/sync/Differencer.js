@@ -3,6 +3,7 @@ import {log} from 'logger';
 import {defaultEqualityOperators} from './Comparator';
 import * as link from 'semantic-link';
 import {mapWaitAll, sequentialWaitAll} from '../mixins/asyncCollection';
+import {pushAll} from '../mixins/collection';
 
 /**
  * TODO: this is probably two classes inheriting the Differencer interface
@@ -115,7 +116,7 @@ export default class Differencer {
                 .reverse()
                 .each(pair => {
                     const index = pair[0];
-                    _(pair).pushAll(deleteItems.splice(index, 1));
+                    pushAll(pair, deleteItems.splice(index, 1));
                 });
 
             // Remove those items that are to be updated from the 'create' list
@@ -126,11 +127,11 @@ export default class Differencer {
                 .reverse()
                 .each(pair => {
                     const index = pair[1];
-                    _(pair).pushAll(createItems.splice(index, 1));
+                    pushAll(pair, createItems.splice(index, 1));
                 });
 
             // Append to the 'update' list the items removed from the 'delete' and 'create' lists
-            _(updateItems).pushAll(_(itemsToMove)
+            pushAll(updateItems, _(itemsToMove)
                 .map(item => [item[2], item[3]]));
 
         });

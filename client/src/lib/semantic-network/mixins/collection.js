@@ -301,18 +301,3 @@ export const clone = arrayOrCollectionItems => {
             return [];
         }*/
 };
-
-export const CollectionMixins = {
-    findResourceInCollection,
-    findResourceInCollectionByUri,
-    findResourceInCollectionByRelOrAttribute,
-    findResourceInCollectionByRelAndAttribute,
-    differenceCollection,
-    spliceAll,
-    pushAll,
-    pushResource,
-    isCollectionEmpty,
-    firstItem,
-    detach: clone
-};
-
