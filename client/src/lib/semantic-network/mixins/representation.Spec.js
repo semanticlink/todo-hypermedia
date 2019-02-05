@@ -1,12 +1,12 @@
-import * as _ from './representation';
+import {mergeByFields, compactObject, extendResource} from './representation';
 import {expect} from 'chai';
 
 describe('Representation mixins', () => {
 
-    describe('_.extendResource()', () => {
+    describe('extendResource()', () => {
 
         const assertExtendResource = (resource, document) => {
-            const result = _.extendResource({}, resource, document);
+            const result = extendResource({}, resource, document);
             expect(result).to.deep.equal(document);
         };
 
@@ -29,7 +29,7 @@ describe('Representation mixins', () => {
 
     });
 
-    describe('_.mergeByFields()', () => {
+    describe('mergeByFields()', () => {
 
         it('should be able to shallow extend overriding matched fields', () => {
             const resource = {name: 'i'};
@@ -37,7 +37,7 @@ describe('Representation mixins', () => {
 
             const fields = ['name'];
 
-            const result = _.mergeByFields(resource, document, fields);
+            const result = mergeByFields(resource, document, fields);
             expect(result).to.deep.equal(document);
             expect(result.name).to.equal('h');
         });
@@ -50,7 +50,7 @@ describe('Representation mixins', () => {
 
                 const fields = ['name', 'textBox'];
 
-                const result = _.mergeByFields(resource, document, fields);
+                const result = mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal(document);
             });
 
@@ -60,7 +60,7 @@ describe('Representation mixins', () => {
 
                 const fields = ['name', 'textBox'];
 
-                const result = _.mergeByFields(resource, document, fields);
+                const result = mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal(document);
             });
 
@@ -70,7 +70,7 @@ describe('Representation mixins', () => {
 
                 const fields = ['textBox'];
 
-                const result = _.mergeByFields(resource, document, fields);
+                const result = mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal({textBox: {width: 5, height: 7}});
             });
 
@@ -80,17 +80,17 @@ describe('Representation mixins', () => {
 
                 const fields = ['textBox'];
 
-                const result = _.mergeByFields(resource, document, fields);
+                const result = mergeByFields(resource, document, fields);
                 expect(result).to.deep.equal({name: 'retain', textBox: {width: 5, height: 7}});
             });
         });
 
     });
 
-    describe('_.compactObject', () => {
+    describe('compactObject', () => {
 
         it('should do everything at once', () => {
-            expect(_.compactObject({
+            expect(compactObject({
                 keep: 99,
                 takeaway: {},
                 alsotake: undefined,
@@ -98,20 +98,20 @@ describe('Representation mixins', () => {
             })).to.deep.equal({keep: 99, alsoKeep: {o: 1}});
         });
         it('should keep numerical fields', () => {
-            expect(_.compactObject({keep: 99})).to.deep.equal({keep: 99});
+            expect(compactObject({keep: 99})).to.deep.equal({keep: 99});
         });
         it('should keep string fields', () => {
-            expect(_.compactObject({keep: 'string'})).to.deep.equal({keep: 'string'});
+            expect(compactObject({keep: 'string'})).to.deep.equal({keep: 'string'});
         });
         it('should keep object fields', () => {
-            expect(_.compactObject({alsoKeep: {o: 1}})).to.deep.equal({alsoKeep: {o: 1}});
+            expect(compactObject({alsoKeep: {o: 1}})).to.deep.equal({alsoKeep: {o: 1}});
         });
         it('should remove empty object fields', () => {
-            expect(_.compactObject({takeaway: {}})).to.deep.equal({});
+            expect(compactObject({takeaway: {}})).to.deep.equal({});
         });
 
         it('should remove undefined fields', () => {
-            expect(_.compactObject({takeaway: undefined})).to.deep.equal({});
+            expect(compactObject({takeaway: undefined})).to.deep.equal({});
         });
     });
 

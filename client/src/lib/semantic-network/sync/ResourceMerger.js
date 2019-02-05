@@ -5,6 +5,7 @@ import {FieldType} from '../interfaces';
 import {log} from 'logger';
 import {defaultResolver} from './syncResolver';
 import {dashToCamel, filterCamelToDash, camelToDash} from '../mixins/linkRel';
+import {compactObject} from '../mixins/representation';
 
 /**
  * Processes difference sets (created, update, delete) for between two client-side collections {@Link CollectionRepresentation}
@@ -362,11 +363,10 @@ export default class ResourceMerger {
 
         // remove all tracked fields from the resource and merge with document
         // omit any empty fields (that were left with the `delete object[property]` above
-        return _({})
-            .chain()
-            .extend(_(resource).omit(trackedFields), document)
-            .compactObject()
-            .value();
+        return compactObject({
+            ..._(resource).omit(trackedFields),
+            ...document
+        });
     }
 
     /**

@@ -75,9 +75,3 @@ export const mergeByFields = (resource, document, fields) => {
 export const compactObject = resource => _(resource).omit(val => {
     return !!(_.isObject(val) && _.isEmpty(val)) || _.isUndefined(val);
 });
-
-export const RepresentationMixins = {
-    extendResource,
-    mergeByFields,
-    compactObject,
-};
