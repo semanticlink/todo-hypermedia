@@ -208,12 +208,11 @@ export default class AuthService {
     /**
      * Login via auth0 popup window
      *
-     * @return {Promise<AuthResult|undefined>}
+     * @return {Promise<AuthResult|Error|undefined>}
      */
     login() {
 
         log.debug('[Auth] Opening popup login window');
-
 
         return new Promise((resolve, reject) => {
 
@@ -225,21 +224,30 @@ export default class AuthService {
                  * @param {AuthResult} authResult
                  */
                 (err, authResult) => {
-                    if (authResult) {
-                        log.debug(`[Auth] set session iat: '${authResult.idTokenPayload.iat}'`);
-                        AuthService.setSession(authResult);
-                        return resolve(authResult);
-                    }
-
-                    // KLUDGE: false negative of entering into a page when we don't want authentication
-                    // it looks like webpack dev components are having an interaction that this compensates for
-                    // error is on detector.js
-                    if (err && err.code === null) {
+                    if (err) {
                         log.debug('[Auth] re-entering');
-                        return resolve(undefined);
+
+                        // KLUDGE: false negative of entering into a page when we don't want authentication
+                        // it looks like there is an interaction with another library
+                        // see https://github.com/auth0/auth0.js/issues/512
+                        //
+                        // To replicate this issue, in Chrome > Dev Tools > Application > Clear storage > Clear site data
+                        //
+                        // Note: to remove auth0 login also clear cookies on auth0 domain
+                        if (err.code == null) {
+                            log.debug('[Auth] waiting for authentication');
+                            // don't resolve the promise because the token still hasn't been retrieved
+                            // authentication with return back through here to be resolved
+                            return;
+                        }
+                        return reject(new Error(`Cannot login '${err.code || err.name}' ${err.description || err.original}`));
                     }
 
-                    reject(new Error(`Cannot login '${err.code || err.name}' ${err.description || err.original}`));
+                    log.debug(`[Auth] set session iat: '${authResult.idTokenPayload.iat}'`);
+                    AuthService.setSession(authResult);
+                    resolve(authResult);
+
+
                 });
         });
 

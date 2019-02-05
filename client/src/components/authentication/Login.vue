@@ -163,9 +163,6 @@
              */
             onFailure(error) {
 
-                // TODO: does this need trigger log in again?
-                // eventBus.$on(loginRequired, this.loginRequired);
-
                 log.error(error.message);
 
                 this.$notify({

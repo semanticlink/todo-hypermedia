@@ -14,11 +14,11 @@ let jwtToken;
 
 /**
  * @class InterceptorsOptions
- * @property {boolean|undefined} queue401s when a 401 is intercepted add to queue for replay (or simply drop)
+ * @property {boolean|undefined} queue401s=true when a 401 is intercepted add to queue for replay (or simply drop)
  */
 /**
  *
- * @param options
+ * @param {InterceptorsOptions?} options
  */
 export const setInterceptors = options => {
 
@@ -127,6 +127,8 @@ export const setInterceptors = options => {
 
                 if (options.queue401s) {
                     httpQueue.pushToBuffer(error.config);
+                } else {
+                    log.debug(`[Authentication] 401 not queued '${error.config.url}'`);
                 }
 
                 return new Promise((resolve, reject) => {

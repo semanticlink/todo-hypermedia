@@ -65,7 +65,7 @@ Vue.use(apiPlugin);
  */
 Vue.use(VueLocalStorage, {name: 'localStorage'});
 
-setInterceptors({queue401s: false});
+setInterceptors();
 setEventBus(EventBus);
 setJwtOnHeaders(AuthService.accessToken);
 
