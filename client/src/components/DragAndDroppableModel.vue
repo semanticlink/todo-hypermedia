@@ -31,7 +31,7 @@
              */
             model: {
                 type: Object | Function,
-                required: true
+                required: false
             },
             /**
              * In-memory {@link LinkedRepresentation} that a dropped in the context of another {@link LinkedRepresentation}

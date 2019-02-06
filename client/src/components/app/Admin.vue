@@ -1,8 +1,7 @@
 <template>
     <div class="hello">
         <h1>Organisations
-            <drag-and-droppable-model
-                    :model="this.$root.$api"
+            <droppable-model
                     :context="this.$root.$api"
                     media-type="application/json"
                     :dropped="createTenantOnRoot">
@@ -12,7 +11,7 @@
                         title="Drop on to create">
                     <add w="22px" h="22px"/>
                 </b-button>
-            </drag-and-droppable-model>
+            </droppable-model>
         </h1>
         <ul>
             <li v-for="tenant in tenantCollection" v-cloak>
@@ -61,7 +60,7 @@
 
 
     export default {
-        components: {DragAndDroppableModel, bButton, Add, bTooltip, bLink},
+        components: {DroppableModel: DragAndDroppableModel, DragAndDroppableModel, bButton, Add, bTooltip, bLink},
         data() {
             return {
                 msg: 'Looking ...',
