@@ -97,7 +97,13 @@ new Vue({
         uriMapping(clientUri, apiUri);
 
         /**
-         * Setup the global options for the api application cache
+         * Setup the global options for the api application cache.
+         *
+         * Because we are do lazy loading, changes to representations (ie new attributes on sparsely
+         * hydrated resources) are not propagated to the ui. Vue2 is particularly poor in certain
+         * situations. By providing `set` we overcome this problem without having to bind explicitly
+         * to view-level properties upon each request/promise. Vue3 shouldn't have this problem.
+         * Angular1 has this issue.
          *
          * @type {CacheOptions}
          */
