@@ -28,7 +28,7 @@ module.exports = merge(common, {
         filename: '[name].js',
     },
     plugins: [
-        new CleanWebpackPlugin(['build']),
+        new CleanWebpackPlugin(/*['build']*/),
 
         /**
          * Build the html files (app and api). These provide the <script src="*"/>  to include
