@@ -54,6 +54,14 @@ Run the `Api` project through the IDE. For example, using Rider:
 * Working Directory: `./api/Api`
 * Environment Variables: `ASPNETCORE_ENVIRONMENT=Development;ASPNETCORE_URLS=http://localhost:5000`        
 
+# Running the API
+
+If viewing the HTML representations in a browser, it will request code for displaying the JSON representation. This is served from `http://localhost:8080/api.js`. 
+
+Ensure that the client project is being run from `yarn run dev`.
+
+Then open browser at `http://localhost:5000/`
+
 # Links
 
 * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html
