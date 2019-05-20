@@ -2,7 +2,7 @@
 # Development
 
 * Rider
-* [.NET Core 2.1 SDK v.2.1.401](https://www.microsoft.com/net/download)
+* [.NET Core 2.1 SDK v.2.1.604](https://dotnet.microsoft.com/download/dotnet-core/2.1)
 * [Git for windows](https://git-scm.com/download/win) (2.15) (Adjust your PATH environment to use git and optional Unix tools from Windows Command Prompt)
 * [deployment instructions in wiki](https://github.com/semanticlink/todo-hypermedia/wiki/Home)
 
@@ -21,6 +21,8 @@
 * gfm
 
 # Api development
+
+Note that currently this application runs at dotnet core 2.1 based on the [LTS support for AWS lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html). Upgrading for custom runtimes is currently not used.
 
 ## Setup DynamoDb
 
