@@ -8,6 +8,7 @@ using Api.Web;
 using Domain;
 using Domain.Models;
 using Infrastructure.NoSQL;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -27,11 +28,17 @@ namespace IntegrationTests
             // TODO: use Fixtures
 
             _services = new ServiceCollection();
-            
+ 
+            var configurationRoot = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
             // Register up the repositories to make them available
             Register(iocRegistrations =>
             {
                 iocRegistrations
+                    // IConfigration is automatically registered in a hosted environment   
+                    .AddSingleton<IConfiguration>(configurationRoot)
                     .RegisterInfrastructure(isDevelopment: true)
                     .RegisterRepositories()
                     // various discussion here on unit test with the ILogger in xunit

@@ -240,7 +240,7 @@ namespace Infrastructure.NoSQL
         }
 
         /// <summary>
-        ///     Delete a todo list and all its children
+        ///     Delete a todo children
         /// </summary>
         public async Task DeleteByParent(string parentId)
         {
@@ -253,8 +253,6 @@ namespace Infrastructure.NoSQL
             await Task.WhenAll(tasks);
 
             await _userRightStore.RemoveRight(_creatorId, parentId);
-
-            await _context.DeleteAsync(parentId);
         }
 
         public async Task DeleteTag(string id, string tagId, Action<string> remove = null)
