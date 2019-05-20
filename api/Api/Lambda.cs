@@ -46,7 +46,7 @@ namespace Api
                 })
                 // don't forget this little sucker, it will give you access to the
                 // IServer through IoC for later in the app is needed
-                .UseApiGateway();
+                .UseLambdaServer();
         }
     }
 }
