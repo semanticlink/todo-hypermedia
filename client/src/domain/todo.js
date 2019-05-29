@@ -1,6 +1,5 @@
 import {get, link} from 'semantic-network';
 import {log} from 'logger';
-import {findResourceInCollectionByUri} from 'semantic-network/utils/collection';
 import {FieldType} from 'semantic-network/interfaces';
 
 /**
@@ -12,23 +11,10 @@ import {FieldType} from 'semantic-network/interfaces';
  */
 export const getTodoList = (apiResource, options) => {
 
-    log.debug('Looking for todos on root');
+    log.debug('Looking for todos on me');
 
     return get(apiResource, /me/, options)
         .then(user => get(user, /todos/, options));
-};
-
-/**
- * Get the todos on the todo list
- * @param {TodoCollectionRepresentation} todoCollection
- * @param {CacheOptions?} options
- * @returns {Promise<TodoCollectionRepresentation>}
- */
-export const getTodos = (todoCollection, options) => {
-
-    log.debug(`Looking for todos on list ${link.getUri(todoCollection, 'self')}`);
-
-    return get(todoCollection, /todos/, {...options, includeItems: true});
 };
 
 /**
@@ -40,6 +26,7 @@ export const getTodos = (todoCollection, options) => {
  * @returns {Promise}
  */
 export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) => {
+    // TODO: why is batchSize not down in the next query?
     return get(userTenantsCollection, {rel: /todos/, includeItems: true, batchSize: 1, ...options})
         .then(userTenantsTodos => get(
             userTenantsTodos,
@@ -58,14 +45,18 @@ export const getTodosWithTagsOnTenantTodos = (userTenantsCollection, options) =>
  * Looks for: -(me)-[todos...{self:$todoUri}]-[todos...]
  *
  * @param {ApiRepresentation} apiResource
- * @param {string} todoUri
+ * @param {Uri} todoUri
  * @param {CacheOptions?} options
- * @returns {Promise<CollectionRepresentation>}
+ * @returns {Promise<TodoCollectionRepresentation>}
  */
-export const getTodoListByUri = (apiResource, todoUri, options) => {
+export const getTodoListAndItemsByUri = (apiResource, todoUri, options) => {
 
-    return getNamedListByUri(apiResource, todoUri, options)
-        .then(itemResource => get(itemResource, {...options, rel: /todos/, includeItems: true}));
+    return getTodoListByUri(apiResource, todoUri, {...options, includeItems: false})
+        .then(itemResource => get(itemResource, {...options, rel: /todos/}));
+};
+
+export const getTodos = (todoCollection, options) => {
+    return get(todoCollection, {...options, includeItems: true});
 };
 
 /**
@@ -79,9 +70,9 @@ export const getTodoListByUri = (apiResource, todoUri, options) => {
  * @param {CacheOptions?} options
  * @returns {Promise<LinkedRepresentation>}
  */
-export const getNamedListByUri = (apiResource, todoUri, options) => {
+export const getTodoListByUri = (apiResource, todoUri, options) => {
     return getTodoList(apiResource, options)
-        .then(todosList => findResourceInCollectionByUri(todosList, todoUri));
+        .then(todosList => get(todosList, {...options, where: todoUri}));
 };
 
 /**
@@ -91,14 +82,14 @@ export const getNamedListByUri = (apiResource, todoUri, options) => {
  *  - doesn't support types (everyone is simple a null
  *  - doesn't support default values (because forms don't have that yet)
  *
- * @param todoResource
- * @returns {Promise<any>}
+ * @param {TodoCollectionRepresentation} todoResource
+ * @returns {Promise<TodoRepresentation>}
  */
 export const defaultTodo = todoResource => {
     return get(todoResource)
         .then(todoCollection => get(todoCollection, /create-form/))
         .catch(() => log.error(`No create form for on '${link.getUri(todoResource, /self/)}'`))
-        .then(/** type {FormRepresentation} */form => {
+        .then(/** @type {FormRepresentation} */form => {
             const obj = {};
 
             if (form && form.items) {
@@ -111,5 +102,5 @@ export const defaultTodo = todoResource => {
 
             return obj;
         })
-        .catch((err) => log.error(err));
+        .catch(log.error);
 };

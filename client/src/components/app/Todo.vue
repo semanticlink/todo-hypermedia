@@ -63,13 +63,11 @@
 <script>
 
     import {del, get, create, update} from 'semantic-network';
-    import _ from 'underscore';
     import {log} from 'logger';
     import {redirectToTodo} from 'router';
     import TodoItem from './TodoItem.vue';
-    import {defaultTodo, getNamedListByUri, getTodoListByUri} from "domain/todo";
+    import {defaultTodo, getTodoListByUri, getTodoListAndItemsByUri, getTodos} from "domain/todo";
     import {mapCompletedToState} from "domain/form-type-mappings";
-    import {mapWaitAll} from 'semantic-network/utils/asyncCollection';
 
     /**
      * This component displays and allows updates to the todo list
@@ -157,31 +155,28 @@
              * Visibility filter can be handed in via the Uri (eg http://localhost:8080/#/todo/a/tenant/1?completed)
              * @type {filterEnum}
              */
-            const visibilityFilterFromUriQuery = _(this.$route.query).chain().keys().first().value();
+            const visibilityFilterFromUriQuery = Object.keys(this.$route.query)[0];
             this.setVisibilityFilter(visibilityFilterFromUriQuery);
 
-
-            return getTodoListByUri(this.$root.$api, this.apiUri)
+            return getTodoListAndItemsByUri(this.$root.$api, this.apiUri)
                 .then(todos => this.todoCollection = todos)
-                .then(() => this.reset())
-                .catch(err => log.error(err));
+                .then(todos => getTodos(todos))
+                .then(this.reset)
+                .catch(log.error);
 
         },
         computed: {
             filteredTodos() {
-                return filters[this.visibility](this.collection)
+                return filters[this.visibility](this.todoItems)
             },
             remaining() {
-                return filters[filterEnum.ACTIVE](this.collection).length;
+                return filters[filterEnum.ACTIVE](this.todoItems).length;
             },
             totalItems() {
-                return this.collection.length;
+                return this.todoItems.length;
             },
-            collection() {
-                if (!this.todoCollection.items) {
-                    this.$set(this.todoCollection, 'items', []);
-                }
-                return this.todoCollection.items;
+            todoItems() {
+                return this.todoCollection.items || [];
             },
             allDone: {
                 get() {
@@ -189,22 +184,26 @@
                 },
                 set(value) {
 
-
-                    mapWaitAll(this.collection, (todo) => {
+                    // process all the todoItems and toggle the completed fields
+                    return update(
+                        this.todoItems,
                         /**
-                         * One of the issues with representations is that many fields are optional (eg completed).
-                         * In such cases, we need to ensure that Vue is bound to them.
-                         *
-                         * In many ways, it actually shows the domain smell because we provided completed as
-                         * a helper property that is a rule of a subset of state.
+                         * @type {TodoRepresentation}
                          */
-                        todo.completed = this.$set(todo, 'completed', value);
-                        const options = this.$root.options;
+                        todo => {
+                            /**
+                             * One of the issues with representations is that many fields are optional (eg completed).
+                             * In such cases, we need to ensure that Vue is bound to them.
+                             *
+                             * In many ways, it actually shows the domain smell because we provided completed as
+                             * a helper property that is a rule of a subset of state.
+                             */
+                            todo.completed = this.$set(todo, 'completed', value);
 
-                        return update(todo, {...todo, state: mapCompletedToState(value), options});
-                    })
+                            return {...todo, state: mapCompletedToState(value)};
+                        },
+                        this.$root.options)
                         .catch(log.error);
-
                 }
             }
         },
@@ -224,8 +223,8 @@
             addTodo() {
                 return create(this.todoCollection, {where: {...this.newTodo}})
                     .then(todoResource => get(todoResource)
-                        .then(() => this.reset()))
-                    .catch(err => log.error(err));
+                        .then(this.reset))
+                    .catch(log.error);
             },
 
             /**
@@ -236,7 +235,7 @@
                 return Promise
                     .all(filters[filterEnum.COMPLETED](this.todoCollection.items)
                         .map(todo => del(this.todoCollection, {where: todo})))
-                    .catch(err => log.error(err));
+                    .catch(log.error);
             },
 
             // **********************************
@@ -306,7 +305,7 @@
                         break;
                 }
 
-                return getNamedListByUri(this.$root.$api, this.apiUri)
+                return getTodoListByUri(this.$root.$api, this.apiUri)
                     .then(todo => redirectToTodo(todo, query));
 
             }

@@ -11,7 +11,7 @@ export type QueryOptions = {
      */
     defaultRepresentation?: Representation,
     /**
-     * Identifies the child resource in a collection by its identity (either as 'self' link rel or a Uri)
+     * Identifies the child resource in a collection by its identity (either as 'self' link rel or a `Uri`)
      */
     where?: Representation | Uri,
     /**
@@ -34,8 +34,14 @@ export type QueryOptions = {
     /**
      * Alters the hydration strategy that it treats the resource as an array of resource and then does a further
      * get using the options as an iterator.
+     *
+     * This should not be used for eager loading of collections (ie items)—use `includeItems`
      */
     iterateOver?: boolean
 
+    /**
+     * Used in conjunction with `iterateOver` for the strategy to load (arrays of) resources. The current implementation
+     * supports only two practice cases: sequential ('1') or parallel ('0' or undefined).
+     */
     batchSize?: number
 } & {} | any;

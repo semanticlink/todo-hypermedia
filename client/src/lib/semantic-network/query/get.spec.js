@@ -114,6 +114,12 @@ describe('Get', () => {
                 return get(singleton, {rel: 'tags', includeItems: 'items'});
             });
 
+
+            it(`${cache.getNamedCollectionAndItems.name} with includeItems as true`, () => {
+                resourceFactory = stub(cache.getNamedCollectionAndItems.name);
+                return get(singleton, {rel: 'tags', includeItems: true});
+            });
+
             it(cache.getNamedCollectionItemByUri.name, () => {
                 resourceFactory = stub(cache.getNamedCollectionItemByUri.name);
                 return get(singleton, {rel: 'tags', where: 'https://api.example.com/item/1'});

@@ -51,8 +51,7 @@
      *
      */
 
-    import {query} from 'semantic-network';
-    import * as link from 'semantic-link';
+    import {del, update, link} from 'semantic-network';
     import {log} from 'logger';
     import {mapCompletedToState, mapStateToCompleted} from "../../domain/form-type-mappings";
 
@@ -110,18 +109,18 @@
                 // Fancy ui needs to make bool --> state (yuck)
                 this.editItem.state = mapCompletedToState(this.editItem.completed);
 
-                return query.update(this.item, this.editItem)
+                return update(this.item, this.editItem)
                 // really we should get a copy from the server
                     .then(() => this.item.completed = mapStateToCompleted(this.editItem.state))
-                    .then(() => this.reset())
-                    .catch(err => log.error(err));
+                    .then(this.reset)
+                    .catch(log.error);
             },
 
             /**
              * Flush the delete back through the collection server-side
              */
             remove() {
-                return query.del(this.collection, {where: this.item});
+                return del(this.collection, {where: this.item});
             },
 
             /**

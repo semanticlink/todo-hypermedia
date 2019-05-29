@@ -15,6 +15,16 @@ export function instanceOfCollection(object: any): object is Representation {
 }
 
 /**
+ * A guard to detect whether the object is an array of {@link Representation}
+ *
+ * @param object
+ * @returns whether the object is an instance on the interface
+ */
+export function instanceOfRepresentationSet(object: any): object is Representation[] {
+    return Array.isArray(object);
+}
+
+/**
  * A guard to detect whether the object is a form {@link FormRepresentation}
  *
  * @see https://stackoverflow.com/questions/14425568/interface-type-check-with-typescript

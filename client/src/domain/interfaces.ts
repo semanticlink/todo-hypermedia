@@ -27,6 +27,7 @@ export interface TodoCollectionRepresentation extends CollectionRepresentation {
 
 export interface TodoRepresentation extends LinkedRepresentation {
     name: string;
+    completed: boolean;
 }
 
 export interface UserCollectionRepresentation extends CollectionRepresentation {

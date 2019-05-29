@@ -2,6 +2,7 @@ import * as link from "semantic-link";
 import {
     getCollection,
     getCollectionItem,
+    getCollectionAndItems,
     getCollectionItemByUri,
     getNamedCollection,
     getNamedCollectionAndItems,
@@ -95,7 +96,12 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
     const name = options.name || relTypeToCamel(rel);
 
     /**
-     * Iterating over the resource(s) and use the options for the iterator
+     * Iterating over the resource(s) and use the options for the iterator. The batch size
+     * indicates at this stage whether the queries or sequential or parallel (ie batch size is a bit misleading
+     * because in practice batch size is either one (sequential) or all (parallel). This can be extended when needed.
+     *
+     * In the case of a named collections/singletons, the options should also have 'rel' (which is picked up by the 'get').
+     *
      */
     if (options.iterateOver) {
         delete options.iterateOver;
@@ -156,8 +162,13 @@ export function get<T extends Representation>(resource: T | T[], rel: string | R
             return getCollectionItem(resource, where, options);
         }
 
+        if (options.includeItems){
+            return getCollectionAndItems(resource, options)
+        }
+
         return getCollection(resource, options);
     }
+
 
     // singleton
     return defaultRepresentation
