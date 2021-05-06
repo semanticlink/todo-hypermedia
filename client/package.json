@@ -33,7 +33,7 @@
     "luxon": "1.15.0",
     "popper.js": "^1.15.0",
     "semantic-link": "^0.1.1",
-    "underscore": "^1.9.1",
+    "underscore": "^1.12.1",
     "vue": "2.6.10",
     "vue-datetime": "^1.0.0-beta.6",
     "vue-ionicons": "3.0.4",
