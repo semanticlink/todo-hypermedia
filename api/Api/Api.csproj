@@ -10,7 +10,7 @@
     <PackageReference Include="FastMember.NetCore" Version="1.1.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" />
     <PackageReference Include="Marvin.Cache.Headers" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.15" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="2.1.0" />
     <PackageReference Include="Morcatko.AspNetCore.JsonMergePatch" Version="2.0.0-beta03" />
     <PackageReference Include="NetEscapades.Extensions.Logging.RollingFile" Version="2.2.0" />
